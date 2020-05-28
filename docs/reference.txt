@@ -1,0 +1,121 @@
+
+#########################
+Firebird-driver Reference
+#########################
+
+=====================
+Main driver namespace
+=====================
+
+.. module:: firebird.driver
+   :synopsis: Python 3+ Database API 2.0 Compliant driver for Firebird 3+
+
+Constants
+=========
+
+.. autodata:: __VERSION__
+
+
+Imports from submodules
+=======================
+
+core
+----
+
+.. py:currentmodule:: firebird.driver.core
+
+Functions:
+   `connect()`, `create_database()`, `connect_service()` and `transaction()`
+
+Convenience TPB's for transaction isolation levels:
+   `ISOLATION_READ_COMMITED_LEGACY`, `ISOLATION_READ_COMMITED`,
+   `ISOLATION_REPEATABLE_READ`, `ISOLATION_SNAPSHOT`,
+   `ISOLATION_SERIALIZABLE`, `ISOLATION_SNAPSHOT_TABLE_STABILITY`
+   and `ISOLATION_READ_COMMITED_RO`
+
+Translation dictionaries:
+   `CHARSET_MAP`
+
+Classes:
+   `DistributedTransactionManager`
+
+types
+-----
+
+.. py:currentmodule:: firebird.driver.types
+
+Exceptions:
+  `Warning`, `Error`, `InterfaceError`, `DatabaseError`, `DataError`,
+  `OperationalError`, `IntegrityError`, `InternalError`, `ProgrammingError`
+  and `NotSupportedError`
+
+Helper classes:
+     `TPB`
+
+Enums:
+     `NetProtocol`, `DBKeyScope`, `DbInfoCode`, `TraInfoCode`, `TraInfoIsolation`,
+     `TraInfoReadCommitted`, `TraInfoAccess`, `Isolation`, `ReadCommitted`,
+     `LockResolution`, `AccessMode`, `TableShareMode`, `TableAccessMode`,
+     `DefaultAction`, `StatementType`, `DbAccessMode`, `DbSpaceReservation`,
+     `DbWriteMode`, `ShutdownMode`, `OnlineMode` and `ShutdownMethod`
+
+Flags:
+     `ServerCapability`, `SvcRepairFlag`, `SvcStatFlag`, `SvcBackupFlag`,
+     `SvcRestoreFlag` and `SvcNBackupFlag`
+
+Globals and other objects required by Python DB API 2.0:
+     `apilevel`, `threadsafety`, `paramstyle`, `Date`, `Time`, `Timestamp`,
+     `DateFromTicks`, `TimeFromTicks`, `TimestampFromTicks`, `STRING`, `BINARY`,
+     `NUMBER`, `DATETIME` and `ROWID`
+
+Helper constants:
+     `DESCRIPTION_NAME`, `DESCRIPTION_TYPE_CODE`, `DESCRIPTION_DISPLAY_SIZE`,
+     `DESCRIPTION_INTERNAL_SIZE`, `DESCRIPTION_PRECISION`, `DESCRIPTION_SCALE`
+     and `DESCRIPTION_NULL_OK`
+
+fbapi
+-----
+
+.. py:currentmodule:: firebird.driver.fbapi
+
+Functions `load_api()` and `get_api()`.
+
+hooks
+-----
+
+.. py:currentmodule:: firebird.driver.hooks
+
+`hooks` and `HookType`
+
+.. include:: ref-core.inc
+.. include:: ref-types.inc
+.. include:: ref-fbapi.inc
+
+.. module:: firebird.driver.hooks
+    :synopsis: Firebird driver hook management
+
+=====================
+firebird.driver.hooks
+=====================
+
+Hook Enums
+==========
+
+APIHook
+-------
+.. autoclass:: APIHook
+
+ConnectionHook
+--------------
+.. autoclass:: ConnectionHook
+
+ServerHook
+----------
+.. autoclass:: ServerHook
+
+Hook manager
+============
+
+Imported from `firebird.base.hooks`.
+
+.. autoclass:: HookManager

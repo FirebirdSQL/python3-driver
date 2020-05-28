@@ -1,0 +1,476 @@
+
+===========
+Usage Guide
+===========
+
+.. currentModule:: firebird.driver
+
+Driver structure
+================
+
+Source code is currently divided into next submodules:
+
+* :mod:`~firebird.driver.types` - Data types (incl. high level FB API interface wrappers) used by driver.
+* :mod:`~firebird.driver.core` - Main driver source code.
+* :mod:`~firebird.driver.fbapi` - Python `ctypes` interface to Firebird client library.
+* :mod:`~firebird.driver.hooks` - Driver code to work with Firebird Services.
+
+All important data, functions, classes and constants are available directly in `firebird.driver`
+namespace. In normal circumstances is not necessary to import submodules directly. However,
+you may need them to access some not so frequently needed driver fuctionality like driver
+hooks, or to implement your own callback interfaces.
+
+.. index:: Database
+
+Databases
+=========
+
+Access to the database is made available through `.Connection` objects. Firebird-driver
+provides two constructors for these:
+
+* `.connect` - Returns `.Connection` to database that already exists.
+* `.create_database` - Returns `.Connection` to newly created database.
+
+
+.. index::
+   pair: Database; connect
+
+Using connect()
+---------------
+
+
+.. index::
+   pair: Database; create
+
+Using create_database()
+-----------------------
+
+
+.. index::
+   pair: Database; delete
+
+Deleting databases
+------------------
+
+.. index::
+   pair: Connection; usage
+
+Connection object
+-----------------
+
+
+.. index::
+   pair: Firebird; information about
+
+Getting information about Firebird version
+------------------------------------------
+
+
+.. index::
+   pair: Database; On-disk Structure
+
+Database On-Disk Structure
+--------------------------
+
+
+.. index::
+   pair: Database; information about
+
+Getting information about database
+----------------------------------
+
+
+
+.. index:: SQL Statement
+
+Executing SQL Statements
+========================
+
+
+.. index::
+   pair: Cursor; usage
+
+Cursor object
+-------------
+
+
+.. index::
+   pair: SQL Statement; execution
+
+SQL Execution Basics
+--------------------
+
+
+.. index::
+   pair: SQL Statement; parametrized
+
+.. _parametrized-statements:
+
+Parametrized statements
+-----------------------
+
+
+.. index::
+   pair: Cursor; fetching data
+
+Fetching data from server
+-------------------------
+
+
+.. index::
+   pair: SQL Statement; prepared
+
+.. _prepared-statements:
+
+Prepared Statements
+-------------------
+
+
+.. index::
+   pair: Cursor; named
+
+Named Cursors
+-------------
+
+
+.. index::
+   pair: Stored procedure; execution
+
+Working with stored procedures
+------------------------------
+
+
+.. index::
+   pair: Data; conversion
+
+Data handling and conversions
+=============================
+
+.. index::
+   pair: parameter; conversion
+
+Implicit Conversion of Input Parameters from Strings
+----------------------------------------------------
+
+
+.. index::
+   pair: unicode; conversion
+
+Automatic conversion from/to unicode
+------------------------------------
+
+
+.. index:: BLOB
+   pair: Data; BLOB
+   pair: BLOB; materialized
+   pair: BLOB; stream
+
+.. _working_with_blobs:
+
+Working with BLOBs
+------------------
+
+
+.. index:: ARRAY
+   pair: Data; ARRAY
+
+Firebird ARRAY type
+-------------------
+
+
+.. index::
+   pair: Transaction; management
+
+Transanction management
+=======================
+
+
+.. index::
+   pair: Transaction; auto-commit
+
+Auto-commit
+-----------
+
+
+.. index::
+   pair: Transaction; parameters
+
+Transaction parameters
+----------------------
+
+
+.. index::
+   pair: Transaction; information about
+
+Getting information about transaction
+-------------------------------------
+
+
+.. index::
+   pair: Transaction; retaining
+
+Retaining transactions
+----------------------
+
+
+.. index:: SAVEPOINT
+   pair: Transaction; SAVEPOINT
+
+Savepoints
+----------
+
+
+.. index::
+   pair: Transaction; multiple
+
+.. _multiple_transactions:
+
+Using multiple transactions with the same connection
+----------------------------------------------------
+
+
+.. index::
+   pair: Transaction; distributed
+
+.. _distributed_transactions:
+
+Distributed Transactions
+------------------------
+
+
+.. index::
+   pair: Transaction; context manager
+
+.. _transaction-context-manager:
+
+Transaction Context Manager
+---------------------------
+
+.. index::
+   pair: Database; events
+
+Database Events
+===============
+
+What they are
+-------------
+The Firebird engine features a distributed, interprocess communication mechanism based on
+messages called `database events`. A database event is a message passed from a trigger or
+stored procedure to an application to announce the occurrence of a specified condition or
+action, usually a database change such as an insertion, modification, or deletion of a record.
+The Firebird event mechanism enables applications to respond to actions and database changes
+made by other, concurrently running applications without the need for those applications to
+communicate directly with one another, and without incurring the expense of CPU time
+required for periodic polling to determine if an event has occurred.
+
+Why use them
+------------
+Anything that can be accomplished with database events can also be implemented using other
+techniques, so why bother with events? Since you’ve chosen to write database-centric programs
+in Python rather than assembly language, you probably already know the answer to this question,
+but let’s illustrate.
+
+A typical application for database events is the handling of administrative messages.
+Suppose you have an administrative message database with a `message's` table, into which
+various applications insert timestamped status reports. It may be desirable to react to
+these messages in diverse ways, depending on the status they indicate: to ignore them, to
+initiate the update of dependent databases upon their arrival, to forward them by e-mail
+to a remote administrator, or even to set off an alarm so that on-site administrators will
+know a problem has occurred.
+
+It is undesirable to tightly couple the program whose status is being reported
+(the `message producer`) to the program that handles the status reports (the `message handler`).
+There are obvious losses of flexibility in doing so. For example, the message producer may
+run on a separate machine from the administrative message database and may lack access rights
+to the downstream reporting facilities (e.g., network access to the SMTP server, in the case
+of forwarded e-mail notifications). Additionally, the actions required to handle status
+reports may themselves be time-consuming and error-prone, as in accessing a remote network
+to transmit e-mail.
+
+In the absence of database event support, the message handler would probably be implemented
+via `polling`. Polling is simply the repetition of a check for a condition at a specified
+interval. In this case, the message handler would check in an infinite loop to see whether
+the most recent record in the `messages` table was more recent than the last message it had
+handled. If so, it would handle the fresh message(s); if not, it would go to sleep for
+a specified interval, then loop.
+
+The `polling-based` implementation of the message handler is fundamentally flawed. Polling
+is a form of busy-wait_; the check for new messages is performed at the specified interval,
+regardless of the actual activity level of the message producers. If the polling interval
+is lengthy, messages might not be handled within a reasonable time period after their arrival;
+if the polling interval is brief, the message handler program (and there may be many such
+programs) will waste a large amount of CPU time on unnecessary checks.
+
+The database server is necessarily aware of the exact moment when a new message arrives.
+Why not let the message handler program request that the database server send it a notification
+when a new message arrives? The message handler can then efficiently sleep until the moment
+its services are needed. Under this `event-based` scheme, the message handler becomes
+aware of new messages at the instant they arrive, yet it does not waste CPU time checking
+in vain for new messages when there are none available.
+
+How events are exposed
+----------------------
+
+#. Server Process ("An event just occurred!")
+
+   To notify any interested listeners that a specific event has
+   occurred, issue the `POST_EVENT` statement from Stored Procedure
+   or Trigger. The `POST_EVENT` statement has one parameter: the name
+   of the event to post. In the preceding example of the administrative
+   message database, `POST_EVENT` might be used from an `after insert`
+   trigger on the `messages` table, like this:
+
+   .. code-block:: s
+
+      create trigger trig_messages_handle_insert
+        for messages
+          after insert
+      as
+      begin
+        POST_EVENT 'new_message';
+      end
+
+   .. note:: The physical notification of the client process does not
+      occur until the transaction in which the `POST_EVENT` took place is
+      actually committed. Therefore, multiple events may *conceptually*
+      occur before the client process is *physically* informed of even one
+      occurrence. Furthermore, the database engine makes no guarantee that
+      clients will be informed of events in the same groupings in which they
+      conceptually occurred. If, within a single transaction, an event named
+      `event_a` is posted once and an event named `event_b` is posted once,
+      the client may receive those posts in separate "batches", despite the
+      fact that they occurred in the same conceptual unit (a single
+      transaction). This also applies to multiple occurrences of *the same*
+      event within a single conceptual unit: the physical notifications may
+      arrive at the client separately.
+
+#. Client Process ("Send me a message when an event occurs.")
+
+   .. note:: If you don't care about the gory details of event notification,
+             skip to the section that describes FDB's Python-level event handling
+             API.
+
+   The Firebird C client library offers two forms of event notification.
+   The first form is *synchronous* notification, by way of the function
+   :c:func:`isc_wait_for_event()`. This form is admirably simple for a C programmer
+   to use, but is inappropriate as a basis for FDB's event support,
+   chiefly because it's not sophisticated enough to serve as the basis for
+   a comfortable Python-level API. The other form of event notification
+   offered by the database client library is *asynchronous*, by way of the
+   functions :c:func:`isc_que_events()` (note that the name of that function
+   is misspelled), :c:func:`isc_cancel_events()`, and others. The details are
+   as nasty as they are numerous, but the essence of using asynchronous
+   notification from C is as follows:
+
+   #. Call :c:func:`isc_event_block()` to create a formatted binary buffer that will tell
+      the server which events the client wants to listen for.
+   #. Call :c:func:`isc_que_events()` (passing the buffer created in the previous step) to
+      inform the server that the client is ready to receive event notifications, and provide
+      a callback that will be asynchronously invoked when one or more of the registered events occurs.
+   #. [The thread that called :c:func:`isc_que_events()` to initiate event listening must
+      now do something else.]
+   #. When the callback is invoked (the database client library starts a thread dedicated
+      to this purpose), it can use the :c:func:`isc_event_counts()` function to determine
+      how many times each of the registered events has occurred since the last call to
+      :c:func:`isc_event_counts()` (if any).
+   #. [The callback thread should now "do its thing", which may include communicating with
+      the thread that called :c:func:`isc_que_events()`.]
+   #. When the callback thread is finished handling an event notification, it must call
+      :c:func:`isc_que_events()` again in order to receive future notifications. Future
+      notifications will invoke the callback again, effectively "looping" the callback
+      thread back to Step 4.
+
+API for Python developers
+-------------------------
+
+
+.. index:: Services
+   pair: Services; working with
+
+.. _working_with_services:
+
+Working with Services
+=====================
+
+
+.. index::
+   pair: Services; connection
+
+Services API Connections
+------------------------
+
+
+.. index::
+   pair: Services; server information
+
+Server Configuration and State
+------------------------------
+
+
+.. index::
+   pair: Services; database options
+
+Database options
+----------------
+
+
+.. index::
+   triple: Services; Database; maintenance
+
+Database maintenance
+--------------------
+
+
+.. index::
+   triple: Services; Database; users
+
+User maintenance
+----------------
+
+
+.. index::
+   pair: Services; trace
+
+Trace service
+-------------
+
+
+.. index::
+   pair: Services; output
+
+Text ouput from Services
+------------------------
+
+
+.. index::
+   pair: Database; schema
+   pair: Database schema; working with
+
+.. _working-with-schema:
+
+
+.. _driver-hooks:
+
+.. index::
+   pair: driver; hooks
+   pair: hooks; usage
+
+Driver hooks
+============
+
+
+.. index::
+   pair: hooks; invocation
+
+Installed hook functions are invoked by next Firebird-driver code.
+
+
+
+
+.. _Firebird Documentation: http://www.firebirdsql.org/en/reference-manuals/
+.. _DDL: http://en.wikipedia.org/wiki/Data_Definition_Language
+.. _DML: http://en.wikipedia.org/wiki/Data_Manipulation_Language
+.. _Firebird SAVEPOINTs: http://www.firebirdsql.org/refdocs/langrefupd15-savepoint.html
+.. _Firebird API documentation: http://www.ibphoenix.com/files/60ApiGuide.zip
+.. _busy-wait: http://www.catb.org/jargon/html/B/busy-wait.html
+.. _Visitor Pattern: http://en.wikipedia.org/wiki/Visitor_pattern

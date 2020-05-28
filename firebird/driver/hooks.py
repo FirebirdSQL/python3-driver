@@ -32,67 +32,24 @@
 #                 ______________________________________
 
 """firebird-driver - Drivers hooks
-
-
 """
 
-import typing as t
-from enum import Enum
+from __future__ import annotations
+from enum import Enum, auto
+from firebird.base.hooks import HookManager
 
-class HookType(Enum):
-    API_LOADED = 1
-    DATABASE_ATTACHED = 2
-    DATABASE_ATTACH_REQUEST = 3
-    DATABASE_DETACH_REQUEST = 4
-    DATABASE_CLOSED = 5
-    DATABASE_DROPPED = 6
-    SERVICE_ATTACHED = 7
+class APIHook(Enum):
+    "Firebird API hooks"
+    LOADED = auto()
 
-class HookManager:
-    """Hook manager object.
-"""
-    def __init__(self):
-        self.hooks = {}
-    def add_hook(self, hook_type: HookType, func: t.Callable):
-        """Instals hook function for specified hook_type.
+class ConnectionHook(Enum):
+    "Connection hooks"
+    ATTACH_REQUEST = auto()
+    ATTACHED = auto()
+    DETACH_REQUEST = auto()
+    CLOSED = auto()
+    DROPPED = auto()
 
-        Args:
-            hook_type (int): One from `HOOK_*` constants
-            func (callable): Hook routine to be installed
-
-        .. important::
-
-            Routine must have a signature required for given hook type.
-            However it's not checked when hook is installed, and any
-            issue will lead to run-time error when hook routine is executed.
-        """
-        self.hooks.setdefault(hook_type, list()).append(func)
-
-    def remove_hook(self, hook_type: HookType, func: t.Callable):
-        """Uninstalls previously installed hook function for
-        specified hook_type.
-
-        Args:
-            hook_type (int): One from `HOOK_*` constants
-            func (callable): Hook routine to be uninstalled
-
-        If hook routine wasn't previously installed, it does nothing.
-        """
-        try:
-            self.hooks.get(hook_type, list()).remove(func)
-        except:
-            pass
-    def get_hooks(self, hook_type: HookType):
-        """Returns list of installed hook routines for specified hook_type.
-
-        Args:
-            hook_type (int): One from `HOOK_*` constants
-
-        Returns:
-            List of installed hook routines.
-        """
-        return self.hooks.get(hook_type, list())
-
-
-hooks = HookManager()
-
+class ServerHook(Enum):
+    "Server hooks"
+    ATTACHED = auto()
