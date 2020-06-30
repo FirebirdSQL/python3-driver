@@ -35,26 +35,25 @@
 
 
 """
-
+from .config import driver_config
 from .fbapi import load_api, get_api
 from .types import Error, InterfaceError, DatabaseError, DataError, \
      OperationalError, IntegrityError, InternalError, ProgrammingError, \
      NotSupportedError, \
-     TPB, \
      NetProtocol, DirectoryCode, PageSize, DBKeyScope, DbInfoCode, \
      TraInfoCode, TraInfoIsolation, TraInfoReadCommitted, \
      TraInfoAccess, TraIsolation, TraReadCommitted, TraLockResolution, TraAccessMode, \
      TableShareMode, TableAccessMode, Isolation, DefaultAction, StatementType, BlobType, \
      DbAccessMode, DbSpaceReservation, DbWriteMode, ShutdownMode, OnlineMode, \
      ShutdownMethod, \
-     ServerCapability, SvcRepairFlag, SvcStatFlag, SvcBackupFlag, \
-     SvcRestoreFlag, SvcNBackupFlag, \
+     ServerCapability, SrvRepairFlag, SrvStatFlag, SrvBackupFlag, \
+     SrvRestoreFlag, SrvNBackupFlag, \
      apilevel, threadsafety, paramstyle, DESCRIPTION_NAME, DESCRIPTION_TYPE_CODE, \
      DESCRIPTION_DISPLAY_SIZE, DESCRIPTION_INTERNAL_SIZE, DESCRIPTION_PRECISION, \
      DESCRIPTION_SCALE, DESCRIPTION_NULL_OK, Date, Time, Timestamp, DateFromTicks, \
      TimeFromTicks, TimestampFromTicks, STRING, BINARY, NUMBER, DATETIME, ROWID
-from .core import connect, create_database, connect_server, transaction, tpb, \
+from .core import connect, create_database, connect_server, transaction, tpb, TPB, \
      CHARSET_MAP, DistributedTransactionManager, Connection, Cursor, Server
 
 #: Current driver version, SEMVER string.
-__VERSION__ = '0.5.0'
+__VERSION__ = '0.6.0'

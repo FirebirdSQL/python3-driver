@@ -10,10 +10,12 @@ Driver structure
 
 Source code is currently divided into next submodules:
 
-* :mod:`~firebird.driver.types` - Data types (incl. high level FB API interface wrappers) used by driver.
+* :mod:`~firebird.driver.types` - Data types used by driver.
+* :mod:`~firebird.driver.interfaces` - Interface wrappers for Firebird new API
 * :mod:`~firebird.driver.core` - Main driver source code.
 * :mod:`~firebird.driver.fbapi` - Python `ctypes` interface to Firebird client library.
-* :mod:`~firebird.driver.hooks` - Driver code to work with Firebird Services.
+* :mod:`~firebird.driver.config` - Driver configuration.
+* :mod:`~firebird.driver.hooks` - Drivers hooks.
 
 All important data, functions, classes and constants are available directly in `firebird.driver`
 namespace. In normal circumstances is not necessary to import submodules directly. However,

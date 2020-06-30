@@ -27,10 +27,10 @@ import datetime
 import sys
 import os
 from logging import getLogger, DEBUG, Formatter, StreamHandler
-from firebird.base.logging import get_manager, TraceFlag, ANY, install_null_logger, \
+from firebird.base.logging import logging_manager, ANY, install_null_logger, \
      LoggingIdMixin
 from firebird.driver import *
-from firebird.driver.hooks import ConnectionHook, ServerHook, HookManager
+from firebird.driver.hooks import ConnectionHook, ServerHook, hook_manager, add_hook
 import firebird.driver as driver
 import sys, os
 import threading
@@ -93,9 +93,9 @@ class DriverTestBase(unittest.TestCase, LoggingIdMixin):
         self.output = StringIO()
         install_null_logger()
         if trace or os.getenv('DRIVER_TRACE') is not None:
-            self.mngr = get_manager()
-            self.mngr.trace |= TraceFlag.BEFORE
-            self.mngr.trace |= TraceFlag.AFTER
+            self.mngr = logging_manager
+            #self.mngr.trace |= TraceFlag.BEFORE
+            #self.mngr.trace |= TraceFlag.AFTER
             self.mngr.bind_logger(ANY, ANY, '', 'trace')
             sh = StreamHandler(sys.stdout)
             sh.setFormatter(Formatter('[%(context)s] %(agent)s: %(message)s'))
@@ -103,8 +103,8 @@ class DriverTestBase(unittest.TestCase, LoggingIdMixin):
             logger.setLevel(DEBUG)
             logger.addHandler(sh)
         #
-        with connect_server(host=FBTEST_HOST, user=FBTEST_USER, password=FBTEST_PASSWORD) as svc:
-            self.version = svc.version
+        with connect_server(FBTEST_HOST, user=FBTEST_USER, password=FBTEST_PASSWORD) as svc:
+            self.version = svc.info.version
         if self.version.startswith(FB30):
             self.FBTEST_DB = 'fbtest30.fdb'
             self.version = FB30
@@ -157,24 +157,45 @@ class TestCreateDrop(DriverTestBase):
         self.dbfile = os.path.join(self.dbpath, 'droptest.fdb')
         if os.path.exists(self.dbfile):
             os.remove(self.dbfile)
-    def test_create_drop(self):
-        with create_database(host=FBTEST_HOST, database=self.dbfile,
-                             user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+    def test_create_drop_dsn(self):
+        with create_database(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+            self.assertEqual(con.dsn, self.dbfile)
             self.assertEqual(con.sql_dialect, 3)
             self.assertEqual(con.charset, None)
             con.drop_database()
-        #
-        with create_database(host=FBTEST_HOST, port=3050, database=self.dbfile,
-                             user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+        # Overwrite
+        with create_database(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+            self.assertEqual(con.dsn, self.dbfile)
             self.assertEqual(con.sql_dialect, 3)
             self.assertEqual(con.charset, None)
-            con.drop_database()
+        with self.assertRaises(DatabaseError) as cm:
+            create_database(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD)
+        self.assertTrue('exist' in cm.exception.args[0])
+        with create_database(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD, overwrite=True) as con:
+            self.assertEqual(con.dsn, self.dbfile)
+    def test_create_drop_config(self):
+        db_config = f"""
+        [test_db2]
+        database = {self.dbfile}
+        user = {FBTEST_USER}
+        password = {FBTEST_PASSWORD}
+        utf8filename = true
+        charset = UTF8
+        sql_dialect = 1
+        page_size = {types.PageSize.PAGE_16K}
+        db_charset = UTF8
+        db_sql_dialect = 1
+        sweep_interval = 0
+        """
+        driver_config.register_database('test_db2', db_config)
         #
-        with create_database(host=FBTEST_HOST, database=self.dbfile,
-                             user=FBTEST_USER, password=FBTEST_PASSWORD,
-                             sql_dialect=1, charset='UTF8') as con:
+        with create_database('test_db2') as con:
             self.assertEqual(con.sql_dialect, 1)
             self.assertEqual(con.charset, 'UTF8')
+            self.assertEqual(con.info.page_size, 16384)
+            self.assertEqual(con.info.sql_dialect, 1)
+            self.assertEqual(con.info.charset, 'UTF8')
+            self.assertEqual(con.info.sweep_interval, 0)
             con.drop_database()
 
 class TestConnection(DriverTestBase):
@@ -192,76 +213,67 @@ class TestConnection(DriverTestBase):
         IP = '127.0.0.1'
         PORT = '3051'
         SVC_NAME = 'fb_srv'
-        # User & password
-        # 1. User and password taken from environment variables
-        with patch("firebird.driver.core.os.environ.get", side_effect=os_environ_get_mock):
-            dsn, user, password = driver.core._connect_helper(None, None, None, DB_ALIAS, None, None, None)
-            self.assertEqual(user, 'MOCK_ISC_USER')
-            self.assertEqual(password, 'MOCK_ISC_PASSWORD')
-        # 2. Returned as is
-        dsn, user, password = driver.core._connect_helper(None, None, None, DB_ALIAS, None, FBTEST_USER, FBTEST_PASSWORD)
-        self.assertEqual(user, FBTEST_USER)
-        self.assertEqual(password, FBTEST_PASSWORD)
         # Classic DSN (without protocol)
         # 1. Local connection
-        dsn, user, password = driver.core._connect_helper(None, None, None, DB_ALIAS, None, None, None)
+        dsn = driver.core._connect_helper(None, None, None, DB_ALIAS, None)
         self.assertEqual(dsn, DB_ALIAS)
-        dsn, user, password = driver.core._connect_helper(None, None, None, DB_LINUX_PATH, None, None, None)
+        dsn = driver.core._connect_helper(None, None, None, DB_LINUX_PATH, None)
         self.assertEqual(dsn, DB_LINUX_PATH)
-        dsn, user, password = driver.core._connect_helper(None, None, None, DB_WIN_PATH, None, None, None)
+        dsn = driver.core._connect_helper(None, None, None, DB_WIN_PATH, None)
         self.assertEqual(dsn, DB_WIN_PATH)
         # 2. TCP/IP
-        dsn, user, password = driver.core._connect_helper(None, HOST, None, DB_ALIAS, None, None, None)
+        dsn = driver.core._connect_helper(None, HOST, None, DB_ALIAS, None)
         self.assertEqual(dsn, f'{HOST}:{DB_ALIAS}')
-        dsn, user, password = driver.core._connect_helper(None, IP, None, DB_LINUX_PATH, None, None, None)
+        dsn = driver.core._connect_helper(None, IP, None, DB_LINUX_PATH, None)
         self.assertEqual(dsn, f'{IP}:{DB_LINUX_PATH}')
-        dsn, user, password = driver.core._connect_helper(None, HOST, None, DB_WIN_PATH, None, None, None)
+        dsn = driver.core._connect_helper(None, HOST, None, DB_WIN_PATH, None)
         self.assertEqual(dsn, f'{HOST}:{DB_WIN_PATH}')
         # 3. TCP/IP with Port
-        dsn, user, password = driver.core._connect_helper(None, HOST, PORT, DB_ALIAS, None, None, None)
+        dsn = driver.core._connect_helper(None, HOST, PORT, DB_ALIAS, None)
         self.assertEqual(dsn, f'{HOST}/{PORT}:{DB_ALIAS}')
-        dsn, user, password = driver.core._connect_helper(None, IP, PORT, DB_LINUX_PATH, None, None, None)
+        dsn = driver.core._connect_helper(None, IP, PORT, DB_LINUX_PATH, None)
         self.assertEqual(dsn, f'{IP}/{PORT}:{DB_LINUX_PATH}')
-        dsn, user, password = driver.core._connect_helper(None, HOST, SVC_NAME, DB_WIN_PATH, None, None, None)
+        dsn = driver.core._connect_helper(None, HOST, SVC_NAME, DB_WIN_PATH, None)
         self.assertEqual(dsn, f'{HOST}/{SVC_NAME}:{DB_WIN_PATH}')
         # 4. Named pipes
-        dsn, user, password = driver.core._connect_helper(None, NPIPE_HOST, None, DB_ALIAS, None, None, None)
+        dsn = driver.core._connect_helper(None, NPIPE_HOST, None, DB_ALIAS, None)
         self.assertEqual(dsn, f'{NPIPE_HOST}\\{DB_ALIAS}')
-        dsn, user, password = driver.core._connect_helper(None, NPIPE_HOST, SVC_NAME, DB_WIN_PATH, None, None, None)
+        dsn = driver.core._connect_helper(None, NPIPE_HOST, SVC_NAME, DB_WIN_PATH, None)
         self.assertEqual(dsn, f'{NPIPE_HOST}@{SVC_NAME}\\{DB_WIN_PATH}')
         # URL-Style Connection Strings (with protocol)
         # 1. Loopback connection
-        dsn, user, password = driver.core._connect_helper(None, None, None, DB_ALIAS, NetProtocol.INET, None, None)
+        dsn = driver.core._connect_helper(None, None, None, DB_ALIAS, NetProtocol.INET)
         self.assertEqual(dsn, f'inet://{DB_ALIAS}')
-        dsn, user, password = driver.core._connect_helper(None, None, None, DB_LINUX_PATH, NetProtocol.INET, None, None)
+        dsn = driver.core._connect_helper(None, None, None, DB_LINUX_PATH, NetProtocol.INET)
         self.assertEqual(dsn, f'inet://{DB_LINUX_PATH}')
-        dsn, user, password = driver.core._connect_helper(None, None, None, DB_WIN_PATH, NetProtocol.INET, None, None)
+        dsn = driver.core._connect_helper(None, None, None, DB_WIN_PATH, NetProtocol.INET)
         self.assertEqual(dsn, f'inet://{DB_WIN_PATH}')
-        dsn, user, password = driver.core._connect_helper(None, None, None, DB_ALIAS, NetProtocol.WNET, None, None)
+        dsn = driver.core._connect_helper(None, None, None, DB_ALIAS, NetProtocol.WNET)
         self.assertEqual(dsn, f'wnet://{DB_ALIAS}')
-        dsn, user, password = driver.core._connect_helper(None, None, None, DB_ALIAS, NetProtocol.XNET, None, None)
+        dsn = driver.core._connect_helper(None, None, None, DB_ALIAS, NetProtocol.XNET)
         self.assertEqual(dsn, f'xnet://{DB_ALIAS}')
         # 2. TCP/IP
-        dsn, user, password = driver.core._connect_helper(None, HOST, None, DB_ALIAS, NetProtocol.INET, None, None)
+        dsn = driver.core._connect_helper(None, HOST, None, DB_ALIAS, NetProtocol.INET)
         self.assertEqual(dsn, f'inet://{HOST}/{DB_ALIAS}')
-        dsn, user, password = driver.core._connect_helper(None, IP, None, DB_LINUX_PATH, NetProtocol.INET, None, None)
+        dsn = driver.core._connect_helper(None, IP, None, DB_LINUX_PATH, NetProtocol.INET)
         self.assertEqual(dsn, f'inet://{IP}/{DB_LINUX_PATH}')
-        dsn, user, password = driver.core._connect_helper(None, HOST, None, DB_WIN_PATH, NetProtocol.INET, None, None)
+        dsn = driver.core._connect_helper(None, HOST, None, DB_WIN_PATH, NetProtocol.INET)
         self.assertEqual(dsn, f'inet://{HOST}/{DB_WIN_PATH}')
         # 3. TCP/IP with Port
-        dsn, user, password = driver.core._connect_helper(None, HOST, PORT, DB_ALIAS, NetProtocol.INET, None, None)
+        dsn = driver.core._connect_helper(None, HOST, PORT, DB_ALIAS, NetProtocol.INET)
         self.assertEqual(dsn, f'inet://{HOST}:{PORT}/{DB_ALIAS}')
-        dsn, user, password = driver.core._connect_helper(None, IP, PORT, DB_LINUX_PATH, NetProtocol.INET, None, None)
+        dsn = driver.core._connect_helper(None, IP, PORT, DB_LINUX_PATH, NetProtocol.INET)
         self.assertEqual(dsn, f'inet://{IP}:{PORT}/{DB_LINUX_PATH}')
-        dsn, user, password = driver.core._connect_helper(None, HOST, SVC_NAME, DB_WIN_PATH, NetProtocol.INET, None, None)
+        dsn = driver.core._connect_helper(None, HOST, SVC_NAME, DB_WIN_PATH, NetProtocol.INET)
         self.assertEqual(dsn, f'inet://{HOST}:{SVC_NAME}/{DB_WIN_PATH}')
         # 4. Named pipes
-        dsn, user, password = driver.core._connect_helper(None, NPIPE_HOST, None, DB_ALIAS, NetProtocol.WNET, None, None)
+        dsn = driver.core._connect_helper(None, NPIPE_HOST, None, DB_ALIAS, NetProtocol.WNET)
         self.assertEqual(dsn,f'wnet://{NPIPE_HOST}/{DB_ALIAS}')
-        dsn, user, password = driver.core._connect_helper(None, NPIPE_HOST, SVC_NAME, DB_WIN_PATH, NetProtocol.WNET, None, None)
+        dsn = driver.core._connect_helper(None, NPIPE_HOST, SVC_NAME, DB_WIN_PATH, NetProtocol.WNET)
         self.assertEqual(dsn, f'wnet://{NPIPE_HOST}:{SVC_NAME}/{DB_WIN_PATH}')
-    def test_connect(self):
-        with connect(dsn=self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+    def test_connect_dsn(self):
+        with connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+            con._logging_id_ = self.__class__.__name__
             self.assertIsNotNone(con._att)
             dpb = [1, 0x1c, len(FBTEST_USER)]
             dpb.extend(ord(x) for x in FBTEST_USER)
@@ -269,40 +281,68 @@ class TestConnection(DriverTestBase):
             dpb.extend(ord(x) for x in FBTEST_PASSWORD)
             dpb.extend((ord('?'), 4, 3, 0, 0, 0))
             self.assertEqual(con._dpb, bytes(dpb))
-        with connect(database=self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
-            self.assertIsNotNone(con._att)
-        with connect(port=3050, database=self.dbfile,
-                     user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
-            self.assertIsNotNone(con._att)
-        with connect(dsn=self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD,
-                     no_gc=1, no_db_triggers=1) as con:
-            dpb.extend([types.DPBItem.NO_GARBAGE_COLLECT, 4, 1, 0, 0, 0])
-            dpb.extend([types.DPBItem.NO_DB_TRIGGERS, 4, 1, 0, 0, 0])
-            self.assertEqual(con._dpb, bytes(dpb))
-        # UTF-8 filenames (FB 2.5+)
-        with connect(dsn=self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD,
-                     utf8filename=True) as con:
+            self.assertEqual(con.dsn, self.dbfile)
+    def test_connect_config(self):
+        srv_config = f"""
+        [server.local]
+        host = {FBTEST_HOST}
+        user = {FBTEST_USER}
+        password = {FBTEST_PASSWORD}
+        port = 3050
+        """
+        db_config = f"""
+        [test_db1]
+        server = server.local
+        database = {self.dbfile}
+        user = {FBTEST_USER}
+        password = {FBTEST_PASSWORD}
+        utf8filename = true
+        charset = UTF8
+        sql_dialect = 3
+        """
+        driver_config.register_server('server.local', srv_config)
+        driver_config.register_database('test_db1', db_config)
+        #
+        with connect('test_db1') as con:
+            con._logging_id_ = self.__class__.__name__
             self.assertIsNotNone(con._att)
             dpb = [1, 0x1c, len(FBTEST_USER)]
             dpb.extend(ord(x) for x in FBTEST_USER)
             dpb.extend((0x1d, len(FBTEST_PASSWORD)))
             dpb.extend(ord(x) for x in FBTEST_PASSWORD)
             dpb.extend((ord('?'), 4, 3, 0, 0, 0))
+            dpb.extend((ord('0'), 4, ord('U'), ord('T'), ord('F'), ord('8')))
             dpb.extend((77, 4, 1, 0, 0, 0))
             self.assertEqual(con._dpb, bytes(dpb))
+            self.assertEqual(con.dsn, f'{FBTEST_HOST}/3050:{self.dbfile}')
+        with connect('test_db1', no_gc=1, no_db_triggers=1) as con:
+            con._logging_id_ = self.__class__.__name__
+            dpb = [1, 0x1c, len(FBTEST_USER)]
+            dpb.extend(ord(x) for x in FBTEST_USER)
+            dpb.extend((0x1d, len(FBTEST_PASSWORD)))
+            dpb.extend(ord(x) for x in FBTEST_PASSWORD)
+            dpb.extend((ord('?'), 4, 3, 0, 0, 0))
+            dpb.extend((ord('0'), 4, ord('U'), ord('T'), ord('F'), ord('8')))
+            dpb.extend([types.DPBItem.NO_GARBAGE_COLLECT, 4, 1, 0, 0, 0])
+            dpb.extend((types.DPBItem.UTF8_FILENAME, 4, 1, 0, 0, 0))
+            dpb.extend([types.DPBItem.NO_DB_TRIGGERS, 4, 1, 0, 0, 0])
+            self.assertEqual(con._dpb, bytes(dpb))
+            self.assertEqual(con.dsn, f'{FBTEST_HOST}/3050:{self.dbfile}')
         # protocols
-        with connect(protocol=NetProtocol.INET, database=self.dbfile,
-                     user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+        cfg = driver_config.get_database('test_db1')
+        cfg.protocol.value = NetProtocol.INET
+        with connect('test_db1') as con:
+            con._logging_id_ = self.__class__.__name__
             self.assertIsNotNone(con._att)
-        with connect(protocol=NetProtocol.INET, database='employee', host=FBTEST_HOST,
-                     user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+            self.assertEqual(con.dsn, f'inet://{FBTEST_HOST}:3050/{self.dbfile}')
+        cfg.protocol.value = NetProtocol.INET4
+        with connect('test_db1') as con:
+            con._logging_id_ = self.__class__.__name__
             self.assertIsNotNone(con._att)
-        with connect(protocol=NetProtocol.INET4, database='employee.fdb',
-                     user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
-            self.assertIsNotNone(con._att)
+            self.assertEqual(con.dsn, f'inet4://{FBTEST_HOST}:3050/{self.dbfile}')
     def test_properties(self):
-        with connect(database=self.dbfile, host=FBTEST_HOST,
-                     user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+        with connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+            con._logging_id_ = self.__class__.__name__
             self.assertIsInstance(con.info, driver.core.DatabaseInfoProvider)
             self.assertIsNone(con.charset)
             self.assertEqual(con.sql_dialect, 3)
@@ -314,8 +354,9 @@ class TestConnection(DriverTestBase):
             self.assertFalse(con.is_closed())
     def test_connect_role(self):
         rolename = 'role'
-        with connect(dsn=self.dbfile, user=FBTEST_USER,
+        with connect(self.dbfile, user=FBTEST_USER,
                      password=FBTEST_PASSWORD, role=rolename) as con:
+            con._logging_id_ = self.__class__.__name__
             self.assertIsNotNone(con._att)
             dpb = [1, 0x1c, len(FBTEST_USER)]
             dpb.extend(ord(x) for x in FBTEST_USER)
@@ -326,7 +367,8 @@ class TestConnection(DriverTestBase):
             dpb.extend((ord('?'), 4, 3, 0, 0, 0))
             self.assertEqual(con._dpb, bytes(dpb))
     def test_transaction(self):
-        with connect(dsn=self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+        with connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+            con._logging_id_ = self.__class__.__name__
             self.assertIsNotNone(con.main_transaction)
             self.assertFalse(con.main_transaction.is_active())
             self.assertFalse(con.main_transaction.is_closed())
@@ -358,13 +400,15 @@ class TestConnection(DriverTestBase):
             self.assertFalse(tr.is_active())
             self.assertTrue(tr.is_closed())
     def test_execute_immediate(self):
-        with connect(dsn=self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+        with connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+            con._logging_id_ = self.__class__.__name__
             #con.execute_immediate("recreate table t (c1 integer)")
             #con.commit()
             con.execute_immediate("delete from t")
             con.commit()
     def test_db_info(self):
-        with connect(dsn=self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+        with connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+            con._logging_id_ = self.__class__.__name__
             # Resize response buffer
             con.info.response.resize(5)
             self.assertEqual(len(con.info.response.raw), 5)
@@ -379,9 +423,9 @@ class TestConnection(DriverTestBase):
             #
             self.assertEqual(con.info.page_size, 8192)
             self.assertGreater(con.info.attachment_id, 0)
-            self.assertEqual(con.info.database_sql_dialect, 3)
-            self.assertEqual(con.info.database_name.upper(), self.dbfile.upper())
-            self.assertIsInstance(con.info.site_name, str)
+            self.assertEqual(con.info.sql_dialect, 3)
+            self.assertEqual(con.info.name.upper(), self.dbfile.upper())
+            self.assertIsInstance(con.info.site, str)
             self.assertIsInstance(con.info.implementation, driver.types.Implementation)
             self.assertIsInstance(con.info.provider, driver.types.DbProvider)
             self.assertIsInstance(con.info.db_class, driver.types.DbClass)
@@ -471,8 +515,8 @@ class TestTransaction(DriverTestBase):
     def setUp(self):
         super().setUp()
         self.dbfile = os.path.join(self.dbpath, self.FBTEST_DB)
-        self.con = connect(host=FBTEST_HOST, database=self.dbfile,
-                           user=FBTEST_USER, password=FBTEST_PASSWORD)
+        self.con = connect(f'{FBTEST_HOST}:{self.dbfile}', user=FBTEST_USER, password=FBTEST_PASSWORD)
+        self.con._logging_id_ = self.__class__.__name__
         #self.con.execute_immediate("recreate table t (c1 integer)")
         self.con.execute_immediate("delete from t")
         self.con.commit()
@@ -573,8 +617,9 @@ class TestTransaction(DriverTestBase):
     def test_transaction_info(self):
         self.con.begin()
         with self.con.main_transaction as tr:
-            info = tr.info.get_info(TraInfoCode.ISOLATION)
-            self.assertEqual(info, Isolation.SNAPSHOT)
+            self.assertTrue(tr.is_active())
+            self.assertIn(self.dbfile, tr.info.database)
+            self.assertEqual(tr.info.isolation, Isolation.SNAPSHOT)
             #
             self.assertGreater(tr.info.id, 0)
             self.assertGreater(tr.info.oit, 0)
@@ -589,14 +634,12 @@ class TestDistributedTransaction(DriverTestBase):
         self.dbfile = os.path.join(self.dbpath, self.FBTEST_DB)
         self.db1 = os.path.join(self.dbpath, 'fbtest-1.fdb')
         self.db2 = os.path.join(self.dbpath, 'fbtest-2.fdb')
-        self.con1 = create_database(host=FBTEST_HOST, database=self.db1,
-                                    user=FBTEST_USER,
-                                    password=FBTEST_PASSWORD, overwrite=True, no_linger=True)
+        self.con1 = create_database(self.db1, user=FBTEST_USER, password=FBTEST_PASSWORD, overwrite=True)
+        self.con1._logging_id_ = self.__class__.__name__
         self.con1.execute_immediate("recreate table T (PK integer, C1 integer)")
         self.con1.commit()
-        self.con2 = create_database(host=FBTEST_HOST, database=self.db2,
-                                    user=FBTEST_USER,
-                                    password=FBTEST_PASSWORD, overwrite=True, no_linger=True)
+        self.con2 = create_database(self.db2, user=FBTEST_USER, password=FBTEST_PASSWORD, overwrite=True)
+        self.con2._logging_id_ = self.__class__.__name__
         self.con2.execute_immediate("recreate table T (PK integer, C1 integer)")
         self.con2.commit()
     def tearDown(self):
@@ -747,9 +790,11 @@ class TestDistributedTransaction(DriverTestBase):
             if not self.con1:
                 self.con1 = connect(host=FBTEST_HOST, database=self.db1, user=FBTEST_USER,
                                     password=FBTEST_PASSWORD, no_linger=True)
+                self.con1._logging_id_ = self.__class__.__name__
             if not self.con2:
                 self.con2 = connect(host=FBTEST_HOST, database=self.db2, user=FBTEST_USER,
                                     password=FBTEST_PASSWORD, no_linger=True)
+                self.con2._logging_id_ = self.__class__.__name__
             c1 = self.con1.cursor()
             c1.execute('select * from t')
             with self.assertRaises(DatabaseError) as cm:
@@ -781,8 +826,8 @@ class TestCursor(DriverTestBase):
     def setUp(self):
         super().setUp()
         self.dbfile = os.path.join(self.dbpath, self.FBTEST_DB)
-        self.con = connect(host=FBTEST_HOST, database=self.dbfile,
-                           user=FBTEST_USER, password=FBTEST_PASSWORD)
+        self.con = connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD)
+        self.con._logging_id_ = self.__class__.__name__
         #self.con.execute_immediate("recreate table t (c1 integer primary key)")
         self.con.execute_immediate("delete from t")
         self.con.commit()
@@ -940,7 +985,7 @@ class TestCursor(DriverTestBase):
             cur.execute('select * from project')
             self.assertEqual(cur.affected_rows, 0)
             cur.fetchone()
-            rcount = 1 if FBTEST_HOST == '' else 6
+            rcount = 1
             self.assertEqual(cur.affected_rows, rcount)
             self.assertEqual(cur.rowcount, rcount)
     def test_name(self):
@@ -968,12 +1013,15 @@ class TestScrollableCursor(DriverTestBase):
         self.dbfile = os.path.join(self.dbpath, self.FBTEST_DB)
         self.con = connect(database=self.dbfile,
                            user=FBTEST_USER, password=FBTEST_PASSWORD)
+        self.con._logging_id_ = self.__class__.__name__
         #self.con.execute_immediate("recreate table t (c1 integer primary key)")
         #self.con.execute_immediate("delete from t")
         #self.con.commit()
     def tearDown(self):
         self.con.close()
     def test_scrollable(self):
+        if sys.platform == 'win32':
+            self.skipTest('Does not work on Windows')
         rows = [('USA', 'Dollar'), ('England', 'Pound'), ('Canada', 'CdnDlr'),
                 ('Switzerland', 'SFranc'), ('Japan', 'Yen'), ('Italy', 'Euro'),
                 ('France', 'Euro'), ('Germany', 'Euro'), ('Australia', 'ADollar'),
@@ -1002,10 +1050,10 @@ class TestPreparedStatement(DriverTestBase):
     def setUp(self):
         super().setUp()
         self.dbfile = os.path.join(self.dbpath, self.FBTEST_DB)
-        self.con = connect(host=FBTEST_HOST, database=self.dbfile,
-                           user=FBTEST_USER, password=FBTEST_PASSWORD)
-        self.con2 = connect(host=FBTEST_HOST, database=self.dbfile,
-                            user=FBTEST_USER, password=FBTEST_PASSWORD)
+        self.con = connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD)
+        self.con._logging_id_ = self.__class__.__name__
+        self.con2 = connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD)
+        self.con2._logging_id_ = self.__class__.__name__
         #self.con.execute_immediate("recreate table t (c1 integer)")
         self.con.execute_immediate("delete from t")
         self.con.commit()
@@ -1046,8 +1094,8 @@ class TestArrays(DriverTestBase):
     def setUp(self):
         super().setUp()
         self.dbfile = os.path.join(self.dbpath, self.FBTEST_DB)
-        self.con = connect(host=FBTEST_HOST, database=self.dbfile,
-                           user=FBTEST_USER, password=FBTEST_PASSWORD)
+        self.con = connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD)
+        self.con._logging_id_ = self.__class__.__name__
         tbl = """recreate table AR (c1 integer,
                                     c2 integer[1:4,0:3,1:2],
                                     c3 varchar(15)[0:5,1:2],
@@ -1270,11 +1318,10 @@ class TestInsertData(DriverTestBase):
     def setUp(self):
         super().setUp()
         self.dbfile = os.path.join(self.dbpath, self.FBTEST_DB)
-        self.con = connect(host=FBTEST_HOST, database=self.dbfile,
-                           user=FBTEST_USER, password=FBTEST_PASSWORD)
-        self.con2 = connect(host=FBTEST_HOST, database=self.dbfile,
-                            user=FBTEST_USER, password=FBTEST_PASSWORD,
-                            charset='utf-8')
+        self.con = connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD)
+        self.con._logging_id_ = self.__class__.__name__
+        self.con2 = connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD, charset='utf-8')
+        self.con2._logging_id_ = self.__class__.__name__
         #self.con.execute_immediate("recreate table t (c1 integer)")
         #self.con.commit()
         #self.con.execute_immediate("RECREATE TABLE T2 (C1 Smallint,C2 Integer,C3 Bigint,C4 Char(5),C5 Varchar(10),C6 Date,C7 Time,C8 Timestamp,C9 Blob sub_type 1,C10 Numeric(18,2),C11 Decimal(18,2),C12 Float,C13 Double precision,C14 Numeric(8,4),C15 Decimal(8,4))")
@@ -1350,7 +1397,7 @@ class TestInsertData(DriverTestBase):
             cur.execute('select C1,C16 from T2 where C1 = 8')
             rows = cur.fetchall()
             self.assertListEqual(rows, [(8, blob_data)])
-            # BLOB bigger than max. segment size
+            # BLOB bigger than stream_blob_threshold
             big_blob = '123456789' * 10000
             cur.execute('insert into T2 (C1,C9) values (?,?)', [5, big_blob])
             cur.transaction.commit()
@@ -1411,8 +1458,8 @@ class TestStoredProc(DriverTestBase):
     def setUp(self):
         super().setUp()
         self.dbfile = os.path.join(self.dbpath, self.FBTEST_DB)
-        self.con = connect(host=FBTEST_HOST, database=self.dbfile,
-                           user=FBTEST_USER, password=FBTEST_PASSWORD)
+        self.con = connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD)
+        self.con._logging_id_ = self.__class__.__name__
         self.con.execute_immediate("delete from t")
         self.con.commit()
     def tearDown(self):
@@ -1434,45 +1481,45 @@ class TestStoredProc(DriverTestBase):
             result = cur.fetchone()
             self.assertTupleEqual(result, tuple([10]))
 
-class TestServer(DriverTestBase):
+class TestServerStandard(DriverTestBase):
     def setUp(self):
         super().setUp()
         self.dbfile = os.path.join(self.dbpath, self.FBTEST_DB)
     def test_attach(self):
-        svc = connect_server(host=FBTEST_HOST, user='SYSDBA', password=FBTEST_PASSWORD)
+        svc = connect_server(FBTEST_HOST, user='SYSDBA', password=FBTEST_PASSWORD)
         svc.close()
     def test_query(self):
-        with connect_server(host=FBTEST_HOST, user='SYSDBA', password=FBTEST_PASSWORD) as svc:
-            self.assertEqual(svc.get_service_manager_version(), 2)
-            self.assertIn('Firebird', svc.get_server_version())
-            self.assertIn('Firebird', svc.get_architecture())
-            x = svc.get_home_directory()
-            #self.assertEqual(x,'/opt/firebird/')
-            self.assertIn('security3.fdb', svc.get_security_database_path())
-            x = svc.get_lock_file_directory()
-            #self.assertEqual(x,'/tmp/firebird/')
-            x = svc.get_server_capabilities()
+        with connect_server(FBTEST_HOST, user='SYSDBA', password=FBTEST_PASSWORD) as svc:
+            self.assertEqual(svc.info.manager_version, 2)
+            self.assertTrue(svc.info.version.startswith('3.0.'))
+            self.assertGreaterEqual(3.0, svc.info.engine_version)
+            self.assertIn('Firebird', svc.info.architecture)
+            x = svc.info.home_directory
+            # On Windows it returns 'security.db', a bug?
+            #self.assertIn('security.db', svc.info.security_database)
+            self.assertIn('security3.fdb', svc.info.security_database)
+            x = svc.info.lock_directory
+            x = svc.info.capabilities
             self.assertIn(ServerCapability.REMOTE_HOP, x)
             self.assertNotIn(ServerCapability.NO_FORCED_WRITE, x)
-            x = svc.get_message_file_directory()
-            #self.assertEqual(x,'/opt/firebird/')
-            with connect(host=FBTEST_HOST, database=self.dbfile,
-                         user=FBTEST_USER, password=FBTEST_PASSWORD):
-                with connect(host=FBTEST_HOST, database='employee',
-                             user=FBTEST_USER, password=FBTEST_PASSWORD):
-                    self.assertGreaterEqual(len(svc.get_attached_database_names()), 2,
+            x = svc.info.message_directory
+            with connect(f"{FBTEST_HOST}:{self.dbfile}", user=FBTEST_USER, password=FBTEST_PASSWORD) as con1:
+                con1._logging_id_ = self.__class__.__name__
+                with connect(f'{FBTEST_HOST}:employee', user=FBTEST_USER, password=FBTEST_PASSWORD) as con2:
+                    con2._logging_id_ = self.__class__.__name__
+                    self.assertGreaterEqual(len(svc.info.attached_databases), 2,
                                             "Should work for Superserver, may fail with value 0 for Classic")
                     self.assertIn(self.dbfile.upper(),
-                                  [s.upper() for s in svc.get_attached_database_names()])
-                    self.assertGreaterEqual(svc.get_connection_count(), 2)
+                                  [s.upper() for s in svc.info.attached_databases])
+                    self.assertGreaterEqual(svc.info.connection_count, 2)
             # BAD request code
             with self.assertRaises(Error) as cm:
-                svc._get_simple_info(255, driver.types.InfoItemType.BYTES)
+                svc.info.get_info(255)
             self.assertTupleEqual(cm.exception.args,
                                   ("feature is not supported",))
 
     def test_running(self):
-        with connect_server(host=FBTEST_HOST, user='SYSDBA', password=FBTEST_PASSWORD) as svc:
+        with connect_server(FBTEST_HOST, user='SYSDBA', password=FBTEST_PASSWORD) as svc:
             self.assertFalse(svc.is_running())
             svc.get_log()
             self.assertTrue(svc.is_running())
@@ -1480,7 +1527,7 @@ class TestServer(DriverTestBase):
             svc.readlines()
             self.assertFalse(svc.is_running())
     def test_wait(self):
-        with connect_server(host=FBTEST_HOST, user='SYSDBA', password=FBTEST_PASSWORD) as svc:
+        with connect_server(FBTEST_HOST, user='SYSDBA', password=FBTEST_PASSWORD) as svc:
             self.assertFalse(svc.is_running())
             svc.get_log()
             self.assertTrue(svc.is_running())
@@ -1494,15 +1541,14 @@ class TestServerServices(DriverTestBase):
         self.fbk = os.path.join(self.dbpath, 'test_employee.fbk')
         self.fbk2 = os.path.join(self.dbpath, 'test_employee.fbk2')
         self.rfdb = os.path.join(self.dbpath, 'test_employee.fdb')
-        self.svc = connect_server(host=FBTEST_HOST, user='SYSDBA',
-                                   password=FBTEST_PASSWORD)
-        self.con = connect(host=FBTEST_HOST, database=self.dbfile,
-                           user=FBTEST_USER, password=FBTEST_PASSWORD)
+        self.svc = connect_server(FBTEST_HOST, user='SYSDBA', password=FBTEST_PASSWORD)
+        self.con = connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD)
+        self.con._logging_id_ = self.__class__.__name__
         self.con.execute_immediate("delete from t")
         self.con.commit()
-        c = create_database(host=FBTEST_HOST, database=self.rfdb,
-                                   user=FBTEST_USER, password=FBTEST_PASSWORD,
-                                   overwrite=True)
+        c = create_database(f"{FBTEST_HOST}:{self.rfdb}",
+                            user=FBTEST_USER, password=FBTEST_PASSWORD,
+                            overwrite=True)
         c.close()
     def tearDown(self):
         self.svc.close()
@@ -1536,167 +1582,6 @@ class TestServerServices(DriverTestBase):
         self.skipTest('Not implemented yet')
         ids = self.svc.get_limbo_transaction_ids(database='employee')
         self.assertIsInstance(ids, type(list()))
-    def test_get_statistics(self):
-        def fetchline(line):
-            output.append(line)
-
-        #self.skipTest('Not implemented yet')
-        self.svc.get_statistics(database='employee')
-        self.assertTrue(self.svc.is_running())
-        # fetch materialized
-        stats = self.svc.readlines()
-        self.assertFalse(self.svc.is_running())
-        self.assertIsInstance(stats, type(list()))
-        # iterate over result
-        self.svc.get_statistics(database='employee',
-                                flags=(SvcStatFlag.DEFAULT
-                                       | SvcStatFlag.SYS_RELATIONS
-                                       | SvcStatFlag.RECORD_VERSIONS))
-        for line in self.svc:
-            self.assertIsInstance(line, str)
-        # callback
-        output = []
-        self.svc.get_statistics(database='employee', callback=fetchline)
-        self.assertGreater(len(output), 0)
-        # fetch only selected tables
-        stats = self.svc.get_statistics(database='employee',
-                                        flags=SvcStatFlag.DATA_PAGES,
-                                        tables=['COUNTRY'])
-        stats = '\n'.join(self.svc.readlines())
-        self.assertIn('COUNTRY', stats)
-        self.assertNotIn('JOB', stats)
-        #
-        stats = self.svc.get_statistics(database='employee',
-                                        flags=SvcStatFlag.DATA_PAGES,
-                                        tables=('COUNTRY', 'PROJECT'))
-        stats = '\n'.join(self.svc.readlines())
-        self.assertIn('COUNTRY', stats)
-        self.assertIn('PROJECT', stats)
-        self.assertNotIn('JOB', stats)
-    def test_backup(self):
-        def fetchline(line):
-            output.append(line)
-
-        #self.skipTest('Not implemented yet')
-        self.svc.backup(database='employee', backup=self.fbk)
-        self.assertTrue(self.svc.is_running())
-        # fetch materialized
-        report = self.svc.readlines()
-        self.assertFalse(self.svc.is_running())
-        self.assertTrue(os.path.exists(self.fbk))
-        self.assertIsInstance(report, type(list()))
-        self.assertListEqual(report, [])
-        # iterate over result
-        self.svc.backup(database='employee', backup=self.fbk,
-                        flags=(SvcBackupFlag.CONVERT
-                               | SvcBackupFlag.IGNORE_LIMBO
-                               | SvcBackupFlag.IGNORE_CHECKSUMS
-                               | SvcBackupFlag.METADATA_ONLY), verbose=True)
-        for line in self.svc:
-            self.assertIsNotNone(line)
-            self.assertIsInstance(line, str)
-        # callback
-        output = []
-        self.svc.backup(database='employee', backup=self.fbk, callback=fetchline, verbose=True)
-        self.assertGreater(len(output), 0)
-        # Firebird 3.0 stats
-        output = []
-        self.svc.backup(database='employee', backup=self.fbk, callback=fetchline,
-                        stats='TDRW', verbose=True)
-        self.assertGreater(len(output), 0)
-        self.assertIn('gbak: time     delta  reads  writes \n', output)
-        # Skip data option
-        self.svc.backup(database='employee', backup=self.fbk, skip_data='(sales|customer)')
-        self.svc.wait()
-        self.svc.restore(backup=self.fbk, database=self.rfdb, flags=SvcRestoreFlag.REPLACE)
-        self.svc.wait()
-        with connect(host=FBTEST_HOST, database=self.rfdb,
-                     user=FBTEST_USER, password=FBTEST_PASSWORD) as rcon:
-            with rcon.cursor() as c:
-                c.execute('select * from sales')
-                self.assertListEqual(c.fetchall(), [])
-                c.execute('select * from country')
-                self.assertGreater(len(c.fetchall()), 0)
-    def test_restore(self):
-        def fetchline(line):
-            output.append(line)
-
-        output = []
-        self.svc.backup(database='employee', backup=self.fbk, callback=fetchline)
-        self.assertTrue(os.path.exists(self.fbk))
-        self.svc.restore(backup=self.fbk, database=self.rfdb, flags=SvcRestoreFlag.REPLACE)
-        self.assertTrue(self.svc.is_running())
-        # fetch materialized
-        report = self.svc.readlines()
-        self.assertFalse(self.svc.is_running())
-        self.assertIsInstance(report, type(list()))
-        # iterate over result
-        self.svc.restore(backup=self.fbk, database=self.rfdb, flags=SvcRestoreFlag.REPLACE)
-        for line in self.svc:
-            self.assertIsNotNone(line)
-            self.assertIsInstance(line, str)
-        # callback
-        output = []
-        self.svc.restore(backup=self.fbk, database=self.rfdb, flags=SvcRestoreFlag.REPLACE, callback=fetchline)
-        self.assertGreater(len(output), 0)
-        # Firebird 3.0 stats
-        output = []
-        self.svc.restore(backup=self.fbk, database=self.rfdb, flags=SvcRestoreFlag.REPLACE, callback=fetchline,
-                         stats='TDRW')
-        self.assertGreater(len(output), 0)
-        self.assertIn('gbak: time     delta  reads  writes \n', output)
-        # Skip data option
-        self.svc.restore(backup=self.fbk, database=self.rfdb,
-                         flags=SvcRestoreFlag.REPLACE, skip_data='(sales|customer)')
-        self.svc.wait()
-        with connect(host=FBTEST_HOST, database=self.rfdb,
-                     user=FBTEST_USER, password=FBTEST_PASSWORD) as rcon:
-            with rcon.cursor() as c:
-                c.execute('select * from sales')
-                self.assertListEqual(c.fetchall(), [])
-                c.execute('select * from country')
-                self.assertGreater(len(c.fetchall()), 0)
-    def test_local_backup(self):
-        self.svc.backup(database='employee', backup=self.fbk)
-        self.svc.wait()
-        with open(self.fbk, mode='rb') as f:
-            f.seek(68)  # Wee must skip after backup creation time (68) that will differ
-            bkp = f.read()
-        backup_stream = BytesIO()
-        self.svc.local_backup(database='employee', backup_stream=backup_stream)
-        backup_stream.seek(68)
-        lbkp = backup_stream.read()
-        stop = min(len(bkp), len(lbkp))
-        i = 0
-        while i < stop:
-            self.assertEqual(bkp[i], lbkp[i], f"bytes differ at {i} ({i+68})")
-            i += 1
-        #self.assertEqual(bkp, lbkp)
-        del bkp
-    def test_local_restore(self):
-        backup_stream = BytesIO()
-        self.svc.local_backup(database='employee', backup_stream=backup_stream)
-        backup_stream.seek(0)
-        self.svc.local_restore(backup_stream=backup_stream, database=self.rfdb,
-                               flags=SvcRestoreFlag.REPLACE)
-        self.assertTrue(os.path.exists(self.rfdb))
-    def test_nbackup(self):
-        self.svc.nbackup(database='employee', backup=self.fbk)
-        self.assertTrue(os.path.exists(self.fbk))
-        self.svc.nbackup(database='employee', backup=self.fbk2, level=1,
-                         direct=True, flags=SvcNBackupFlag.NO_TRIGGERS)
-        self.assertTrue(os.path.exists(self.fbk2))
-    def test_nrestore(self):
-        self.test_nbackup()
-        if os.path.exists(self.rfdb):
-            os.remove(self.rfdb)
-        self.svc.nrestore(backups=[self.fbk], database=self.rfdb)
-        self.assertTrue(os.path.exists(self.rfdb))
-        if os.path.exists(self.rfdb):
-            os.remove(self.rfdb)
-        self.svc.nrestore(backups=[self.fbk, self.fbk2], database=self.rfdb,
-                          direct=True, flags=SvcNBackupFlag.NO_TRIGGERS)
-        self.assertTrue(os.path.exists(self.rfdb))
     def test_trace(self):
         #self.skipTest('Not implemented yet')
         trace_config = """database = %s
@@ -1710,124 +1595,350 @@ class TestServerServices(DriverTestBase):
           max_sql_length = 2048
         }
         """ % self.dbfile
-        with connect_server(host=FBTEST_HOST, user='SYSDBA', password=FBTEST_PASSWORD) as svc2, \
-             connect_server(host=FBTEST_HOST, user='SYSDBA', password=FBTEST_PASSWORD) as svcx:
+        with connect_server(FBTEST_HOST, user='SYSDBA', password=FBTEST_PASSWORD) as svc2, \
+             connect_server(FBTEST_HOST, user='SYSDBA', password=FBTEST_PASSWORD) as svcx:
             # Start trace sessions
-            trace1_id = self.svc.trace_start(config=trace_config, name='test_trace_1')
-            trace2_id = svc2.trace_start(config=trace_config)
+            trace1_id = self.svc.trace.start(config=trace_config, name='test_trace_1')
+            trace2_id = svc2.trace.start(config=trace_config)
             # check sessions
-            sessions = svcx.trace_list()
+            sessions = svcx.trace.sessions
             self.assertIn(trace1_id, sessions)
-            seq = list(sessions[trace1_id].keys())
-            seq.sort()
-            self.assertListEqual(seq,['date', 'flags', 'name', 'user'])
+            self.assertEqual(sessions[trace1_id].name, 'test_trace_1')
+            self.assertEqual(sessions[trace2_id].name, '')
+            # Windows returns SYSDBA
+            #self.assertEqual(sessions[trace1_id].user, 'SYSDBA')
+            #self.assertEqual(sessions[trace2_id].user, 'SYSDBA')
+            self.assertEqual(sessions[trace1_id].user, '')
+            self.assertEqual(sessions[trace2_id].user, '')
             self.assertIn(trace2_id, sessions)
-            seq = list(sessions[trace2_id].keys())
-            seq.sort()
-            self.assertListEqual(seq,['date', 'flags', 'user'])
-            self.assertListEqual(sessions[trace1_id]['flags'], ['active', ' trace'])
-            self.assertListEqual(sessions[trace2_id]['flags'], ['active', ' trace'])
+            self.assertListEqual(sessions[trace1_id].flags, ['active', ' trace'])
+            self.assertListEqual(sessions[trace2_id].flags, ['active', ' trace'])
             # Pause session
-            svcx.trace_suspend(session_id=trace2_id)
-            self.assertIn('suspend', svcx.trace_list()[trace2_id]['flags'])
+            svcx.trace.suspend(session_id=trace2_id)
+            self.assertIn('suspend', svcx.trace.sessions[trace2_id].flags)
             # Resume session
-            svcx.trace_resume(session_id=trace2_id)
-            self.assertIn('active', svcx.trace_list()[trace2_id]['flags'])
+            svcx.trace.resume(session_id=trace2_id)
+            self.assertIn('active', svcx.trace.sessions[trace2_id].flags)
             # Stop session
-            svcx.trace_stop(session_id=trace2_id)
-            self.assertNotIn(trace2_id, svcx.trace_list())
+            svcx.trace.stop(session_id=trace2_id)
+            self.assertNotIn(trace2_id, svcx.trace.sessions)
             # Finalize
-            svcx.trace_stop(session_id=trace1_id)
+            svcx.trace.stop(session_id=trace1_id)
+    def test_get_users(self):
+        users = self.svc.user.get_all()
+        self.assertIsInstance(users, type(list()))
+        self.assertIsInstance(users[0], driver.core.UserInfo)
+        self.assertEqual(users[0].user_name, 'SYSDBA')
+    def test_manage_user(self):
+        USER_NAME = 'DRIVER_TEST'
+        try:
+            self.svc.user.delete(USER_NAME)
+        except DatabaseError as e:
+            if e.sqlstate == '28000':
+                pass
+            else:
+                raise
+        # Add user
+        self.svc.user.add(user_name=USER_NAME, password='DRIVER_TEST',
+                          first_name='Firebird', middle_name='Driver', last_name='Test')
+        self.assertTrue(self.svc.user.exists(USER_NAME))
+        users = [u for u in self.svc.user.get_all() if u.user_name == USER_NAME]
+        self.assertTrue(users)
+        self.assertEqual(len(users), 1)
+        self.assertEqual(users[0].first_name, 'Firebird')
+        self.assertEqual(users[0].middle_name, 'Driver')
+        self.assertEqual(users[0].last_name, 'Test')
+        # Modify user
+        self.svc.user.update(USER_NAME, first_name='XFirebird', middle_name='XDriver', last_name='XTest')
+        user = self.svc.user.get(USER_NAME)
+        self.assertEqual(user.user_name, USER_NAME)
+        self.assertEqual(user.first_name, 'XFirebird')
+        self.assertEqual(user.middle_name, 'XDriver')
+        self.assertEqual(user.last_name, 'XTest')
+        # Delete user
+        self.svc.user.delete(USER_NAME)
+        self.assertFalse(self.svc.user.exists(USER_NAME))
+
+class TestServerDatabaseServices(DriverTestBase):
+    def setUp(self):
+        super().setUp()
+        # f"{FBTEST_HOST}:{os.path.join(self.dbpath, 'test_employee.fdb')}"
+        self.dbfile = os.path.join(self.dbpath, self.FBTEST_DB)
+        self.fbk = os.path.join(self.dbpath, 'test_employee.fbk')
+        self.fbk2 = os.path.join(self.dbpath, 'test_employee.fbk2')
+        self.rfdb = os.path.join(self.dbpath, 'test_employee.fdb')
+        self.svc = connect_server(FBTEST_HOST, user='SYSDBA', password=FBTEST_PASSWORD)
+        self.con = connect(f"{FBTEST_HOST}:{self.dbfile}",
+                           user=FBTEST_USER, password=FBTEST_PASSWORD)
+        self.con._logging_id_ = self.__class__.__name__
+        self.con.execute_immediate("delete from t")
+        self.con.commit()
+        c = create_database(f"{FBTEST_HOST}:{self.rfdb}",
+                            user=FBTEST_USER, password=FBTEST_PASSWORD,
+                            overwrite=True)
+        c.close()
+    def tearDown(self):
+        self.svc.close()
+        self.con.close()
+        if os.path.exists(self.rfdb):
+            os.remove(self.rfdb)
+        if os.path.exists(self.fbk):
+            os.remove(self.fbk)
+        if os.path.exists(self.fbk2):
+            os.remove(self.fbk2)
+    def test_get_statistics(self):
+        def fetchline(line):
+            output.append(line)
+
+        #self.skipTest('Not implemented yet')
+        self.svc.database.get_statistics(database='employee')
+        self.assertTrue(self.svc.is_running())
+        # fetch materialized
+        stats = self.svc.readlines()
+        self.assertFalse(self.svc.is_running())
+        self.assertIsInstance(stats, type(list()))
+        # iterate over result
+        self.svc.database.get_statistics(database='employee',
+                                         flags=(SrvStatFlag.DEFAULT
+                                                | SrvStatFlag.SYS_RELATIONS
+                                                | SrvStatFlag.RECORD_VERSIONS))
+        for line in self.svc:
+            self.assertIsInstance(line, str)
+        # callback
+        output = []
+        self.svc.database.get_statistics(database='employee', callback=fetchline)
+        self.assertGreater(len(output), 0)
+        # fetch only selected tables
+        stats = self.svc.database.get_statistics(database='employee',
+                                                 flags=SrvStatFlag.DATA_PAGES,
+                                                 tables=['COUNTRY'])
+        stats = '\n'.join(self.svc.readlines())
+        self.assertIn('COUNTRY', stats)
+        self.assertNotIn('JOB', stats)
+        #
+        stats = self.svc.database.get_statistics(database='employee',
+                                                 flags=SrvStatFlag.DATA_PAGES,
+                                                 tables=('COUNTRY', 'PROJECT'))
+        stats = '\n'.join(self.svc.readlines())
+        self.assertIn('COUNTRY', stats)
+        self.assertIn('PROJECT', stats)
+        self.assertNotIn('JOB', stats)
+    def test_backup(self):
+        def fetchline(line):
+            output.append(line)
+
+        #self.skipTest('Not implemented yet')
+        self.svc.database.backup(database='employee', backup=self.fbk)
+        self.assertTrue(self.svc.is_running())
+        # fetch materialized
+        report = self.svc.readlines()
+        self.assertFalse(self.svc.is_running())
+        self.assertTrue(os.path.exists(self.fbk))
+        self.assertIsInstance(report, type(list()))
+        self.assertListEqual(report, [])
+        # iterate over result
+        self.svc.database.backup(database='employee', backup=self.fbk,
+                                 flags=(SrvBackupFlag.CONVERT
+                                        | SrvBackupFlag.IGNORE_LIMBO
+                                        | SrvBackupFlag.IGNORE_CHECKSUMS
+                                        | SrvBackupFlag.METADATA_ONLY), verbose=True)
+        for line in self.svc:
+            self.assertIsNotNone(line)
+            self.assertIsInstance(line, str)
+        # callback
+        output = []
+        self.svc.database.backup(database='employee', backup=self.fbk, callback=fetchline,
+                                 verbose=True)
+        self.assertGreater(len(output), 0)
+        # Firebird 3.0 stats
+        output = []
+        self.svc.database.backup(database='employee', backup=self.fbk, callback=fetchline,
+                                 stats='TDRW', verbose=True)
+        self.assertGreater(len(output), 0)
+        self.assertIn('gbak: time     delta  reads  writes \n', output)
+        # Skip data option
+        self.svc.database.backup(database='employee', backup=self.fbk, skip_data='(sales|customer)')
+        self.svc.wait()
+        self.svc.database.restore(backup=self.fbk, database=self.rfdb, flags=SrvRestoreFlag.REPLACE)
+        self.svc.wait()
+        with connect(f"{FBTEST_HOST}:{self.rfdb}", user=FBTEST_USER, password=FBTEST_PASSWORD) as rcon:
+            rcon._logging_id_ = self.__class__.__name__
+            with rcon.cursor() as c:
+                c.execute('select * from sales')
+                self.assertListEqual(c.fetchall(), [])
+                c.execute('select * from country')
+                self.assertGreater(len(c.fetchall()), 0)
+    def test_restore(self):
+        def fetchline(line):
+            output.append(line)
+
+        output = []
+        self.svc.database.backup(database='employee', backup=self.fbk, callback=fetchline)
+        self.assertTrue(os.path.exists(self.fbk))
+        self.svc.database.restore(backup=self.fbk, database=self.rfdb, flags=SrvRestoreFlag.REPLACE)
+        self.assertTrue(self.svc.is_running())
+        # fetch materialized
+        report = self.svc.readlines()
+        self.assertFalse(self.svc.is_running())
+        self.assertIsInstance(report, type(list()))
+        # iterate over result
+        self.svc.database.restore(backup=self.fbk, database=self.rfdb, flags=SrvRestoreFlag.REPLACE)
+        for line in self.svc:
+            self.assertIsNotNone(line)
+            self.assertIsInstance(line, str)
+        # callback
+        output = []
+        self.svc.database.restore(backup=self.fbk, database=self.rfdb,
+                                  flags=SrvRestoreFlag.REPLACE, callback=fetchline)
+        self.assertGreater(len(output), 0)
+        # Firebird 3.0 stats
+        output = []
+        self.svc.database.restore(backup=self.fbk, database=self.rfdb,
+                                  flags=SrvRestoreFlag.REPLACE, callback=fetchline,
+                                  stats='TDRW')
+        self.assertGreater(len(output), 0)
+        self.assertIn('gbak: time     delta  reads  writes \n', output)
+        # Skip data option
+        self.svc.database.restore(backup=self.fbk, database=self.rfdb,
+                                  flags=SrvRestoreFlag.REPLACE, skip_data='(sales|customer)')
+        self.svc.wait()
+        with connect(f"{FBTEST_HOST}:{self.rfdb}", user=FBTEST_USER, password=FBTEST_PASSWORD) as rcon:
+            rcon._logging_id_ = self.__class__.__name__
+            with rcon.cursor() as c:
+                c.execute('select * from sales')
+                self.assertListEqual(c.fetchall(), [])
+                c.execute('select * from country')
+                self.assertGreater(len(c.fetchall()), 0)
+    def test_local_backup(self):
+        self.svc.database.backup(database='employee', backup=self.fbk)
+        self.svc.wait()
+        with open(self.fbk, mode='rb') as f:
+            f.seek(68)  # Wee must skip after backup creation time (68) that will differ
+            bkp = f.read()
+        backup_stream = BytesIO()
+        self.svc.database.local_backup(database='employee', backup_stream=backup_stream)
+        backup_stream.seek(68)
+        lbkp = backup_stream.read()
+        stop = min(len(bkp), len(lbkp))
+        i = 0
+        while i < stop:
+            self.assertEqual(bkp[i], lbkp[i], f"bytes differ at {i} ({i+68})")
+            i += 1
+        #self.assertEqual(bkp, lbkp)
+        del bkp
+    def test_local_restore(self):
+        backup_stream = BytesIO()
+        self.svc.database.local_backup(database='employee', backup_stream=backup_stream)
+        backup_stream.seek(0)
+        self.svc.database.local_restore(backup_stream=backup_stream, database=self.rfdb,
+                                        flags=SrvRestoreFlag.REPLACE)
+        self.assertTrue(os.path.exists(self.rfdb))
+    def test_nbackup(self):
+        self.svc.database.nbackup(database='employee', backup=self.fbk)
+        self.assertTrue(os.path.exists(self.fbk))
+        self.svc.database.nbackup(database='employee', backup=self.fbk2, level=1,
+                                  direct=True, flags=SrvNBackupFlag.NO_TRIGGERS)
+        self.assertTrue(os.path.exists(self.fbk2))
+    def test_nrestore(self):
+        self.test_nbackup()
+        if os.path.exists(self.rfdb):
+            os.remove(self.rfdb)
+        self.svc.database.nrestore(backups=[self.fbk], database=self.rfdb)
+        self.assertTrue(os.path.exists(self.rfdb))
+        if os.path.exists(self.rfdb):
+            os.remove(self.rfdb)
+        self.svc.database.nrestore(backups=[self.fbk, self.fbk2], database=self.rfdb,
+                          direct=True, flags=SrvNBackupFlag.NO_TRIGGERS)
+        self.assertTrue(os.path.exists(self.rfdb))
     def test_set_default_cache_size(self):
-        with connect(host=FBTEST_HOST, database=self.rfdb,
-                     user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+        with connect(f"{FBTEST_HOST}:{self.rfdb}", user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+            con._logging_id_ = self.__class__.__name__
             self.assertNotEqual(con.info.page_cache_size, 100)
-        self.svc.set_default_cache_size(database=self.rfdb, size=100)
-        with connect(host=FBTEST_HOST, database=self.rfdb,
-                     user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+        self.svc.database.set_default_cache_size(database=self.rfdb, size=100)
+        with connect(f"{FBTEST_HOST}:{self.rfdb}", user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+            con._logging_id_ = self.__class__.__name__
             self.assertEqual(con.info.page_cache_size, 100)
-        self.svc.set_default_cache_size(database=self.rfdb, size=5000)
-        with connect(host=FBTEST_HOST, database=self.rfdb,
-                     user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+        self.svc.database.set_default_cache_size(database=self.rfdb, size=5000)
+        with connect(f"{FBTEST_HOST}:{self.rfdb}", user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+            con._logging_id_ = self.__class__.__name__
             self.assertEqual(con.info.page_cache_size, 5000)
     def test_set_sweep_interval(self):
-        with connect(host=FBTEST_HOST, database=self.rfdb,
-                     user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+        with connect(f"{FBTEST_HOST}:{self.rfdb}", user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+            con._logging_id_ = self.__class__.__name__
             self.assertNotEqual(con.info.sweep_interval, 10000)
-        self.svc.set_sweep_interval(database=self.rfdb, interval=10000)
-        with connect(host=FBTEST_HOST, database=self.rfdb,
-                     user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+        self.svc.database.set_sweep_interval(database=self.rfdb, interval=10000)
+        with connect(f"{FBTEST_HOST}:{self.rfdb}", user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+            con._logging_id_ = self.__class__.__name__
             self.assertEqual(con.info.sweep_interval, 10000)
     def test_shutdown_bring_online(self):
         #self.skipTest('Not implemented yet')
         # Shutdown database to single-user maintenance mode
-        self.svc.shutdown(database=self.rfdb,mode=ShutdownMode.SINGLE,
-                          method=ShutdownMethod.FORCED, timeout=0)
-        self.svc.get_statistics(database=self.rfdb, flags=SvcStatFlag.HDR_PAGES)
+        self.svc.database.shutdown(database=self.rfdb,mode=ShutdownMode.SINGLE,
+                                   method=ShutdownMethod.FORCED, timeout=0)
+        self.svc.database.get_statistics(database=self.rfdb, flags=SrvStatFlag.HDR_PAGES)
         self.assertIn('single-user maintenance', ''.join(self.svc.readlines()))
         # Enable multi-user maintenance
-        self.svc.bring_online(database=self.rfdb, mode=OnlineMode.MULTI)
-        self.svc.get_statistics(database=self.rfdb, flags=SvcStatFlag.HDR_PAGES)
+        self.svc.database.bring_online(database=self.rfdb, mode=OnlineMode.MULTI)
+        self.svc.database.get_statistics(database=self.rfdb, flags=SrvStatFlag.HDR_PAGES)
         self.assertIn('multi-user maintenance', ''.join(self.svc.readlines()))
         # Go to full shutdown mode, disabling new attachments during 5 seconds
-        self.svc.shutdown(database=self.rfdb,
-                          mode=ShutdownMode.FULL,
-                          method=ShutdownMethod.DENNY_ATTACHMENTS, timeout=5)
-        self.svc.get_statistics(database=self.rfdb, flags=SvcStatFlag.HDR_PAGES)
+        self.svc.database.shutdown(database=self.rfdb, mode=ShutdownMode.FULL,
+                                   method=ShutdownMethod.DENNY_ATTACHMENTS, timeout=5)
+        self.svc.database.get_statistics(database=self.rfdb, flags=SrvStatFlag.HDR_PAGES)
         self.assertIn('full shutdown', ''.join(self.svc.readlines()))
         # Enable single-user maintenance
-        self.svc.bring_online(database=self.rfdb, mode=OnlineMode.SINGLE)
-        self.svc.get_statistics(database=self.rfdb, flags=SvcStatFlag.HDR_PAGES)
+        self.svc.database.bring_online(database=self.rfdb, mode=OnlineMode.SINGLE)
+        self.svc.database.get_statistics(database=self.rfdb, flags=SrvStatFlag.HDR_PAGES)
         self.assertIn('single-user maintenance', ''.join(self.svc.readlines()))
         # Return to normal state
-        self.svc.bring_online(database=self.rfdb)
+        self.svc.database.bring_online(database=self.rfdb)
     def test_set_space_reservation(self):
-        with connect(host=FBTEST_HOST, database=self.rfdb,
-                     user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+        with connect(f"{FBTEST_HOST}:{self.rfdb}", user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+            con._logging_id_ = self.__class__.__name__
             self.assertEqual(con.info.space_reservation, DbSpaceReservation.RESERVE)
-        self.svc.set_space_reservation(database=self.rfdb, mode=DbSpaceReservation.USE_FULL)
-        with connect(host=FBTEST_HOST, database=self.rfdb,
-                     user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+        self.svc.database.set_space_reservation(database=self.rfdb, mode=DbSpaceReservation.USE_FULL)
+        with connect(f"{FBTEST_HOST}:{self.rfdb}", user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+            con._logging_id_ = self.__class__.__name__
             self.assertEqual(con.info.space_reservation, DbSpaceReservation.USE_FULL)
     def test_set_write_mode(self):
-        with connect(host=FBTEST_HOST, database=self.rfdb,
-                     user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+        with connect(f"{FBTEST_HOST}:{self.rfdb}", user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+            con._logging_id_ = self.__class__.__name__
             self.assertEqual(con.info.write_mode, DbWriteMode.SYNC)
-        self.svc.set_write_mode(database=self.rfdb, mode=DbWriteMode.ASYNC)
-        with connect(host=FBTEST_HOST, database=self.rfdb,
-                     user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+        self.svc.database.set_write_mode(database=self.rfdb, mode=DbWriteMode.ASYNC)
+        with connect(f"{FBTEST_HOST}:{self.rfdb}", user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+            con._logging_id_ = self.__class__.__name__
             self.assertEqual(con.info.write_mode, DbWriteMode.ASYNC)
     def test_set_access_mode(self):
-        with connect(host=FBTEST_HOST, database=self.rfdb,
-                     user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+        with connect(f"{FBTEST_HOST}:{self.rfdb}", user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+            con._logging_id_ = self.__class__.__name__
             self.assertEqual(con.info.access_mode, DbAccessMode.READ_WRITE)
-        self.svc.set_access_mode(database=self.rfdb, mode=DbAccessMode.READ_ONLY)
-        with connect(host=FBTEST_HOST, database=self.rfdb,
-                     user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+        self.svc.database.set_access_mode(database=self.rfdb, mode=DbAccessMode.READ_ONLY)
+        with connect(f"{FBTEST_HOST}:{self.rfdb}", user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+            con._logging_id_ = self.__class__.__name__
             self.assertEqual(con.info.access_mode, DbAccessMode.READ_ONLY)
     def test_set_sql_dialect(self):
-        with connect(host=FBTEST_HOST, database=self.rfdb,
-                            user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
-            self.assertEqual(con.info.database_sql_dialect, 3)
-        self.svc.set_sql_dialect(database=self.rfdb, dialect=1)
-        with connect(host=FBTEST_HOST, database=self.rfdb,
-                            user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
-            self.assertEqual(con.info.database_sql_dialect, 1)
+        with connect(f"{FBTEST_HOST}:{self.rfdb}", user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+            con._logging_id_ = self.__class__.__name__
+            self.assertEqual(con.info.sql_dialect, 3)
+        self.svc.database.set_sql_dialect(database=self.rfdb, dialect=1)
+        with connect(f"{FBTEST_HOST}:{self.rfdb}", user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+            con._logging_id_ = self.__class__.__name__
+            self.assertEqual(con.info.sql_dialect, 1)
     def test_activate_shadow(self):
-        self.svc.activate_shadow(database=self.rfdb)
+        self.svc.database.activate_shadow(database=self.rfdb)
     def test_no_linger(self):
-        self.svc.no_linger(database=self.rfdb)
+        self.svc.database.no_linger(database=self.rfdb)
     def test_sweep(self):
-        self.svc.sweep(database=self.rfdb)
+        self.svc.database.sweep(database=self.rfdb)
     def test_repair(self):
-        self.svc.repair(database=self.rfdb, flags=SvcRepairFlag.CORRUPTION_CHECK)
-        self.svc.repair(database=self.rfdb, flags=SvcRepairFlag.REPAIR)
+        self.svc.database.repair(database=self.rfdb, flags=SrvRepairFlag.CORRUPTION_CHECK)
+        self.svc.database.repair(database=self.rfdb, flags=SrvRepairFlag.REPAIR)
     def test_validate(self):
         def fetchline(line):
             output.append(line)
 
         output = []
-        self.svc.validate(database=self.dbfile)
+        self.svc.database.validate(database=self.dbfile)
         # fetch materialized
         report = self.svc.readlines()
         self.assertFalse(self.svc.is_running())
@@ -1835,56 +1946,22 @@ class TestServerServices(DriverTestBase):
         self.assertIn('Validation started', '/n'.join(report))
         self.assertIn('Validation finished', '/n'.join(report))
         # iterate over result
-        self.svc.validate(database=self.dbfile)
+        self.svc.database.validate(database=self.dbfile)
         for line in self.svc:
             self.assertIsNotNone(line)
             self.assertIsInstance(line, str)
         # callback
         output = []
-        self.svc.validate(database=self.dbfile, callback=fetchline)
+        self.svc.database.validate(database=self.dbfile, callback=fetchline)
         self.assertGreater(len(output), 0)
         # Parameters
-        self.svc.validate(database=self.dbfile, include_table='COUNTRY|SALES',
+        self.svc.database.validate(database=self.dbfile, include_table='COUNTRY|SALES',
                           include_index='SALESTATX', lock_timeout=-1)
         report = '/n'.join(self.svc.readlines())
         self.assertNotIn('(JOB)', report)
         self.assertIn('(COUNTRY)', report)
         self.assertIn('(SALES)', report)
         self.assertIn('(SALESTATX)', report)
-    def test_get_users(self):
-        users = self.svc.get_users()
-        self.assertIsInstance(users, type(list()))
-        self.assertIsInstance(users[0], driver.core.UserInfo)
-        self.assertEqual(users[0].user_name, 'SYSDBA')
-    def test_manage_user(self):
-        USER_NAME = 'DRIVER_TEST'
-        try:
-            self.svc.delete_user(USER_NAME)
-        except DatabaseError as e:
-            if e.sqlstate == '28000':
-                pass
-            else:
-                raise
-        # Add user
-        self.svc.add_user(user_name=USER_NAME, password='DRIVER_TEST',
-                          first_name='Firebird', middle_name='Driver', last_name='Test')
-        self.assertTrue(self.svc.user_exists(USER_NAME))
-        users = [u for u in self.svc.get_users() if u.user_name == USER_NAME]
-        self.assertTrue(users)
-        self.assertEqual(len(users), 1)
-        self.assertEqual(users[0].first_name, 'Firebird')
-        self.assertEqual(users[0].middle_name, 'Driver')
-        self.assertEqual(users[0].last_name, 'Test')
-        # Modify user
-        self.svc.modify_user(USER_NAME, first_name='XFirebird', middle_name='XDriver', last_name='XTest')
-        user = self.svc.get_user(USER_NAME)
-        self.assertEqual(user.user_name, USER_NAME)
-        self.assertEqual(user.first_name, 'XFirebird')
-        self.assertEqual(user.middle_name, 'XDriver')
-        self.assertEqual(user.last_name, 'XTest')
-        # Delete user
-        self.svc.delete_user(USER_NAME)
-        self.assertFalse(self.svc.user_exists(USER_NAME))
 
 class TestEvents(DriverTestBase):
     def setUp(self):
@@ -1892,8 +1969,7 @@ class TestEvents(DriverTestBase):
         self.dbfile = os.path.join(self.dbpath, 'fbevents.fdb')
         if os.path.exists(self.dbfile):
             os.remove(self.dbfile)
-        self.con = create_database(host=FBTEST_HOST, database=self.dbfile,
-                                   user=FBTEST_USER, password=FBTEST_PASSWORD)
+        self.con = create_database(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD)
         with self.con.cursor() as cur:
             cur.execute("CREATE TABLE T (PK Integer, C1 Integer)")
             cur.execute("""CREATE TRIGGER EVENTS_AU FOR T ACTIVE
@@ -1999,8 +2075,8 @@ class TestStreamBLOBs(DriverTestBase):
     def setUp(self):
         super().setUp()
         self.dbfile = os.path.join(self.dbpath, self.FBTEST_DB)
-        self.con = connect(host=FBTEST_HOST, database=self.dbfile,
-                           user=FBTEST_USER, password=FBTEST_PASSWORD)
+        self.con = connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD)
+        self.con._logging_id_ = self.__class__.__name__
         #self.con.execute_immediate("recreate table t (c1 integer)")
         #self.con.commit()
         #self.con.execute_immediate("RECREATE TABLE T2 (C1 Smallint,C2 Integer,C3 Bigint,C4 Char(5),C5 Varchar(10),C6 Date,C7 Time,C8 Timestamp,C9 Blob sub_type 1,C10 Numeric(18,2),C11 Decimal(18,2),C12 Float,C13 Double precision,C14 Numeric(8,4),C15 Decimal(8,4))")
@@ -2115,9 +2191,8 @@ class TestCharsetConversion(DriverTestBase):
     def setUp(self):
         super().setUp()
         self.dbfile = os.path.join(self.dbpath, self.FBTEST_DB)
-        self.con = connect(host=FBTEST_HOST, database=self.dbfile,
-                           user=FBTEST_USER, password=FBTEST_PASSWORD,
-                           charset='utf8')
+        self.con = connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD, charset='utf8')
+        self.con._logging_id_ = self.__class__.__name__
         #self.con.execute_immediate("recreate table t (c1 integer)")
         #self.con.commit()
         #self.con.execute_immediate("RECREATE TABLE T2 (C1 Smallint,C2 Integer,C3 Bigint,C4 Char(5),C5 Varchar(10),C6 Date,C7 Time,C8 Timestamp,C9 Blob sub_type 1,C10 Numeric(18,2),C11 Decimal(18,2),C12 Float,C13 Double precision,C14 Numeric(8,4),C15 Decimal(8,4))")
@@ -2141,24 +2216,25 @@ class TestCharsetConversion(DriverTestBase):
         s5 = 'ěščřž'
         s30 = 'ěščřžýáíéúůďťňóĚŠČŘŽÝÁÍÉÚŮĎŤŇÓ'
 
-        con1250 = connect(host=FBTEST_HOST, database=self.dbfile, user=FBTEST_USER,
-                          password=FBTEST_PASSWORD, charset='win1250')
-        with self.con.cursor() as c_utf8, con1250.cursor() as c_win1250:
-            # Insert unicode data
-            c_utf8.execute("insert into T4 (C1, C_WIN1250, V_WIN1250, C_UTF8, V_UTF8)"
-                           "values (?,?,?,?,?)",
-                           (1, s5, s30, s5, s30))
-            self.con.commit()
+        with connect(self.dbfile, user=FBTEST_USER,
+                     password=FBTEST_PASSWORD, charset='win1250') as con1250:
+            con1250._logging_id_ = self.__class__.__name__
+            with self.con.cursor() as c_utf8, con1250.cursor() as c_win1250:
+                # Insert unicode data
+                c_utf8.execute("insert into T4 (C1, C_WIN1250, V_WIN1250, C_UTF8, V_UTF8)"
+                               "values (?,?,?,?,?)",
+                               (1, s5, s30, s5, s30))
+                self.con.commit()
 
-            # Should return the same unicode content when read from win1250 or utf8 connection
-            c_win1250.execute("select C1, C_WIN1250, V_WIN1250,"
-                              "C_UTF8, V_UTF8 from T4 where C1 = 1")
-            row = c_win1250.fetchone()
-            self.assertTupleEqual(row, (1, s5, s30, s5, s30))
-            c_utf8.execute("select C1, C_WIN1250, V_WIN1250,"
-                           "C_UTF8, V_UTF8 from T4 where C1 = 1")
-            row = c_utf8.fetchone()
-            self.assertTupleEqual(row, (1, s5, s30, s5, s30))
+                # Should return the same unicode content when read from win1250 or utf8 connection
+                c_win1250.execute("select C1, C_WIN1250, V_WIN1250,"
+                                  "C_UTF8, V_UTF8 from T4 where C1 = 1")
+                row = c_win1250.fetchone()
+                self.assertTupleEqual(row, (1, s5, s30, s5, s30))
+                c_utf8.execute("select C1, C_WIN1250, V_WIN1250,"
+                               "C_UTF8, V_UTF8 from T4 where C1 = 1")
+                row = c_utf8.fetchone()
+                self.assertTupleEqual(row, (1, s5, s30, s5, s30))
     def testCharVarchar(self):
         s = 'Introdução'
         self.assertEqual(len(s), 10)
@@ -2203,8 +2279,7 @@ class TestHooks(DriverTestBase):
     def setUp(self):
         super().setUp()
         self.dbfile = os.path.join(self.dbpath, self.FBTEST_DB)
-        self.hooks = HookManager()
-        self.hooks.remove_all_hooks()
+        hook_manager.remove_all_hooks()
         self._db = None
         self._svc = None
         self._hook_con = None
@@ -2233,37 +2308,42 @@ class TestHooks(DriverTestBase):
     def __hook_db_attach_request_b(self, event, dsn, dpb):
         return self._hook_con
     def test_hook_db_attached(self):
-        self.hooks.add_hook(ConnectionHook.ATTACHED, driver.Connection, self.__hook_db_attached)
-        with connect(dsn=self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+        add_hook(ConnectionHook.ATTACHED, driver.Connection, self.__hook_db_attached)
+        with connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+            con._logging_id_ = self.__class__.__name__
             self.assertIs(con, self._db)
     def test_hook_db_attach_request(self):
-        self._hook_con = connect(dsn=self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD)
-        self.hooks.add_hook(ConnectionHook.ATTACH_REQUEST, driver.Connection, self.__hook_db_attach_request_a)
-        self.hooks.add_hook(ConnectionHook.ATTACH_REQUEST, driver.Connection, self.__hook_db_attach_request_b)
-        with connect(dsn=self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+        self._hook_con = connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD)
+        self._hook_con._logging_id_ = self.__class__.__name__
+        add_hook(ConnectionHook.ATTACH_REQUEST, driver.Connection, self.__hook_db_attach_request_a)
+        add_hook(ConnectionHook.ATTACH_REQUEST, driver.Connection, self.__hook_db_attach_request_b)
+        with connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+            con._logging_id_ = self.__class__.__name__
             self.assertIs(con, self._hook_con)
         self._hook_con.close()
     def test_hook_db_closed(self):
-        with connect(dsn=self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
-            self.hooks.add_hook(ConnectionHook.CLOSED, con, self.__hook_db_closed)
+        with connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+            con._logging_id_ = self.__class__.__name__
+            add_hook(ConnectionHook.CLOSED, con, self.__hook_db_closed)
         self.assertIs(con, self._db)
     def test_hook_db_detach_request(self):
         # reject detach
-        con = connect(dsn=self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD)
-        self.hooks.add_hook(ConnectionHook.DETACH_REQUEST, con, self.__hook_db_detach_request_a)
+        con = connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD)
+        con._logging_id_ = self.__class__.__name__
+        add_hook(ConnectionHook.DETACH_REQUEST, con, self.__hook_db_detach_request_a)
         con.close()
         self.assertIs(con, self._db)
         self.assertFalse(con.is_closed())
-        self.hooks.remove_hook(ConnectionHook.DETACH_REQUEST, con, self.__hook_db_detach_request_a)
+        hook_manager.remove_hook(ConnectionHook.DETACH_REQUEST, con, self.__hook_db_detach_request_a)
         # accept close
         self._db = None
-        self.hooks.add_hook(ConnectionHook.DETACH_REQUEST, con, self.__hook_db_detach_request_b)
+        add_hook(ConnectionHook.DETACH_REQUEST, con, self.__hook_db_detach_request_b)
         con.close()
         self.assertIs(con, self._db)
         self.assertTrue(con.is_closed())
     def test_hook_service_attached(self):
-        self.hooks.add_hook(ServerHook.ATTACHED, driver.Server, self.__hook_service_attached)
-        with connect_server(host=FBTEST_HOST, user=FBTEST_USER, password=FBTEST_PASSWORD) as svc:
+        add_hook(ServerHook.ATTACHED, driver.Server, self.__hook_service_attached)
+        with connect_server(FBTEST_HOST, user=FBTEST_USER, password=FBTEST_PASSWORD) as svc:
             self.assertIs(svc, self._svc)
 
 

@@ -32,13 +32,12 @@
 #                 ______________________________________
 
 """firebird-driver - Main driver code (connection, transaction, cursor etc.)
-
-
 """
 
 from __future__ import annotations
 from typing import Any, Type, Union, Dict, Set, List, Tuple, Sequence, Mapping, Optional, \
      BinaryIO, Callable
+import sys
 import os
 import weakref
 import itertools
@@ -50,10 +49,16 @@ from abc import ABC, abstractmethod
 from warnings import warn
 from queue import PriorityQueue
 from ctypes import memset, memmove, create_string_buffer, byref, string_at, addressof, pointer
-from firebird.base.logging import traced, LoggingIdMixin, UNDEFINED
+from firebird.base.types import Sentinel, UNLIMITED, ByteOrder
+from firebird.base.logging import LoggingIdMixin, UNDEFINED
+from firebird.base.buffer import MemoryBuffer, BufferFactory, BytesBufferFactory, \
+     CTypesBufferFactory, safe_ord
 from . import fbapi as a
 from .types import *
-from .hooks import APIHook, ConnectionHook, ServerHook, HookManager
+from .interfaces import iAttachment, iTransaction, iStatement, iMessageMetadata, iBlob, \
+     iResultSet, iDtc, iService, iCryptKeyCallbackImpl
+from .hooks import APIHook, ConnectionHook, ServerHook, register_class, get_callbacks, add_hook
+from .config import driver_config
 
 SHRT_MIN = -32768
 SHRT_MAX = 32767
@@ -63,15 +68,9 @@ INT_MAX = 2147483647
 UINT_MAX = 4294967295
 LONG_MIN = -9223372036854775808
 LONG_MAX = 9223372036854775807
-
-_tenTo = [10 ** x for x in range(20)]
-_i2name = {DbInfoCode.READ_SEQ_COUNT: 'sequential', DbInfoCode.READ_IDX_COUNT: 'indexed',
-            DbInfoCode.INSERT_COUNT: 'inserts', DbInfoCode.UPDATE_COUNT: 'updates',
-            DbInfoCode.DELETE_COUNT: 'deletes', DbInfoCode.BACKOUT_COUNT: 'backouts',
-            DbInfoCode.PURGE_COUNT: 'purges', DbInfoCode.EXPUNGE_COUNT: 'expunges'}
-
-_bpb_stream = bytes([1, BPBItem.TYPE, 1, BlobType.STREAM])
 MAX_BLOB_SEGMENT_SIZE = 65535
+
+FS_ENCODING = sys.getfilesystemencoding()
 
 #: Python dictionary that maps Firebird character set names (key) to Python character sets (value).
 CHARSET_MAP = {None: a.getpreferredencoding(), 'NONE': a.getpreferredencoding(),
@@ -95,12 +94,30 @@ CHARSET_MAP = {None: a.getpreferredencoding(), 'NONE': a.getpreferredencoding(),
                'WIN1258': 'cp1258',
                }
 
+# Internal
+_master = None
+_util = None
+_thns = threading.local()
+
+_tenTo = [10 ** x for x in range(20)]
+_i2name = {DbInfoCode.READ_SEQ_COUNT: 'sequential', DbInfoCode.READ_IDX_COUNT: 'indexed',
+            DbInfoCode.INSERT_COUNT: 'inserts', DbInfoCode.UPDATE_COUNT: 'updates',
+            DbInfoCode.DELETE_COUNT: 'deletes', DbInfoCode.BACKOUT_COUNT: 'backouts',
+            DbInfoCode.PURGE_COUNT: 'purges', DbInfoCode.EXPUNGE_COUNT: 'expunges'}
+
+_bpb_stream = bytes([1, BPBItem.TYPE, 1, BlobType.STREAM])
+
+# Info structural codes
+isc_info_end = 1
+isc_info_truncated = 2
+isc_info_error = 3
+isc_info_data_not_ready = 4
 
 def __api_loaded(api: a.FirebirdAPI) -> None:
     setattr(sys.modules[__name__], '_master', api.fb_get_master_interface())
     setattr(sys.modules[__name__], '_util', _master.get_util_interface())
 
-HookManager().add_hook(APIHook.LOADED, a.FirebirdAPI, __api_loaded)
+add_hook(APIHook.LOADED, a.FirebirdAPI, __api_loaded)
 
 def _create_blob_buffer(size: int=MAX_BLOB_SEGMENT_SIZE) -> Any:
     if size < MAX_BLOB_SEGMENT_SIZE:
@@ -194,7 +211,7 @@ which has range [%s,%s].""" % (str(value),
                             scale,
                             _get_internal_data_type_name(datatype),
                             str(vmin), str(vmax))
-        raise InterfaceError(msg)
+        raise ValueError(msg)
 
 def _is_str_param(value: Any, datatype: SQLDataType) -> bool:
     return ((isinstance(value, str) and datatype != SQLDataType.BLOB) or
@@ -250,6 +267,366 @@ Arguments:
 _OP_DIE = object()
 _OP_RECORD_AND_REREGISTER = object()
 
+# Managers for Parameter buffers
+class TPB:
+    "Transaction Parameter Buffer"
+    def __init__(self, *, access_mode: TraAccessMode = TraAccessMode.WRITE,
+                 isolation: Isolation = Isolation.SNAPSHOT,
+                 lock_timeout: int = -1, no_auto_undo: bool = False,
+                 auto_commit: bool = False, ignore_limbo: bool = False):
+        self.access_mode: TraAccessMode = access_mode
+        self.isolation: Isolation = isolation
+        self.lock_timeout: int = lock_timeout
+        self.no_auto_undo: bool = no_auto_undo
+        self.auto_commit: bool = auto_commit
+        self.ignore_limbo: bool = ignore_limbo
+        self._table_reservation: List[Tuple[str, TableShareMode, TableAccessMode]] = []
+    def clear(self) -> None:
+        "Clear all information."
+        self.access_mode = TraAccessMode.WRITE
+        self.isolation = Isolation.SNAPSHOT
+        self.lock_timeout = -1
+        self.no_auto_undo = False
+        self.auto_commit = False
+        self.ignore_limbo = False
+        self._table_reservation = []
+    def parse_buffer(self, buffer: bytes) -> None:
+        "Load information from TPB."
+        self.clear()
+        with a.get_api().util.get_xpb_builder(XpbKind.TPB, buffer) as tpb:
+            while not tpb.is_eof():
+                tag = tpb.get_tag()
+                if tag in TraAccessMode._value2member_map_:
+                    self.access_mode = TraAccessMode(tag)
+                elif tag in TraIsolation._value2member_map_:
+                    isolation = TraIsolation(tag)
+                    if isolation != TraIsolation.READ_COMMITTED:
+                        self.isolation = Isolation(isolation)
+                elif tag in TraReadCommitted._value2member_map_:
+                    isolation = TraReadCommitted(tag)
+                    if isolation == TraReadCommitted.RECORD_VERSION:
+                        self.isolation = Isolation.READ_COMMITTED_RECORD_VERSION
+                    else:
+                        self.isolation = Isolation.READ_COMMITTED_NO_RECORD_VERSION
+                elif tag in TraLockResolution._value2member_map_:
+                    self.lock_timeout = -1 if TraLockResolution(tag).WAIT else 0
+                elif tag == TPBItem.AUTOCOMMIT:
+                    self.auto_commit = True
+                elif tag == TPBItem.NO_AUTO_UNDO:
+                    self.no_auto_undo = True
+                elif tag == TPBItem.IGNORE_LIMBO:
+                    self.ignore_limbo = True
+                elif tag == TPBItem.LOCK_TIMEOUT:
+                    self.lock_timeout = tpb.get_int()
+                elif tag in TableAccessMode._value2member_map_:
+                    tbl_access = TableAccessMode(tag)
+                    tbl_name = tpb.get_string()
+                    tpb.move_next()
+                    if tpb.is_eof():
+                        raise ValueError(f"Missing share mode value in table {tbl_name} reservation")
+                    if (val := tpb.get_tag()) not in TableShareMode._value2member_map_:
+                        raise ValueError(f"Missing share mode value in table {tbl_name} reservation")
+                    tbl_share = TableShareMode(val)
+                    self.reserve_table(tbl_name, tbl_share, tbl_access)
+                tpb.move_next()
+    def get_buffer(self) -> bytes:
+        "Create TPB from stored information."
+        with a.get_api().util.get_xpb_builder(XpbKind.TPB) as tpb:
+            tpb.insert_tag(self.access_mode)
+            isolation = (Isolation.READ_COMMITTED_RECORD_VERSION
+                         if self.isolation == Isolation.READ_COMMITTED
+                         else self.isolation)
+            if isolation in [Isolation.SNAPSHOT, Isolation.SERIALIZABLE]:
+                tpb.insert_tag(isolation)
+            else:
+                tpb.insert_tag(TraIsolation.READ_COMMITTED)
+                tpb.insert_tag(TraReadCommitted.RECORD_VERSION
+                               if isolation == Isolation.READ_COMMITTED_RECORD_VERSION
+                               else TraReadCommitted.NO_RECORD_VERSION)
+            tpb.insert_tag(TraLockResolution.NO_WAIT if self.lock_timeout == 0 else TraLockResolution.WAIT)
+            if self.lock_timeout > 0:
+                tpb.insert_int(TPBItem.LOCK_TIMEOUT, self.lock_timeout)
+            if self.auto_commit:
+                tpb.insert_tag(TPBItem.AUTOCOMMIT)
+            if self.no_auto_undo:
+                tpb.insert_tag(TPBItem.NO_AUTO_UNDO)
+            if self.ignore_limbo:
+                tpb.insert_tag(TPBItem.IGNORE_LIMBO)
+            for table in self._table_reservation:
+                # Access mode + table name
+                tpb.insert_string(table[2], table[0])
+                tpb.insert_tag(table[1])  # Share mode
+            result = tpb.get_buffer()
+        return result
+    def reserve_table(self, name: str, share_mode: TableShareMode, access_mode: TableAccessMode) -> None:
+        "Set information about table reservation"
+        self._table_reservation.append((name, share_mode, access_mode))
+
+class DPB:
+    "Database Parameter Buffer"
+    def __init__(self, *, user: str = None, password: str = None, role: str = None,
+                 trusted_auth: bool = False, sql_dialect: int = 3, timeout: int = None,
+                 charset: str = 'UTF8', cache_size: int = None, no_gc: bool = False,
+                 no_db_triggers: bool = False, no_linger: bool = False,
+                 utf8filename: bool = False, dbkey_scope: DBKeyScope = None,
+                 dummy_packet_interval: int = None, overwrite: bool = False,
+                 db_cache_size: int = None, forced_writes: bool = None,
+                 reserve_space: bool = None, page_size: int = None, read_only: bool = False,
+                 sweep_interval: int = None, db_sql_dialect: int = None, db_charset: str = None,
+                 config: str = None, auth_plugin_list: str = None):
+        # Available options:
+        # AuthClient, WireCryptPlugin, Providers, ConnectionTimeout, WireCrypt,
+        # WireConpression, DummyPacketInterval, RemoteServiceName, RemoteServicePort,
+        # RemoteAuxPort, TcpNoNagle, IpcName, RemotePipeName
+        self.config: Optional[str] = config
+        self.auth_plugin_list: str = auth_plugin_list
+        # Connect
+        self.trusted_auth: bool = trusted_auth
+        self.user: str = user
+        self.password: str = password
+        self.role: str = role
+        self.sql_dialect: int = sql_dialect
+        self.charset: str = charset
+        self.timeout: Optional[int] = timeout
+        self.dummy_packet_interval: Optional[int] = dummy_packet_interval
+        self.cache_size: int = cache_size
+        self.no_gc: bool = no_gc
+        self.no_db_triggers: bool = no_db_triggers
+        self.no_linger: bool = no_linger
+        self.utf8filename: bool = utf8filename
+        self.dbkey_scope: Optional[DBKeyScope] = dbkey_scope
+        # For db create
+        self.page_size: Optional[int] = page_size
+        self.overwrite: bool = overwrite
+        self.db_buffers = None
+        self.db_cache_size: Optional[int] = db_cache_size
+        self.forced_writes: Optional[bool] = forced_writes
+        self.reserve_space: Optional[bool] = reserve_space
+        self.read_only: bool = read_only
+        self.sweep_interval: Optional[int] = sweep_interval
+        self.db_sql_dialect: Optional[int] = db_sql_dialect
+        self.db_charset: Optional[str] = db_charset
+    def clear(self) -> None:
+        "Clear all information."
+        self.config = None
+        # Connect
+        self.trusted_auth = False
+        self.user = None
+        self.password = None
+        self.role = None
+        self.sql_dialect = 3
+        self.charset = 'UTF8'
+        self.timeout = None
+        self.dummy_packet_interval = None
+        self.cache_size = None
+        self.no_gc = False
+        self.no_db_triggers = False
+        self.no_linger = False
+        self.utf8filename = False
+        self.dbkey_scope = None
+        # For db create
+        self.page_size = None
+        self.overwrite = False
+        self.db_buffers = None
+        self.forced_writes = None
+        self.reserve_space = None
+        self.page_size = None
+        self.read_only = False
+        self.sweep_interval = None
+        self.db_sql_dialect = None
+        self.db_charset = None
+    def parse_buffer(self, buffer: bytes) -> None:
+        "Load information from DPB."
+        self.clear()
+        with a.get_api().util.get_xpb_builder(XpbKind.DPB, buffer) as dpb:
+            while not dpb.is_eof():
+                tag = dpb.get_tag()
+                if tag == DPBItem.CONFIG:
+                    self.config = dpb.get_string()
+                elif tag == DPBItem.AUTH_PLUGIN_LIST:
+                    self.auth_plugin_list = dpb.get_string()
+                elif tag == DPBItem.TRUSTED_AUTH:
+                    self.trusted_auth = True
+                elif tag == DPBItem.USER_NAME:
+                    self.user = dpb.get_string()
+                elif tag == DPBItem.PASSWORD:
+                    self.password = dpb.get_string()
+                elif tag == DPBItem.CONNECT_TIMEOUT:
+                    self.timeout = dpb.get_int()
+                elif tag == DPBItem.DUMMY_PACKET_INTERVAL:
+                    self.dummy_packet_interval = dpb.get_int()
+                elif tag == DPBItem.SQL_ROLE_NAME:
+                    self.role = dpb.get_string()
+                elif tag == DPBItem.SQL_DIALECT:
+                    self.sql_dialect = dpb.get_int()
+                elif tag == DPBItem.LC_CTYPE:
+                    self.charset = dpb.get_string()
+                elif tag == DPBItem.NUM_BUFFERS:
+                    self.cache_size = dpb.get_int()
+                elif tag == DPBItem.NO_GARBAGE_COLLECT:
+                    self.no_gc = bool(dpb.get_int())
+                elif tag == DPBItem.UTF8_FILENAME:
+                    self.utf8filename = bool(dpb.get_int())
+                elif tag == DPBItem.NO_DB_TRIGGERS:
+                    self.no_db_triggers = bool(dpb.get_int())
+                elif tag == DPBItem.NOLINGER:
+                    self.no_linger = bool(dpb.get_int())
+                elif tag == DPBItem.DBKEY_SCOPE:
+                    self.dbkey_scope = DBKeyScope(dpb.get_int())
+                elif tag == DPBItem.PAGE_SIZE:
+                    self.page_size = dpb.get_int()
+                elif tag == DPBItem.OVERWRITE:
+                    self.overwrite = bool(dpb.get_int())
+                elif tag == DPBItem.SET_PAGE_BUFFERS:
+                    self.db_cache_size = dpb.get_int()
+                elif tag == DPBItem.FORCE_WRITE:
+                    self.forced_writes = bool(dpb.get_int())
+                elif tag == DPBItem.NO_RESERVE:
+                    self.reserve_space = not bool(dpb.get_int())
+                elif tag == DPBItem.SET_DB_READONLY:
+                    self.read_only = bool(dpb.get_int())
+                elif tag == DPBItem.SWEEP_INTERVAL:
+                    self.sweep_interval = dpb.get_int()
+                elif tag == DPBItem.SET_DB_SQL_DIALECT:
+                    self.db_sql_dialect = dpb.get_int()
+                elif tag == DPBItem.SET_DB_CHARSET:
+                    self.db_charset = dpb.get_string()
+    def get_buffer(self, *, for_create: bool = False) -> bytes:
+        "Create DPB from stored information."
+        with a.get_api().util.get_xpb_builder(XpbKind.DPB) as dpb:
+            if self.config is not None:
+                dpb.insert_string(DPBItem.CONFIG, self.config)
+            if self.trusted_auth:
+                dpb.insert_tag(DPBItem.TRUSTED_AUTH)
+            else:
+                if self.user:
+                    dpb.insert_string(DPBItem.USER_NAME, self.user)
+                if self.password:
+                    dpb.insert_string(DPBItem.PASSWORD, self.password)
+            if self.auth_plugin_list is not None:
+                dpb.insert_string(DPBItem.AUTH_PLUGIN_LIST, self.auth_plugin_list)
+            if self.timeout is not None:
+                dpb.insert_int(DPBItem.CONNECT_TIMEOUT, self.timeout)
+            if self.dummy_packet_interval is not None:
+                dpb.insert_int(DPBItem.DUMMY_PACKET_INTERVAL, self.dummy_packet_interval)
+            if self.role:
+                dpb.insert_string(DPBItem.SQL_ROLE_NAME, self.role)
+            if self.sql_dialect:
+                dpb.insert_int(DPBItem.SQL_DIALECT, self.sql_dialect)
+            if self.charset:
+                dpb.insert_string(DPBItem.LC_CTYPE, self.charset)
+                if for_create:
+                    dpb.insert_string(DPBItem.SET_DB_CHARSET, self.charset)
+            if self.cache_size is not None:
+                dpb.insert_int(DPBItem.NUM_BUFFERS, self.cache_size)
+            if self.no_gc:
+                dpb.insert_int(DPBItem.NO_GARBAGE_COLLECT, 1)
+            if self.utf8filename:
+                dpb.insert_int(DPBItem.UTF8_FILENAME, 1)
+            if self.no_db_triggers:
+                dpb.insert_int(DPBItem.NO_DB_TRIGGERS, 1)
+            if self.no_linger:
+                dpb.insert_int(DPBItem.NOLINGER, 1)
+            if self.dbkey_scope is not None:
+                dpb.insert_int(DPBItem.DBKEY_SCOPE, self.dbkey_scope)
+            if for_create:
+                if self.page_size is not None:
+                    dpb.insert_int(DPBItem.PAGE_SIZE, self.page_size)
+                if self.overwrite:
+                    dpb.insert_int(DPBItem.OVERWRITE, 1)
+                if self.db_cache_size is not None:
+                    dpb.insert_int(DPBItem.SET_PAGE_BUFFERS, self.db_cache_size)
+                if self.forced_writes is not None:
+                    dpb.insert_int(DPBItem.FORCE_WRITE, int(self.forced_writes))
+                if self.reserve_space is not None:
+                    dpb.insert_int(DPBItem.NO_RESERVE, int(not self.reserve_space))
+                if self.read_only:
+                    dpb.insert_int(DPBItem.SET_DB_READONLY, 1)
+                if self.sweep_interval is not None:
+                    dpb.insert_int(DPBItem.SWEEP_INTERVAL, self.sweep_interval)
+                if self.db_sql_dialect is not None:
+                    dpb.insert_int(DPBItem.SET_DB_SQL_DIALECT, self.db_sql_dialect)
+                if self.db_charset is not None:
+                    dpb.insert_string(DPBItem.SET_DB_CHARSET, self.db_charset)
+            #
+            result = dpb.get_buffer()
+        return result
+
+class SPB_ATTACH:
+    "Service Parameter Buffer"
+    def __init__(self, *, user: str = None, password: str = None, trusted_auth: bool = False,
+                 config: str = None, auth_plugin_list: str = None):
+        self.user: str = user
+        self.password: str = password
+        self.trusted_auth: bool = trusted_auth
+        self.config: str = config
+        self.auth_plugin_list: str = auth_plugin_list
+    def clear(self) -> None:
+        "Clear all information."
+        self.user = None
+        self.password = None
+        self.trusted_auth = False
+        self.config = None
+    def parse_buffer(self, buffer: bytes) -> None:
+        "Load information from SPB_ATTACH."
+        self.clear()
+        with a.get_api().util.get_xpb_builder(XpbKind.SPB_ATTACH, buffer) as spb:
+            while not spb.is_eof():
+                tag = spb.get_tag()
+                if tag == SPBItem.CONFIG:
+                    self.config = spb.get_string()
+                elif tag == SPBItem.AUTH_PLUGIN_LIST:
+                    self.auth_plugin_list = spb.get_string()
+                elif tag == SPBItem.TRUSTED_AUTH:
+                    self.trusted_auth = True
+                elif tag == SPBItem.USER_NAME:
+                    self.user = spb.get_string()
+                elif tag == SPBItem.PASSWORD:
+                    self.password = spb.get_string()
+    def get_buffer(self) -> bytes:
+        "Create SPB_ATTACH from stored information."
+        with a.get_api().util.get_xpb_builder(XpbKind.SPB_ATTACH) as spb:
+            if self.config is not None:
+                spb.insert_string(SPBItem.CONFIG, self.config)
+            if self.trusted_auth:
+                spb.insert_tag(SPBItem.TRUSTED_AUTH)
+            else:
+                if self.user is not None:
+                    spb.insert_string(SPBItem.USER_NAME, self.user)
+                if self.password is not None:
+                    spb.insert_string(SPBItem.PASSWORD, self.password)
+            if self.auth_plugin_list is not None:
+                spb.insert_string(SPBItem.AUTH_PLUGIN_LIST, self.auth_plugin_list)
+            result = spb.get_buffer()
+        return result
+
+
+class Buffer(MemoryBuffer):
+    "MemoryBuffer with extensions"
+    def __init__(self, init: Union[int, bytes], size: int = None, *,
+                 factory: Type[BufferFactory]=BytesBufferFactory,
+                 max_size: Union[int, Sentinel]=UNLIMITED, byteorder: ByteOrder=ByteOrder.LITTLE):
+        super().__init__(init, size, factory=factory, eof_marker=isc_info_end,
+                         max_size=max_size, byteorder=byteorder)
+    def seek_last_data(self) -> int:
+        "Set the position in buffer to first non-zero byte when searched from the end of buffer."
+        self.pos = self.last_data
+    def get_tag(self) -> int:
+        "Read 1 byte number (c_ubyte)"
+        return self.read_byte()
+    def rewind(self) -> None:
+        "Set current position in buffer to beginning."
+        self.pos = 0
+    def is_truncated(self) -> bool:
+        "Return True when positioned on `isc_info_truncated` tag"
+        return safe_ord(self.raw[self.pos]) == isc_info_truncated
+
+class CBuffer(Buffer):
+    "ctypes MemoryBuffer with extensions"
+    def __init__(self, init: Union[int, bytes], size: int = None, *,
+                 max_size: Union[int, Sentinel]=UNLIMITED, byteorder: ByteOrder=ByteOrder.LITTLE):
+        super().__init__(init, size, factory=CTypesBufferFactory, max_size=max_size, byteorder=byteorder)
+
 class EventBlock:
     "Used internally by `EventCollector`."
     def __init__(self, queue, db_handle: a.FB_API_HANDLE, event_names: List[str]):
@@ -277,7 +654,9 @@ class EventBlock:
                                                 pointer(self.result_buf),
                                                 *[x.encode() for x in event_names])
     def __del__(self):
-        self.close()
+        if not self.__closed:
+            warn(f"EventBlock disposed without prior close()", ResourceWarning)
+            self.close()
     def __lt__(self, other):
         return self.event_id.value < other.event_id.value
     def __wait_for_events(self) -> None:
@@ -357,7 +736,9 @@ Important:
         self.__blocks: List[List[str]] = [[x for x in y if x] for y in itertools.zip_longest(*[iter(event_names)]*15)]
         self.__initialized: bool = False
     def __del__(self):
-        self.close()
+        if not self.__closed:
+            warn(f"EventCollector disposed without prior close()", ResourceWarning)
+            self.close()
     def __enter__(self):
         self.begin()
         return self
@@ -459,19 +840,19 @@ Attributes:
         self._charset: str = charset
         self.response: CBuffer = CBuffer(buffer_size)
         self.request: Buffer = Buffer(10)
-        self._cache: Dict[str] = {}
+        self._cache: Dict = {}
     @abstractmethod
-    def close(self) -> None:
+    def _close(self) -> None:
         """Close the information source."""
     @abstractmethod
-    def acquire(self, request: bytes) -> None:
+    def _acquire(self, request: bytes) -> None:
         """Acquire information specified by parameter. Information must be stored in
 `response` buffer.
 
 Arguments:
     request: Data specifying the required information.
 """
-    def get_data(self, request: bytes, max_size: int=SHRT_MAX) -> None:
+    def _get_data(self, request: bytes, max_size: int=SHRT_MAX) -> None:
         """Helper function that aquires information specified by parameter into internal
 `response` buffer. If information source couldn't store all required data because the buffer
 is too small, this function tries to `.acquire()` the information again with buffer of doubled size.
@@ -485,7 +866,7 @@ Raises:
         or response is ivalid.
 """
         while True:
-            self.acquire(request)
+            self._acquire(request)
             self.response.seek_last_data()
             if self.response.is_truncated():
                 if (buf_size := len(self.response.raw)) < max_size:
@@ -504,13 +885,13 @@ class DatabaseInfoProvider(InfoProvider):
     """Provides access to information about attached database.
 
 Important:
-   Do NOT create instances of this class directly! Use only
-   `Connection.info` property to access the instance already bound to connectected database.
+   Do NOT create instances of this class directly! Use `Connection.info` property to
+   access the instance already bound to attached database.
 
 """
-    def __init__(self, charset: str, att: iAttachment):
-        super().__init__(charset)
-        self._att: iAttachment = att
+    def __init__(self, connection: Connection):
+        super().__init__(connection._py_charset)
+        self._con: Connection = weakref.ref(connection)
         # Page size
         self.__page_size = self.get_info(DbInfoCode.PAGE_SIZE)  # prefetch it
         # Get Firebird engine version
@@ -525,26 +906,37 @@ Important:
             self.__version = '0.0.0.0'
         x = self.__version.split('.')
         self.__engine_version = float(f'{x[0]}.{x[1]}')
-    def close(self) -> None:
+    def _close(self) -> None:
         "Drops the association with attached database."
-        super().close()
-        self._att = None
-    def acquire(self, request: bytes) -> None:
+        self._con = None
+    def _acquire(self, request: bytes) -> None:
         """Acquires information from associated attachment. Information is stored in native
 format in `response` buffer.
 
 Arguments:
     request: Data specifying the required information.
 """
-        self._att.get_info(request, self.response.raw)
-    def _db_info(self, info_code: DbInfoCode, page_number: int=None) -> Any:
+        self._con()._att.get_info(request, self.response.raw)
+    def get_info(self, info_code: DbInfoCode, page_number: int=None) -> Any:
+        """Returns requested information from associated attachment.
+
+Arguments:
+    info_code: A code specifying the required information.
+    page_number: A page number for `DbInfoCode.PAGE_CONTENTS` request. Ignored for other requests.
+
+Returns:
+    The data type of returned value depends on information required.
+"""
+        if info_code in self._cache:
+            return self._cache[info_code]
+        self.response.clear()
         request = bytes([info_code])
         if info_code == DbInfoCode.PAGE_CONTENTS:
             request += (4).to_bytes(2, 'little')
             request += page_number.to_bytes(4, 'little')
             if len(self.response.raw) < self.page_size + 10:
                 self.response.resize(self.page_size + 10)
-        self.get_data(request)
+        self._get_data(request)
         tag = self.response.get_tag()
         if (request[0] != tag):
             if info_code == DbInfoCode.ACTIVE_TRANSACTIONS:
@@ -558,18 +950,7 @@ Arguments:
         if info_code == DbInfoCode.ACTIVE_TRANSACTIONS:
             # we'll rewind back, otherwise it will break the repeating cluster processing
             self.response.rewind()
-    def get_info(self, info_code: DbInfoCode, page_number: int=None) -> Any:
-        """Returns requested information from associated attachment.
-
-Arguments:
-    info_code: A code specifying the required information.
-    page_number: A page number for `DbInfoCode.PAGE_CONTENTS` request. Ignored for other requests.
-
-Returns:
-    The data type of returned value depends on information required.
-"""
-        self.response.clear()
-        self._db_info(info_code, page_number)
+        #
         if info_code == DbInfoCode.BASE_LEVEL:
             result = self.response.get_tag()
         elif info_code == DbInfoCode.DB_ID:
@@ -596,8 +977,10 @@ Returns:
             self.response.read_short()  # number of strings
             result = self.response.read_pascal_string()
         elif info_code == DbInfoCode.USER_NAMES:
+            self.response.rewind() # necessary to process names separated by info tag
             usernames = []
             while not self.response.is_eof():
+                self.response.get_tag() # DbInfoCode.USER_NAMES
                 self.response.read_short()  # cluster length
                 usernames.append(self.response.read_pascal_string(encoding=self._charset))
             # The client-exposed return value is a dictionary mapping
@@ -654,6 +1037,14 @@ Returns:
                                                _util.decode_time(value[4:]))
         elif info_code == DbInfoCode.PAGE_CONTENTS:
             result = self.response.read_bytes()
+        # cache
+        if info_code in (DbInfoCode.CREATION_DATE, DbInfoCode.DB_CLASS, DbInfoCode.DB_PROVIDER,
+                         DbInfoCode.DB_SQL_DIALECT, DbInfoCode.ODS_MINOR_VERSION,
+                         DbInfoCode.ODS_VERSION, DbInfoCode.PAGE_SIZE, DbInfoCode.VERSION,
+                         DbInfoCode.FIREBIRD_VERSION, DbInfoCode.IMPLEMENTATION_OLD,
+                         DbInfoCode.IMPLEMENTATION, DbInfoCode.DB_ID, DbInfoCode.BASE_LEVEL,
+                         DbInfoCode.ATTACHMENT_ID):
+            self._cache[info_code] = result
         return result
     # Functions
     def get_page_content(self, page_number: int) -> bytes:
@@ -662,19 +1053,15 @@ Returns:
 Arguments:
    page_number: Sequence number of database page to be fetched from server.
 """
-        assert self._att is not None
         return self.get_info(DbInfoCode.PAGE_CONTENTS, page_number)
     def get_active_transaction_ids(self) -> List[int]:
         "Returns list of IDs of active transactions."
-        assert self._att is not None
         return self.get_info(DbInfoCode.ACTIVE_TRANSACTIONS)
     def get_active_transaction_count(self) -> int:
         "Returns number of active transactions."
-        assert self._att is not None
         return self.get_info(DbInfoCode.ACTIVE_TRAN_COUNT)
     def get_table_access_stats(self) -> List[TableAccessStats]:
         "Returns actual table access statistics."
-        assert self._att is not None
         tables = {}
         info_codes = [DbInfoCode.READ_SEQ_COUNT, DbInfoCode.READ_IDX_COUNT,
                       DbInfoCode.INSERT_COUNT, DbInfoCode.UPDATE_COUNT,
@@ -696,6 +1083,14 @@ Arguments:
         return ConnectionFlag.ENCRYPTED in ConnectionFlag(self.get_info(DbInfoCode.CONN_FLAGS))
     # Properties
     @property
+    def charset(self) -> str:
+        "Database character set."
+        if -1 not in self._cache:
+            with transaction(self._con()._tra_qry, bypass=True):
+                with self._con()._ic.execute("SELECT RDB$CHARACTER_SET_NAME FROM RDB$DATABASE"):
+                    self._cache[-1] = self._con()._ic.fetchone()[0].strip()
+        return self._cache[-1]
+    @property
     def page_size(self) -> int:
         "Page size (in bytes)."
         return self.__page_size
@@ -704,15 +1099,15 @@ Arguments:
         "Attachment ID."
         return self.get_info(DbInfoCode.ATTACHMENT_ID)
     @property
-    def database_sql_dialect(self) -> int:
+    def sql_dialect(self) -> int:
         "SQL dialect used by connected database."
         return self.get_info(DbInfoCode.DB_SQL_DIALECT)
     @property
-    def database_name(self) -> str:
+    def name(self) -> str:
         "Database name (filename or alias)."
         return self.get_info(DbInfoCode.DB_ID)[0]
     @property
-    def site_name(self) -> str:
+    def site(self) -> str:
         "Database site name."
         return self.get_info(DbInfoCode.DB_ID)[1]
     @property
@@ -844,8 +1239,7 @@ Note:
 
 Attributes:
     default_tpb (bytes): Default Transaction parameter buffer for started transactions.
-        If it's not specified when Connection is created, it's set to SNAPSHOT isolation
-        with WAIT lock resolution (infinite lock timeout).
+        Default is set to SNAPSHOT isolation with WAIT lock resolution (infinite lock timeout).
 """
     # PEP 249 (Python DB API 2.0) extension
     Warning = Warning
@@ -858,19 +1252,20 @@ Attributes:
     InternalError = InternalError
     ProgrammingError = ProgrammingError
     NotSupportedError = NotSupportedError
-    def __init__(self, att: iAttachment, dpb: bytes=None, sql_dialect: int=3,
-                 charset: str=None, default_tpb: bytes=None) -> None:
+    def __init__(self, att: iAttachment, dsn: str, dpb: bytes=None, sql_dialect: int=3,
+                 charset: str=None) -> None:
         self._att: iAttachment = att
         self.__str: str = f'Connection[{self._get_db_handle()}]'
         self.__charset: str = charset
         self.__precision_cache = {}
         self.__sqlsubtype_cache = {}
         self.__ecollectors: List[EventCollector] = []
-        self._sql_dialect: int = sql_dialect
+        self.__dsn: str = dsn
+        self.__sql_dialect: int = sql_dialect
         self._py_charset: str = CHARSET_MAP.get(charset, 'ascii')
         self._att.charset = self._py_charset
         self._dpb: bytes = dpb
-        self.default_tpb: bytes = default_tpb if default_tpb is not None else tpb(Isolation.SNAPSHOT)
+        self.default_tpb: bytes = tpb(Isolation.SNAPSHOT)
         self._transactions: List[TransactionManager] = []
         self._statements: List[Statement] = []
         #
@@ -882,12 +1277,12 @@ Attributes:
                                                                    access=TraAccessMode.READ))
         self._tra_qry._logging_id_ = 'Transaction.Query'
         # Cursor for internal use
-        self.__ic = self.query_transaction.cursor()
-        self.__ic._connection = weakref.proxy(self, self.__ic._dead_con)
-        self.__ic._logging_id_ = 'Cursor.internal'
+        self._ic = self.query_transaction.cursor()
+        self._ic._connection = weakref.proxy(self, self._ic._dead_con)
+        self._ic._logging_id_ = 'Cursor.internal'
     def __del__(self):
         if not self.is_closed():
-            warn("Connection disposed without prior close()", ResourceWarning)
+            warn(f"Connection '{self.logging_id}' disposed without prior close()", ResourceWarning)
             self._close()
             self._close_internals()
             self._att.detach()
@@ -910,7 +1305,7 @@ Attributes:
     def __stmt_deleted(self, stmt) -> None:
         self._statements.remove(stmt)
     def _close(self) -> None:
-        self.__ic.close()
+        self._ic.close()
         for collector in self.__ecollectors:
             collector.close()
         self.main_transaction._finish(DefaultAction.ROLLBACK)
@@ -927,12 +1322,12 @@ Attributes:
         self.main_transaction.close()
         self.query_transaction.close()
         if self.__info is not None:
-            self.__info.close()
+            self.__info._close()
     def _prepare(self, sql: str, transaction: TransactionManager) -> Statement:
         if _commit := not transaction.is_active():
             transaction.begin()
-        stmt = self._att.prepare(transaction._tra, sql, self._sql_dialect)
-        result = Statement(self, stmt, sql, self._sql_dialect)
+        stmt = self._att.prepare(transaction._tra, sql, self.__sql_dialect)
+        result = Statement(self, stmt, sql, self.__sql_dialect)
         self._statements.append(weakref.ref(result, self.__stmt_deleted))
         if _commit:
             transaction.commit()
@@ -951,7 +1346,7 @@ Attributes:
             return precision
         # First, try table
         with transaction(self._tra_qry, bypass=True):
-            with self.__ic.execute("SELECT FIELD_SPEC.RDB$FIELD_PRECISION"
+            with self._ic.execute("SELECT FIELD_SPEC.RDB$FIELD_PRECISION"
                                    " FROM RDB$FIELDS FIELD_SPEC,"
                                    " RDB$RELATION_FIELDS REL_FIELDS"
                                    " WHERE"
@@ -960,10 +1355,10 @@ Attributes:
                                    " AND REL_FIELDS.RDB$RELATION_NAME = ?"
                                    " AND REL_FIELDS.RDB$FIELD_NAME = ?",
                                    (meta.relation, meta.field)):
-                result = self.__ic.fetchone()
+                result = self._ic.fetchone()
             if result is None:
                 # Next, try stored procedure output parameter
-                with self.__ic.execute("SELECT FIELD_SPEC.RDB$FIELD_PRECISION"
+                with self._ic.execute("SELECT FIELD_SPEC.RDB$FIELD_PRECISION"
                                        " FROM RDB$FIELDS FIELD_SPEC,"
                                        " RDB$PROCEDURE_PARAMETERS REL_FIELDS"
                                        " WHERE"
@@ -973,7 +1368,7 @@ Attributes:
                                        " AND RDB$PARAMETER_NAME = ?"
                                        " AND RDB$PARAMETER_TYPE = 1",
                                        (meta.relation, meta.field)):
-                    result = self.__ic.fetchone()
+                    result = self._ic.fetchone()
             if result:
                 self.__precision_cache[(meta.relation, meta.field)] = result[0]
                 return result[0]
@@ -984,18 +1379,17 @@ Attributes:
         if subtype is not None:
             return subtype
         with transaction(self._tra_qry, bypass=True):
-            with self.__ic.execute("SELECT FIELD_SPEC.RDB$FIELD_SUB_TYPE"
+            with self._ic.execute("SELECT FIELD_SPEC.RDB$FIELD_SUB_TYPE"
                                    " FROM RDB$FIELDS FIELD_SPEC, RDB$RELATION_FIELDS REL_FIELDS"
                                    " WHERE"
                                    " FIELD_SPEC.RDB$FIELD_NAME = REL_FIELDS.RDB$FIELD_SOURCE"
                                    " AND REL_FIELDS.RDB$RELATION_NAME = ?"
                                    " AND REL_FIELDS.RDB$FIELD_NAME = ?",
                                    (relation, column)):
-                result = self.__ic.fetchone()
+                result = self._ic.fetchone()
         if result:
             self.__sqlsubtype_cache[(relation, column)] = result[0]
             return result[0]
-    @traced()
     def drop_database(self) -> None:
         """Drops the connected database.
 
@@ -1016,7 +1410,7 @@ Hooks:
         self._close_internals()
         self._att.drop_database()
         self._att = None
-        for hook in HookManager().get_callbacks(ConnectionHook.DROPPED, self):
+        for hook in get_callbacks(ConnectionHook.DROPPED, self):
             hook(ConnectionHook.DROPPED, self)
     def execute_immediate(self, sql: str) -> None:
         """Executes SQL statement.
@@ -1047,7 +1441,6 @@ Arguments:
         conduit = EventCollector(db_handle, event_names)
         self.__ecollectors.append(conduit)
         return conduit
-    @traced()
     def close(self) -> None:
         """Close the connection and release all associated resources.
 
@@ -1078,7 +1471,7 @@ Important:
         if not self.is_closed():
             self._close()
             retain = False
-            for hook in HookManager().get_callbacks(ConnectionHook.DETACH_REQUEST, self):
+            for hook in get_callbacks(ConnectionHook.DETACH_REQUEST, self):
                 ret = hook(ConnectionHook.DETACH_REQUEST, self)
                 if ret and not retain:
                     retain = True
@@ -1089,9 +1482,8 @@ Important:
                     self._att.detach()
                 finally:
                     self._att = None
-                    for hook in HookManager().get_callbacks(ConnectionHook.CLOSED, self):
+                    for hook in get_callbacks(ConnectionHook.CLOSED, self):
                         hook(ConnectionHook.CLOSED, self)
-    @traced()
     def transaction_manager(self, default_tpb: bytes=None,
                             default_action: DefaultAction=DefaultAction.COMMIT) -> TransactionManager:
         """Create new `TransactionManager` instance for this connection.
@@ -1159,10 +1551,14 @@ Important:
 """
         return self._att is None
     @property
+    def dsn(self) -> str:
+        "Connection string"
+        return self.__dsn
+    @property
     def info(self) -> DatabaseInfoProvider:
         "Access to various information about attached database."
         if self.__info is None:
-            self.__info = DatabaseInfoProvider(self._py_charset, self._att)
+            self.__info = DatabaseInfoProvider(self)
         return self.__info
     @property
     def charset(self) -> str:
@@ -1171,7 +1567,7 @@ Important:
     @property
     def sql_dialect(self) -> int:
         "Connection SQL dialect."
-        return self._sql_dialect
+        return self.__sql_dialect
     @property
     def main_transaction(self) -> TransactionManager:
         "Main transaction manager for this connection."
@@ -1191,18 +1587,17 @@ Note:
         result.extend(self._transactions)
         return result
 
-HookManager().register_class(Connection, ConnectionHook)
-
 def tpb(isolation: Isolation, lock_timeout: int=-1, access: TraAccessMode=TraAccessMode.WRITE) -> bytes:
-    "Helper function to costruct simple TPB."
+    """Helper function to costruct simple TPB.
+
+Arguments:
+    isolation: Isolation level.
+    lock_timeout: Lock timeout (-1 = Infinity)
+    access: Access mode.
+"""
     return TPB(isolation=isolation, lock_timeout=lock_timeout, access_mode=access).get_buffer()
 
-def _connect_helper(dsn: str, host: str, port: str, database: str,
-                    protocol: NetProtocol, user: str, password: str) -> Tuple[str, str, str]:
-    if user is None:
-        user = os.environ.get('ISC_USER', None)
-    if password is None:
-        password = os.environ.get('ISC_PASSWORD', None)
+def _connect_helper(dsn: str, host: str, port: str, database: str, protocol: NetProtocol) -> str:
     if ((not dsn and not host and not database) or
             (dsn and (host or database)) or
             (host and not database)):
@@ -1230,20 +1625,20 @@ def _connect_helper(dsn: str, host: str, port: str, database: str,
             elif host:
                 dsn += f'{host}:'
         dsn += database
-    return (dsn, user, password)
+    return dsn
 
 def __make_connection(create: bool, dsn: str, utf8filename: bool, dpb: bytes,
-                      sql_dialect: int, charset: str, default_tpb: bytes,
+                      sql_dialect: int, charset: str,
                       crypt_callback: iCryptKeyCallbackImpl) -> Connection:
     with a.get_api().master.get_dispatcher() as provider:
         if crypt_callback is not None:
             provider.set_dbcrypt_callback(crypt_callback)
         if create:
             att = provider.create_database(dsn, dpb, 'utf-8' if utf8filename else FS_ENCODING)
-            con = Connection(att, dpb, sql_dialect, charset, default_tpb)
+            con = Connection(att, dsn, dpb, sql_dialect, charset)
         else:
             con = None
-            for hook in HookManager().get_callbacks(ConnectionHook.ATTACH_REQUEST, Connection):
+            for hook in get_callbacks(ConnectionHook.ATTACH_REQUEST, Connection):
                 try:
                     con = hook(ConnectionHook.ATTACH_REQUEST, dsn, dpb)
                 except Exception as e:
@@ -1252,47 +1647,26 @@ def __make_connection(create: bool, dsn: str, utf8filename: bool, dpb: bytes,
                     break
             if con is None:
                 att = provider.attach_database(dsn, dpb, 'utf-8' if utf8filename else FS_ENCODING)
-                con = Connection(att, dpb, sql_dialect, charset, default_tpb)
-    for hook in HookManager().get_callbacks(ConnectionHook.ATTACHED, con):
+                con = Connection(att, dsn, dpb, sql_dialect, charset)
+    for hook in get_callbacks(ConnectionHook.ATTACHED, con):
         hook(ConnectionHook.ATTACHED, con)
     return con
 
-@traced(agent='firebird.driver')
-def connect(*, dsn: str=None, host: str=None, port: str=None, database: str=None,
-            utf8filename: bool=False, protocol: NetProtocol=None,
-            user: str=None, password: str=None, trusted_auth: bool=False,
-            role: str=None, charset: str=None, sql_dialect: int=3,
-            timeout: int=None, default_tpb: bytes=None,
-            no_gc: bool=None, no_db_triggers: bool=None, no_linger: bool=None,
-            cache_size: int=None, dbkey_scope: DBKeyScope=None,
-            dummy_packet_interval: int=None, config: str=None,
-            auth_plugin_list: str=None, crypt_callback: iCryptKeyCallbackImpl=None) -> Connection:
+def connect(database: str, *, user: str=None, password: str=None, role: str=None,
+            no_gc: bool=None, no_db_triggers: bool=None, dbkey_scope: DBKeyScope=None,
+            crypt_callback: iCryptKeyCallbackImpl=None, charset: str=None) -> Connection:
     """Establishes a connection to the database.
 
 Arguments:
-    dsn: Connection string (see Firebid doc. for details)
-    host: Server host machine specification.
-    port: Port or service name used by Firebird server.
-    database: Database specification (file spec. or alias)
-    utf8filename: Database name is in UTF8.
-    protocol: Protocol to be used for connection.
-    user: User name. If not specified, driver attempts to use ISC_USER environment variable.
-    password: User password. If not specified, driver attempts to use ISC_PASSWORD environment variable.
-    trusted_auth: Use trusted authentication.
+    database: DSN or Database configuration name.
+    user: User name.
+    password: User password.
     role: User role.
-    charset: Character set for connection.
-    sql_dialect: SQL Dialect for connection.
-    timeout: Connection timeout.
-    default_tpb: Default transaction isolation level for transactions.
     no_gc: Do not perform garbage collection for this connection.
     no_db_triggers: Do not execute database triggers for this connection.
-    no_linger: Do not use linger for this connection.
-    cache_size: Page cache size override for connection.
     dbkey_scope: DBKEY scope override for connection.
-    dummy_packet_interval: Dummy packet interval for this connection.
-    config: Configuration override.
-    auth_plugin_list: List of authentication plugins override.
     crypt_callback: Callback that provides encryption key for the database.
+    charset: Character set for connection.
 
 Hooks:
     Event `.ConnectionHook.ATTACH_REQUEST`: Executed after all parameters
@@ -1312,68 +1686,60 @@ Hooks:
 
     Any value returned by hook is ignored.
 """
+    db_config = driver_config.get_database(database)
+    if db_config is None:
+        db_config = driver_config.db_defaults
+    else:
+        database = db_config.database.value
+    if db_config.server.value is None:
+        srv_config = driver_config.server_defaults
+    else:
+        srv_config = driver_config.get_server(db_config.server.value)
+        if srv_config is None:
+            raise ValueError(f"Configuration for server '{db_config.server.value}' not found")
+    if user is None:
+        user = db_config.user.value
+        if user is None:
+            user = srv_config.user.value
+    if password is None:
+        password = db_config.password.value
+        if password is None:
+            password = srv_config.password.value
+    if role is None:
+        role = db_config.role.value
+    if charset is None:
+        charset = db_config.charset.value
     if charset:
         charset = charset.upper()
-    dsn, user, password = _connect_helper(dsn, host, port, database, protocol,
-                                          user, password)
-    dpb = DPB(user=user, password=password, role=role, trusted_auth=trusted_auth,
-              sql_dialect=sql_dialect, timeout=timeout, charset=charset,
-              cache_size=cache_size, no_gc=no_gc, no_db_triggers=no_db_triggers,
-              no_linger=no_linger, utf8filename=utf8filename, dbkey_scope=dbkey_scope,
-              dummy_packet_interval=dummy_packet_interval, config=config)
-    return __make_connection(False, dsn, utf8filename, dpb.get_buffer(),
-                             sql_dialect, charset, default_tpb, crypt_callback)
+    dsn = _connect_helper(db_config.dsn.value, srv_config.host.value, srv_config.port.value,
+                          database, db_config.protocol.value)
+    dpb = DPB(user=user, password=password, role=role, trusted_auth=db_config.trusted_auth.value,
+              sql_dialect=db_config.sql_dialect.value, timeout=db_config.timeout.value,
+              charset=charset, cache_size=db_config.cache_size.value,
+              no_linger=db_config.no_linger.value, utf8filename=db_config.utf8filename.value,
+              no_gc=no_gc, no_db_triggers=no_db_triggers, dbkey_scope=dbkey_scope,
+              dummy_packet_interval=db_config.dummy_packet_interval.value,
+              config=db_config.config.value)
+    return __make_connection(False, dsn, db_config.utf8filename.value, dpb.get_buffer(),
+                             db_config.sql_dialect.value, charset, crypt_callback)
 
-@traced(agent='firebird.driver')
-def create_database(*, dsn: str=None, host: str=None, port: str=None,
-                    database: str=None, utf8filename: bool=False,
-                    protocol: NetProtocol=None, user: str=None, password: str=None,
-                    trusted_auth: bool=False, role: str=None, charset: str=None,
-                    sql_dialect: int=3, timeout: int=None,
-                    default_tpb: bytes=None, no_gc: bool=None, no_db_triggers: bool=None,
-                    no_linger: bool=None, cache_size: int=None, dbkey_scope: DBKeyScope=None,
-                    dummy_packet_interval: int=None, config: str=None,
-                    auth_plugin_list: str=None, crypt_callback: iCryptKeyCallbackImpl=None,
-                    overwrite: bool=False, page_size: int=None,
-                    forced_writes: bool=None, db_charset: str=None,
-                    db_sql_dialect: int=None, db_cache_size: int=None,
-                    sweep_interval: int=None, reserve_space: bool=None,
-                    read_only: bool=False) -> Connection:
+def create_database(database: str, *, user: str=None, password: str=None, role: str=None,
+                    no_gc: bool=None, no_db_triggers: bool=None, dbkey_scope: DBKeyScope=None,
+                    crypt_callback: iCryptKeyCallbackImpl=None, charset: str=None,
+                    overwrite: bool=False) -> Connection:
     """Creates new database.
 
 Arguments:
-    dsn: Connection string in `[host[/port]]:database` format
-    host: Server host machine specification.
-    port: Port or service name used by Firebird server.
-    database: Database specification (file spec. or alias)
-    utf8filename: Database name is in UTF8.
-    protocol: Protocol to be used for connection.
-    user: User name. If not specified, driver attempts to use ISC_USER environment variable.
-    password: User password. If not specified, driver attempts to use ISC_PASSWORD environment variable.
-    trusted_auth: Use trusted authentication.
+    database: DSN or Database configuration name.
+    user: User name.
+    password: User password.
     role: User role.
-    charset: Character set for connection.
-    sql_dialect: SQL Dialect for connection.
-    timeout: Connection timeout.
-    default_tpb: Default transaction isolation level for transactions.
     no_gc: Do not perform garbage collection for this connection.
     no_db_triggers: Do not execute database triggers for this connection.
-    no_linger: Do not use linger for this connection.
-    cache_size: Page cache size override for connection.
     dbkey_scope: DBKEY scope override for connection.
-    dummy_packet_interval: Dummy packet interval for this connection.
-    config: Configuration override.
-    auth_plugin_list: List of authentication plugins override.
     crypt_callback: Callback that provides encryption key for the database.
+    charset: Character set for connection.
     overwrite: Overwite the existing database.
-    page_size: Page size to be used.
-    forced_writes: Write mode (True = sync/False = async).
-    db_charset: Character set for the database.
-    db_sql_dialect: SQL dialect for the database.
-    db_cache_size: Page cache size override for database.
-    sweep_interval: Sweep interval for the database.
-    reserve_space: Data page space usage (True = reserve space, False = Use all space)
-    read_only: Access mode for the database.
 
 Hooks:
     Event `.ConnectionHook.ATTACHED`: Executed before `Connection` instance is
@@ -1383,40 +1749,70 @@ Hooks:
 
     Any value returned by hook is ignored.
 """
+    db_config = driver_config.get_database(database)
+    if db_config is None:
+        db_config = driver_config.db_defaults
+        db_config.database.value = database
+        if db_config.server.value is None:
+            srv_config = driver_config.server_defaults
+        else:
+            srv_config = driver_config.get_server(db_config.server.value)
+            if srv_config is None:
+                raise ValueError(f"Configuration for server '{db_config.server.value}' not found")
+    else:
+        if db_config.server.value is None:
+            srv_config = driver_config.server_defaults
+        else:
+            srv_config = driver_config.get_server(db_config.server.value)
+            if srv_config is None:
+                raise ValueError(f"Configuration for server '{db_config.server.value}' not found")
+    if user is None:
+        user = db_config.user.value
+    if password is None:
+        password = db_config.password.value
+    if role is None:
+        role = db_config.role.value
+    if charset is None:
+        charset = db_config.charset.value
     if charset:
         charset = charset.upper()
-    dsn, user, password = _connect_helper(dsn, host, port, database, protocol,
-                                          user, password)
-    dpb = DPB(user=user, password=password, role=role, trusted_auth=trusted_auth,
-              sql_dialect=sql_dialect, timeout=timeout, charset=charset,
-              cache_size=cache_size, no_gc=no_gc, no_db_triggers=no_db_triggers,
-              no_linger=no_linger, utf8filename=utf8filename, dbkey_scope=dbkey_scope,
-              dummy_packet_interval=dummy_packet_interval, config=config,
-              auth_plugin_list=auth_plugin_list, overwrite=overwrite,
-              db_cache_size=db_cache_size, forced_writes=forced_writes,
-              reserve_space=reserve_space, page_size=page_size, read_only=read_only,
-              sweep_interval=sweep_interval, db_sql_dialect=db_sql_dialect,
-              db_charset=db_charset)
-    return __make_connection(True, dsn, utf8filename, dpb.get_buffer(for_create=True),
-                             sql_dialect, charset, default_tpb, crypt_callback)
+    dsn = _connect_helper(db_config.dsn.value, srv_config.host.value, srv_config.port.value,
+                          db_config.database.value, db_config.protocol.value)
+    dpb = DPB(user=user, password=password, role=role, trusted_auth=db_config.trusted_auth.value,
+              sql_dialect=db_config.sql_dialect.value, timeout=db_config.timeout.value,
+              charset=charset, cache_size=db_config.cache_size.value,
+              no_linger=db_config.no_linger.value, utf8filename=db_config.utf8filename.value,
+              no_gc=no_gc, no_db_triggers=no_db_triggers, dbkey_scope=dbkey_scope,
+              dummy_packet_interval=db_config.dummy_packet_interval.value,
+              config=db_config.config.value, auth_plugin_list=db_config.auth_plugin_list.value,
+              overwrite=overwrite, db_cache_size=db_config.db_cache_size.value,
+              forced_writes=db_config.forced_writes.value, page_size=db_config.page_size.value,
+              reserve_space=db_config.reserve_space.value, sweep_interval=db_config.sweep_interval.value,
+              db_sql_dialect=db_config.db_sql_dialect.value, db_charset=db_config.db_charset.value)
+    return __make_connection(True, dsn, db_config.utf8filename.value,
+                             dpb.get_buffer(for_create=True), db_config.sql_dialect.value,
+                             charset, crypt_callback)
 
 class TransactionInfoProvider(InfoProvider):
     """Provides access to information about attached database.
+
+Important:
+   Do NOT create instances of this class directly! Use `TransactionManager.info` property
+   to access the instance already bound to transaction context.
 """
     def __init__(self, charset: str, tra: TransactionManager):
         super().__init__(charset)
         self._mngr: TransactionManager = weakref.ref(tra)
-    def acquire(self, request: bytes) -> None:
+    def _acquire(self, request: bytes) -> None:
         assert self._mngr is not None
         if not self._mngr().is_active():
             raise InterfaceError("TransactionManager is not active")
         self._mngr()._tra.get_info(request, self.response.raw)
-    def close(self) -> None:
-        super().close()
+    def _close(self) -> None:
         self._mngr = None
     def get_info(self, info_code: TraInfoCode) -> Any:
         request = bytes([info_code])
-        self.get_data(request)
+        self._get_data(request)
         tag = self.response.get_tag()
         if (request[0] != tag):
             if tag == isc_info_error:  # pragma: no cover
@@ -1434,6 +1830,8 @@ class TransactionInfoProvider(InfoProvider):
                 result = Isolation(self.response.read_byte() + self.response.read_byte())
         elif info_code == TraInfoCode.ACCESS:
             result = TraInfoAccess(self.response.read_sized_int())
+        elif info_code == TraInfoCode.DBPATH:
+            result = self.response.read_sized_string()
         else:
             result = self.response.read_sized_int(signed=info_code == TraInfoCode.LOCK_TIMEOUT)
         return result
@@ -1459,13 +1857,17 @@ class TransactionInfoProvider(InfoProvider):
         "ID of Oldest Snapshot Transaction at the time this transaction started"
         return self.get_info(TraInfoCode.OLDEST_SNAPSHOT)
     @property
-    def isolation(self) -> Tuple[TraInfoIsolation, TraInfoReadCommitted]:
+    def isolation(self) -> Isolation:
         "Isolation level"
         return self.get_info(TraInfoCode.ISOLATION)
     @property
     def lock_timeout(self) -> int:
         "Lock timeout"
         return self.get_info(TraInfoCode.LOCK_TIMEOUT)
+    @property
+    def database(self) -> str:
+        "Database filename"
+        return self.get_info(TraInfoCode.DBPATH)
 
 class TransactionManager(LoggingIdMixin):
     """Transaction manager.
@@ -1483,7 +1885,7 @@ Attributes:
         self._connection: Callable[[], Connection] = weakref.ref(connection, self.__dead_con)
         self.default_tpb: bytes = default_tpb
         self.default_action: DefaultAction = default_action
-        self.info: TransactionInfoProvider = TransactionInfoProvider(connection._py_charset, self)
+        self.__info: TransactionInfoProvider = None
         self._cursors: List = []  # Weak references to cursors
         self._tra: iTransaction = None
         self.__closed: bool = False
@@ -1495,7 +1897,7 @@ Attributes:
         self.close()
     def __del__(self):
         if self._tra is not None:
-            warn("Transaction disposed while active", ResourceWarning)
+            warn(f"Transaction '{self.logging_id}' disposed while active", ResourceWarning)
             self._finish()
     def __dead_con(self, obj) -> None:
         self._connection = None
@@ -1532,8 +1934,8 @@ Important:
                     con._transactions.remove(self)
                 self._connection = None
                 self.__closed = True
-                self.info.close()
-    @traced()
+                if self.__info is not None:
+                    self.__info._close()
     def execute_immediate(self, sql: str) -> None:
         """Executes SQL statement. The statement MUST NOT return any result.
 
@@ -1543,8 +1945,7 @@ Arguments:
         assert not self.__closed
         if not self.is_active():
             self.begin()
-        self._connection()._att.execute(self._tra, sql, self._connection()._sql_dialect)
-    @traced()
+        self._connection()._att.execute(self._tra, sql, self._connection().sql_dialect)
     def begin(self, tpb: bytes=None) -> None:
         """Starts new transaction managed by this instance.
 
@@ -1555,7 +1956,6 @@ Arguments:
         assert not self.__closed
         self._finish()  # Make sure that previous transaction (if any) is ended
         self._tra = self._connection()._att.start_transaction(tpb if tpb else self.default_tpb)
-    @traced()
     def commit(self, *, retaining: bool=False) -> None:
         """Commits the transaction managed by this instance.
 
@@ -1571,7 +1971,6 @@ Arguments:
             self._tra.commit()
         if not retaining:
             self._tra = None
-    @traced()
     def rollback(self, *, retaining: bool=False, savepoint: str=None) -> None:
         """Rolls back the transaction managed by this instance.
 
@@ -1596,7 +1995,6 @@ Raises:
                 self._tra.rollback()
             if not retaining:
                 self._tra = None
-    @traced()
     def savepoint(self, name: str) -> None:
         """Creates a new savepoint for transaction managed by this instance.
 
@@ -1618,6 +2016,12 @@ Arguments:
         return self.__closed
     # Properties
     @property
+    def info(self) -> TransactionInfoProvider:
+        "Access to various information about active transaction."
+        if self.__info is None:
+            self.__info = TransactionInfoProvider(self._connection()._py_charset, self)
+        return self.__info
+    @property
     def log_context(self) -> Connection:
         if self._connection is None:
             return 'Connection.GC'
@@ -1638,7 +2042,6 @@ Attributes:
     default_tpb (bytes): Default Transaction parameter buffer
     default_action (DefaultAction): Default action for implicit transaction end
 """
-    @traced()
     def __init__(self, connections: Sequence[Connection], default_tpb: bytes=None,
                  default_action: DefaultAction=DefaultAction.COMMIT):
         self._connections: List[Connection] = list(connections)
@@ -1649,7 +2052,6 @@ Attributes:
         self._dtc: iDtc = _master.get_dtc()
         self.__closed: bool = False
         self._logging_id_ = 'DTransaction'
-    @traced()
     def close(self) -> None:
         """Close the distributed transaction manager and release all associated
 resources.
@@ -1663,7 +2065,6 @@ Important:
             finally:
                 self._connections.clear()
                 self.__closed = True
-    @traced()
     def execute_immediate(self, sql: str) -> None:
         """Executes SQL statement on all connections in distributed transaction.
 The statement MUST NOT return any result.
@@ -1675,8 +2076,7 @@ Arguments:
         if not self.is_active():
             self.begin()
         for connection in self._connections:
-            connection._att.execute(self._tra, sql, connection._sql_dialect)
-    @traced()
+            connection._att.execute(self._tra, sql, connection.sql_dialect)
     def begin(self, tpb: bytes=None) -> None:
         """Starts new distributed transaction managed by this instance.
 
@@ -1690,7 +2090,6 @@ Arguments:
             for con in self._connections:
                 builder.add_with_tpb(con._att, tpb if tpb else self.default_tpb)
             self._tra = builder.start()
-    @traced()
     def prepare(self) -> None:
         """Manually triggers the first phase of a two-phase commit (2PC).
 
@@ -1701,7 +2100,6 @@ Note:
         assert not self.__closed
         assert self.is_active()
         self._tra.prepare()
-    @traced()
     def commit(self, *, retaining: bool=False) -> None:
         """Commits the distributed transaction managed by this instance.
 
@@ -1717,7 +2115,6 @@ Arguments:
             self._tra.commit()
         if not retaining:
             self._tra = None
-    @traced()
     def rollback(self, *, retaining: bool=False, savepoint: str=None) -> None:
         """Rolls back the distributed transaction managed by this instance.
 
@@ -1742,7 +2139,6 @@ Raises:
                 self._tra.rollback()
             if not retaining:
                 self._tra = None
-    @traced()
     def savepoint(self, name: str) -> None:
         """Creates a new savepoint for distributed transaction managed by this instance.
 
@@ -1810,7 +2206,7 @@ Note:
         self.free()
     def __del__(self):
         if self._in_meta or self._out_meta or self._istmt:
-            warn("Statement disposed without prior free()", ResourceWarning)
+            warn(f"Statement '{self.logging_id}' disposed without prior free()", ResourceWarning)
             self.free()
     def __str__(self):
         return f'{self.logging_id}[{self.sql}]'
@@ -1923,7 +2319,7 @@ Attributes:
         self.close()
     def __del__(self):
         if self._blob is not None:
-            warn("BlobReader disposed without prior close()", ResourceWarning)
+            warn(f"BlobReader '{self.logging_id}' disposed without prior close()", ResourceWarning)
             self.close()
     def __repr__(self):
         return f'{self.logging_id}[size={self.length}]'
@@ -2098,8 +2494,6 @@ Note:
     #:
     #: Required by Python DB API 2.0
     arraysize: int = 1
-    #: BLOBs greater than threshold are returned as `BlobReader` instead in materialized form.
-    stream_blob_threshold: int = 65536
     def __init__(self, connection: Connection, transaction: TransactionManager):
         self._connection: Connection = connection
         self._dialect: int = connection.sql_dialect
@@ -2116,13 +2510,15 @@ Note:
         self.__blob_readers: Set = weakref.WeakSet()
         #: Names of columns that should be returned as `BlobReader`.
         self.stream_blobs: List[str] = []
+        #: BLOBs greater than threshold are returned as `BlobReader` instead in materialized form.
+        self.stream_blob_threshold = driver_config.stream_blob_threshold.value
     def __enter__(self) -> Cursor:
         return self
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         self.close()
     def __del__(self):
         if self._result is not None or self._stmt is not None or self.__blob_readers:
-            warn("Cursor disposed without prior close()", ResourceWarning)
+            warn(f"Cursor '{self.logging_id}' disposed without prior close()", ResourceWarning)
             self.close()
     def __next__(self):
         if (row := self.fetchone()) is not None:
@@ -2558,7 +2954,7 @@ Note:
                     segment_size = blob.get_info2(BlobInfoCode.MAX_SEGMENT)
                     # Check if stream BLOB is requested instead materialized one
                     if ((self.stream_blobs and (desc.alias if desc.alias != desc.field else desc.field) in self.stream_blobs)
-                        or (self.stream_blob_threshold and (blob_length > self.stream_blob_threshold))):
+                        or (blob_length > self.stream_blob_threshold)):
                         # Stream BLOB
                         value = BlobReader(blob, blobid, desc.subtype, blob_length,
                                            segment_size, self._py_charset, self)
@@ -2711,7 +3107,6 @@ Note:
         self.__output_cache = None
         while self.__blob_readers:
             self.__blob_readers.pop().close()
-    @traced()
     def callproc(self, proc_name: str, parameters: Sequence=None) -> Optional[Tuple]:
         """Executes a stored procedure with the given name.
 
@@ -2742,7 +3137,6 @@ Arguments:
                                  " context of currently executed statement")
         self._stmt._istmt.set_cursor_name(name)
         self._name = name
-    @traced()
     def prepare(self, operation: str) -> Statement:
         """Creates prepared statement for repeated execution.
 
@@ -2750,7 +3144,6 @@ Arguments:
     operation: SQL command.
 """
         return self._connection._prepare(operation, self._transaction)
-    @traced(max_param_length=5000)
     def open(self, operation: Union[str, Statement], parameters: Sequence[Any]=None) -> Cursor:
         """Executes SQL command or prepared `Statement` as scrollable.
 
@@ -2769,7 +3162,6 @@ Note:
     If cursor is open, it's closed before new statement is executed.
 """
         self._execute(operation, parameters, CursorFlag.SCROLLABLE)
-    @traced(max_param_length=5000)
     def execute(self, operation: Union[str, Statement], parameters: Sequence[Any]=None) -> Cursor:
         """Executes SQL command or prepared `Statement`.
 
@@ -2956,7 +3348,7 @@ Arguments:
         return self._connection
     @property
     def log_context(self) -> Connection:
-        return self._transaction
+        return self._connection
     @property
     def statement(self) -> Statement:
         "Executed `Statement` or None if cursor does not executed a statement yet."
@@ -3085,198 +3477,447 @@ Note:
         "Name set for cursor."
         return self._name
 
-class Server(LoggingIdMixin):
-    """Represents connection to Firebird Service Manager.
+class ServerInfoProvider(InfoProvider):
+    """Provides access to information about attached server.
 
-Note:
-    Implements context manager protocol to call `.close()` automatically.
+Important:
+   Do NOT create instances of this class directly! Use `Server.info` property to access
+   the instance already bound to connectected server.
 """
-    def __init__(self, svc: iService, spb: bytes, host: str):
-        self._svc: iService = svc
-        self.spb: bytes = spb
-        self.host: str = host
-        self.response: CBuffer = CBuffer(USHRT_MAX)
-        self.__eof: bool = False
-        self.__line_buffer: List[str] = []
+    def __init__(self, charset: str, server: Server):
+        super().__init__(charset)
+        self._srv: Server = weakref.ref(server)
         # Get Firebird engine version
-        verstr = self.get_server_version()
+        verstr: str = self.get_info(SrvInfoCode.SERVER_VERSION)
         x = verstr.split()
-        self.__version: str = '0.0.0.0'
         if x[0].find('V') > 0:
             (x, self.__version) = x[0].split('V')
         elif x[0].find('T') > 0:  # pragma: no cover
             (x, self.__version) = x[0].split('T')
+        else: # pragma: no cover
+            # Unknown version
+            self.__version = '0.0.0.0'
         x = self.__version.split('.')
-        self.__engine_version: float = float('%s.%s' % (x[0], x[1]))
-    def __enter__(self) -> Server:
-        return self
-    def __exit__(self, exc_type, exc_value, traceback) -> None:
-        self.close()
-    def __del__(self):
-        if self._svc is not None:
-            warn("Server disposed without prior close()", ResourceWarning)
-            self.close()
-    def __next__(self):
-        if (line := self.readline()) is not None:
-            return line
-        else:
-            raise StopIteration
-    def __iter__(self):
-        return self
-    def __str__(self):
-        return f'Server[v{self.version}@{self.host.replace(":service_mgr","")}]'
-    def __repr__(self):
-        return str(self)
-    def _reset_output(self) -> None:
-        self.__eof = False
-        self.__line_buffer.clear()
-    def _make_request(self, timeout: int) -> bytes:
-        if timeout == -1:
-            return None
-        else:
-            return b''.join([SvcInfoCode.TIMEOUT.to_bytes(1, 'little'),
-                             (4).to_bytes(2, 'little'),
-                             timeout.to_bytes(4, 'little'), isc_info_end.to_bytes(1, 'little')])
-    def _get_simple_info(self, info_code: SvcInfoCode, result_type: InfoItemType,
-                         timeout: int=-1) -> Any:
-        send = self._make_request(timeout)
-        receive = bytes([info_code])
+        self.__engine_version = float(f'{x[0]}.{x[1]}')
+    def _close(self) -> None:
+        "Drops the association with attached database."
+        self._srv = None
+    def _acquire(self, request: bytes) -> None:
+        """Acquires information from associated attachment. Information is stored in native
+format in `response` buffer.
+
+Arguments:
+    request: Data specifying the required information.
+"""
+        self._srv()._svc.query(None, request, self.response.raw)
+    def get_info(self, info_code: SrvInfoCode) -> Any:
+        """Returns requested information from connected server.
+
+Arguments:
+    info_code: A code specifying the required information.
+
+Returns:
+    The data type of returned value depends on information required.
+"""
+        if info_code in self._cache:
+            return self._cache[info_code]
         self.response.clear()
-        self._svc.query(send, receive, self.response.raw)
-        if self.response.is_truncated():  # pragma: no cover
-            raise InterfaceError("Requested data can't fit into largest possible buffer")
+        request = bytes([info_code])
+        self._get_data(request)
         tag = self.response.get_tag()
-        if tag == SvcInfoCode.TIMEOUT:
-            return None
-        if tag != info_code:  # pragma: no cover
-            raise InterfaceError(f"Unknown result code {tag}")
-        if result_type == InfoItemType.INTEGER:
-            result = self.response.read_short()
-        elif result_type == InfoItemType.BIGINT:
+        if (tag != info_code.value):
+            if tag == isc_info_error:  # pragma: no cover
+                raise InterfaceError("An error response was received")
+            else:  # pragma: no cover
+                raise InterfaceError("Result code does not match request code")
+        #
+        if info_code in (SrvInfoCode.VERSION, SrvInfoCode.CAPABILITIES, SrvInfoCode.RUNNING):
             result = self.response.read_int()
-        elif result_type == InfoItemType.BYTES:
-            result = self.response.read_bytes()
-        elif result_type == InfoItemType.STRING:
+        elif info_code in (SrvInfoCode.SERVER_VERSION, SrvInfoCode.IMPLEMENTATION,
+                           SrvInfoCode.GET_ENV, SrvInfoCode.GET_ENV_MSG,
+                           SrvInfoCode.GET_ENV_LOCK, SrvInfoCode.USER_DBPATH):
             result = self.response.read_sized_string()
+        elif info_code == SrvInfoCode.SRV_DB_INFO:
+            num_attachments = -1
+            databases = []
+            while not self.response.is_eof():
+                tag = self.response.get_tag()
+                if tag == SrvInfoCode.TIMEOUT:
+                    return None
+                elif tag == SrvDbInfoOption.ATT:
+                    num_attachments = self.response.read_short()
+                elif tag == SPBItem.DBNAME:
+                    databases.append(self.response.read_sized_string())
+                elif tag == SrvDbInfoOption.DB:
+                    self.response.read_short()
+            result = (num_attachments, databases)
+        if self.response.get_tag() != isc_info_end:  # pragma: no cover
+            raise InterfaceError("Malformed result buffer (missing isc_info_end item)")
+        # cache
+        if info_code in (SrvInfoCode.SERVER_VERSION, SrvInfoCode.VERSION,
+                         SrvInfoCode.IMPLEMENTATION, SrvInfoCode.GET_ENV,
+                         SrvInfoCode.USER_DBPATH, SrvInfoCode.GET_ENV_LOCK,
+                         SrvInfoCode.GET_ENV_MSG, SrvInfoCode.CAPABILITIES):
+            self._cache[info_code] = result
+        return result
+    @property
+    def version(self) -> str:
+        "Firebird version as SEMVER string."
+        return self.__version
+    @property
+    def engine_version(self) -> float:
+        "Firebird version as <major>.<minor> float number."
+        return self.__engine_version
+    @property
+    def manager_version(self) -> int:
+        "Service manager version."
+        return self.get_info(SrvInfoCode.VERSION)
+    @property
+    def architecture(self) -> str:
+        "Server implementation description."
+        return self.get_info(SrvInfoCode.IMPLEMENTATION)
+    @property
+    def home_directory(self) -> str:
+        "Server home directory."
+        return self.get_info(SrvInfoCode.GET_ENV)
+    @property
+    def security_database(self) -> str:
+        "Path to security database."
+        return self.get_info(SrvInfoCode.USER_DBPATH)
+    @property
+    def lock_directory(self) -> str:
+        "Directory with lock file(s)."
+        return self.get_info(SrvInfoCode.GET_ENV_LOCK)
+    @property
+    def message_directory(self) -> str:
+        "Directory with message file(s)."
+        return self.get_info(SrvInfoCode.GET_ENV_MSG)
+    @property
+    def capabilities(self) -> ServerCapability:
+        "Server capabilities."
+        return ServerCapability(self.get_info(SrvInfoCode.CAPABILITIES))
+    @property
+    def connection_count(self) -> int:
+        "Number of database attachments."
+        return self.get_info(SrvInfoCode.SRV_DB_INFO)[0]
+    @property
+    def attached_databases(self) -> List[str]:
+        "List of attached databases."
+        return self.get_info(SrvInfoCode.SRV_DB_INFO)[1]
+
+class ServerServiceProvider:
+    """Base class for server service providers."""
+    def __init__(self, server: Server):
+        self._srv: Server = weakref.ref(server)
+    def _close(self) -> None:
+        self._srv = None
+
+class ServerDbServices(ServerServiceProvider):
+    """Database-related server services."""
+    def get_statistics(self, *, database: str,
+                       flags: SrvStatFlag=SrvStatFlag.DEFAULT,
+                       tables: Sequence[str]=None,
+                       callback: CB_OUTPUT_LINE=None) -> None:
+        """Return database statistics produced by gstat utility.
+"""
+        self._srv()._reset_output()
+        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
+            spb.insert_tag(ServerAction.DB_STATS)
+            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_int(SPBItem.OPTIONS, flags)
+            if tables is not None:
+                cmdline = ['-t']
+                cmdline.extend(tables)
+                spb.insert_string(SPBItem.COMMAND_LINE, ' '.join(cmdline))
+            self._srv()._svc.start(spb.get_buffer())
+        if callback:
+            for line in self._srv():
+                callback(line)
+    def backup(self, *, database: str, backup: Union[str, Sequence[str]],
+               backup_file_sizes: Sequence[int]=(),
+               flags: SrvBackupFlag=SrvBackupFlag.NONE,
+               callback: CB_OUTPUT_LINE=None, stats: str=None,
+               verbose: bool=False, skip_data: str=None) -> None:
+        if isinstance(backup, str):
+            backup = [backup]
+            assert len(backup_file_sizes) == 0
         else:
-            result = None
-        if self.response.get_tag() != isc_info_end:  # pragma: no cover
-            raise InterfaceError("Malformed result buffer (missing isc_info_end item)")
-        return result
-    def _fetch_complex_info(self, request: bytes, timeout: int=-1) -> None:
-        send = self._make_request(timeout)
-        self.response.clear()
-        self._svc.query(send, request, self.response.raw)
-        if self.response.is_truncated():  # pragma: no cover
-            raise InterfaceError("Requested data can't fint into largest possible buffer")
-    def _fetch_line(self, timeout: int=-1) -> Optional[str]:
-        self._fetch_complex_info(bytes([SvcInfoCode.LINE]))
-        result = None
-        while not self.response.is_eof():
-            tag = self.response.get_tag()
-            if tag == SvcInfoCode.TIMEOUT:
-                return None
-            elif tag == SvcInfoCode.LINE:
-                result = self.response.read_sized_string()
-        if self.response.get_tag() != isc_info_end:  # pragma: no cover
-            raise InterfaceError("Malformed result buffer (missing isc_info_end item)")
-        return result
-    def _read_output(self, *, init: str='', timeout: int=-1) -> None:
-        assert self._svc is not None
-        send = self._make_request(timeout)
-        self.response.clear()
-        self._svc.query(send, bytes([SvcInfoCode.TO_EOF]), self.response.raw)
-        tag = self.response.get_tag()
-        if tag != SvcInfoCode.TO_EOF:  # pragma: no cover
-            raise InterfaceError(f"Service responded with error code: {tag}")
-        init += self.response.read_sized_string()
-        self.__line_buffer = init.splitlines(keepends=True)
-        self.__eof = self.response.get_tag() == isc_info_end
-    def _read_all_binary_output(self, *, timeout: int=-1) -> bytes:
-        assert self._svc is not None
-        send = self._make_request(timeout)
-        result = b''
-        eof = False
-        while not eof:
-            self.response.clear()
-            self._svc.query(send, bytes([SvcInfoCode.TO_EOF]), self.response.raw)
-            tag = self.response.get_tag()
-            if tag != SvcInfoCode.TO_EOF:  # pragma: no cover
-                raise InterfaceError(f"Service responded with error code: {tag}")
-            result += self.response.read_bytes()
-            eof = self.response.get_tag() == isc_info_end
-        return result
-    def _read_next_binary_output(self, *, timeout: int=-1) -> bytes:
-        assert self._svc is not None
-        result = None
-        if not self.__eof:
-            send = self._make_request(timeout)
-            self.response.clear()
-            self._svc.query(send, bytes([SvcInfoCode.TO_EOF]), self.response.raw)
-            tag = self.response.get_tag()
-            if tag != SvcInfoCode.TO_EOF:  # pragma: no cover
-                raise InterfaceError(f"Service responded with error code: {tag}")
-            result = self.response.read_bytes()
-            tag = self.response.get_tag()
-            self.__eof = tag == isc_info_end
-        return result
-    def _get_svr_db_info(self) -> Tuple[int, List]:
-        self._fetch_complex_info(bytes([SvcInfoCode.SRV_DB_INFO]))
-        num_attachments = -1
-        databases = []
-        while not self.response.is_eof():
-            tag = self.response.get_tag()
-            if tag == SvcInfoCode.TIMEOUT:
-                return None
-            elif tag == SvcDbInfoOption.ATT:
-                num_attachments = self.response.read_short()
-            elif tag == SPBItem.DBNAME:
-                databases.append(self.response.read_sized_string())
-            elif tag == SvcDbInfoOption.DB:
-                self.response.read_short()
-        if self.response.get_tag() != isc_info_end:  # pragma: no cover
-            raise InterfaceError("Malformed result buffer (missing isc_info_end item)")
-        return (num_attachments, databases)
-    def get_service_manager_version(self) -> int:
-        assert self._svc is not None
-        return self._get_simple_info(SvcInfoCode.VERSION, InfoItemType.BIGINT)
-    def get_server_version(self) -> str:
-        assert self._svc is not None
-        return self._get_simple_info(SvcInfoCode.SERVER_VERSION, InfoItemType.STRING)
-    def get_architecture(self) -> str:
-        assert self._svc is not None
-        return self._get_simple_info(SvcInfoCode.IMPLEMENTATION, InfoItemType.STRING)
-    def get_home_directory(self) -> str:
-        assert self._svc is not None
-        return self._get_simple_info(SvcInfoCode.GET_ENV, InfoItemType.STRING)
-    def get_security_database_path(self) -> str:
-        assert self._svc is not None
-        return self._get_simple_info(SvcInfoCode.USER_DBPATH, InfoItemType.STRING)
-    def get_lock_file_directory(self) -> str:
-        assert self._svc is not None
-        return self._get_simple_info(SvcInfoCode.GET_ENV_LOCK, InfoItemType.STRING)
-    def get_message_file_directory(self) -> str:
-        assert self._svc is not None
-        return self._get_simple_info(SvcInfoCode.GET_ENV_MSG, InfoItemType.STRING)
-    def get_server_capabilities(self) -> ServerCapability:
-        assert self._svc is not None
-        return ServerCapability(self._get_simple_info(SvcInfoCode.CAPABILITIES, InfoItemType.BIGINT))
-    def get_connection_count(self) -> int:
-        assert self._svc is not None
-        return self._get_svr_db_info()[0]
-    def get_attached_database_names(self) -> List[str]:
-        assert self._svc is not None
-        return self._get_svr_db_info()[1]
+            assert len(backup) >= 1
+            assert len(backup) == len(backup_file_sizes) - 1
+        self._srv()._reset_output()
+        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
+            spb.insert_tag(ServerAction.BACKUP)
+            spb.insert_string(SPBItem.DBNAME, database)
+            for filename, size in itertools.zip_longest(backup, backup_file_sizes):
+                spb.insert_string(SrvBackupOption.FILE, filename)
+                if size is not None:
+                    spb.insert_int(SrvBackupOption.LENGTH, size)
+            if skip_data is not None:
+                spb.insert_string(SrvBackupOption.SKIP_DATA, skip_data)
+            spb.insert_int(SPBItem.OPTIONS, flags)
+            if verbose:
+                spb.insert_tag(SPBItem.VERBOSE)
+            if stats:
+                spb.insert_string(SrvBackupOption.STAT, stats)
+            self._srv()._svc.start(spb.get_buffer())
+        if callback:
+            for line in self._srv():
+                callback(line)
+    def restore(self, *, backup: Union[str, Sequence[str]],
+                database: Union[str, Sequence[str]],
+                db_file_pages: Sequence[int]=(),
+                flags: SrvRestoreFlag=SrvRestoreFlag.CREATE,
+                callback: CB_OUTPUT_LINE=None, stats: str=None,
+                verbose: bool=True, skip_data: str=None, page_size: int=None,
+                buffers: int=None, access_mode: DbAccessMode=DbAccessMode.READ_WRITE) -> None:
+        if isinstance(backup, str):
+            backup = [backup]
+        if isinstance(database, str):
+            database = [database]
+            assert len(db_file_pages) == 0
+        else:
+            assert len(database) >= 1
+            assert len(database) == len(db_file_pages) - 1
+        self._srv()._reset_output()
+        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
+            spb.insert_tag(ServerAction.RESTORE)
+            for filename in backup:
+                spb.insert_string(SrvRestoreOption.FILE, filename)
+            for filename, size in itertools.zip_longest(database, db_file_pages):
+                spb.insert_string(SPBItem.DBNAME, filename)
+                if size is not None:
+                    spb.insert_int(SrvRestoreOption.LENGTH, size)
+            if page_size is not None:
+                spb.insert_int(SrvRestoreOption.PAGE_SIZE, page_size)
+            if buffers is not None:
+                spb.insert_int(SrvRestoreOption.BUFFERS, buffers)
+            spb.insert_bytes(SrvRestoreOption.ACCESS_MODE, bytes([access_mode]))
+            if skip_data is not None:
+                spb.insert_string(SrvRestoreOption.SKIP_DATA, skip_data)
+            spb.insert_int(SPBItem.OPTIONS, flags)
+            if verbose:
+                spb.insert_tag(SPBItem.VERBOSE)
+            if stats:
+                spb.insert_string(SrvBackupOption.STAT, stats)
+            self._srv()._svc.start(spb.get_buffer())
+        if callback:
+            for line in self._srv():
+                callback(line)
+    def local_backup(self, *, database: str, backup_stream: BinaryIO,
+                     flags: SrvBackupFlag=SrvBackupFlag.NONE) -> None:
+        self._srv()._reset_output()
+        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
+            spb.insert_tag(ServerAction.BACKUP)
+            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_string(SrvBackupOption.FILE, 'stdout')
+            spb.insert_int(SPBItem.OPTIONS, flags)
+            self._srv()._svc.start(spb.get_buffer())
+        while not self._srv()._eof:
+            backup_stream.write(self._srv()._read_next_binary_output())
+    def local_restore(self, *, backup_stream: BinaryIO,
+                      database: Union[str, Sequence[str]],
+                      db_file_pages: Sequence[int]=(),
+                      flags: SrvRestoreFlag=SrvRestoreFlag.CREATE,
+                      page_size: int=None, buffers: int=None,
+                      access_mode: DbAccessMode=DbAccessMode.READ_WRITE) -> None:
+        if isinstance(database, str):
+            database = [database]
+            assert len(db_file_pages) == 0
+        else:
+            assert len(database) >= 1
+            assert len(database) == len(db_file_pages) - 1
+        self._srv()._reset_output()
+        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
+            spb.insert_tag(ServerAction.RESTORE)
+            spb.insert_string(SrvRestoreOption.FILE, 'stdin')
+            for filename, size in itertools.zip_longest(database, db_file_pages):
+                spb.insert_string(SPBItem.DBNAME, filename)
+                if size is not None:
+                    spb.insert_int(SrvRestoreOption.LENGTH, size)
+            if page_size is not None:
+                spb.insert_int(SrvRestoreOption.PAGE_SIZE, page_size)
+            if buffers is not None:
+                spb.insert_int(SrvRestoreOption.BUFFERS, buffers)
+            spb.insert_bytes(SrvRestoreOption.ACCESS_MODE, bytes([access_mode]))
+            spb.insert_int(SPBItem.OPTIONS, flags)
+            self._srv()._svc.start(spb.get_buffer())
+        #
+        request_length = 0
+        line = ''
+        keep_going = True
+        while keep_going:
+            no_data = False
+            self._srv().response.clear()
+            if request_length > 0:
+                request_length = min([request_length, 65500])
+                raw = backup_stream.read(request_length)
+                send = b''.join([SrvInfoCode.LINE.to_bytes(1, 'little'),
+                                 len(raw).to_bytes(2, 'little'), raw,
+                                 isc_info_end.to_bytes(1, 'little')])
+            else:
+                send = None
+            self._srv()._svc.query(send, bytes([SrvInfoCode.STDIN, SrvInfoCode.LINE]),
+                                   self._srv().response.raw)
+            tag = self._srv().response.get_tag()
+            while tag != isc_info_end:
+                if tag == SrvInfoCode.STDIN:
+                    request_length = self._srv().response.read_int()
+                elif tag == SrvInfoCode.LINE:
+                    line = self._srv().response.read_sized_string()
+                elif tag == isc_info_data_not_ready:
+                    no_data = True
+                else:  # pragma: no cover
+                    raise InterfaceError(f"Service responded with error code: {tag}")
+                tag = self._srv().response.get_tag()
+            keep_going = no_data or request_length != 0 or len(line) > 0
+    def nbackup(self, *, database: str, backup: str, level: int=0,
+                direct: bool=False, flags: SrvNBackupFlag=SrvNBackupFlag.NONE) -> None:
+        self._srv()._reset_output()
+        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
+            spb.insert_tag(ServerAction.NBAK)
+            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_string(SrvNBackupOption.FILE, backup)
+            spb.insert_int(SrvNBackupOption.LEVEL, level)
+            if direct:
+                spb.insert_string(SrvNBackupOption.DIRECT, 'ON')
+            spb.insert_int(SPBItem.OPTIONS, flags)
+            self._srv()._svc.start(spb.get_buffer())
+        self._srv().wait()
+    def nrestore(self, *, backups: Sequence[str], database: str,
+                 direct: bool=False, flags: SrvNBackupFlag=SrvNBackupFlag.NONE) -> None:
+        self._srv()._reset_output()
+        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
+            spb.insert_tag(ServerAction.NREST)
+            spb.insert_string(SPBItem.DBNAME, database)
+            for backup in backups:
+                spb.insert_string(SrvNBackupOption.FILE, backup)
+            if direct:
+                spb.insert_string(SrvNBackupOption.DIRECT, 'ON')
+            spb.insert_int(SPBItem.OPTIONS, flags)
+            self._srv()._svc.start(spb.get_buffer())
+        self._srv().wait()
+    def set_default_cache_size(self, *, database: str, size: int) -> None:
+        self._srv()._reset_output()
+        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
+            spb.insert_tag(ServerAction.PROPERTIES)
+            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_int(SrvPropertiesOption.PAGE_BUFFERS, size)
+            self._srv()._svc.start(spb.get_buffer())
+    def set_sweep_interval(self, *, database: str, interval: int) -> None:
+        self._srv()._reset_output()
+        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
+            spb.insert_tag(ServerAction.PROPERTIES)
+            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_int(SrvPropertiesOption.SWEEP_INTERVAL, interval)
+            self._srv()._svc.start(spb.get_buffer())
+    def set_space_reservation(self, *, database: str, mode: DbSpaceReservation) -> None:
+        self._srv()._reset_output()
+        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
+            spb.insert_tag(ServerAction.PROPERTIES)
+            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_bytes(SrvPropertiesOption.RESERVE_SPACE,
+                             bytes([mode]))
+            self._srv()._svc.start(spb.get_buffer())
+    def set_write_mode(self, *, database: str, mode: DbWriteMode) -> None:
+        self._srv()._reset_output()
+        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
+            spb.insert_tag(ServerAction.PROPERTIES)
+            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_bytes(SrvPropertiesOption.WRITE_MODE,
+                             bytes([mode]))
+            self._srv()._svc.start(spb.get_buffer())
+    def set_access_mode(self, *, database: str, mode: DbAccessMode) -> None:
+        self._srv()._reset_output()
+        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
+            spb.insert_tag(ServerAction.PROPERTIES)
+            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_bytes(SrvPropertiesOption.ACCESS_MODE,
+                             bytes([mode]))
+            self._srv()._svc.start(spb.get_buffer())
+    def set_sql_dialect(self, *, database: str, dialect: int) -> None:
+        self._srv()._reset_output()
+        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
+            spb.insert_tag(ServerAction.PROPERTIES)
+            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_int(SrvPropertiesOption.SET_SQL_DIALECT, dialect)
+            self._srv()._svc.start(spb.get_buffer())
+    def activate_shadow(self, *, database: str) -> None:
+        self._srv()._reset_output()
+        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
+            spb.insert_tag(ServerAction.PROPERTIES)
+            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_int(SPBItem.OPTIONS, SrvPropertiesFlag.ACTIVATE)
+            self._srv()._svc.start(spb.get_buffer())
+    def no_linger(self, *, database: str) -> None:
+        self._srv()._reset_output()
+        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
+            spb.insert_tag(ServerAction.PROPERTIES)
+            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_int(SPBItem.OPTIONS, SrvPropertiesFlag.NOLINGER)
+            self._srv()._svc.start(spb.get_buffer())
+    def shutdown(self, *, database: str, mode: ShutdownMode,
+                 method: ShutdownMethod, timeout: int) -> None:
+        self._srv()._reset_output()
+        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
+            spb.insert_tag(ServerAction.PROPERTIES)
+            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_bytes(SrvPropertiesOption.SHUTDOWN_MODE, bytes([mode]))
+            spb.insert_int(method, timeout)
+            self._srv()._svc.start(spb.get_buffer())
+    def bring_online(self, *, database: str, mode: OnlineMode=OnlineMode.NORMAL) -> None:
+        self._srv()._reset_output()
+        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
+            spb.insert_tag(ServerAction.PROPERTIES)
+            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_bytes(SrvPropertiesOption.ONLINE_MODE, bytes([mode]))
+            self._srv()._svc.start(spb.get_buffer())
+    def sweep(self, *, database: str) -> None:
+        self._srv()._reset_output()
+        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
+            spb.insert_tag(ServerAction.REPAIR)
+            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_int(SPBItem.OPTIONS, SrvRepairFlag.SWEEP_DB)
+            self._srv()._svc.start(spb.get_buffer())
+        self._srv().wait()
+    def repair(self, *, database: str, flags: SrvRepairFlag=SrvRepairFlag.REPAIR) -> bytes:
+        self._srv()._reset_output()
+        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
+            spb.insert_tag(ServerAction.REPAIR)
+            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_int(SPBItem.OPTIONS, flags)
+            self._srv()._svc.start(spb.get_buffer())
+        self._srv().wait()
+    def validate(self, *, database: str, include_table: str=None,
+                 exclude_table: str=None, include_index: str=None,
+                 exclude_index: str=None, lock_timeout: int=None,
+                 callback: CB_OUTPUT_LINE=None) -> None:
+        self._srv()._reset_output()
+        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
+            spb.insert_tag(ServerAction.VALIDATE)
+            spb.insert_string(SPBItem.DBNAME, database)
+            if include_table is not None:
+                spb.insert_string(SrvValidateOption.INCLUDE_TABLE, include_table)
+            if exclude_table is not None:
+                spb.insert_string(SrvValidateOption.EXCLUDE_TABLE, exclude_table)
+            if include_index is not None:
+                spb.insert_string(SrvValidateOption.INCLUDE_INDEX, include_index)
+            if exclude_index is not None:
+                spb.insert_string(SrvValidateOption.EXCLUDE_INDEX, exclude_index)
+            if lock_timeout is not None:
+                spb.insert_int(SrvValidateOption.LOCK_TIMEOUT, lock_timeout)
+            self._srv()._svc.start(spb.get_buffer())
+        if callback:
+            for line in self._srv():
+                callback(line)
     def get_limbo_transaction_ids(self, *, database: str) -> List[int]:
-        assert self._svc is not None
         raise NotImplementedError
         #with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            #spb.insert_tag(ServiceAction.REPAIR)
+            #spb.insert_tag(ServerAction .REPAIR)
             #spb.insert_string(SPBItem.DBNAME, database)
             #spb.insert_int(SPBItem.OPTIONS, SvcRepairFlag.LIST_LIMBO_TRANS)
-            #self._svc.start(spb.get_buffer())
-        #self._reset_output()
-        #self._fetch_complex_info(bytes([SvcInfoCode.LIMBO_TRANS]))
+            #self._srv()._svc.start(spb.get_buffer())
+        #self._srv()._reset_output()
+        #self._srv()._fetch_complex_info(bytes([SvcInfoCode.LIMBO_TRANS]))
         #trans_ids = []
         #while not self.result_buffer.is_eof():
             #tag = self.result_buffer.get_tag()
@@ -3332,572 +3973,335 @@ Note:
         #if self.result_buffer.get_tag() != isc_info_end:
             #raise InterfaceError("Malformed result buffer (missing isc_info_end item)")
         #return trans_ids
-    @traced()
     def commit_limbo_transaction(self, *, database: str, transaction_id: int) -> None:
-        assert self._svc is not None
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.REPAIR)
+            spb.insert_tag(ServerAction.REPAIR)
             spb.insert_string(SPBItem.DBNAME, database)
             if transaction_id <= USHRT_MAX:
-                spb.insert_int(SvcRepairOption.COMMIT_TRANS, transaction_id)
+                spb.insert_int(SrvRepairOption.COMMIT_TRANS, transaction_id)
             else:
-                spb.insert_bigint(SvcRepairOption.COMMIT_TRANS_64, transaction_id)
-            self._svc.start(spb.get_buffer())
-        self._read_all_binary_output()
-    @traced()
+                spb.insert_bigint(SrvRepairOption.COMMIT_TRANS_64, transaction_id)
+            self._srv()._svc.start(spb.get_buffer())
+        self._srv()._read_all_binary_output()
     def rollback_limbo_transaction(self, *, database: str, transaction_id: int) -> None:
-        assert self._svc is not None
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.REPAIR)
+            spb.insert_tag(ServerAction.REPAIR)
             spb.insert_string(SPBItem.DBNAME, database)
             if transaction_id <= USHRT_MAX:
-                spb.insert_int(SvcRepairOption.ROLLBACK_TRANS, transaction_id)
+                spb.insert_int(SrvRepairOption.ROLLBACK_TRANS, transaction_id)
             else:
-                spb.insert_bigint(SvcRepairOption.ROLLBACK_TRANS_64, transaction_id)
-            self._svc.start(spb.get_buffer())
-        self._read_all_binary_output()
-    @traced()
-    def get_log(self, callback: CB_OUTPUT_LINE=None) -> None:
-        assert self._svc is not None
-        self._reset_output()
-        self._svc.start(bytes([ServiceAction.GET_FB_LOG]))
-        if callback:
-            for line in self:
-                callback(line)
-    @traced()
-    def get_statistics(self, *, database: str,
-                       flags: SvcStatFlag=SvcStatFlag.DEFAULT,
-                       tables: Sequence[str]=None,
-                       callback: CB_OUTPUT_LINE=None) -> None:
-        assert self._svc is not None
-        self._reset_output()
-        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.DB_STATS)
-            spb.insert_string(SPBItem.DBNAME, database)
-            spb.insert_int(SPBItem.OPTIONS, flags)
-            if tables is not None:
-                cmdline = ['-t']
-                cmdline.extend(tables)
-                spb.insert_string(SPBItem.COMMAND_LINE, ' '.join(cmdline))
-            self._svc.start(spb.get_buffer())
-        if callback:
-            for line in self:
-                callback(line)
-    @traced()
-    def backup(self, *, database: str, backup: Union[str, Sequence[str]],
-               backup_file_sizes: Sequence[int]=(),
-               flags: SvcBackupFlag=SvcBackupFlag.NONE,
-               callback: CB_OUTPUT_LINE=None, stats: str=None,
-               verbose: bool=False, skip_data: str=None) -> None:
-        assert self._svc is not None
-        if isinstance(backup, str):
-            backup = [backup]
-            assert len(backup_file_sizes) == 0
-        else:
-            assert len(backup) >= 1
-            assert len(backup) == len(backup_file_sizes) - 1
-        self._reset_output()
-        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.BACKUP)
-            spb.insert_string(SPBItem.DBNAME, database)
-            for filename, size in itertools.zip_longest(backup, backup_file_sizes):
-                spb.insert_string(SvcBackupOption.FILE, filename)
-                if size is not None:
-                    spb.insert_int(SvcBackupOption.LENGTH, size)
-            if skip_data is not None:
-                spb.insert_string(SvcBackupOption.SKIP_DATA, skip_data)
-            spb.insert_int(SPBItem.OPTIONS, flags)
-            if verbose:
-                spb.insert_tag(SPBItem.VERBOSE)
-            if stats:
-                spb.insert_string(SvcBackupOption.STAT, stats)
-            self._svc.start(spb.get_buffer())
-        if callback:
-            for line in self:
-                callback(line)
-    @traced()
-    def local_backup(self, *, database: str, backup_stream: BinaryIO,
-                     flags: SvcBackupFlag=SvcBackupFlag.NONE) -> None:
-        assert self._svc is not None
-        self._reset_output()
-        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.BACKUP)
-            spb.insert_string(SPBItem.DBNAME, database)
-            spb.insert_string(SvcBackupOption.FILE, 'stdout')
-            spb.insert_int(SPBItem.OPTIONS, flags)
-            self._svc.start(spb.get_buffer())
-        while not self.__eof:
-            backup_stream.write(self._read_next_binary_output())
-    @traced()
-    def restore(self, *, backup: Union[str, Sequence[str]],
-                database: Union[str, Sequence[str]],
-                db_file_pages: Sequence[int]=(),
-                flags: SvcRestoreFlag=SvcRestoreFlag.CREATE,
-                callback: CB_OUTPUT_LINE=None, stats: str=None,
-                verbose: bool=True, skip_data: str=None, page_size: int=None,
-                buffers: int=None, access_mode: DbAccessMode=DbAccessMode.READ_WRITE) -> None:
-        assert self._svc is not None
-        if isinstance(backup, str):
-            backup = [backup]
-        if isinstance(database, str):
-            database = [database]
-            assert len(db_file_pages) == 0
-        else:
-            assert len(database) >= 1
-            assert len(database) == len(db_file_pages) - 1
-        self._reset_output()
-        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.RESTORE)
-            for filename in backup:
-                spb.insert_string(SvcRestoreOption.FILE, filename)
-            for filename, size in itertools.zip_longest(database, db_file_pages):
-                spb.insert_string(SPBItem.DBNAME, filename)
-                if size is not None:
-                    spb.insert_int(SvcRestoreOption.LENGTH, size)
-            if page_size is not None:
-                spb.insert_int(SvcRestoreOption.PAGE_SIZE, page_size)
-            if buffers is not None:
-                spb.insert_int(SvcRestoreOption.BUFFERS, buffers)
-            spb.insert_bytes(SvcRestoreOption.ACCESS_MODE, bytes([access_mode]))
-            if skip_data is not None:
-                spb.insert_string(SvcRestoreOption.SKIP_DATA, skip_data)
-            spb.insert_int(SPBItem.OPTIONS, flags)
-            if verbose:
-                spb.insert_tag(SPBItem.VERBOSE)
-            if stats:
-                spb.insert_string(SvcBackupOption.STAT, stats)
-            self._svc.start(spb.get_buffer())
-        if callback:
-            for line in self:
-                callback(line)
-    @traced()
-    def local_restore(self, *, backup_stream: BinaryIO,
-                      database: Union[str, Sequence[str]],
-                      db_file_pages: Sequence[int]=(),
-                      flags: SvcRestoreFlag=SvcRestoreFlag.CREATE,
-                      page_size: int=None, buffers: int=None,
-                      access_mode: DbAccessMode=DbAccessMode.READ_WRITE) -> None:
-        assert self._svc is not None
-        if isinstance(database, str):
-            database = [database]
-            assert len(db_file_pages) == 0
-        else:
-            assert len(database) >= 1
-            assert len(database) == len(db_file_pages) - 1
-        self._reset_output()
-        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.RESTORE)
-            spb.insert_string(SvcRestoreOption.FILE, 'stdin')
-            for filename, size in itertools.zip_longest(database, db_file_pages):
-                spb.insert_string(SPBItem.DBNAME, filename)
-                if size is not None:
-                    spb.insert_int(SvcRestoreOption.LENGTH, size)
-            if page_size is not None:
-                spb.insert_int(SvcRestoreOption.PAGE_SIZE, page_size)
-            if buffers is not None:
-                spb.insert_int(SvcRestoreOption.BUFFERS, buffers)
-            spb.insert_bytes(SvcRestoreOption.ACCESS_MODE, bytes([access_mode]))
-            spb.insert_int(SPBItem.OPTIONS, flags)
-            self._svc.start(spb.get_buffer())
-        #
-        request_length = 0
-        line = ''
-        keep_going = True
-        while keep_going:
-            no_data = False
-            self.response.clear()
-            if request_length > 0:
-                request_length = min([request_length, 65500])
-                raw = backup_stream.read(request_length)
-                send = b''.join([SvcInfoCode.LINE.to_bytes(1, 'little'),
-                                 len(raw).to_bytes(2, 'little'), raw,
-                                 isc_info_end.to_bytes(1, 'little')])
-            else:
-                send = None
-            self._svc.query(send, bytes([SvcInfoCode.STDIN, SvcInfoCode.LINE]), self.response.raw)
-            tag = self.response.get_tag()
-            while tag != isc_info_end:
-                if tag == SvcInfoCode.STDIN:
-                    request_length = self.response.read_int()
-                elif tag == SvcInfoCode.LINE:
-                    line = self.response.read_sized_string()
-                elif tag == isc_info_data_not_ready:
-                    no_data = True
-                else:  # pragma: no cover
-                    raise InterfaceError(f"Service responded with error code: {tag}")
-                tag = self.response.get_tag()
-            keep_going = no_data or request_length != 0 or len(line) > 0
-    @traced()
-    def nbackup(self, *, database: str, backup: str, level: int=0,
-                direct: bool=False, flags: SvcNBackupFlag=SvcNBackupFlag.NONE) -> None:
-        assert self._svc is not None
-        self._reset_output()
-        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.NBAK)
-            spb.insert_string(SPBItem.DBNAME, database)
-            spb.insert_string(SvcNBackupOption.FILE, backup)
-            spb.insert_int(SvcNBackupOption.LEVEL, level)
-            if direct:
-                spb.insert_string(SvcNBackupOption.DIRECT, 'ON')
-            spb.insert_int(SPBItem.OPTIONS, flags)
-            self._svc.start(spb.get_buffer())
-        self.wait()
-    @traced()
-    def nrestore(self, *, backups: Sequence[str], database: str,
-                 direct: bool=False, flags: SvcNBackupFlag=SvcNBackupFlag.NONE) -> None:
-        assert self._svc is not None
-        self._reset_output()
-        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.NREST)
-            spb.insert_string(SPBItem.DBNAME, database)
-            for backup in backups:
-                spb.insert_string(SvcNBackupOption.FILE, backup)
-            if direct:
-                spb.insert_string(SvcNBackupOption.DIRECT, 'ON')
-            spb.insert_int(SPBItem.OPTIONS, flags)
-            self._svc.start(spb.get_buffer())
-        self.wait()
-    @traced()
-    def trace_start(self, *, config: str, name: str=None) -> int:
-        assert self._svc is not None
-        self._reset_output()
-        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.TRACE_START)
-            if name is not None:
-                spb.insert_string(SvcTraceOption.NAME, name)
-            spb.insert_string(SvcTraceOption.CONFIG, config)
-            self._svc.start(spb.get_buffer())
-        response = self._fetch_line()
-        if response.startswith('Trace session ID'):
-            return int(response.split()[3])
-        else:  # pragma: no cover
-            # response should contain the error message
-            raise DatabaseError(response)
-    def __trace_action(self, action: ServiceAction, label: str, session_id: int) -> None:
-        assert self._svc is not None
-        self._reset_output()
-        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(action)
-            spb.insert_int(SvcTraceOption.ID, session_id)
-            self._svc.start(spb.get_buffer())
-        response = self._fetch_line()
-        if not response.startswith(f"Trace session ID {session_id} {label}"):  # pragma: no cover
-            # response should contain the error message
-            raise DatabaseError(response)
-    @traced()
-    def trace_stop(self, *, session_id: int) -> None:
-        self.__trace_action(ServiceAction.TRACE_STOP, 'stopped', session_id)
-    @traced()
-    def trace_suspend(self, *, session_id: int) -> None:
-        self.__trace_action(ServiceAction.TRACE_SUSPEND, 'paused', session_id)
-    @traced()
-    def trace_resume(self, *, session_id: int) -> None:
-        self.__trace_action(ServiceAction.TRACE_RESUME, 'resumed', session_id)
-    @traced()
-    def trace_list(self) -> Dict[int, Dict[str, Any]]:
-        assert self._svc is not None
-        self._reset_output()
-        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.TRACE_LIST)
-            self._svc.start(spb.get_buffer())
-        result = {}
-        for line in self:
-            if not line.strip():
-                session_id = None
-            elif line.startswith('Session ID:'):
-                session_id = int(line.split(':')[1].strip())
-                result[session_id] = dict()
-            elif line.lstrip().startswith('name:'):
-                result[session_id]['name'] = line.split(':')[1].strip()
-            elif line.lstrip().startswith('user:'):
-                result[session_id]['user'] = line.split(':')[1].strip()
-            elif line.lstrip().startswith('date:'):
-                result[session_id]['date'] = datetime.datetime.strptime(
-                    line.split(':', 1)[1].strip(),
-                    '%Y-%m-%d %H:%M:%S')
-            elif line.lstrip().startswith('flags:'):
-                result[session_id]['flags'] = line.split(':')[1].strip().split(',')
-            else:  # pragma: no cover
-                raise InterfaceError(f"Unexpected line in trace session list: {line}")
-        return result
-    @traced()
-    def set_default_cache_size(self, *, database: str, size: int) -> None:
-        assert self._svc is not None
-        self._reset_output()
-        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.PROPERTIES)
-            spb.insert_string(SPBItem.DBNAME, database)
-            spb.insert_int(SvcPropertiesOption.PAGE_BUFFERS, size)
-            self._svc.start(spb.get_buffer())
-    @traced()
-    def set_sweep_interval(self, *, database: str, interval: int) -> None:
-        assert self._svc is not None
-        self._reset_output()
-        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.PROPERTIES)
-            spb.insert_string(SPBItem.DBNAME, database)
-            spb.insert_int(SvcPropertiesOption.SWEEP_INTERVAL, interval)
-            self._svc.start(spb.get_buffer())
-    @traced()
-    def set_space_reservation(self, *, database: str, mode: DbSpaceReservation) -> None:
-        assert self._svc is not None
-        self._reset_output()
-        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.PROPERTIES)
-            spb.insert_string(SPBItem.DBNAME, database)
-            spb.insert_bytes(SvcPropertiesOption.RESERVE_SPACE,
-                             bytes([mode]))
-            self._svc.start(spb.get_buffer())
-    @traced()
-    def set_write_mode(self, *, database: str, mode: DbWriteMode) -> None:
-        assert self._svc is not None
-        self._reset_output()
-        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.PROPERTIES)
-            spb.insert_string(SPBItem.DBNAME, database)
-            spb.insert_bytes(SvcPropertiesOption.WRITE_MODE,
-                             bytes([mode]))
-            self._svc.start(spb.get_buffer())
-    @traced()
-    def set_access_mode(self, *, database: str, mode: DbAccessMode) -> None:
-        assert self._svc is not None
-        self._reset_output()
-        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.PROPERTIES)
-            spb.insert_string(SPBItem.DBNAME, database)
-            spb.insert_bytes(SvcPropertiesOption.ACCESS_MODE,
-                             bytes([mode]))
-            self._svc.start(spb.get_buffer())
-    @traced()
-    def set_sql_dialect(self, *, database: str, dialect: int) -> None:
-        assert self._svc is not None
-        self._reset_output()
-        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.PROPERTIES)
-            spb.insert_string(SPBItem.DBNAME, database)
-            spb.insert_int(SvcPropertiesOption.SET_SQL_DIALECT, dialect)
-            self._svc.start(spb.get_buffer())
-    @traced()
-    def activate_shadow(self, *, database: str) -> None:
-        assert self._svc is not None
-        self._reset_output()
-        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.PROPERTIES)
-            spb.insert_string(SPBItem.DBNAME, database)
-            spb.insert_int(SPBItem.OPTIONS, SvcPropertiesFlag.ACTIVATE)
-            self._svc.start(spb.get_buffer())
-    @traced()
-    def no_linger(self, *, database: str) -> None:
-        assert self._svc is not None
-        self._reset_output()
-        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.PROPERTIES)
-            spb.insert_string(SPBItem.DBNAME, database)
-            spb.insert_int(SPBItem.OPTIONS, SvcPropertiesFlag.NOLINGER)
-            self._svc.start(spb.get_buffer())
-    @traced()
-    def shutdown(self, *, database: str, mode: ShutdownMode,
-                 method: ShutdownMethod, timeout: int) -> None:
-        assert self._svc is not None
-        self._reset_output()
-        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.PROPERTIES)
-            spb.insert_string(SPBItem.DBNAME, database)
-            spb.insert_bytes(SvcPropertiesOption.SHUTDOWN_MODE, bytes([mode]))
-            spb.insert_int(method, timeout)
-            self._svc.start(spb.get_buffer())
-    @traced()
-    def bring_online(self, *, database: str, mode: OnlineMode=OnlineMode.NORMAL) -> None:
-        assert self._svc is not None
-        self._reset_output()
-        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.PROPERTIES)
-            spb.insert_string(SPBItem.DBNAME, database)
-            spb.insert_bytes(SvcPropertiesOption.ONLINE_MODE, bytes([mode]))
-            self._svc.start(spb.get_buffer())
-    @traced()
-    def sweep(self, *, database: str) -> None:
-        assert self._svc is not None
-        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.REPAIR)
-            spb.insert_string(SPBItem.DBNAME, database)
-            spb.insert_int(SPBItem.OPTIONS, SvcRepairFlag.SWEEP_DB)
-            self._svc.start(spb.get_buffer())
-        self._reset_output()
-        self.wait()
-    @traced()
-    def repair(self, *, database: str, flags: SvcRepairFlag=SvcRepairFlag.REPAIR) -> bytes:
-        assert self._svc is not None
-        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.REPAIR)
-            spb.insert_string(SPBItem.DBNAME, database)
-            spb.insert_int(SPBItem.OPTIONS, flags)
-            self._svc.start(spb.get_buffer())
-        self._reset_output()
-        self.wait()
-    @traced()
-    def validate(self, *, database: str, include_table: str=None,
-                 exclude_table: str=None, include_index: str=None,
-                 exclude_index: str=None, lock_timeout: int=None,
-                 callback: CB_OUTPUT_LINE=None) -> None:
-        assert self._svc is not None
-        self._reset_output()
-        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.VALIDATE)
-            spb.insert_string(SPBItem.DBNAME, database)
-            if include_table is not None:
-                spb.insert_string(SvcValidateOption.INCLUDE_TABLE, include_table)
-            if exclude_table is not None:
-                spb.insert_string(SvcValidateOption.EXCLUDE_TABLE, exclude_table)
-            if include_index is not None:
-                spb.insert_string(SvcValidateOption.INCLUDE_INDEX, include_index)
-            if exclude_index is not None:
-                spb.insert_string(SvcValidateOption.EXCLUDE_INDEX, exclude_index)
-            if lock_timeout is not None:
-                spb.insert_int(SvcValidateOption.LOCK_TIMEOUT, lock_timeout)
-            self._svc.start(spb.get_buffer())
-        if callback:
-            for line in self:
-                callback(line)
+                spb.insert_bigint(SrvRepairOption.ROLLBACK_TRANS_64, transaction_id)
+            self._srv()._svc.start(spb.get_buffer())
+        self._srv()._read_all_binary_output()
+
+class ServerUserServices(ServerServiceProvider):
+    """User-related server services."""
     def __fetch_users(self, data: Buffer) -> List[UserInfo]:
         users = []
         user = {}
         while not data.is_eof():
             tag = data.get_tag()
-            if tag == SvcUserOption.USER_NAME:
+            if tag == SrvUserOption.USER_NAME:
                 if user:
                     users.append(UserInfo(**user))
                     user.clear()
                 user['user_name'] = data.read_sized_string()
-            elif tag == SvcUserOption.USER_ID:
+            elif tag == SrvUserOption.USER_ID:
                 user['user_id'] = data.read_int()
-            elif tag == SvcUserOption.GROUP_ID:
+            elif tag == SrvUserOption.GROUP_ID:
                 user['group_id'] = data.read_int()
-            elif tag == SvcUserOption.PASSWORD:  # pragma: no cover
+            elif tag == SrvUserOption.PASSWORD:  # pragma: no cover
                 user['password'] = data.read_bytes()
-            elif tag == SvcUserOption.GROUP_NAME:  # pragma: no cover
+            elif tag == SrvUserOption.GROUP_NAME:  # pragma: no cover
                 user['group_name'] = data.read_sized_string()
-            elif tag == SvcUserOption.FIRST_NAME:
+            elif tag == SrvUserOption.FIRST_NAME:
                 user['first_name'] = data.read_sized_string()
-            elif tag == SvcUserOption.MIDDLE_NAME:
+            elif tag == SrvUserOption.MIDDLE_NAME:
                 user['middle_name'] = data.read_sized_string()
-            elif tag == SvcUserOption.LAST_NAME:
+            elif tag == SrvUserOption.LAST_NAME:
                 user['last_name'] = data.read_sized_string()
-            elif tag == SvcUserOption.ADMIN:
+            elif tag == SrvUserOption.ADMIN:
                 user['admin'] = bool(data.read_int())
             else:  # pragma: no cover
                 raise InterfaceError(f"Unrecognized result clumplet: {tag}")
         if user:
             users.append(UserInfo(**user))
         return users
-    @traced()
-    def get_users(self, *, database: str=None, sql_role: str=None) -> List[UserInfo]:
-        assert self._svc is not None
-        self._reset_output()
+    def get_all(self, *, database: str=None, sql_role: str=None) -> List[UserInfo]:
+        self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.DISPLAY_USER_ADM)
+            spb.insert_tag(ServerAction.DISPLAY_USER_ADM)
             if database is not None:
                 spb.insert_string(SPBItem.DBNAME, database)
             if sql_role is not None:
                 spb.insert_string(SPBItem.SQL_ROLE_NAME, sql_role)
-            self._svc.start(spb.get_buffer())
-        return self.__fetch_users(Buffer(self._read_all_binary_output()))
-    @traced()
-    def get_user(self, user_name: str, *, database: str=None, sql_role: str=None) -> Optional[UserInfo]:
-        assert self._svc is not None
-        self._reset_output()
+            self._srv()._svc.start(spb.get_buffer())
+        return self.__fetch_users(Buffer(self._srv()._read_all_binary_output()))
+    def get(self, user_name: str, *, database: str=None, sql_role: str=None) -> Optional[UserInfo]:
+        self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.DISPLAY_USER_ADM)
+            spb.insert_tag(ServerAction.DISPLAY_USER_ADM)
             if database is not None:
                 spb.insert_string(SPBItem.DBNAME, database)
-            spb.insert_string(SvcUserOption.USER_NAME, user_name)
+            spb.insert_string(SrvUserOption.USER_NAME, user_name)
             if sql_role is not None:
                 spb.insert_string(SPBItem.SQL_ROLE_NAME, sql_role)
-            self._svc.start(spb.get_buffer())
-        users = self.__fetch_users(Buffer(self._read_all_binary_output()))
+            self._srv()._svc.start(spb.get_buffer())
+        users = self.__fetch_users(Buffer(self._srv()._read_all_binary_output()))
         return users[0] if users else None
-    @traced()
-    def add_user(self, *, user_name: str, password: str, user_id: int=None,
+    def add(self, *, user_name: str, password: str, user_id: int=None,
                  group_id: int=None, first_name: str=None, middle_name: str=None,
                  last_name: str=None, admin: bool=None, database: str=None,
                  sql_role: str=None) -> None:
-        assert self._svc is not None
-        self._reset_output()
+        self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.ADD_USER)
+            spb.insert_tag(ServerAction.ADD_USER)
             if database is not None:
                 spb.insert_string(SPBItem.DBNAME, database)
-            spb.insert_string(SvcUserOption.USER_NAME, user_name)
+            spb.insert_string(SrvUserOption.USER_NAME, user_name)
             if sql_role is not None:
                 spb.insert_string(SPBItem.SQL_ROLE_NAME, sql_role)
-            spb.insert_string(SvcUserOption.PASSWORD, password)
+            spb.insert_string(SrvUserOption.PASSWORD, password)
             if user_id is not None:
-                spb.insert_int(SvcUserOption.USER_ID, user_id)
+                spb.insert_int(SrvUserOption.USER_ID, user_id)
             if group_id is not None:
-                spb.insert_int(SvcUserOption.GROUP_ID, group_id)
+                spb.insert_int(SrvUserOption.GROUP_ID, group_id)
             if first_name is not None:
-                spb.insert_string(SvcUserOption.FIRST_NAME, first_name)
+                spb.insert_string(SrvUserOption.FIRST_NAME, first_name)
             if middle_name is not None:
-                spb.insert_string(SvcUserOption.MIDDLE_NAME, middle_name)
+                spb.insert_string(SrvUserOption.MIDDLE_NAME, middle_name)
             if last_name is not None:
-                spb.insert_string(SvcUserOption.LAST_NAME, last_name)
+                spb.insert_string(SrvUserOption.LAST_NAME, last_name)
             if admin is not None:
-                spb.insert_int(SvcUserOption.ADMIN, 1 if admin else 0)
-            self._svc.start(spb.get_buffer())
-        self.wait()
-    @traced()
-    def modify_user(self, user_name: str, *, password: str=None,
+                spb.insert_int(SrvUserOption.ADMIN, 1 if admin else 0)
+            self._srv()._svc.start(spb.get_buffer())
+        self._srv().wait()
+    def update(self, user_name: str, *, password: str=None,
                     user_id: int=None, group_id: int=None,
                     first_name: str=None, middle_name: str=None,
                     last_name: str=None, admin: bool=None) -> None:
-        assert self._svc is not None
-        self._reset_output()
+        self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.MODIFY_USER)
-            spb.insert_string(SvcUserOption.USER_NAME, user_name)
+            spb.insert_tag(ServerAction.MODIFY_USER)
+            spb.insert_string(SrvUserOption.USER_NAME, user_name)
             if password is not None:
-                spb.insert_string(SvcUserOption.PASSWORD, password)
+                spb.insert_string(SrvUserOption.PASSWORD, password)
             if user_id is not None:
-                spb.insert_int(SvcUserOption.USER_ID, user_id)
+                spb.insert_int(SrvUserOption.USER_ID, user_id)
             if group_id is not None:
-                spb.insert_int(SvcUserOption.GROUP_ID, group_id)
+                spb.insert_int(SrvUserOption.GROUP_ID, group_id)
             if first_name is not None:
-                spb.insert_string(SvcUserOption.FIRST_NAME, first_name)
+                spb.insert_string(SrvUserOption.FIRST_NAME, first_name)
             if middle_name is not None:
-                spb.insert_string(SvcUserOption.MIDDLE_NAME, middle_name)
+                spb.insert_string(SrvUserOption.MIDDLE_NAME, middle_name)
             if last_name is not None:
-                spb.insert_string(SvcUserOption.LAST_NAME, last_name)
+                spb.insert_string(SrvUserOption.LAST_NAME, last_name)
             if admin is not None:
-                spb.insert_int(SvcUserOption.ADMIN, 1 if admin else 0)
-            self._svc.start(spb.get_buffer())
-        self.wait()
-    @traced()
-    def delete_user(self, user_name: str, *, database: str=None, sql_role: str=None) -> None:
-        assert self._svc is not None
-        self._reset_output()
+                spb.insert_int(SrvUserOption.ADMIN, 1 if admin else 0)
+            self._srv()._svc.start(spb.get_buffer())
+        self._srv().wait()
+    def delete(self, user_name: str, *, database: str=None, sql_role: str=None) -> None:
+        self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServiceAction.DELETE_USER)
-            spb.insert_string(SvcUserOption.USER_NAME, user_name)
+            spb.insert_tag(ServerAction.DELETE_USER)
+            spb.insert_string(SrvUserOption.USER_NAME, user_name)
             if database is not None:
                 spb.insert_string(SPBItem.DBNAME, database)
             if sql_role is not None:
                 spb.insert_string(SPBItem.SQL_ROLE_NAME, sql_role)
-            self._svc.start(spb.get_buffer())
-        self.wait()
-    @traced()
-    def user_exists(self, user_name: str, *, database: str=None, sql_role: str=None) -> bool:
-        return self.get_user(user_name, database=database, sql_role=sql_role) is not None
+            self._srv()._svc.start(spb.get_buffer())
+        self._srv().wait()
+    def exists(self, user_name: str, *, database: str=None, sql_role: str=None) -> bool:
+        return self.get(user_name, database=database, sql_role=sql_role) is not None
+
+class ServerTraceServices(ServerServiceProvider):
+    """Trace-related server services."""
+    def __action(self, action: ServerAction, label: str, session_id: int) -> None:
+        self._srv()._reset_output()
+        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
+            spb.insert_tag(action)
+            spb.insert_int(SrvTraceOption.ID, session_id)
+            self._srv()._svc.start(spb.get_buffer())
+        response = self._srv()._fetch_line()
+        if not response.startswith(f"Trace session ID {session_id} {label}"):  # pragma: no cover
+            # response should contain the error message
+            raise DatabaseError(response)
+    def start(self, *, config: str, name: str=None) -> int:
+        self._srv()._reset_output()
+        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
+            spb.insert_tag(ServerAction.TRACE_START)
+            if name is not None:
+                spb.insert_string(SrvTraceOption.NAME, name)
+            spb.insert_string(SrvTraceOption.CONFIG, config)
+            self._srv()._svc.start(spb.get_buffer())
+        response = self._srv()._fetch_line()
+        if response.startswith('Trace session ID'):
+            return int(response.split()[3])
+        else:  # pragma: no cover
+            # response should contain the error message
+            raise DatabaseError(response)
+    def stop(self, *, session_id: int) -> None:
+        self.__action(ServerAction.TRACE_STOP, 'stopped', session_id)
+    def suspend(self, *, session_id: int) -> None:
+        self.__action(ServerAction.TRACE_SUSPEND, 'paused', session_id)
+    def resume(self, *, session_id: int) -> None:
+        self.__action(ServerAction.TRACE_RESUME, 'resumed', session_id)
+    @property
+    def sessions(self) -> Dict[int, Dict[str, Any]]:
+        "Dictionary with active trace sessions."
+        def store():
+            if current:
+                session = TraceSession(**current)
+                result[session.id] = session
+                current.clear()
+
+        self._srv()._reset_output()
+        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
+            spb.insert_tag(ServerAction.TRACE_LIST)
+            self._srv()._svc.start(spb.get_buffer())
+        result = {}
+        current = {}
+        for line in self._srv():
+            if not line.strip():
+                store()
+            elif line.startswith('Session ID:'):
+                store()
+                current['id'] = int(line.split(':')[1].strip())
+            elif line.lstrip().startswith('name:'):
+                current['name'] = line.split(':')[1].strip()
+            elif line.lstrip().startswith('user:'):
+                current['user'] = line.split(':')[1].strip()
+            elif line.lstrip().startswith('date:'):
+                current['timestamp'] = datetime.datetime.strptime(
+                    line.split(':', 1)[1].strip(),
+                    '%Y-%m-%d %H:%M:%S')
+            elif line.lstrip().startswith('flags:'):
+                current['flags'] = line.split(':')[1].strip().split(',')
+            else:  # pragma: no cover
+                raise InterfaceError(f"Unexpected line in trace session list: {line}")
+        store()
+        return result
+
+class Server(LoggingIdMixin):
+    """Represents connection to Firebird Service Manager.
+
+Note:
+    Implements context manager protocol to call `.close()` automatically.
+"""
+    def __init__(self, svc: iService, spb: bytes, host: str):
+        self._svc: iService = svc
+        self.spb: bytes = spb
+        self.host: str = host
+        self.response: CBuffer = CBuffer(USHRT_MAX)
+        self._eof: bool = False
+        self.__line_buffer: List[str] = []
+        self.charset: str = 'ascii'
+        #
+        self.__info: ServerInfoProvider = None
+        self.__dbsvc: ServerDbServices = None
+        self.__trace: ServerTraceServices = None
+        self.__user: ServerUserServices = None
+    def __enter__(self) -> Server:
+        return self
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
+        self.close()
+    def __del__(self):
+        if self._svc is not None:
+            warn(f"Server '{self.logging_id}' disposed without prior close()", ResourceWarning)
+            self.close()
+    def __next__(self):
+        if (line := self.readline()) is not None:
+            return line
+        else:
+            raise StopIteration
+    def __iter__(self):
+        return self
+    def __str__(self):
+        return f'Server[v{self.info.version}@{self.host.replace(":service_mgr","")}]'
+    def _reset_output(self) -> None:
+        self._eof = False
+        self.__line_buffer.clear()
+    def _make_request(self, timeout: int) -> bytes:
+        if timeout == -1:
+            return None
+        else:
+            return b''.join([SrvInfoCode.TIMEOUT.to_bytes(1, 'little'),
+                             (4).to_bytes(2, 'little'),
+                             timeout.to_bytes(4, 'little'), isc_info_end.to_bytes(1, 'little')])
+    def _fetch_complex_info(self, request: bytes, timeout: int=-1) -> None:
+        send = self._make_request(timeout)
+        self.response.clear()
+        self._svc.query(send, request, self.response.raw)
+        if self.response.is_truncated():  # pragma: no cover
+            raise InterfaceError("Requested data can't fint into largest possible buffer")
+    def _fetch_line(self, timeout: int=-1) -> Optional[str]:
+        self._fetch_complex_info(bytes([SrvInfoCode.LINE]))
+        result = None
+        while not self.response.is_eof():
+            tag = self.response.get_tag()
+            if tag == SrvInfoCode.TIMEOUT:
+                return None
+            elif tag == SrvInfoCode.LINE:
+                result = self.response.read_sized_string()
+        if self.response.get_tag() != isc_info_end:  # pragma: no cover
+            raise InterfaceError("Malformed result buffer (missing isc_info_end item)")
+        return result
+    def _read_output(self, *, init: str='', timeout: int=-1) -> None:
+        assert self._svc is not None
+        self.response.clear()
+        self._svc.query(self._make_request(timeout), bytes([SrvInfoCode.TO_EOF]), self.response.raw)
+        tag = self.response.get_tag()
+        if tag != SrvInfoCode.TO_EOF:  # pragma: no cover
+            raise InterfaceError(f"Service responded with error code: {tag}")
+        init += self.response.read_sized_string()
+        self.__line_buffer = init.splitlines(keepends=True)
+        self._eof = self.response.get_tag() == isc_info_end
+    def _read_all_binary_output(self, *, timeout: int=-1) -> bytes:
+        assert self._svc is not None
+        send = self._make_request(timeout)
+        result = []
+        eof = False
+        while not eof:
+            self.response.clear()
+            self._svc.query(send, bytes([SrvInfoCode.TO_EOF]), self.response.raw)
+            tag = self.response.get_tag()
+            if tag != SrvInfoCode.TO_EOF:  # pragma: no cover
+                raise InterfaceError(f"Service responded with error code: {tag}")
+            result.append(self.response.read_bytes())
+            eof = self.response.get_tag() == isc_info_end
+        return b''.join(result)
+    def _read_next_binary_output(self, *, timeout: int=-1) -> bytes:
+        assert self._svc is not None
+        result = None
+        if not self._eof:
+            send = self._make_request(timeout)
+            self.response.clear()
+            self._svc.query(send, bytes([SrvInfoCode.TO_EOF]), self.response.raw)
+            tag = self.response.get_tag()
+            if tag != SrvInfoCode.TO_EOF:  # pragma: no cover
+                raise InterfaceError(f"Service responded with error code: {tag}")
+            result = self.response.read_bytes()
+            tag = self.response.get_tag()
+            self._eof = tag == isc_info_end
+        return result
+    def get_log(self, callback: CB_OUTPUT_LINE=None) -> None:
+        assert self._svc is not None
+        self._reset_output()
+        self._svc.start(bytes([ServerAction.GET_FB_LOG]))
+        if callback:
+            for line in self:
+                callback(line)
     def is_running(self) -> bool:
         assert self._svc is not None
-        return self._get_simple_info(SvcInfoCode.RUNNING, InfoItemType.BIGINT) > 0
+        return self.info.get_info(SrvInfoCode.RUNNING) > 0
     def readline(self) -> Optional[str]:
-        if self.__eof and not self.__line_buffer:
+        if self._eof and not self.__line_buffer:
             return None
         if not self.__line_buffer:
             self._read_output()
         elif len(self.__line_buffer) == 1:
             line = self.__line_buffer.pop(0)
-            if self.__eof:
+            if self._eof:
                 return line
             self._read_output(init=line)
         if self.__line_buffer:
@@ -3909,63 +4313,95 @@ Note:
         while self.is_running():
             for _ in self:
                 pass
-    @traced()
     def close(self) -> None:
         if self._svc is not None:
             self._svc.detach()
             self._svc = None
+        if self.__info is not None:
+            self.__info._close()
+            self.__info = None
+        if self.__dbsvc is not None:
+            self.__dbsvc._close()
+            self.__dbsvc = None
+        if self.__trace is not None:
+            self.__trace._close()
+            self.__trace = None
+        if self.__user is not None:
+            self.__user._close()
+            self.__user = None
     # Properties
     @property
-    def version(self) -> str:
-        "Firebird version as SEMVER string"
-        return self.__version
+    def info(self) -> ServerInfoProvider:
+        "Access to various information about attached server."
+        if self.__info is None:
+            self.__info = ServerInfoProvider(self.charset, self)
+        return self.__info
     @property
-    def engine_version(self) -> float:
-        "Firebird version"
-        return self.__engine_version
+    def database(self) -> ServerDbServices:
+        "Access to various database-related actions and services."
+        if self.__dbsvc is None:
+            self.__dbsvc = ServerDbServices(self)
+        return self.__dbsvc
+    @property
+    def trace(self) -> ServerTraceServices:
+        "Access to various database-related actions and services."
+        if self.__trace is None:
+            self.__trace = ServerTraceServices(self)
+        return self.__trace
+    @property
+    def user(self) -> ServerUserServices:
+        "Access to various user-related actions and services."
+        if self.__user is None:
+            self.__user = ServerUserServices(self)
+        return self.__user
 
-HookManager().register_class(Server, ServerHook)
-
-@traced(agent='firebird.driver')
-def connect_server(*, host: str='', trusted_auth: bool=False, user: str=None,
-                   password: str=None, config: str=None, auth_plugin_list: str=None,
+def connect_server(server: str, *, user: str=None, password: str=None,
                    crypt_callback: iCryptKeyCallbackImpl=None) -> Server:
     """Establishes a connection to server's service manager.
 
 Arguments:
-    host: Server host machine specification.
-    trusted_auth: Use trusted authentication.
-    user: User name. If not specified, driver attempts to use ISC_USER environment variable.
-    password: User password. If not specified, driver attempts to use ISC_PASSWORD environment variable.
-    config: Configuration override.
-    auth_plugin_list: List of authentication plugins override.
+    host: Server host machine or Server configuration name.
+    user: User name.
+    password: User password.
     crypt_callback: Callback that provides encryption key.
 
 Hooks:
     Event `.ServerHook.ATTACHED`: Executed before `Service` instance is
     returned. Hook must have signature::
 
-        hook_func(service: Service) -> None
+        hook_func(server: Server) -> None
 
     Any value returned by hook is ignored.
 """
+    srv_config = driver_config.get_server(server)
+    if srv_config is None:
+        srv_config = driver_config.server_defaults
+        host = server
+    else:
+        host = srv_config.host.value
     if not host.endswith('service_mgr'):
         if host and not host.endswith(':'):
             host += ':'
         host += 'service_mgr'
     if user is None:
-        user = os.environ.get('ISC_USER', None)
+        user = srv_config.user.value
     if password is None:
-        password = os.environ.get('ISC_PASSWORD', None)
-    spb = SPB_ATTACH(trusted_auth=trusted_auth, user=user, password=password,
-                     config=config, auth_plugin_list = auth_plugin_list)
+        password = srv_config.password.value
+    spb = SPB_ATTACH(user=user, password=password, config=srv_config.config.value,
+                     trusted_auth=srv_config.trusted_auth.value,
+                     auth_plugin_list=srv_config.auth_plugin_list.value)
     spb_buf = spb.get_buffer()
     with a.get_api().master.get_dispatcher() as provider:
         if crypt_callback is not None:
             provider.set_dbcrypt_callback(crypt_callback)
         svc = provider.attach_service_manager(host, spb_buf)
     con = Server(svc, spb_buf, host)
-    for hook in HookManager().get_callbacks(ServerHook.ATTACHED, con):
+    for hook in get_callbacks(ServerHook.ATTACHED, con):
         hook(ServerHook.ATTACHED, con)
     return con
 
+# Register hookable classes
+register_class(Connection, ConnectionHook)
+register_class(Server, ServerHook)
+del register_class
+del add_hook

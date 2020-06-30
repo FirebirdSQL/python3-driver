@@ -23,10 +23,10 @@ copyright = '2020, The Firebird Project'
 author = 'Pavel Císař'
 
 # The short X.Y version
-version = '0.5.0'
+version = '0.6.0'
 
 # The full version, including alpha/beta/rc tags
-release = '0.5.0'
+release = '0.6.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -54,7 +54,7 @@ source_suffix = '.txt'
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'requirements.txt']
 
 default_role = 'py:obj'
 
@@ -97,7 +97,7 @@ html_theme_options = {
     ],
 
     # Render the next and previous page links in navbar. (Default: true)
-    #'navbar_sidebarrel': True,
+    'navbar_sidebarrel': False,
 
     # Render the current pages TOC in the navbar. (Default: true)
     #'navbar_pagenav': True,
@@ -183,8 +183,9 @@ napoleon_use_ivar = True
 
 # -- Options for intersphinx extension ---------------------------------------
 
-# Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}
+# intersphinx
+intersphinx_mapping = {'python': ('https://docs.python.org/3', None),
+                       'base': ('https://firebird-base.rtfd.io/en/latest', None)}
 
 # -- Options for todo extension ----------------------------------------------
 

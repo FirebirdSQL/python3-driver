@@ -1,0 +1,31 @@
+.. module:: firebird.driver.config
+    :synopsis: Driver configuration
+
+======================
+firebird.driver.config
+======================
+
+This module contains firebird-driver configuration. Uses configuration classes from firebird-base
+package.
+
+Classes
+=======
+
+DriverConfig
+------------
+.. autoclass:: DriverConfig
+
+ServerConfig
+------------
+.. autoclass:: ServerConfig
+
+DatabaseConfig
+--------------
+.. autoclass:: DatabaseConfig
+
+Globals
+=======
+
+driver_config
+-------------
+.. autodata:: driver_config

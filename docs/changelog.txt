@@ -2,6 +2,29 @@
 Changelog
 #########
 
+Version 0.6.0
+=============
+
+* More documentation.
+* Initial support for Firebird 4+ (interfaces and other definitions). Includes support for
+  interface versions.
+* `Service` renamed to `Server`. Selected functionality moved to inner objects (relates to
+  FB4+ support).
+* New module: `~firebird.driver.config` - Driver configuration
+* New module: `~firebird.driver.interfaces` - Interface wrappers for Firebird new API
+* Changed module: `~firebird.driver.types`
+
+  - Interface wrapper moved to separate module
+  - Buffer managers moved to `~firebird.driver.core` module
+* Changed module: `~firebird.driver.core`
+
+  - `connect()`, `create_database()` and `connect_server()` now use driver configuration.
+  - Simplified/unified transaction isolation specification.
+  - Emit warnings when objects with allocated Firebird resources are disposed (by Python
+    GC) without prior call to `close()`.
+  - Trace instrumentation removed. Use dynamic trace configuration from firebird-base 0.6.0.
+  - `Connection` and `Transaction` information moved to inner objects accesible via `info`
+    properties (relates to FB4+ support).
 
 Version 0.5.0
 =============

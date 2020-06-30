@@ -143,6 +143,10 @@ StateResult
 -----------
 .. autoclass:: StateResult
 
+PageSize
+--------
+.. autoclass:: PageSize
+
 DBKeyScope
 ----------
 .. autoclass:: DBKeyScope
@@ -151,9 +155,9 @@ InfoItemType
 ------------
 .. autoclass:: InfoItemType
 
-SvcInfoCode
+SrvInfoCode
 -----------
-.. autoclass:: SvcInfoCode
+.. autoclass:: SrvInfoCode
 
 BlobInfoCode
 ------------
@@ -162,6 +166,10 @@ BlobInfoCode
 DbInfoCode
 ----------
 .. autoclass:: DbInfoCode
+
+StmtInfoCode
+------------
+.. autoclass:: StmtInfoCode
 
 TraInfoCode
 -----------
@@ -179,6 +187,10 @@ TraInfoAccess
 -------------
 .. autoclass:: TraInfoAccess
 
+TraAccessMode
+-------------
+.. autoclass:: TraAccessMode
+
 TraIsolation
 ------------
 .. autoclass:: TraIsolation
@@ -194,10 +206,6 @@ Isolation
 TraLockResolution
 -----------------
 .. autoclass:: TraLockResolution
-
-TraAccessMode
--------------
-.. autoclass:: TraAccessMode
 
 TableShareMode
 --------------
@@ -243,45 +251,45 @@ BlobStorage
 -----------
 .. autoclass:: BlobStorage
 
-ServiceAction
--------------
-.. autoclass:: ServiceAction
+ServerAction
+------------
+.. autoclass:: ServerAction
 
-SvcDbInfoOption
+SrvDbInfoOption
 ---------------
-.. autoclass:: SvcDbInfoOption
+.. autoclass:: SrvDbInfoOption
 
-SvcRepairOption
+SrvRepairOption
 ---------------
-.. autoclass:: SvcRepairOption
+.. autoclass:: SrvRepairOption
 
-SvcBackupOption
+SrvBackupOption
 ---------------
-.. autoclass:: SvcBackupOption
+.. autoclass:: SrvBackupOption
 
-SvcRestoreOption
+SrvRestoreOption
 ----------------
-.. autoclass:: SvcRestoreOption
+.. autoclass:: SrvRestoreOption
 
-SvcNBackupOption
+SrvNBackupOption
 ----------------
-.. autoclass:: SvcNBackupOption
+.. autoclass:: SrvNBackupOption
 
-SvcTraceOption
+SrvTraceOption
 --------------
-.. autoclass:: SvcTraceOption
+.. autoclass:: SrvTraceOption
 
-SvcPropertiesOption
+SrvPropertiesOption
 -------------------
-.. autoclass:: SvcPropertiesOption
+.. autoclass:: SrvPropertiesOption
 
-SvcValidateOption
+SrvValidateOption
 -----------------
-.. autoclass:: SvcValidateOption
+.. autoclass:: SrvValidateOption
 
-SvcUserOption
+SrvUserOption
 -------------
-.. autoclass:: SvcUserOption
+.. autoclass:: SrvUserOption
 
 DbAccessMode
 ------------
@@ -311,6 +319,30 @@ TransactionState
 ----------------
 .. autoclass:: TransactionState
 
+DbProvider
+----------
+.. autoclass:: DbProvider
+
+DbClass
+-------
+.. autoclass:: DbClass
+
+Implementation
+--------------
+.. autoclass:: Implementation
+
+ImpCPU
+------
+.. autoclass:: ImpCPU
+
+ImpOS
+-----
+.. autoclass:: ImpOS
+
+ImpCompiler
+-----------
+.. autoclass:: ImpCompiler
+
 Flags
 =====
 
@@ -338,29 +370,33 @@ ServerCapability
 ----------------
 .. autoclass:: ServerCapability
 
-SvcRepairFlag
+SrvRepairFlag
 -------------
-.. autoclass:: SvcRepairFlag
+.. autoclass:: SrvRepairFlag
 
-SvcStatFlag
+SrvStatFlag
 -----------
-.. autoclass:: SvcStatFlag
+.. autoclass:: SrvStatFlag
 
-SvcBackupFlag
+SrvBackupFlag
 -------------
-.. autoclass:: SvcBackupFlag
+.. autoclass:: SrvBackupFlag
 
-SvcRestoreFlag
+SrvRestoreFlag
 --------------
-.. autoclass:: SvcRestoreFlag
+.. autoclass:: SrvRestoreFlag
 
-SvcNBackupFlag
+SrvNBackupFlag
 --------------
-.. autoclass:: SvcNBackupFlag
+.. autoclass:: SrvNBackupFlag
 
-SvcPropertiesFlag
+SrvPropertiesFlag
 -----------------
-.. autoclass:: SvcPropertiesFlag
+.. autoclass:: SrvPropertiesFlag
+
+ImpFlags
+--------
+.. autoclass:: ImpFlags
 
 Dataclasses
 ===========
@@ -380,164 +416,13 @@ UserInfo
 .. autoclass:: UserInfo
    :no-members:
 
-Managers for parameter buffers
-==============================
-
-TPB
+BCD
 ---
-.. autoclass:: TPB
+.. autoclass:: BCD
+   :no-members:
 
-DPB
----
-.. autoclass:: DPB
-
-SPB_ATTACH
-----------
-.. autoclass:: SPB_ATTACH
-
-Buffer
-------
-.. autoclass:: Buffer
-
-Firebird API Interface wrappers
-===============================
-
-iVersioned
-----------
-.. autoclass:: iVersioned
-
-iReferenceCounted
------------------
-.. autoclass:: iReferenceCounted
-
-iDisposable
------------
-.. autoclass:: iDisposable
-
-iPluginBase
------------
-.. autoclass:: iPluginBase
-
-iConfigEntry
+TraceSession
 ------------
-.. autoclass:: iConfigEntry
-
-iConfig
--------
-.. autoclass:: iConfig
-
-iFirebirdConf
--------------
-.. autoclass:: iFirebirdConf
-
-iPluginManager
---------------
-.. autoclass:: iPluginManager
-
-iConfigManager
---------------
-.. autoclass:: iConfigManager
-
-iBlob
------
-.. autoclass:: iBlob
-
-iTransaction
-------------
-.. autoclass:: iTransaction
-
-iMessageMetadata
-----------------
-.. autoclass:: iMessageMetadata
-
-iMetadataBuilder
-----------------
-.. autoclass:: iMetadataBuilder
-
-iResultSet
-----------
-.. autoclass:: iResultSet
-
-iStatement
-----------
-.. autoclass:: iStatement
-
-iRequest
---------
-.. autoclass:: iRequest
-
-iEvents
--------
-.. autoclass:: iEvents
-
-iAttachment
------------
-.. autoclass:: iAttachment
-
-iService
---------
-.. autoclass:: iService
-
-iProvider
----------
-.. autoclass:: iProvider
-
-iDtcStart
----------
-.. autoclass:: iDtcStart
-
-iDtc
-----
-.. autoclass:: iDtc
-
-iTimerControl
--------------
-.. autoclass:: iTimerControl
-
-iXpbBuilder
------------
-.. autoclass:: iXpbBuilder
-
-iUtil
------
-.. autoclass:: iUtil
-
-iMaster
--------
-.. autoclass:: iMaster
-
-Interface implementations
-=========================
-
-iVersionedImpl
---------------
-.. autoclass:: iVersionedImpl
-
-iReferenceCountedImpl
----------------------
-.. autoclass:: iReferenceCountedImpl
-
-iDisposableImpl
----------------
-.. autoclass:: iDisposableImpl
-
-iVersionCallbackImpl
---------------------
-.. autoclass:: iVersionCallbackImpl
-
-iCryptKeyCallbackImpl
----------------------
-.. autoclass:: iCryptKeyCallbackImpl
-
-iOffsetsCallbackImp
--------------------
-.. autoclass:: iOffsetsCallbackImp
-
-iEventCallbackImpl
-------------------
-.. autoclass:: iEventCallbackImpl
-
-iTimerImpl
-----------
-.. autoclass:: iTimerImpl
+.. autoclass:: TraceSession
+   :no-members:
 

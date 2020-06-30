@@ -43,7 +43,8 @@ from ctypes.util import find_library
 from locale import getpreferredencoding
 from pathlib import Path
 import platform
-from .hooks import APIHook, HookManager
+from .config import driver_config
+from .hooks import APIHook, register_class, get_callbacks
 
 # Constants
 
@@ -195,6 +196,8 @@ config_items = {
 
 # Types
 
+Int = c_int
+IntPtr = POINTER(Int)
 Int64 = c_long
 Int64Ptr = POINTER(Int64)
 QWord = c_ulong
@@ -209,9 +212,14 @@ ISC_LONG_PTR = POINTER(ISC_LONG)
 ISC_ULONG = c_uint
 ISC_INT64 = c_longlong
 ISC_UINT64 = c_ulonglong
+# >>> Firebird 4
 FB_DEC16 = c_ulonglong
-FB_DEC32 = c_ulonglong * 2
+FB_DEC16Ptr = POINTER(FB_DEC16)
+FB_DEC34 = c_ulonglong * 2
+FB_DEC34Ptr = POINTER(FB_DEC34)
 FB_I128 = c_ulonglong * 2
+FB_I128Ptr = POINTER(FB_I128)
+# <<< FB4
 
 class ISC_QUAD(Structure):
     "ISC_QUAD"
@@ -228,25 +236,32 @@ FB_API_HANDLE_PTR = POINTER(FB_API_HANDLE)
 RESULT_VECTOR = ISC_ULONG * 15
 ISC_EVENT_CALLBACK = CFUNCTYPE(None, POINTER(ISC_UCHAR), c_ushort, POINTER(ISC_UCHAR))
 
+# >>> Firebird 4
 class ISC_TIME_TZ(Structure):
     "ISC_TIME_TZ"
     _fields_ = [('utc_time', ISC_TIME), ('time_zone', ISC_USHORT)]
+ISC_TIME_TZ_PTR = POINTER(ISC_TIME_TZ)
 
 class ISC_TIME_TZ_EX(Structure):
     "ISC_TIME_TZ_EX"
     _fields_ = [('utc_time', ISC_TIME), ('time_zone', ISC_USHORT), ('ext_offset', ISC_SHORT)]
+ISC_TIME_TZ_EX_PTR = POINTER(ISC_TIME_TZ_EX)
 
 class ISC_TIMESTAMP(Structure):
     "ISC_TIMESTAMP"
     _fields_ = [('timestamp_date', ISC_DATE), ('timestamp_time', ISC_TIME)]
+ISC_TIMESTAMP_PTR = POINTER(ISC_TIMESTAMP)
 
 class ISC_TIMESTAMP_TZ(Structure):
     "ISC_TIMESTAMP_TZ"
     _fields_ = [('utc_timestamp', ISC_TIMESTAMP), ('time_zone', ISC_USHORT)]
+ISC_TIMESTAMP_TZ_PTR = POINTER(ISC_TIMESTAMP_TZ)
 
 class ISC_TIMESTAMP_TZ_EX(Structure):
     "ISC_TIMESTAMP_TZ_EX"
     _fields_ = [('utc_timestamp', ISC_TIMESTAMP), ('time_zone', ISC_USHORT), ('ext_offset', ISC_SHORT)]
+ISC_TIMESTAMP_TZ_EX_PTR = POINTER(ISC_TIMESTAMP_TZ_EX)
+# <<< Firebird 4
 
 class ISC_ARRAY_BOUND(Structure):
     "ISC_ARRAY_BOUND"
@@ -460,6 +475,7 @@ class IStatement_struct(Structure):
     "IStatement interface"
     _fields_ = [('dummy', c_void_p), ('vtable', IStatement_VTablePtr)]
 IStatement = POINTER(IStatement_struct)
+# >>> Firebird 4
 # IBatch(3) : ReferenceCounted
 class IBatch_VTable(Structure):
     "IBatch virtual method table"
@@ -477,6 +493,7 @@ class IBatchCompletionState_struct(Structure):
     _fields_ = [('dummy', c_void_p), ('vtable', IBatchCompletionState_VTablePtr)]
 IBatchCompletionState = POINTER(IBatchCompletionState_struct)
 # IReplicator(3) : ReferenceCounted
+# <<< Firebird 4
 # IRequest(3) : ReferenceCounted
 class IRequest_VTable(Structure):
     "IRequest virtual method table"
@@ -637,6 +654,36 @@ IXpbBuilder = POINTER(IXpbBuilder_struct)
 # IUdrProcedureFactory(3) : Disposable
 # IUdrTriggerFactory(3) : Disposable
 # IUdrPlugin(2) : Versioned
+# >>> Firebird 4
+# IDecFloat16(2) : Versioned
+class IDecFloat16_VTable(Structure):
+    "IDecFloat16 virtual method table"
+IDecFloat16_VTablePtr = POINTER(IDecFloat16_VTable)
+class IDecFloat16_struct(Structure):
+    "IDecFloat16 interface"
+    _fields_ = [('dummy', c_void_p), ('vtable', IDecFloat16_VTablePtr)]
+IDecFloat16 = POINTER(IDecFloat16_struct)
+# IDecFloat34(2) : Versioned
+class IDecFloat34_VTable(Structure):
+    "IDecFloat34 virtual method table"
+IDecFloat34_VTablePtr = POINTER(IDecFloat34_VTable)
+class IDecFloat34_struct(Structure):
+    "IDecFloat34 interface"
+    _fields_ = [('dummy', c_void_p), ('vtable', IDecFloat34_VTablePtr)]
+IDecFloat34 = POINTER(IDecFloat34_struct)
+# IInt128(2) : Versioned
+class IInt128_VTable(Structure):
+    "IInt128 virtual method table"
+IInt128_VTablePtr = POINTER(IInt128_VTable)
+class IInt128_struct(Structure):
+    "IInt128 interface"
+    _fields_ = [('dummy', c_void_p), ('vtable', IInt128_VTablePtr)]
+IInt128 = POINTER(IInt128_struct)
+# IReplicatedRecord(2) : Versioned
+# IReplicatedBlob(2) : Versioned
+# IReplicatedTransaction(3) : Disposable
+# IReplicatedSession(3) : Disposable
+
 # ====================
 # Interfaces - Methods
 # ====================
@@ -740,6 +787,7 @@ IFirebirdConf_asInteger = CFUNCTYPE(Int64, IFirebirdConf, Cardinal)
 IFirebirdConf_asString = CFUNCTYPE(c_char_p, IFirebirdConf, Cardinal)
 # function asBoolean(this: IFirebirdConf; key: Cardinal): Boolean
 IFirebirdConf_asBoolean = CFUNCTYPE(c_bool, IFirebirdConf, Cardinal)
+# >>> Firebird 4
 # IFirebirdConf(4)
 # function getVersion(this: IFirebirdConf; status: IStatus): Cardinal
 IFirebirdConf_getVersion = CFUNCTYPE(Cardinal, IFirebirdConf, IStatus)
@@ -758,6 +806,7 @@ IConfigManager_getPluginConfig = CFUNCTYPE(IConfig, IConfigManager, c_char_p)
 IConfigManager_getInstallDirectory = CFUNCTYPE(c_char_p, IConfigManager)
 # function getRootDirectory(this: IConfigManager): PAnsiChar
 IConfigManager_getRootDirectory = CFUNCTYPE(c_char_p, IConfigManager)
+# >>> Firebird 4
 # IConfigManager(3) : IConfigManager(2)
 # function getDefaultSecurityDb(this: IConfigManager): PAnsiChar
 IConfigManager_getDefaultSecurityDb = CFUNCTYPE(c_char_p, IConfigManager)
@@ -837,6 +886,7 @@ IMessageMetadata_getNullOffset = CFUNCTYPE(Cardinal, IMessageMetadata, IStatus, 
 IMessageMetadata_getBuilder = CFUNCTYPE(IMetadataBuilder, IMessageMetadata, IStatus)
 # function getMessageLength(this: IMessageMetadata; status: IStatus): Cardinal
 IMessageMetadata_getMessageLength = CFUNCTYPE(Cardinal, IMessageMetadata, IStatus)
+# >>> Firebird 4
 # IMessageMetadata(4) : IMessageMetadata(3)
 # function getAlignment(this: IMessageMetadata; status: IStatus): Cardinal
 IMessageMetadata_getAlignment = CFUNCTYPE(Cardinal, IMessageMetadata, IStatus)
@@ -865,6 +915,7 @@ IMetadataBuilder_remove = CFUNCTYPE(None, IMetadataBuilder, IStatus, Cardinal)
 IMetadataBuilder_addField = CFUNCTYPE(Cardinal, IMetadataBuilder, IStatus)
 # function getMetadata(this: IMetadataBuilder; status: IStatus): IMessageMetadata
 IMetadataBuilder_getMetadata = CFUNCTYPE(IMessageMetadata, IMetadataBuilder, IStatus)
+# >>> Firebird 4
 # IMetadataBuilder(4) : IMetadataBuilder(3)
 # procedure setField(this: IMetadataBuilder; status: IStatus; index: Cardinal; field: PAnsiChar)
 IMetadataBuilder_setField = CFUNCTYPE(None, IMetadataBuilder, IStatus, Cardinal, c_char_p)
@@ -924,6 +975,7 @@ IStatement_setCursorName = CFUNCTYPE(None, IStatement, IStatus, c_char_p)
 IStatement_free = CFUNCTYPE(None, IStatement, IStatus)
 # function getFlags(this: IStatement; status: IStatus): Cardinal
 IStatement_getFlags = CFUNCTYPE(Cardinal, IStatement, IStatus)
+# >>> Firebird 4
 # IStatement(4) : IStatement(3)
 # function getTimeout(this: IStatement; status: IStatus): Cardinal
 IStatement_getTimeout = CFUNCTYPE(Cardinal, IStatement, IStatus)
@@ -1034,6 +1086,20 @@ IAttachment_ping = CFUNCTYPE(None, IAttachment, IStatus)
 IAttachment_detach = CFUNCTYPE(None, IAttachment, IStatus)
 # procedure dropDatabase(this: IAttachment; status: IStatus)
 IAttachment_dropDatabase = CFUNCTYPE(None, IAttachment, IStatus)
+# >>> Firebird 4
+# IAttachment(4) : IAttachment(3)
+# function getIdleTimeout(this: IAttachment; status: IStatus): Cardinal
+IAttachment_getIdleTimeout = CFUNCTYPE(Cardinal, IAttachment, IStatus)
+# procedure setIdleTimeout(this: IAttachment; status: IStatus; timeOut: Cardinal)
+IAttachment_setIdleTimeout = CFUNCTYPE(None, IAttachment, IStatus, Cardinal)
+# function getStatementTimeout(this: IAttachment; status: IStatus): Cardinal
+IAttachment_getStatementTimeout = CFUNCTYPE(Cardinal, IAttachment, IStatus)
+# procedure setStatementTimeout(this: IAttachment; status: IStatus; timeOut: Cardinal)
+IAttachment_setStatementTimeout = CFUNCTYPE(None, IAttachment, IStatus, Cardinal)
+# function createBatch(this: IAttachment; status: IStatus; transaction: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: IMessageMetadata; parLength: Cardinal; par: BytePtr): IBatch
+IAttachment_createBatch = CFUNCTYPE(IBatch, IAttachment, IStatus, ITransaction, Cardinal, c_char_p, Cardinal, IMessageMetadata, Cardinal, c_void_p)
+# function createReplicator(this: IAttachment; status: IStatus): IReplicator
+# NOT SURFACED IN DRIVER
 #
 # IService(3) : ReferenceCounted
 # ------------------------------
@@ -1126,6 +1192,26 @@ IUtil_getClientVersion = CFUNCTYPE(Cardinal, IUtil)
 IUtil_getXpbBuilder = CFUNCTYPE(IXpbBuilder, IUtil, IStatus, Cardinal, BytePtr, Cardinal)
 # function setOffsets(this: IUtil; status: IStatus; metadata: IMessageMetadata; callback: IOffsetsCallback): Cardinal
 IUtil_setOffsets = CFUNCTYPE(Cardinal, IUtil, IStatus, IMessageMetadata, IOffsetsCallback)
+# >>> Firebird 4
+# IUtil(4) : IUtil(2)
+# function getDecFloat16(this: IUtil; status: IStatus): IDecFloat16
+IUtil_getDecFloat16 = CFUNCTYPE(IDecFloat16, IUtil, IStatus)
+# function getDecFloat34(this: IUtil; status: IStatus): IDecFloat34
+IUtil_getDecFloat34 = CFUNCTYPE(IDecFloat34, IUtil, IStatus)
+# procedure decodeTimeTz(this: IUtil; status: IStatus; timeTz: ISC_TIME_TZPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar)
+IUtil_decodeTimeTz = CFUNCTYPE(None, IUtil, IStatus, ISC_TIME_TZ_PTR, CardinalPtr, CardinalPtr, CardinalPtr, CardinalPtr, Cardinal, c_char_p)
+# procedure decodeTimeStampTz(this: IUtil; status: IStatus; timeStampTz: ISC_TIMESTAMP_TZPtr; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar)
+IUtil_decodeTimeStampTz = CFUNCTYPE(None, IUtil, IStatus, ISC_TIMESTAMP_TZ_PTR, CardinalPtr, CardinalPtr, CardinalPtr, CardinalPtr, CardinalPtr, CardinalPtr, CardinalPtr, Cardinal, c_char_p)
+# procedure encodeTimeTz(this: IUtil; status: IStatus; timeTz: ISC_TIME_TZPtr; hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal; timeZone: PAnsiChar)
+IUtil_encodeTimeTz = CFUNCTYPE(None, IUtil, IStatus, ISC_TIME_TZ_PTR, Cardinal, Cardinal, Cardinal, Cardinal, c_char_p)
+# procedure encodeTimeStampTz(this: IUtil; status: IStatus; timeStampTz: ISC_TIMESTAMP_TZPtr; year: Cardinal; month: Cardinal; day: Cardinal; hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal; timeZone: PAnsiChar)
+IUtil_encodeTimeStampTz = CFUNCTYPE(None, IUtil, IStatus, ISC_TIMESTAMP_TZ_PTR, Cardinal, Cardinal, Cardinal, Cardinal, Cardinal, Cardinal, Cardinal, c_char_p)
+# function getInt128(this: IUtil; status: IStatus): IInt128
+IUtil_getInt128 = CFUNCTYPE(IInt128, IUtil, IStatus)
+# procedure decodeTimeTzEx(this: IUtil; status: IStatus; timeTz: ISC_TIME_TZ_EXPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar)
+IUtil_decodeTimeTzEx = CFUNCTYPE(None, IUtil, IStatus, ISC_TIME_TZ_EX_PTR, CardinalPtr, CardinalPtr, CardinalPtr, CardinalPtr, Cardinal, c_char_p)
+# procedure decodeTimeStampTzEx(this: IUtil; status: IStatus; timeStampTz: ISC_TIMESTAMP_TZ_EXPtr; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar)
+IUtil_decodeTimeStampTzEx = CFUNCTYPE(None, IUtil, IStatus, ISC_TIMESTAMP_TZ_EX_PTR, CardinalPtr, CardinalPtr, CardinalPtr, CardinalPtr, CardinalPtr, CardinalPtr, CardinalPtr, Cardinal, c_char_p)
 #
 # IOffsetsCallback(2) : Versioned
 # -------------------------------
@@ -1174,6 +1260,36 @@ IXpbBuilder_getBytes = CFUNCTYPE(BytePtr, IXpbBuilder, IStatus)
 IXpbBuilder_getBufferLength = CFUNCTYPE(Cardinal, IXpbBuilder, IStatus)
 # function getBuffer(this: IXpbBuilder; status: IStatus): BytePtr
 IXpbBuilder_getBuffer = CFUNCTYPE(BytePtr, IXpbBuilder, IStatus)
+#
+# IDecFloat16(2) : Versioned
+# --------------------------
+# procedure toBcd(this: IDecFloat16; from: FB_DEC16Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr)
+IDecFloat16_toBcd = CFUNCTYPE(None, IDecFloat16, FB_DEC16Ptr, IntPtr, BytePtr, IntPtr)
+# procedure toString(this: IDecFloat16; status: IStatus; from: FB_DEC16Ptr; bufferLength: Cardinal; buffer: PAnsiChar)
+IDecFloat16_toString = CFUNCTYPE(None, IDecFloat16, IStatus, FB_DEC16Ptr, Cardinal, c_char_p)
+# procedure fromBcd(this: IDecFloat16; sign: Integer; bcd: BytePtr; exp: Integer; to_: FB_DEC16Ptr)
+IDecFloat16_fromBcd = CFUNCTYPE(None, IDecFloat16, c_int, BytePtr, c_int, FB_DEC16Ptr)
+# procedure fromString(this: IDecFloat16; status: IStatus; from: PAnsiChar; to_: FB_DEC16Ptr)
+IDecFloat16_fromString = CFUNCTYPE(None, IDecFloat16, IStatus, c_char_p, FB_DEC16Ptr)
+#
+# IDecFloat34(2) : Versioned
+# --------------------------
+# procedure toBcd(this: IDecFloat34; from: FB_DEC34Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr)
+IDecFloat34_toBcd = CFUNCTYPE(None, IDecFloat34, FB_DEC34Ptr, IntPtr, BytePtr, IntPtr)
+# procedure toString(this: IDecFloat34; status: IStatus; from: FB_DEC34Ptr; bufferLength: Cardinal; buffer: PAnsiChar)
+IDecFloat34_toString = CFUNCTYPE(None, IDecFloat34, IStatus, FB_DEC34Ptr, Cardinal, c_char_p)
+# procedure fromBcd(this: IDecFloat34; sign: Integer; bcd: BytePtr; exp: Integer; to_: FB_DEC34Ptr)
+IDecFloat34_fromBcd = CFUNCTYPE(None, IDecFloat34, c_int, BytePtr, c_int, FB_DEC34Ptr)
+# procedure fromString(this: IDecFloat34; status: IStatus; from: PAnsiChar; to_: FB_DEC34Ptr)
+IDecFloat34_fromString = CFUNCTYPE(None, IDecFloat34, IStatus, c_char_p, FB_DEC34Ptr)
+#
+# IInt128(2) : Versioned
+# ----------------------
+# procedure toString(this: IInt128; status: IStatus; from: FB_I128Ptr; scale: Integer; bufferLength: Cardinal; buffer: PAnsiChar)
+IInt128_toString = CFUNCTYPE(None, IInt128, IStatus, FB_I128Ptr, c_int, Cardinal, c_char_p)
+# procedure fromString(this: IInt128; status: IStatus; scale: Integer; from: PAnsiChar; to_: FB_I128Ptr)
+IInt128_fromString = CFUNCTYPE(None, IInt128, IStatus, c_int, c_char_p, FB_I128Ptr)
+#
 # ------------------------------------------------------------------------------
 # Interfaces - Data structures
 # ------------------------------------------------------------------------------
@@ -1249,7 +1365,8 @@ IConfig_VTable._fields_ = [
     ('find', IConfig_find),
     ('findValue', IConfig_findValue),
     ('findPos', IConfig_findPos)]
-# IFirebirdConf(3) : ReferenceCounted
+# >>> Firebird 4
+# IFirebirdConf(4) : ReferenceCounted
 IFirebirdConf_VTable._fields_ = [
     ('dummy', c_void_p),
     ('version', c_ulong),
@@ -1258,13 +1375,15 @@ IFirebirdConf_VTable._fields_ = [
     ('getKey', IFirebirdConf_getKey),
     ('asInteger', IFirebirdConf_asInteger),
     ('asString', IFirebirdConf_asString),
-    ('asBoolean', IFirebirdConf_asBoolean)]
+    ('asBoolean', IFirebirdConf_asBoolean),
+    ('getVersion', IFirebirdConf_getVersion)]
 # IPluginConfig(3) : ReferenceCounted
 # IPluginFactory(2) : Versioned
 # IPluginModule(3) : Versioned
 # IPluginManager(2) : Versioned
 # ICryptKey(2) : Versioned
-# IConfigManager(2) : Versioned
+# >>> Firebird 4
+# IConfigManager(3) : Versioned
 IConfigManager_VTable._fields_ = [
     ('dummy', c_void_p),
     ('version', c_ulong),
@@ -1273,7 +1392,8 @@ IConfigManager_VTable._fields_ = [
     ('getDatabaseConf', IConfigManager_getDatabaseConf),
     ('getPluginConfig', IConfigManager_getPluginConfig),
     ('getInstallDirectory', IConfigManager_getInstallDirectory),
-    ('getRootDirectory', IConfigManager_getRootDirectory)]
+    ('getRootDirectory', IConfigManager_getRootDirectory),
+    ('getDefaultSecurityDb', IConfigManager_getDefaultSecurityDb)]
 # IEventCallback(3) : ReferenceCounted
 IEventCallback_VTable._fields_ = [
     ('dummy', c_void_p),
@@ -1309,7 +1429,8 @@ ITransaction_VTable._fields_ = [
     ('join', ITransaction_join),
     ('validate', ITransaction_validate),
     ('enterDtc', ITransaction_enterDtc)]
-# IMessageMetadata(3) : ReferenceCounted
+# >>> Firebird 4
+# IMessageMetadata(4) : ReferenceCounted
 IMessageMetadata_VTable._fields_ = [
     ('dummy', c_void_p),
     ('version', c_ulong),
@@ -1329,8 +1450,11 @@ IMessageMetadata_VTable._fields_ = [
     ('getOffset', IMessageMetadata_getOffset),
     ('getNullOffset', IMessageMetadata_getNullOffset),
     ('getBuilder', IMessageMetadata_getBuilder),
-    ('getMessageLength', IMessageMetadata_getMessageLength)]
-# IMetadataBuilder(3) : ReferenceCounted
+    ('getMessageLength', IMessageMetadata_getMessageLength),
+    ('getAlignment', IMessageMetadata_getAlignment),
+    ('getAlignedLength', IMessageMetadata_getAlignedLength)]
+# >>> Firebird 4
+# IMetadataBuilder(4) : ReferenceCounted
 IMetadataBuilder_VTable._fields_ = [
     ('dummy', c_void_p),
     ('version', c_ulong),
@@ -1345,7 +1469,11 @@ IMetadataBuilder_VTable._fields_ = [
     ('moveNameToIndex', IMetadataBuilder_moveNameToIndex),
     ('remove', IMetadataBuilder_remove),
     ('addField', IMetadataBuilder_addField),
-    ('getMetadata', IMetadataBuilder_getMetadata)]
+    ('getMetadata', IMetadataBuilder_getMetadata),
+    ('setField', IMetadataBuilder_setField),
+    ('setRelation', IMetadataBuilder_setRelation),
+    ('setOwner', IMetadataBuilder_setOwner),
+    ('setAlias', IMetadataBuilder_setAlias)]
 # IResultSet(3) : ReferenceCounted
 IResultSet_VTable._fields_ = [
     ('dummy', c_void_p),
@@ -1363,7 +1491,8 @@ IResultSet_VTable._fields_ = [
     ('getMetadata', IResultSet_getMetadata),
     ('close', IResultSet_close),
     ('setDelayedOutputFormat', IResultSet_setDelayedOutputFormat)]
-# IStatement(3) : ReferenceCounted
+# >>> Firebird 4
+# IStatement(4) : ReferenceCounted
 IStatement_VTable._fields_ = [
     ('dummy', c_void_p),
     ('version', c_ulong),
@@ -1379,7 +1508,10 @@ IStatement_VTable._fields_ = [
     ('openCursor', IStatement_openCursor),
     ('setCursorName', IStatement_setCursorName),
     ('free', IStatement_free),
-    ('getFlags', IStatement_getFlags)]
+    ('getFlags', IStatement_getFlags),
+    ('getTimeout', IStatement_getTimeout),
+    ('setTimeout', IStatement_setTimeout),
+    ('createBatch', IStatement_createBatch)]
 # IBatch(3) : ReferenceCounted
 IBatch_VTable._fields_ = [
     ('dummy', c_void_p),
@@ -1426,7 +1558,8 @@ IEvents_VTable._fields_ = [
     ('addRef', IReferenceCounted_addRef),
     ('release', IReferenceCounted_release),
     ('cancel', IEvents_cancel)]
-# IAttachment(3) : ReferenceCounted
+# >>> Firebird 4
+# IAttachment(4) : ReferenceCounted
 IAttachment_VTable._fields_ = [
     ('dummy', c_void_p),
     ('version', c_ulong),
@@ -1449,7 +1582,13 @@ IAttachment_VTable._fields_ = [
     ('cancelOperation', IAttachment_cancelOperation),
     ('ping', IAttachment_ping),
     ('detach', IAttachment_detach),
-    ('dropDatabase', IAttachment_dropDatabase)]
+    ('dropDatabase', IAttachment_dropDatabase),
+    ('getIdleTimeout', IAttachment_getIdleTimeout),
+    ('setIdleTimeout', IAttachment_setIdleTimeout),
+    ('getStatementTimeout', IAttachment_getStatementTimeout),
+    ('setStatementTimeout', IAttachment_setStatementTimeout),
+    ('createBatch', IAttachment_createBatch),
+    ('createReplicator', c_void_p)]
 # IService(3) : ReferenceCounted
 IService_VTable._fields_ = [
     ('dummy', c_void_p),
@@ -1534,7 +1673,8 @@ IVersionCallback_VTable._fields_ = [
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('callback', IVersionCallback_callback)]
-# IUtil(2) : Versioned
+# >>> Firebird 4
+# IUtil(4) : Versioned
 IUtil_VTable._fields_ = [
     ('dummy', c_void_p),
     ('version', c_ulong),
@@ -1550,7 +1690,18 @@ IUtil_VTable._fields_ = [
     ('formatStatus', IUtil_formatStatus),
     ('getClientVersion', IUtil_getClientVersion),
     ('getXpbBuilder', IUtil_getXpbBuilder),
-    ('setOffsets', IUtil_setOffsets)]
+    ('setOffsets', IUtil_setOffsets),
+    ('getDecFloat16', IUtil_getDecFloat16),
+    ('getDecFloat34', IUtil_getDecFloat34),
+    ('getTransactionByHandle', c_void_p), # FB 4 Beta 2
+    ('getStatementByHandle', c_void_p), # FB 4 Beta 2
+    ('decodeTimeTz', IUtil_decodeTimeTz),
+    ('decodeTimeStampTz', IUtil_decodeTimeStampTz),
+    ('encodeTimeTz', IUtil_encodeTimeTz),
+    ('encodeTimeStampTz', IUtil_encodeTimeStampTz),
+    ('getInt128', IUtil_getInt128),
+    ('decodeTimeTzEx', IUtil_decodeTimeTzEx),
+    ('decodeTimeStampTzEx', IUtil_decodeTimeStampTzEx)]
 # IOffsetsCallback(2) : Versioned
 IOffsetsCallback_VTable._fields_ = [
     ('dummy', c_void_p),
@@ -1604,6 +1755,29 @@ IXpbBuilder_VTable._fields_ = [
 # ? IUdrProcedureFactory(3) : Disposable
 # ? IUdrTriggerFactory(3) : Disposable
 # ? IUdrPlugin(2) : Versioned
+# >>> Firebird 4
+# IDecFloat16(2) : Versioned
+IDecFloat16_VTable._fields_ = [
+    ('dummy', c_void_p),
+    ('version', c_ulong),
+    ('toBcd', IDecFloat16_toBcd),
+    ('toString', IDecFloat16_toString),
+    ('fromBcd', IDecFloat16_fromBcd),
+    ('fromString', IDecFloat16_fromString)]
+# IDecFloat34(2) : Versioned
+IDecFloat34_VTable._fields_ = [
+    ('dummy', c_void_p),
+    ('version', c_ulong),
+    ('toBcd', IDecFloat34_toBcd),
+    ('toString', IDecFloat34_toString),
+    ('fromBcd', IDecFloat34_fromBcd),
+    ('fromString', IDecFloat34_fromString)]
+# IInt128(2) : Versioned
+IInt128_VTable._fields_ = [
+    ('dummy', c_void_p),
+    ('version', c_ulong),
+    ('toString', IInt128_toString),
+    ('fromString', IInt128_fromString)]
 
 sys_encoding = getpreferredencoding()
 
@@ -1856,11 +2030,13 @@ Hooks:
     hook is ignored.
 """
     if not has_api():
+        if filename is None:
+            filename = driver_config.fb_client_library.value
         if filename and not isinstance(filename, Path):
             filename = Path(filename)
         _api = FirebirdAPI(filename)
         setattr(sys.modules[__name__], 'api', _api)
-        for hook in HookManager().get_callbacks(APIHook.LOADED, _api):
+        for hook in get_callbacks(APIHook.LOADED, _api):
             hook(_api)
 
 def get_api() -> FirebirdAPI:
@@ -1871,4 +2047,4 @@ def get_api() -> FirebirdAPI:
 
 api: FirebirdAPI = None
 
-HookManager().register_class(FirebirdAPI, set([APIHook.LOADED]))
+register_class(FirebirdAPI, set([APIHook.LOADED]))

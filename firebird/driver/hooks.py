@@ -36,7 +36,7 @@
 
 from __future__ import annotations
 from enum import Enum, auto
-from firebird.base.hooks import HookManager
+from firebird.base.hooks import register_class, get_callbacks, add_hook, hook_manager
 
 class APIHook(Enum):
     "Firebird API hooks"

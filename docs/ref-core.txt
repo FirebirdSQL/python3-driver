@@ -28,18 +28,42 @@ Functions
 
 connect
 -------
-
 .. autofunction:: connect
 
 create_database
 ---------------
-
 .. autofunction:: create_database
 
 connect_server
 --------------
-
 .. autofunction:: connect_server
+
+tpb
+---
+.. autofunction:: tpb
+
+Managers for parameter buffers
+==============================
+
+TPB
+---
+.. autoclass:: TPB
+
+DPB
+---
+.. autoclass:: DPB
+
+SPB_ATTACH
+----------
+.. autoclass:: SPB_ATTACH
+
+Buffer
+------
+.. autoclass:: Buffer
+
+CBuffer
+-------
+.. autoclass:: CBuffer
 
 Classes
 =======
@@ -47,14 +71,6 @@ Classes
 Connection
 ----------
 .. autoclass:: Connection
-
-InfoProvider
-------------
-.. autoclass:: InfoProvider
-
-DatabaseInfoProvider
---------------------
-.. autoclass:: DatabaseInfoProvider
 
 TransactionManager
 ------------------
@@ -75,6 +91,38 @@ Cursor
 Server
 ------
 .. autoclass:: Server
+
+ServerServiceProvider
+---------------------
+.. autoclass:: ServerServiceProvider
+
+ServerDbServices
+----------------
+.. autoclass:: ServerDbServices
+
+ServerUserServices
+------------------
+.. autoclass:: ServerUserServices
+
+ServerTraceServices
+-------------------
+.. autoclass:: ServerTraceServices
+
+InfoProvider
+------------
+.. autoclass:: InfoProvider
+
+DatabaseInfoProvider
+--------------------
+.. autoclass:: DatabaseInfoProvider
+
+TransactionInfoProvider
+-----------------------
+.. autoclass:: TransactionInfoProvider
+
+ServerInfoProvider
+------------------
+.. autoclass:: ServerInfoProvider
 
 EventCollector
 --------------
