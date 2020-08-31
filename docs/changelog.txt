@@ -2,6 +2,12 @@
 Changelog
 #########
 
+Version 0.7.0
+=============
+
+* Added support for new FB4 data types (TIME/TIMESTAMP WITH TIMEZONE, DECFLOAT[16|34] and
+  extended DECIMAL/NUMERIC via INT128 storage).
+
 Version 0.6.0
 =============
 

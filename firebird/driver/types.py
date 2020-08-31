@@ -39,6 +39,7 @@ from typing import Tuple, List, Callable, Protocol
 import time
 import datetime
 import decimal
+from dateutil import tz
 from enum import IntEnum, IntFlag
 from dataclasses import dataclass, field
 from firebird.base.types import Error
@@ -434,6 +435,9 @@ class SQLDataType(IntEnum):
     TIME = 560
     DATE = 570
     INT64 = 580
+    TIMESTAMP_TZ_EX = 32748  # Firebird 4
+    TIME_TZ_EX = 32750  # Firebird 4
+    INT128 = 32752 # Firebird 4
     TIMESTAMP_TZ = 32754  # Firebird 4
     TIME_TZ = 32756  # Firebird 4
     DEC_FIXED = 32758  # Firebird 4
@@ -1136,17 +1140,17 @@ Time = datetime.time
 #: This callable constructs an object holding a time stamp value.
 Timestamp = datetime.datetime
 
-def DateFromTicks(ticks: float) -> Date:
+def DateFromTicks(ticks: float) -> Date: # pragma: no cover
     """Constructs an object holding a date value from the given ticks value
 (number of seconds since the epoch)."""
     return Date(time.localtime(ticks)[:3])
 
-def TimeFromTicks(ticks: float) -> Time:
+def TimeFromTicks(ticks: float) -> Time: # pragma: no cover
     """Constructs an object holding a time value from the given ticks value
 (number of seconds since the epoch)."""
     return Time(time.localtime(ticks)[3:6])
 
-def TimestampFromTicks(ticks: float) -> Timestamp:
+def TimestampFromTicks(ticks: float) -> Timestamp: # pragma: no cover
     """Constructs an object holding a time stamp value from the given ticks value
 (number of seconds since the epoch)."""
     return Timestamp(time.localtime(ticks)[:6])
@@ -1158,7 +1162,7 @@ class DBAPITypeObject:
     "Python DB API 2.0 - type support"
     def __init__(self, *values):
         self.values = values
-    def __cmp__(self, other):
+    def __cmp__(self, other): # pragma: no cover
         if other in self.values:
             return 0
         if other < self.values:
@@ -1198,3 +1202,20 @@ class Transactional(Protocol):  # pragma: no cover
         "Returns true if transaction is active"
         ...
 
+# timezone
+
+def get_timezone(timezone: str=None) -> datetime.tzinfo:
+    """Returns `datetime.tzinfo` for specified time zone.
+
+This is preferred method to obtain timezone information for construction of timezone-aware
+`datetime.datetime` and `datetime.time` objects. Current implementation uses `dateutil.tz`
+for timezone tzinfo objects, but adds metadata neccessary to store timezone regions into
+database instead zoned time, and to handle offset-based timezones in format required by
+Firebird.
+"""
+    if timezone[0] in ['+', '-']:
+        timezone = 'UTC' + timezone
+    result = tz.gettz(timezone)
+    if result is not None and not hasattr(result, '_timezone_'):
+        setattr(result, '_timezone_', timezone[3:] if timezone.startswith('UTC') and len(timezone) > 3 else timezone)
+    return result

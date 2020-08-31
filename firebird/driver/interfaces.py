@@ -39,11 +39,11 @@ from typing import Union, Any, Optional, ByteString
 import sys
 import threading
 import datetime
-from ctypes import memmove, memset, create_string_buffer, cast, byref, string_at, \
+from ctypes import memmove, memset, create_string_buffer, cast, byref, string_at, sizeof, \
      c_char_p, c_void_p, c_byte, c_ulong
 from .types import Error, DatabaseError, InterfaceError, BCD, \
      StateResult, DirectoryCode, BlobInfoCode, SQLDataType, XpbKind, \
-     StatementType, StateFlag, CursorFlag, StatementFlag, PreparePrefetchFlag
+     StatementType, StateFlag, CursorFlag, StatementFlag, PreparePrefetchFlag, get_timezone
 from . import fbapi as a
 from .hooks import APIHook, add_hook
 
@@ -1308,64 +1308,108 @@ handle does not work with interfaces."""
 class iUtil(iUtil_v2):
     "Class that wraps IUtil v4 interface for use from Python"
     VERSION = 4
+    STR_SIZE = 200
+    def __init__(self, intf):
+        super().__init__(intf)
+        self.year = a.Cardinal(0)
+        self.month = a.Cardinal(0)
+        self.day = a.Cardinal(0)
+        self.hours = a.Cardinal(0)
+        self.minutes = a.Cardinal(0)
+        self.seconds = a.Cardinal(0)
+        self.fractions = a.Cardinal(0)
+        self.str_buf = create_string_buffer(self.STR_SIZE)
+        self.time_tz = create_string_buffer(sizeof(a.ISC_TIME_TZ()))
+        self.timestamp_tz = create_string_buffer(sizeof(a.ISC_TIMESTAMP_TZ()))
     def get_decfloat16(self) -> iDecFloat16:
-        "TODO"
+        "Returns iDecFloat16 interface."
         result = self.vtable.getDecFloat16(self, self.status)
         self._check()
         return iDecFloat16(result)
     def get_decfloat34(self) -> iDecFloat34:
-        "TODO"
+        "Returns iDecFloat34 interface."
         result = self.vtable.getDecFloat34(self, self.status)
         self._check()
         return iDecFloat34(result)
-    def decode_time_tz(self, timetz: a.ISC_TIME_TZ, hours: a.Cardinal, minutes: a.Cardinal,
-                       seconds: a.Cardinal, fractions: a.Cardinal, zone_bufer: bytes) -> None:
-        "TODO"
+    def decode_time_tz(self, timetz: Union[a.ISC_TIME_TZ, bytes]) -> datetime.time:
+        "Decodes TIME WITH TIMEZONE from internal format to datetime.time with tzinfo."
+        if isinstance(timetz, bytes):
+            timetz = a.ISC_TIME_TZ.from_buffer_copy(timetz)
+        self.hours.value = 0
+        self.minutes.value = 0
+        self.seconds.value = 0
+        self.fractions.value = 0
+        memset(self.str_buf, 0, self.STR_SIZE)
         # procedure decodeTimeTz(this: IUtil; status: IStatus; timeTz: ISC_TIME_TZPtr;
         #                        hours: CardinalPtr; minutes: CardinalPtr;
         #                        seconds: CardinalPtr; fractions: CardinalPtr;
         #                        timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar)
-        self.vtable.decodeTimeTz(self, self.status, byref(timetz), byref(hours),
-                                 byref(minutes), byref(seconds), byref(fractions),
-                                 len(zone_bufer), zone_bufer)
+        self.vtable.decodeTimeTz(self, self.status, byref(timetz), byref(self.hours),
+                                 byref(self.minutes), byref(self.seconds), byref(self.fractions),
+                                 self.STR_SIZE, self.str_buf)
         self._check()
-    def decode_timestamp_tz(self, timestamptz: a.ISC_TIMESTAMP_TZ, year: a.Cardinal,
-                            month: a.Cardinal, day: a.Cardinal, hours: a.Cardinal,
-                            minutes: a.Cardinal, seconds: a.Cardinal, fractions: a.Cardinal,
-                            zone_bufer: bytes) -> None:
-        "TODO"
+        tz = get_timezone(self.str_buf.value.decode())
+        return datetime.time(self.hours.value, self.minutes.value, self.seconds.value,
+                             self.fractions.value * 100, tz)
+    def decode_timestamp_tz(self, timestamptz: Union[a.ISC_TIMESTAMP_TZ, bytes]) -> datetime.datetime:
+        "Decodes TIMESTAMP WITH TIMEZONE from internal format to datetime.datetime with tzinfo."
+        if isinstance(timestamptz, bytes):
+            timestamptz = a.ISC_TIMESTAMP_TZ.from_buffer_copy(timestamptz)
+        self.year.value = 0
+        self.month.value = 0
+        self.day.value = 0
+        self.hours.value = 0
+        self.minutes.value = 0
+        self.seconds.value = 0
+        self.fractions.value = 0
+        memset(self.str_buf, 0, self.STR_SIZE)
         # procedure decodeTimeStampTz(this: IUtil; status: IStatus; timeStampTz: ISC_TIMESTAMP_TZPtr;
         #                             year: CardinalPtr; month: CardinalPtr; day: CardinalPtr;
         #                             hours: CardinalPtr; minutes: CardinalPtr;
         #                             seconds: CardinalPtr; fractions: CardinalPtr;
         #                             timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar)
-        self.vtable.decodeTimeStampTz(self, self.status, byref(timestamptz), byref(year),
-                                      byref(month), byref(day), byref(hours),
-                                      byref(minutes), byref(seconds), byref(fractions),
-                                      len(zone_bufer), zone_bufer)
+        self.vtable.decodeTimeStampTz(self, self.status, byref(timestamptz), byref(self.year),
+                                      byref(self.month), byref(self.day), byref(self.hours),
+                                      byref(self.minutes), byref(self.seconds), byref(self.fractions),
+                                      self.STR_SIZE, self.str_buf)
         self._check()
-    def encode_time_tz(self, timetz: a.ISC_TIME_TZ, hours: int, minutes: int, seconds: int,
-                       fractions: int, tz: str) -> None:
-        "TODO"
+        tz = get_timezone(self.str_buf.value.decode())
+        return datetime.datetime(self.year.value, self.month.value, self.day.value,
+                                 self.hours.value, self.minutes.value, self.seconds.value,
+                                 self.fractions.value * 100, tz)
+    def encode_time_tz(self, time: datetime.time) -> bytes:
+        "Encodes datetime.time with tzinfo into internal format for TIME WITH TIMEZONE."
+        tzname = getattr(time.tzinfo, '_timezone_', None)
+        if not tzname:
+            raise InterfaceError("Time timezone not set or does not have a name")
+        self.str_buf.value = tzname.encode()
+        memset(self.time_tz, 0, 8)
         # procedure encodeTimeTz(this: IUtil; status: IStatus; timeTz: ISC_TIME_TZPtr;
         #                        hours: Cardinal; minutes: Cardinal; seconds: Cardinal;
         #                        fractions: Cardinal; timeZone: PAnsiChar)
-        self.vtable.encodeTimeTz(self, self.status, byref(timetz), hours, minutes, seconds,
-                                 fractions, tz.encode())
+        self.vtable.encodeTimeTz(self, self.status, cast(self.time_tz, a.ISC_TIME_TZ_PTR),
+                                 time.hour, time.minute, time.second, time.microsecond // 100, self.str_buf)
         self._check()
-    def encode_timestamp_tz(self, timestamptz: a.ISC_TIMESTAMP_TZ, year: int, month: int,
-                            day: int, hours: int, minutes: int, seconds: int,
-                            fractions: int, tz: str) -> None:
-        "TODO"
+        return self.time_tz.raw
+    def encode_timestamp_tz(self, timestamp: datetime.datetime) -> bytes:
+        "Encodes datetime.datetime with tzinfo into internal format for TIMESTAMP WITH TIMEZONE."
+        tzname = getattr(timestamp.tzinfo, '_timezone_', None)
+        if not tzname:
+            raise InterfaceError("Datetime timezone not set or does not have a name")
+        self.str_buf.value = tzname.encode()
+        memset(self.timestamp_tz, 0, 12)
         # procedure encodeTimeStampTz(this: IUtil; status: IStatus; timeStampTz: ISC_TIMESTAMP_TZPtr;
         #                             year: Cardinal; month: Cardinal; day: Cardinal;
         #                             hours: Cardinal; minutes: Cardinal; seconds: Cardinal;
         #                             fractions: Cardinal; timeZone: PAnsiChar)
-        self.vtable.encodeTimeStampTz(self, self.status, byref(timestamptz), year, month,
-                                      day, hours, minutes, seconds, fractions, tz.encode())
+        self.vtable.encodeTimeStampTz(self, self.status, cast(self.timestamp_tz, a.ISC_TIMESTAMP_TZ_PTR),
+                                      timestamp.year, timestamp.month, timestamp.day,
+                                      timestamp.hour, timestamp.minute, timestamp.second,
+                                      timestamp.microsecond // 100, self.str_buf)
         self._check()
+        return self.timestamp_tz.raw
     def get_int128(self) -> iInt128:
-        "TODO"
+        "Returns iInt128 interface."
         result = self.vtable.getInt128(self, self.status)
         self._check()
         return iInt128(result)
@@ -1489,8 +1533,9 @@ class iInt128(iVersioned):
     def to_str(self, value: a.FB_I128, scale: int) -> str:
         # procedure toString(this: IInt128; status: IStatus; from: FB_I128Ptr; scale: Integer; bufferLength: Cardinal; buffer: PAnsiChar)
         memset(self.str_buf, 0, self.STR_SIZE)
-        self.vtable.toString(self, self.status, byref(value), scale, self.STR_SIZE, buffer)
+        self.vtable.toString(self, self.status, byref(value), scale, self.STR_SIZE, self.str_buf)
         self._check()
+        return self.str_buf.value.decode()
     def from_str(self, value: str, scale: int, into: a.FB_I128=None) -> a.FB_I128:
         # procedure fromString(this: IInt128; status: IStatus; scale: Integer; from: PAnsiChar; to_: FB_I128Ptr)
         result = a.FB_I128(0) if into is None else into

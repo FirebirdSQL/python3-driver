@@ -426,3 +426,9 @@ TraceSession
 .. autoclass:: TraceSession
    :no-members:
 
+Helper functions
+================
+
+get_timezone
+------------
+.. autofunction:: get_timezone

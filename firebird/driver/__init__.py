@@ -51,7 +51,8 @@ from .types import Error, InterfaceError, DatabaseError, DataError, \
      apilevel, threadsafety, paramstyle, DESCRIPTION_NAME, DESCRIPTION_TYPE_CODE, \
      DESCRIPTION_DISPLAY_SIZE, DESCRIPTION_INTERNAL_SIZE, DESCRIPTION_PRECISION, \
      DESCRIPTION_SCALE, DESCRIPTION_NULL_OK, Date, Time, Timestamp, DateFromTicks, \
-     TimeFromTicks, TimestampFromTicks, STRING, BINARY, NUMBER, DATETIME, ROWID
+     TimeFromTicks, TimestampFromTicks, STRING, BINARY, NUMBER, DATETIME, ROWID, \
+     get_timezone
 from .core import connect, create_database, connect_server, transaction, tpb, TPB, \
      CHARSET_MAP, DistributedTransactionManager, Connection, Cursor, Server
 

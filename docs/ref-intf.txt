@@ -167,7 +167,7 @@ iDecFloat34
 
 iInt128
 -------
-..autoclass:: iInt128
+.. autoclass:: iInt128
 
 iMaster
 -------

@@ -66,6 +66,9 @@ Helper constants:
     `DESCRIPTION_INTERNAL_SIZE`, `DESCRIPTION_PRECISION`, `DESCRIPTION_SCALE`
     and `DESCRIPTION_NULL_OK`
 
+Helper functions:
+    `get_timezone`
+
 fbapi
 -----
 

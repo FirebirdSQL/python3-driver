@@ -35,6 +35,7 @@
 """
 from typing import Union
 import sys
+import decimal
 import ctypes
 from ctypes import c_byte, c_ubyte, c_char, c_bool, c_short, c_ushort, c_int, c_uint, \
     c_long, c_ulong, c_longlong, c_ulonglong, c_char_p, c_void_p, \
@@ -1904,6 +1905,7 @@ Methods:
 """
 
     def __init__(self, filename: Path = None):
+        decimal.getcontext().prec = 34
         if filename is None:
             if sys.platform == 'darwin':
                 filename = find_library('Firebird')

@@ -41,6 +41,7 @@ from re import finditer
 from io import StringIO, BytesIO
 
 FB30 = '3.0'
+FB40 = '4.0'
 
 # Default server host
 #FBTEST_HOST = ''
@@ -108,6 +109,9 @@ class DriverTestBase(unittest.TestCase, LoggingIdMixin):
         if self.version.startswith(FB30):
             self.FBTEST_DB = 'fbtest30.fdb'
             self.version = FB30
+        elif self.version.startswith(FB40):
+            self.FBTEST_DB = 'fbtest40.fdb'
+            self.version = FB40
         else:
             raise Exception("Unsupported Firebird version (%s)" % self.version)
         #
@@ -173,6 +177,7 @@ class TestCreateDrop(DriverTestBase):
         self.assertTrue('exist' in cm.exception.args[0])
         with create_database(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD, overwrite=True) as con:
             self.assertEqual(con.dsn, self.dbfile)
+            con.drop_database()
     def test_create_drop_config(self):
         db_config = f"""
         [test_db2]
@@ -433,7 +438,7 @@ class TestConnection(DriverTestBase):
             self.assertGreaterEqual(con.info.ods_version, 11)
             self.assertGreaterEqual(con.info.ods_minor_version, 0)
             self.assertGreaterEqual(con.info.page_cache_size, 75)
-            self.assertEqual(con.info.pages_allocated, 367)
+            self.assertEqual(con.info.pages_allocated, 389)
             self.assertGreater(con.info.pages_used, 300)
             self.assertGreaterEqual(con.info.pages_free, 0)
             self.assertEqual(con.info.sweep_interval, 20000)
@@ -468,7 +473,7 @@ class TestConnection(DriverTestBase):
                                      [t1.info.id, t2.info.id])
                 self.assertEqual(con.info.get_active_transaction_count(), 2)
             s = con.info.get_table_access_stats()
-            self.assertEqual(len(s), 6)
+            self.assertIn(len(s), [6,12])
             self.assertIsInstance(s[0], driver.types.TableAccessStats)
             # Low level info calls
             with con.transaction_manager() as t1, con.transaction_manager() as t2:
@@ -599,7 +604,10 @@ class TestTransaction(DriverTestBase):
         tpb_buffer = tpb.get_buffer()
         with self.con.transaction_manager(tpb_buffer) as tr:
             info = tr.info.get_info(TraInfoCode.ISOLATION)
-            self.assertEqual(info, Isolation.READ_COMMITTED_RECORD_VERSION)
+            if self.version == FB40:
+                self.assertEqual(info, Isolation.READ_COMMITTED_READ_CONSISTENCY)
+            else:
+                self.assertEqual(info, Isolation.READ_COMMITTED_RECORD_VERSION)
             self.assertEqual(tr.info.get_info(TraInfoCode.ACCESS), TraInfoAccess.READ_WRITE)
             self.assertEqual(tr.info.lock_timeout, 10)
         del tpb
@@ -983,9 +991,15 @@ class TestCursor(DriverTestBase):
         with self.con.cursor() as cur:
             self.assertEqual(cur.affected_rows, -1)
             cur.execute('select * from project')
-            self.assertEqual(cur.affected_rows, 0)
+            if self.version == FB40:
+                self.assertEqual(cur.affected_rows, 1)
+            else:
+                self.assertEqual(cur.affected_rows, 0)
             cur.fetchone()
-            rcount = 1
+            if sys.platform == 'win32':
+                rcount = 6
+            else:
+                rcount = 1
             self.assertEqual(cur.affected_rows, rcount)
             self.assertEqual(cur.rowcount, rcount)
     def test_name(self):
@@ -1491,13 +1505,16 @@ class TestServerStandard(DriverTestBase):
     def test_query(self):
         with connect_server(FBTEST_HOST, user='SYSDBA', password=FBTEST_PASSWORD) as svc:
             self.assertEqual(svc.info.manager_version, 2)
-            self.assertTrue(svc.info.version.startswith('3.0.'))
-            self.assertGreaterEqual(3.0, svc.info.engine_version)
+            self.assertTrue(svc.info.version.startswith(self.version))
+            self.assertGreaterEqual(float(self.version), svc.info.engine_version)
             self.assertIn('Firebird', svc.info.architecture)
             x = svc.info.home_directory
             # On Windows it returns 'security.db', a bug?
             #self.assertIn('security.db', svc.info.security_database)
-            self.assertIn('security3.fdb', svc.info.security_database)
+            if self.version == FB40:
+                self.assertIn('security4.fdb'.upper(), svc.info.security_database.upper())
+            else:
+                self.assertIn('security3.fdb', svc.info.security_database)
             x = svc.info.lock_directory
             x = svc.info.capabilities
             self.assertIn(ServerCapability.REMOTE_HOP, x)
@@ -1606,10 +1623,14 @@ class TestServerServices(DriverTestBase):
             self.assertEqual(sessions[trace1_id].name, 'test_trace_1')
             self.assertEqual(sessions[trace2_id].name, '')
             # Windows returns SYSDBA
-            #self.assertEqual(sessions[trace1_id].user, 'SYSDBA')
-            #self.assertEqual(sessions[trace2_id].user, 'SYSDBA')
-            self.assertEqual(sessions[trace1_id].user, '')
-            self.assertEqual(sessions[trace2_id].user, '')
+            #if sys.platform == 'win32':
+                #self.assertEqual(sessions[trace1_id].user, 'SYSDBA')
+                #self.assertEqual(sessions[trace2_id].user, 'SYSDBA')
+            #else:
+                #self.assertEqual(sessions[trace1_id].user, '')
+                #self.assertEqual(sessions[trace2_id].user, '')
+            self.assertEqual(sessions[trace1_id].user, 'SYSDBA')
+            self.assertEqual(sessions[trace2_id].user, 'SYSDBA')
             self.assertIn(trace2_id, sessions)
             self.assertListEqual(sessions[trace1_id].flags, ['active', ' trace'])
             self.assertListEqual(sessions[trace2_id].flags, ['active', ' trace'])
@@ -1961,7 +1982,8 @@ class TestServerDatabaseServices(DriverTestBase):
         self.assertNotIn('(JOB)', report)
         self.assertIn('(COUNTRY)', report)
         self.assertIn('(SALES)', report)
-        self.assertIn('(SALESTATX)', report)
+        if self.version != FB40:
+            self.assertIn('(SALESTATX)', report)
 
 class TestEvents(DriverTestBase):
     def setUp(self):
@@ -2346,6 +2368,223 @@ class TestHooks(DriverTestBase):
         with connect_server(FBTEST_HOST, user=FBTEST_USER, password=FBTEST_PASSWORD) as svc:
             self.assertIs(svc, self._svc)
 
+
+class TestFB4(DriverTestBase):
+    def setUp(self):
+        super().setUp()
+        self.dbfile = os.path.join(self.dbpath, self.FBTEST_DB)
+        self.con = connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD)
+        self.con._logging_id_ = self.__class__.__name__
+        self.con2 = connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD, charset='utf-8')
+        self.con2._logging_id_ = self.__class__.__name__
+        #self.con.execute_immediate("CREATE TABLE FB4 (PK integer,T_TZ TIME WITH TIME ZONE,TS_TZ timestamp with time zone,T time,TS timestamp,DF decfloat,DF16 decfloat(16),DF34 decfloat(34),N128 numeric(34,6),D128 decimal(34,6))")
+        #self.con.execute_immediate("delete from T")
+        self.con.execute_immediate("delete from FB4")
+        self.con.commit()
+    def tearDown(self):
+        self.con2.close()
+        self.con.close()
+    def test_01_select_with_timezone_region(self):
+        data = {1: (2020, 1, 31, 11, 55, 35, 123400, 'Europe/Prague'),
+                2: (2020, 6, 1, 1, 55, 35, 123400, 'Europe/Prague'),
+                3: (2020, 12, 31, 23, 55, 35, 123400, 'Europe/Prague'),}
+        with self.con.cursor() as cur:
+            cur.execute("insert into FB4 (PK,T_TZ,TS_TZ) values (1, '11:55:35.1234 Europe/Prague', '2020-01-31 11:55:35.1234 Europe/Prague')")
+            cur.execute("insert into FB4 (PK,T_TZ,TS_TZ) values (2, '01:55:35.1234 Europe/Prague', '2020-06-01 01:55:35.1234 Europe/Prague')")
+            cur.execute("insert into FB4 (PK,T_TZ,TS_TZ) values (3, '23:55:35.1234 Europe/Prague', '2020-12-31 23:55:35.1234 Europe/Prague')")
+            self.con.commit()
+            cur.execute('select PK,T_TZ,TS_TZ from FB4 where PK between 1 and 3 order by PK')
+            for pk, t_tz, ts_tz in cur:
+                d = data[pk]
+                self.assertIsInstance(t_tz, datetime.time)
+                self.assertIsNotNone(t_tz.tzinfo)
+                self.assertIsNotNone(getattr(t_tz.tzinfo, '_timezone_'))
+                self.assertEqual(t_tz.hour, d[3])
+                self.assertEqual(t_tz.minute, d[4])
+                self.assertEqual(t_tz.second, d[5])
+                self.assertEqual(t_tz.microsecond, d[6])
+                self.assertEqual(t_tz.tzinfo._timezone_, d[7])
+                #
+                self.assertIsInstance(ts_tz, datetime.datetime)
+                self.assertIsNotNone(ts_tz.tzinfo)
+                self.assertIsNotNone(getattr(ts_tz.tzinfo, '_timezone_'))
+                self.assertEqual(ts_tz.year, d[0])
+                self.assertEqual(ts_tz.month, d[1])
+                self.assertEqual(ts_tz.day, d[2])
+                self.assertEqual(ts_tz.hour, d[3])
+                self.assertEqual(ts_tz.minute, d[4])
+                self.assertEqual(ts_tz.second, d[5])
+                self.assertEqual(ts_tz.microsecond, d[6])
+                self.assertEqual(ts_tz.tzinfo._timezone_, d[7])
+    def test_02_select_with_timezone_offset(self):
+        data = {1: (2020, 1, 31, 11, 55, 35, 123400, '+01:00'),
+                2: (2020, 6, 1, 1, 55, 35, 123400, '+02:00'),
+                3: (2020, 12, 31, 23, 55, 35, 123400, '+01:00'),}
+        with self.con.cursor() as cur:
+            cur.execute("insert into FB4 (PK,T_TZ,TS_TZ) values (1, '11:55:35.1234 +01:00', '2020-01-31 11:55:35.1234 +01:00')")
+            cur.execute("insert into FB4 (PK,T_TZ,TS_TZ) values (2, '01:55:35.1234 +02:00', '2020-06-01 01:55:35.1234 +02:00')")
+            cur.execute("insert into FB4 (PK,T_TZ,TS_TZ) values (3, '23:55:35.1234 +01:00', '2020-12-31 23:55:35.1234 +01:00')")
+            self.con.commit()
+            cur.execute('select PK,T_TZ,TS_TZ from FB4 where PK between 1 and 3 order by PK')
+            for pk, t_tz, ts_tz in cur:
+                d = data[pk]
+                self.assertIsInstance(t_tz, datetime.time)
+                self.assertIsNotNone(t_tz.tzinfo)
+                self.assertIsNotNone(getattr(t_tz.tzinfo, '_timezone_', None))
+                self.assertEqual(t_tz.hour, d[3])
+                self.assertEqual(t_tz.minute, d[4])
+                self.assertEqual(t_tz.second, d[5])
+                self.assertEqual(t_tz.microsecond, d[6])
+                self.assertEqual(t_tz.tzinfo._timezone_, d[7])
+                #
+                self.assertIsInstance(ts_tz, datetime.datetime)
+                self.assertIsNotNone(ts_tz.tzinfo)
+                self.assertIsNotNone(getattr(ts_tz.tzinfo, '_timezone_', None))
+                self.assertEqual(ts_tz.year, d[0])
+                self.assertEqual(ts_tz.month, d[1])
+                self.assertEqual(ts_tz.day, d[2])
+                self.assertEqual(ts_tz.hour, d[3])
+                self.assertEqual(ts_tz.minute, d[4])
+                self.assertEqual(ts_tz.second, d[5])
+                self.assertEqual(ts_tz.microsecond, d[6])
+                self.assertEqual(ts_tz.tzinfo._timezone_, d[7])
+    def test_03_insert_with_timezone_region(self):
+        data = {1: (2020, 1, 31, 11, 55, 35, 123400, 'Europe/Prague'),
+                2: (2020, 6, 1, 1, 55, 35, 123400, 'Europe/Prague'),
+                3: (2020, 12, 31, 23, 55, 35, 123400, 'Europe/Prague'),}
+        with self.con.cursor() as cur:
+            for pk, d in data.items():
+                zone = get_timezone(d[7])
+                ts = datetime.datetime(d[0], d[1], d[2], d[3], d[4], d[5], d[6], zone)
+                cur.execute("insert into FB4 (PK,T_TZ,TS_TZ) values (?, ?, ?)", (pk, ts.timetz(), ts))
+                self.con.commit()
+            cur.execute('select PK,T_TZ,TS_TZ from FB4 where PK between 1 and 3 order by PK')
+            for pk, t_tz, ts_tz in cur:
+                d = data[pk]
+                self.assertIsInstance(t_tz, datetime.time)
+                self.assertIsNotNone(t_tz.tzinfo)
+                self.assertIsNotNone(getattr(t_tz.tzinfo, '_timezone_'))
+                self.assertEqual(t_tz.hour, d[3])
+                self.assertEqual(t_tz.minute, d[4])
+                self.assertEqual(t_tz.second, d[5])
+                self.assertEqual(t_tz.microsecond, d[6])
+                self.assertEqual(t_tz.tzinfo._timezone_, d[7])
+                #
+                self.assertIsInstance(ts_tz, datetime.datetime)
+                self.assertIsNotNone(ts_tz.tzinfo)
+                self.assertIsNotNone(getattr(ts_tz.tzinfo, '_timezone_'))
+                self.assertEqual(ts_tz.year, d[0])
+                self.assertEqual(ts_tz.month, d[1])
+                self.assertEqual(ts_tz.day, d[2])
+                self.assertEqual(ts_tz.hour, d[3])
+                self.assertEqual(ts_tz.minute, d[4])
+                self.assertEqual(ts_tz.second, d[5])
+                self.assertEqual(ts_tz.microsecond, d[6])
+                self.assertEqual(ts_tz.tzinfo._timezone_, d[7])
+    def test_04_insert_with_timezone_offset(self):
+        data = {1: (2020, 1, 31, 11, 55, 35, 123400, '+01:00'),
+                2: (2020, 6, 1, 1, 55, 35, 123400, '+02:00'),
+                3: (2020, 12, 31, 23, 55, 35, 123400, '+01:00'),}
+        with self.con.cursor() as cur:
+            for pk, d in data.items():
+                zone = get_timezone(d[7])
+                ts = datetime.datetime(d[0], d[1], d[2], d[3], d[4], d[5], d[6], zone)
+                cur.execute("insert into FB4 (PK,T_TZ,TS_TZ) values (?, ?, ?)", (pk, ts.timetz(), ts))
+                self.con.commit()
+            cur.execute('select PK,T_TZ,TS_TZ from FB4 where PK between 1 and 3 order by PK')
+            for pk, t_tz, ts_tz in cur:
+                d = data[pk]
+                self.assertIsInstance(t_tz, datetime.time)
+                self.assertIsNotNone(t_tz.tzinfo)
+                self.assertIsNotNone(getattr(t_tz.tzinfo, '_timezone_'))
+                self.assertEqual(t_tz.hour, d[3])
+                self.assertEqual(t_tz.minute, d[4])
+                self.assertEqual(t_tz.second, d[5])
+                self.assertEqual(t_tz.microsecond, d[6])
+                self.assertEqual(t_tz.tzinfo._timezone_, d[7])
+                #
+                self.assertIsInstance(ts_tz, datetime.datetime)
+                self.assertIsNotNone(ts_tz.tzinfo)
+                self.assertIsNotNone(getattr(ts_tz.tzinfo, '_timezone_'))
+                self.assertEqual(ts_tz.year, d[0])
+                self.assertEqual(ts_tz.month, d[1])
+                self.assertEqual(ts_tz.day, d[2])
+                self.assertEqual(ts_tz.hour, d[3])
+                self.assertEqual(ts_tz.minute, d[4])
+                self.assertEqual(ts_tz.second, d[5])
+                self.assertEqual(ts_tz.microsecond, d[6])
+                self.assertEqual(ts_tz.tzinfo._timezone_, d[7])
+    def test_05_select_defloat(self):
+        data = {4: (decimal.Decimal('1111111111222222222233333333334444'),
+                    decimal.Decimal('1111111111222222'),
+                    decimal.Decimal('1111111111222222222233333333334444')),
+                }
+        with self.con.cursor() as cur:
+            cur.execute("insert into FB4 (PK,DF,DF16,DF34) values (4, 1111111111222222222233333333334444, 1111111111222222, 1111111111222222222233333333334444)")
+            self.con.commit()
+            cur.execute('select PK,DF,DF16,DF34 from FB4 where PK = 4')
+            for pk, df, df16, df34 in cur:
+                d = data[pk]
+                self.assertIsInstance(df, decimal.Decimal)
+                self.assertEqual(df, d[0])
+                self.assertIsInstance(df16, decimal.Decimal)
+                self.assertEqual(df16, d[1])
+                self.assertIsInstance(df34, decimal.Decimal)
+                self.assertEqual(df34, d[2])
+    def test_06_insert_defloat(self):
+        data = {4: (decimal.Decimal('1111111111222222222233333333334444'),
+                    decimal.Decimal('1111111111222222'),
+                    decimal.Decimal('1111111111222222222233333333334444')),
+                }
+        with self.con.cursor() as cur:
+            for pk, d in data.items():
+                cur.execute("insert into FB4 (PK,DF,DF16,DF34) values (?, ?, ?, ?)", (pk, d[0], d[1], d[2]))
+                self.con.commit()
+            cur.execute('select PK,DF,DF16,DF34 from FB4 where PK = 4')
+            for pk, df, df16, df34 in cur:
+                d = data[pk]
+                self.assertIsInstance(df, decimal.Decimal)
+                self.assertEqual(df, d[0])
+                self.assertIsInstance(df16, decimal.Decimal)
+                self.assertEqual(df16, d[1])
+                self.assertIsInstance(df34, decimal.Decimal)
+                self.assertEqual(df34, d[2])
+    def test_07_select_int128(self):
+        data = {5: decimal.Decimal('1111111111222222222233333333.334444'),
+                6: decimal.Decimal('111111111122222222223333333333.4444'),
+                7: decimal.Decimal('111111111122222222223333333333.444455'),
+                8: decimal.Decimal('111111111122222222223333333333.444456'),
+                }
+        with self.con.cursor() as cur:
+            cur.execute("insert into FB4 (PK,N128,D128) values (5, 1111111111222222222233333333.334444, 1111111111222222222233333333.334444)")
+            cur.execute("insert into FB4 (PK,N128,D128) values (6, 111111111122222222223333333333.4444, 111111111122222222223333333333.4444)")
+            cur.execute("insert into FB4 (PK,N128,D128) values (7, 111111111122222222223333333333.444455, 111111111122222222223333333333.444455)")
+            cur.execute("insert into FB4 (PK,N128,D128) values (8, 111111111122222222223333333333.4444559, 111111111122222222223333333333.4444559)")
+            self.con.commit()
+            cur.execute('select PK,N128,D128 from FB4 where PK between 5 and 8 order by pk')
+            for pk, n128, d128 in cur:
+                d = data[pk]
+                self.assertIsInstance(n128, decimal.Decimal)
+                self.assertEqual(n128, d)
+                self.assertIsInstance(d128, decimal.Decimal)
+                self.assertEqual(d128, d)
+    def test_08_select_int128(self):
+        data = {5: (decimal.Decimal('1111111111222222222233333333.334444'),decimal.Decimal('1111111111222222222233333333.334444')),
+                6: (decimal.Decimal('111111111122222222223333333333.4444'),decimal.Decimal('111111111122222222223333333333.4444')),
+                7: (decimal.Decimal('111111111122222222223333333333.444455'),decimal.Decimal('111111111122222222223333333333.444455')),
+                8: (decimal.Decimal('111111111122222222223333333333.4444559'),decimal.Decimal('111111111122222222223333333333.444456')),
+                }
+        with self.con.cursor() as cur:
+            for pk, d in data.items():
+                cur.execute("insert into FB4 (PK,N128,D128) values (?, ?, ?)", (pk, d[0], d[0]))
+                self.con.commit()
+            cur.execute('select PK,N128,D128 from FB4 where PK between 5 and 8 order by pk')
+            for pk, n128, d128 in cur:
+                d = data[pk]
+                self.assertIsInstance(n128, decimal.Decimal)
+                self.assertEqual(n128, d[1])
+                self.assertIsInstance(d128, decimal.Decimal)
+                self.assertEqual(d128, d[1])
 
 if __name__ == '__main__':
     unittest.main()

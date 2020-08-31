@@ -2787,8 +2787,18 @@ Note:
                     memmove(buf_addr + offset, _util.encode_date(value).to_bytes(length, 'little'), length)
                 elif datatype == SQLDataType.TIME:
                     memmove(buf_addr + offset, _util.encode_time(value).to_bytes(length, 'little'), length)
+                elif datatype == SQLDataType.TIME_TZ:
+                    memmove(buf_addr + offset, _util.encode_time_tz(value), length)
                 elif datatype == SQLDataType.TIMESTAMP:
                     memmove(buf_addr + offset, _encode_timestamp(value), length)
+                elif datatype == SQLDataType.TIMESTAMP_TZ:
+                    memmove(buf_addr + offset, _util.encode_timestamp_tz(value), length)
+                elif datatype == SQLDataType.DEC16:
+                    memmove(buf_addr + offset, byref(_util.get_decfloat16().from_str(str(value))), length)
+                elif datatype == SQLDataType.DEC34:
+                    memmove(buf_addr + offset, _util.get_decfloat34().from_str(str(value)), length)
+                elif datatype == SQLDataType.INT128:
+                    memmove(buf_addr + offset, _util.get_int128().from_str(str(value), in_meta.get_scale(i)), length)
                 elif datatype == SQLDataType.FLOAT:
                     memmove(buf_addr + offset, struct.pack('f', value), length)
                 elif datatype == SQLDataType.DOUBLE:
@@ -2937,9 +2947,21 @@ Note:
                     value = _util.decode_date(buffer[offset:offset+length])
                 elif datatype == SQLDataType.TIME:
                     value = _util.decode_time(buffer[offset:offset+length])
+                elif datatype == SQLDataType.TIME_TZ:
+                    value = _util.decode_time_tz(buffer[offset:offset+length])
                 elif datatype == SQLDataType.TIMESTAMP:
                     value = datetime.datetime.combine(_util.decode_date(buffer[offset:offset+4]),
                                                       _util.decode_time(buffer[offset+4:offset+length]))
+                elif datatype == SQLDataType.TIMESTAMP_TZ:
+                    value = _util.decode_timestamp_tz(buffer[offset:offset+length])
+                elif datatype == SQLDataType.INT128:
+                    value = decimal.Decimal(_util.get_int128().to_str(a.FB_I128.from_buffer_copy(buffer[offset:offset+length]), desc.scale))
+                #elif datatype == SQLDataType.DEC_FIXED:
+                    #value = 'DEC_FIXED'
+                elif datatype == SQLDataType.DEC16:
+                    value = decimal.Decimal(_util.get_decfloat16().to_str(a.FB_DEC16.from_buffer_copy(buffer[offset:offset+length])))
+                elif datatype == SQLDataType.DEC34:
+                    value = decimal.Decimal(_util.get_decfloat34().to_str(a.FB_DEC34.from_buffer_copy(buffer[offset:offset+length])))
                 elif datatype == SQLDataType.FLOAT:
                     value = struct.unpack('f', buffer[offset:offset+length])[0]
                 elif datatype == SQLDataType.DOUBLE:
