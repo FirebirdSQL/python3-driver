@@ -115,11 +115,13 @@ blr_column_name = 21
 blr_column_name2 = 22
 blr_bool = 23
 # Added in FB 4.0
-blr_dec64 = 24
-blr_dec128 = 25
-blr_dec_fixed = 26
+blr_dec64 = 24 # DECFLOAT(16)
+blr_dec128 = 25 # DECFLOAT(34)
+blr_int128 = 26 # INT128
 blr_sql_time_tz = 28
 blr_timestamp_tz = 29
+blr_ex_time_tz = 30
+blr_ex_timestamp_tz = 31
 
 if platform.architecture() == ('64bit', 'WindowsPE'):  # pragma: no cover
     intptr_t = c_longlong

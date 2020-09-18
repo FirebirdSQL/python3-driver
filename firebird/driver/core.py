@@ -378,33 +378,59 @@ class DPB:
         # AuthClient, WireCryptPlugin, Providers, ConnectionTimeout, WireCrypt,
         # WireConpression, DummyPacketInterval, RemoteServiceName, RemoteServicePort,
         # RemoteAuxPort, TcpNoNagle, IpcName, RemotePipeName
+        #: Configuration override
         self.config: Optional[str] = config
+        #: List of authentication plugins override
         self.auth_plugin_list: str = auth_plugin_list
         # Connect
+        #: Use trusted authentication
         self.trusted_auth: bool = trusted_auth
+        #: User name
         self.user: str = user
+        #: User password
         self.password: str = password
+        #: User role
         self.role: str = role
+        #: SQL Dialect for database connection
         self.sql_dialect: int = sql_dialect
+        #: Character set for database connection
         self.charset: str = charset
+        #: Connection timeout
         self.timeout: Optional[int] = timeout
+        #: Dummy packet interval for this database connection
         self.dummy_packet_interval: Optional[int] = dummy_packet_interval
+        #: Page cache size override for database connection
         self.cache_size: int = cache_size
+        #: Disable garbage collection for database connection
         self.no_gc: bool = no_gc
+        #: Disable database triggers for database connection
         self.no_db_triggers: bool = no_db_triggers
+        #: Do not use linger for database connection
         self.no_linger: bool = no_linger
+        #: Database filename passed in UTF8
         self.utf8filename: bool = utf8filename
+        #: Scope for RDB$DB_KEY values
         self.dbkey_scope: Optional[DBKeyScope] = dbkey_scope
         # For db create
+        #: Database page size [db create only]
         self.page_size: Optional[int] = page_size
+        #: Overwrite existing database [db create only]
         self.overwrite: bool = overwrite
+        #: Number of pages in database cache [db create only]
         self.db_buffers = None
+        #: Database cache size [db create only]
         self.db_cache_size: Optional[int] = db_cache_size
+        #: Database write mode (True = sync/False = async) [db create only]
         self.forced_writes: Optional[bool] = forced_writes
+        #: Database data page space usage (True = reserve space, False = Use all space) [db create only]
         self.reserve_space: Optional[bool] = reserve_space
+        #: Database access mode (True = read-only/False = read-write) [db create only]
         self.read_only: bool = read_only
+        #: Sweep interval for the database [db create only]
         self.sweep_interval: Optional[int] = sweep_interval
+        #: SQL dialect for the database [db create only]
         self.db_sql_dialect: Optional[int] = db_sql_dialect
+        #: Character set for the database [db create only]
         self.db_charset: Optional[str] = db_charset
     def clear(self) -> None:
         "Clear all information."
@@ -1265,6 +1291,7 @@ Attributes:
         self._py_charset: str = CHARSET_MAP.get(charset, 'ascii')
         self._att.charset = self._py_charset
         self._dpb: bytes = dpb
+        #: Default TPB for newly created transaction managers
         self.default_tpb: bytes = tpb(Isolation.SNAPSHOT)
         self._transactions: List[TransactionManager] = []
         self._statements: List[Statement] = []
@@ -1411,7 +1438,7 @@ Hooks:
         self._att.drop_database()
         self._att = None
         for hook in get_callbacks(ConnectionHook.DROPPED, self):
-            hook(ConnectionHook.DROPPED, self)
+            hook(self)
     def execute_immediate(self, sql: str) -> None:
         """Executes SQL statement.
 
@@ -1472,7 +1499,7 @@ Important:
             self._close()
             retain = False
             for hook in get_callbacks(ConnectionHook.DETACH_REQUEST, self):
-                ret = hook(ConnectionHook.DETACH_REQUEST, self)
+                ret = hook(self)
                 if ret and not retain:
                     retain = True
             #
@@ -1483,7 +1510,7 @@ Important:
                 finally:
                     self._att = None
                     for hook in get_callbacks(ConnectionHook.CLOSED, self):
-                        hook(ConnectionHook.CLOSED, self)
+                        hook(self)
     def transaction_manager(self, default_tpb: bytes=None,
                             default_action: DefaultAction=DefaultAction.COMMIT) -> TransactionManager:
         """Create new `TransactionManager` instance for this connection.
@@ -1537,7 +1564,11 @@ Arguments:
         return self.main_transaction.cursor()
     def ping(self) -> None:
         """Checks connection status. If test fails the only operation possible
-with attachment is to close it."""
+with connection is to close it.
+
+Raises:
+  DatabaseError: When connection is dead.
+"""
         assert self._att is not None
         self._att.ping()
     def is_active(self) -> bool:
@@ -1640,7 +1671,7 @@ def __make_connection(create: bool, dsn: str, utf8filename: bool, dpb: bytes,
             con = None
             for hook in get_callbacks(ConnectionHook.ATTACH_REQUEST, Connection):
                 try:
-                    con = hook(ConnectionHook.ATTACH_REQUEST, dsn, dpb)
+                    con = hook(dsn, dpb)
                 except Exception as e:
                     raise InterfaceError("Error in DATABASE_ATTACH_REQUEST hook.", *e.args) from e
                 if con is not None:
@@ -1649,7 +1680,7 @@ def __make_connection(create: bool, dsn: str, utf8filename: bool, dpb: bytes,
                 att = provider.attach_database(dsn, dpb, 'utf-8' if utf8filename else FS_ENCODING)
                 con = Connection(att, dsn, dpb, sql_dialect, charset)
     for hook in get_callbacks(ConnectionHook.ATTACHED, con):
-        hook(ConnectionHook.ATTACHED, con)
+        hook(con)
     return con
 
 def connect(database: str, *, user: str=None, password: str=None, role: str=None,
@@ -1883,7 +1914,9 @@ Attributes:
     def __init__(self, connection: Connection, default_tpb: bytes,
                  default_action: DefaultAction=DefaultAction.COMMIT):
         self._connection: Callable[[], Connection] = weakref.ref(connection, self.__dead_con)
+        #: Default Transaction Parameter Block used to start transaction
         self.default_tpb: bytes = default_tpb
+        #: Default action (commit/rollback) to be performed when transaction is closed.
         self.default_action: DefaultAction = default_action
         self.__info: TransactionInfoProvider = None
         self._cursors: List = []  # Weak references to cursors
@@ -2162,6 +2195,9 @@ Raises:
         self._cursors.append(weakref.ref(cur, self._cursor_deleted))
         return cur
 
+    @property
+    def log_context(self) -> Connection:
+        return UNDEFINED
 
 class Statement(LoggingIdMixin):
     """Prepared SQL statement.
@@ -2569,6 +2605,16 @@ Note:
                     val = _util.decode_date(buf[bufpos:bufpos+esize])
                 elif dtype == a.blr_sql_time:
                     val = _util.decode_time(buf[bufpos:bufpos+esize])
+                elif dtype == a.blr_sql_time_tz:
+                    val = _util.decode_time_tz(buf[bufpos:bufpos+esize])
+                elif dtype == a.blr_timestamp_tz:
+                    val = _util.decode_timestamp_tz(buf[bufpos:bufpos+esize])
+                elif dtype == a.blr_int128:
+                    val = decimal.Decimal(_util.get_int128().to_str(a.FB_I128.from_buffer_copy(buf[bufpos:bufpos+esize]), scale))
+                elif dtype == a.blr_dec64:
+                    val = decimal.Decimal(_util.get_decfloat16().to_str(a.FB_DEC16.from_buffer_copy(buf[bufpos:bufpos+esize])))
+                elif dtype == a.blr_dec128:
+                    val = decimal.Decimal(_util.get_decfloat34().to_str(a.FB_DEC34.from_buffer_copy(buf[bufpos:bufpos+esize])))
                 else:  # pragma: no cover
                     raise InterfaceError(f"Unsupported Firebird ARRAY subtype: {dtype}")
                 value.append(val)
@@ -2676,6 +2722,21 @@ Note:
                 elif dtype == a.blr_sql_time:
                     valuebuf.value = _util.encode_time(value[i]).to_bytes(4, 'little')
                     memmove(byref(buf, bufpos), valuebuf, esize)
+                elif dtype == a.blr_sql_time_tz:
+                    valuebuf.value = _util.encode_time_tz(value[i]).to_bytes(esize, 'little')
+                    memmove(byref(buf, bufpos), valuebuf, esize)
+                elif dtype == a.blr_timestamp_tz:
+                    valuebuf.value = _util.encode_timestamp_tz(value[i])
+                    memmove(byref(buf, bufpos), valuebuf, esize)
+                elif dtype == a.blr_dec64:
+                    valuebuf.value = _util.get_decfloat16().from_str(str(value[i]))
+                    memmove(byref(buf, bufpos), valuebuf, esize)
+                elif dtype == a.blr_dec128:
+                    valuebuf.value = _util.get_decfloat34().from_str(str(value[i]))
+                    memmove(byref(buf, bufpos), valuebuf, esize)
+                elif dtype == a.blr_int128:
+                    valuebuf.value = _util.get_int128().from_str(str(value), scale)
+                    memmove(byref(buf, bufpos), valuebuf, esize)
                 else:  # pragma: no cover
                     raise InterfaceError(f"Unsupported Firebird ARRAY subtype: {dtype}")
                 bufpos += esize
@@ -2698,20 +2759,22 @@ Note:
                 # leaf: check value type
                 if value_type in (a.blr_text, a.blr_text2, a.blr_varying, a.blr_varying2):
                     ok = isinstance(value[i], str)
-                elif value_type in (a.blr_short, a.blr_long, a.blr_int64):
+                elif value_type in (a.blr_short, a.blr_long, a.blr_int64, a.blr_int128):
                     if sqlsubtype or value_scale:
                         ok = isinstance(value[i], decimal.Decimal)
                     else:
                         ok = isinstance(value[i], int)
+                elif value_type in (a.blr_dec64, a.blr_dec128):
+                    ok = isinstance(value[i], decimal.Decimal)
                 elif value_type == a.blr_float:
                     ok = isinstance(value[i], float)
                 elif value_type in (a.blr_d_float, a.blr_double):
                     ok = isinstance(value[i], float)
-                elif value_type == a.blr_timestamp:
+                elif value_type in (a.blr_timestamp, a.blr_timestamp_tz):
                     ok = isinstance(value[i], datetime.datetime)
                 elif value_type == a.blr_sql_date:
                     ok = isinstance(value[i], datetime.date)
-                elif value_type == a.blr_sql_time:
+                elif value_type in (a.blr_sql_time, a.blr_sql_time_tz):
                     ok = isinstance(value[i], datetime.time)
                 elif value_type == a.blr_bool:
                     ok = isinstance(value[i], bool)
@@ -2761,7 +2824,7 @@ Note:
                     # Implicit conversion to string
                     if not isinstance(value, (str, bytes, bytearray)):
                         value = str(value)
-                    if isinstance(value, str):
+                    if isinstance(value, str) and self._py_charset:
                         value = value.encode(self._py_charset)
                     if (datatype in [SQLDataType.TEXT, SQLDataType.VARYING]
                         and len(value) > length):
@@ -2956,8 +3019,6 @@ Note:
                     value = _util.decode_timestamp_tz(buffer[offset:offset+length])
                 elif datatype == SQLDataType.INT128:
                     value = decimal.Decimal(_util.get_int128().to_str(a.FB_I128.from_buffer_copy(buffer[offset:offset+length]), desc.scale))
-                #elif datatype == SQLDataType.DEC_FIXED:
-                    #value = 'DEC_FIXED'
                 elif datatype == SQLDataType.DEC16:
                     value = decimal.Decimal(_util.get_decfloat16().to_str(a.FB_DEC16.from_buffer_copy(buffer[offset:offset+length])))
                 elif datatype == SQLDataType.DEC34:
@@ -2983,9 +3044,9 @@ Note:
                         self.__blob_readers.add(value)
                     else:
                         # Materialized BLOB
-                        blob_value = create_string_buffer(blob_length)
                         try:
                             # Load BLOB
+                            blob_value = create_string_buffer(blob_length)
                             bytes_read = 0
                             bytes_actually_read = a.Cardinal(0)
                             while bytes_read < blob_length:
@@ -3129,7 +3190,26 @@ Note:
         self.__output_cache = None
         while self.__blob_readers:
             self.__blob_readers.pop().close()
-    def callproc(self, proc_name: str, parameters: Sequence=None) -> Optional[Tuple]:
+    def callproc(self, proc_name: str, parameters: Sequence=None) -> None:
+        """Executes a stored procedure with the given name.
+
+Arguments:
+    proc_name: Stored procedure name.
+    parameters: Sequence of parameters. Must contain one entry for each argument
+                that the procedure expects.
+
+.. note::
+
+   If stored procedure does have output parameters, you must retrieve their values
+   saparatelly by `.Cursor.fetchone()` call. This method is not very convenient, but conforms
+   to Python DB API 2.0. If you don't require conformance to Python DB API, it's recommended
+   to use more convenient method `.Cursor.call_procedure()` instead.
+"""
+        params = [] if parameters is None else parameters
+        sql = ('EXECUTE PROCEDURE ' + proc_name + ' '
+               + ','.join('?' * len(params)))
+        self.execute(sql, params)
+    def call_procedure(self, proc_name: str, parameters: Sequence=None) -> Optional[Tuple]:
         """Executes a stored procedure with the given name.
 
 Arguments:
@@ -3140,10 +3220,7 @@ Arguments:
 Returns:
     None or tuple with values returned by stored procedure.
 """
-        params = [] if parameters is None else parameters
-        sql = ('EXECUTE PROCEDURE ' + proc_name + ' '
-               + ','.join('?' * len(params)))
-        self.execute(sql, params)
+        self.callproc(proc_name, parameters)
         return self.fetchone() if self._stmt._out_cnt > 0 else None
     def set_cursor_name(self, name: str) -> None:
         """Sets name for the SQL cursor.
@@ -3522,7 +3599,7 @@ Important:
         x = self.__version.split('.')
         self.__engine_version = float(f'{x[0]}.{x[1]}')
     def _close(self) -> None:
-        "Drops the association with attached database."
+        "Drops the association with attached server."
         self._srv = None
     def _acquire(self, request: bytes) -> None:
         """Acquires information from associated attachment. Information is stored in native
@@ -3582,6 +3659,18 @@ Returns:
                          SrvInfoCode.GET_ENV_MSG, SrvInfoCode.CAPABILITIES):
             self._cache[info_code] = result
         return result
+    def get_log(self, callback: CB_OUTPUT_LINE=None) -> None:
+        """Request content of Firebird Server log. **(ASYNC service)**
+
+Arguments:
+    callback: Function to call back with each output line.
+"""
+        assert self._srv()._svc is not None
+        self._srv()._reset_output()
+        self._srv()._svc.start(bytes([ServerAction.GET_FB_LOG]))
+        if callback:
+            for line in self._srv():
+                callback(line)
     @property
     def version(self) -> str:
         "Firebird version as SEMVER string."
@@ -3635,12 +3724,18 @@ class ServerServiceProvider:
         self._srv = None
 
 class ServerDbServices(ServerServiceProvider):
-    """Database-related server services."""
+    """Database-related actions and services."""
     def get_statistics(self, *, database: str,
                        flags: SrvStatFlag=SrvStatFlag.DEFAULT,
                        tables: Sequence[str]=None,
                        callback: CB_OUTPUT_LINE=None) -> None:
-        """Return database statistics produced by gstat utility.
+        """Return database statistics produced by gstat utility. **(ASYNC service)**
+
+Arguments:
+    database: Database specification or alias.
+    flags: Flags indicating which statistics shall be collected.
+    tables: List of database tables whose statistics are to be collected.
+    callback: Function to call back with each output line.
 """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
@@ -3660,6 +3755,18 @@ class ServerDbServices(ServerServiceProvider):
                flags: SrvBackupFlag=SrvBackupFlag.NONE,
                callback: CB_OUTPUT_LINE=None, stats: str=None,
                verbose: bool=False, skip_data: str=None) -> None:
+        """Request logical (GBAK) database backup. **(ASYNC service)**
+
+Arguments:
+    database: Database specification or alias.
+    backup: Backup filespec, or list of backup file specifications.
+    backup_file_sizes: List of file sizes for backup files.
+    flags: Backup options.
+    callback: Function to call back with each output line.
+    stats: Backup statistic options (TDWR).
+    verbose: Whether output should be verbose or not.
+    skip_data: String with table names whose data should be excluded from backup.
+"""
         if isinstance(backup, str):
             backup = [backup]
             assert len(backup_file_sizes) == 0
@@ -3692,6 +3799,21 @@ class ServerDbServices(ServerServiceProvider):
                 callback: CB_OUTPUT_LINE=None, stats: str=None,
                 verbose: bool=True, skip_data: str=None, page_size: int=None,
                 buffers: int=None, access_mode: DbAccessMode=DbAccessMode.READ_WRITE) -> None:
+        """Request database restore from logical (GBAK) backup. **(ASYNC service)**
+
+Arguments:
+    backup: Backup filespec, or list of backup file specifications.
+    database: Database specification or alias, or list of those.
+    db_file_pages: List of database file sizes (in pages).
+    flags: Restore options.
+    callback: Function to call back with each output line.
+    stats: Restore statistic options (TDWR).
+    verbose: Whether output should be verbose or not.
+    skip_data: String with table names whose data should be excluded from restore.
+    page_size: Page size for restored database.
+    buffers: Cache size for restored database.
+    access_mode: Restored database access mode (R/W or R/O).
+"""
         if isinstance(backup, str):
             backup = [backup]
         if isinstance(database, str):
@@ -3726,13 +3848,23 @@ class ServerDbServices(ServerServiceProvider):
             for line in self._srv():
                 callback(line)
     def local_backup(self, *, database: str, backup_stream: BinaryIO,
-                     flags: SrvBackupFlag=SrvBackupFlag.NONE) -> None:
+                     flags: SrvBackupFlag=SrvBackupFlag.NONE, skip_data: str=None) -> None:
+        """Request logical (GBAK) database backup into local byte stream. **(SYNC service)**
+
+Arguments:
+    database: Database specification or alias.
+    backup_stream: Binary stream to which the backup is to be written.
+    flags: Backup options.
+    skip_data: String with table names whose data should be excluded from backup.
+"""
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.BACKUP)
             spb.insert_string(SPBItem.DBNAME, database)
             spb.insert_string(SrvBackupOption.FILE, 'stdout')
             spb.insert_int(SPBItem.OPTIONS, flags)
+            if skip_data is not None:
+                spb.insert_string(SrvBackupOption.SKIP_DATA, skip_data)
             self._srv()._svc.start(spb.get_buffer())
         while not self._srv()._eof:
             backup_stream.write(self._srv()._read_next_binary_output())
@@ -3740,8 +3872,21 @@ class ServerDbServices(ServerServiceProvider):
                       database: Union[str, Sequence[str]],
                       db_file_pages: Sequence[int]=(),
                       flags: SrvRestoreFlag=SrvRestoreFlag.CREATE,
-                      page_size: int=None, buffers: int=None,
+                      skip_data: str=None, page_size: int=None, buffers: int=None,
                       access_mode: DbAccessMode=DbAccessMode.READ_WRITE) -> None:
+        """Request database restore from logical (GBAK) backup stored in local byte stream.
+**(SYNC service)**
+
+Arguments:
+    backup_stream: Binary stream with the backup.
+    database: Database specification or alias, or list of those.
+    db_file_pages: List of database file sizes (in pages).
+    flags: Restore options.
+    skip_data: String with table names whose data should be excluded from restore.
+    page_size: Page size for restored database.
+    buffers: Cache size for restored database.
+    access_mode: Restored database access mode (R/W or R/O).
+"""
         if isinstance(database, str):
             database = [database]
             assert len(db_file_pages) == 0
@@ -3761,6 +3906,8 @@ class ServerDbServices(ServerServiceProvider):
             if buffers is not None:
                 spb.insert_int(SrvRestoreOption.BUFFERS, buffers)
             spb.insert_bytes(SrvRestoreOption.ACCESS_MODE, bytes([access_mode]))
+            if skip_data is not None:
+                spb.insert_string(SrvRestoreOption.SKIP_DATA, skip_data)
             spb.insert_int(SPBItem.OPTIONS, flags)
             self._srv()._svc.start(spb.get_buffer())
         #
@@ -3793,32 +3940,55 @@ class ServerDbServices(ServerServiceProvider):
                 tag = self._srv().response.get_tag()
             keep_going = no_data or request_length != 0 or len(line) > 0
     def nbackup(self, *, database: str, backup: str, level: int=0,
-                direct: bool=False, flags: SrvNBackupFlag=SrvNBackupFlag.NONE) -> None:
+                direct: bool=None, flags: SrvNBackupFlag=SrvNBackupFlag.NONE) -> None:
+        """Perform physical (NBACKUP) database backup. **(SYNC service)**
+
+Arguments:
+    database: Database specification or alias.
+    backup: Backup file specification.
+    level: Backup level.
+    direct: Direct I/O override.
+    flags: Backup options.
+"""
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.NBAK)
             spb.insert_string(SPBItem.DBNAME, database)
             spb.insert_string(SrvNBackupOption.FILE, backup)
             spb.insert_int(SrvNBackupOption.LEVEL, level)
-            if direct:
-                spb.insert_string(SrvNBackupOption.DIRECT, 'ON')
+            if direct is not None:
+                spb.insert_string(SrvNBackupOption.DIRECT, 'ON' if direct else 'OFF')
             spb.insert_int(SPBItem.OPTIONS, flags)
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
     def nrestore(self, *, backups: Sequence[str], database: str,
                  direct: bool=False, flags: SrvNBackupFlag=SrvNBackupFlag.NONE) -> None:
+        """Perform restore from physical (NBACKUP) database backup.  **(SYNC service)**
+
+Arguments:
+    backups: Backup file(s) specification.
+    database: Database specification or alias.
+    direct: Direct I/O override.
+    flags: Restore options.
+"""
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.NREST)
             spb.insert_string(SPBItem.DBNAME, database)
             for backup in backups:
                 spb.insert_string(SrvNBackupOption.FILE, backup)
-            if direct:
-                spb.insert_string(SrvNBackupOption.DIRECT, 'ON')
+            if direct is not None:
+                spb.insert_string(SrvNBackupOption.DIRECT, 'ON' if direct else 'OFF')
             spb.insert_int(SPBItem.OPTIONS, flags)
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
     def set_default_cache_size(self, *, database: str, size: int) -> None:
+        """Set individual page cache size for database.
+
+Arguments:
+    database: Database specification or alias.
+    size: New value.
+"""
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
@@ -3826,6 +3996,12 @@ class ServerDbServices(ServerServiceProvider):
             spb.insert_int(SrvPropertiesOption.PAGE_BUFFERS, size)
             self._srv()._svc.start(spb.get_buffer())
     def set_sweep_interval(self, *, database: str, interval: int) -> None:
+        """Set database sweep interval.
+
+Arguments:
+    database: Database specification or alias.
+    interval: New value.
+"""
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
@@ -3833,6 +4009,12 @@ class ServerDbServices(ServerServiceProvider):
             spb.insert_int(SrvPropertiesOption.SWEEP_INTERVAL, interval)
             self._srv()._svc.start(spb.get_buffer())
     def set_space_reservation(self, *, database: str, mode: DbSpaceReservation) -> None:
+        """Set space reservation for database.
+
+Arguments:
+    database: Database specification or alias.
+    mode: New value.
+"""
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
@@ -3841,6 +4023,12 @@ class ServerDbServices(ServerServiceProvider):
                              bytes([mode]))
             self._srv()._svc.start(spb.get_buffer())
     def set_write_mode(self, *, database: str, mode: DbWriteMode) -> None:
+        """Set database write mode (SYNC/ASYNC).
+
+Arguments:
+    database: Database specification or alias.
+    mode: New value.
+"""
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
@@ -3849,6 +4037,12 @@ class ServerDbServices(ServerServiceProvider):
                              bytes([mode]))
             self._srv()._svc.start(spb.get_buffer())
     def set_access_mode(self, *, database: str, mode: DbAccessMode) -> None:
+        """Set database access mode (R/W or R/O).
+
+Arguments:
+    database: Database specification or alias.
+    mode: New value.
+"""
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
@@ -3857,6 +4051,12 @@ class ServerDbServices(ServerServiceProvider):
                              bytes([mode]))
             self._srv()._svc.start(spb.get_buffer())
     def set_sql_dialect(self, *, database: str, dialect: int) -> None:
+        """Set database SQL dialect.
+
+Arguments:
+    database: Database specification or alias.
+    dialect: New value.
+"""
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
@@ -3864,6 +4064,11 @@ class ServerDbServices(ServerServiceProvider):
             spb.insert_int(SrvPropertiesOption.SET_SQL_DIALECT, dialect)
             self._srv()._svc.start(spb.get_buffer())
     def activate_shadow(self, *, database: str) -> None:
+        """Activate database shadow.
+
+Arguments:
+    database: Database specification or alias.
+"""
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
@@ -3871,6 +4076,11 @@ class ServerDbServices(ServerServiceProvider):
             spb.insert_int(SPBItem.OPTIONS, SrvPropertiesFlag.ACTIVATE)
             self._srv()._svc.start(spb.get_buffer())
     def no_linger(self, *, database: str) -> None:
+        """Set one-off override for database linger.
+
+Arguments:
+    database: Database specification or alias.
+"""
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
@@ -3879,6 +4089,14 @@ class ServerDbServices(ServerServiceProvider):
             self._srv()._svc.start(spb.get_buffer())
     def shutdown(self, *, database: str, mode: ShutdownMode,
                  method: ShutdownMethod, timeout: int) -> None:
+        """Database shutdown.
+
+Arguments:
+    database: Database specification or alias.
+    mode: Shutdown mode.
+    method: Shutdown method.
+    timeout: Timeout for shutdown.
+"""
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
@@ -3887,6 +4105,12 @@ class ServerDbServices(ServerServiceProvider):
             spb.insert_int(method, timeout)
             self._srv()._svc.start(spb.get_buffer())
     def bring_online(self, *, database: str, mode: OnlineMode=OnlineMode.NORMAL) -> None:
+        """Bring previously shut down database back online.
+
+Arguments:
+    database: Database specification or alias.
+    mode: Online mode.
+"""
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
@@ -3894,6 +4118,11 @@ class ServerDbServices(ServerServiceProvider):
             spb.insert_bytes(SrvPropertiesOption.ONLINE_MODE, bytes([mode]))
             self._srv()._svc.start(spb.get_buffer())
     def sweep(self, *, database: str) -> None:
+        """Perform database sweep operation.
+
+Arguments:
+    database: Database specification or alias.
+"""
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.REPAIR)
@@ -3902,6 +4131,12 @@ class ServerDbServices(ServerServiceProvider):
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
     def repair(self, *, database: str, flags: SrvRepairFlag=SrvRepairFlag.REPAIR) -> bytes:
+        """Perform database repair operation.  **(SYNC service)**
+
+Arguments:
+    database: Database specification or alias.
+    flags: Repair flags.
+"""
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.REPAIR)
@@ -3913,6 +4148,19 @@ class ServerDbServices(ServerServiceProvider):
                  exclude_table: str=None, include_index: str=None,
                  exclude_index: str=None, lock_timeout: int=None,
                  callback: CB_OUTPUT_LINE=None) -> None:
+        """Perform database validation. **(ASYNC service)**
+
+Arguments:
+    database: Database specification or alias.
+    flags: Repair flags.
+    include_table: Regex pattern for table names to include in validation run.
+    exclude_table: Regex pattern for table names to exclude in validation run.
+    include_index: Regex pattern for index names to include in validation run.
+    exclude_index: Regex pattern for index names to exclude in validation run.
+    lock_timeout: Lock timeout (seconds), used to acquire locks for table to validate,
+      default is 10 secs. 0 is no-wait, -1 is infinite wait.
+    callback: Function to call back with each output line.
+"""
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.VALIDATE)
@@ -3932,6 +4180,11 @@ class ServerDbServices(ServerServiceProvider):
             for line in self._srv():
                 callback(line)
     def get_limbo_transaction_ids(self, *, database: str) -> List[int]:
+        """Returns list of transactions in limbo.
+
+Arguments:
+    database: Database specification or alias.
+"""
         raise NotImplementedError
         #with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             #spb.insert_tag(ServerAction .REPAIR)
@@ -3996,6 +4249,12 @@ class ServerDbServices(ServerServiceProvider):
             #raise InterfaceError("Malformed result buffer (missing isc_info_end item)")
         #return trans_ids
     def commit_limbo_transaction(self, *, database: str, transaction_id: int) -> None:
+        """Resolve limbo transaction with commit.
+
+Arguments:
+    database: Database specification or alias.
+    transaction_id: ID of Transaction to resolve.
+"""
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.REPAIR)
             spb.insert_string(SPBItem.DBNAME, database)
@@ -4006,6 +4265,12 @@ class ServerDbServices(ServerServiceProvider):
             self._srv()._svc.start(spb.get_buffer())
         self._srv()._read_all_binary_output()
     def rollback_limbo_transaction(self, *, database: str, transaction_id: int) -> None:
+        """Resolve limbo transaction with rollback.
+
+Arguments:
+    database: Database specification or alias.
+    transaction_id: ID of Transaction to resolve.
+"""
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.REPAIR)
             spb.insert_string(SPBItem.DBNAME, database)
@@ -4017,7 +4282,7 @@ class ServerDbServices(ServerServiceProvider):
         self._srv()._read_all_binary_output()
 
 class ServerUserServices(ServerServiceProvider):
-    """User-related server services."""
+    """User-related actions and services."""
     def __fetch_users(self, data: Buffer) -> List[UserInfo]:
         users = []
         user = {}
@@ -4050,6 +4315,12 @@ class ServerUserServices(ServerServiceProvider):
             users.append(UserInfo(**user))
         return users
     def get_all(self, *, database: str=None, sql_role: str=None) -> List[UserInfo]:
+        """Get information about users.
+
+Arguments:
+    database: Database specification or alias.
+    sql_role: SQL role name.
+"""
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.DISPLAY_USER_ADM)
@@ -4060,6 +4331,13 @@ class ServerUserServices(ServerServiceProvider):
             self._srv()._svc.start(spb.get_buffer())
         return self.__fetch_users(Buffer(self._srv()._read_all_binary_output()))
     def get(self, user_name: str, *, database: str=None, sql_role: str=None) -> Optional[UserInfo]:
+        """Get information about user.
+
+Arguments:
+    user_name: User name.
+    database: Database specification or alias.
+    sql_role: SQL role name.
+"""
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.DISPLAY_USER_ADM)
@@ -4075,6 +4353,20 @@ class ServerUserServices(ServerServiceProvider):
                  group_id: int=None, first_name: str=None, middle_name: str=None,
                  last_name: str=None, admin: bool=None, database: str=None,
                  sql_role: str=None) -> None:
+        """Add new user.
+
+Arguments:
+    user_name: User name.
+    password: User password.
+    user_id: User ID.
+    group_id: Group ID.
+    firest_name: User's first name.
+    middle_name: User's middle name.
+    last_name: User's last name.
+    admin: Admin flag.
+    database: Database specification or alias.
+    sql_role: SQL role name.
+"""
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.ADD_USER)
@@ -4102,6 +4394,18 @@ class ServerUserServices(ServerServiceProvider):
                     user_id: int=None, group_id: int=None,
                     first_name: str=None, middle_name: str=None,
                     last_name: str=None, admin: bool=None) -> None:
+        """Update user information.
+
+Arguments:
+    user_name: User name.
+    password: User password.
+    user_id: User ID.
+    group_id: Group ID.
+    firest_name: User's first name.
+    middle_name: User's middle name.
+    last_name: User's last name.
+    admin: Admin flag.
+"""
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.MODIFY_USER)
@@ -4123,6 +4427,13 @@ class ServerUserServices(ServerServiceProvider):
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
     def delete(self, user_name: str, *, database: str=None, sql_role: str=None) -> None:
+        """Delete user.
+
+Arguments:
+    user_name: User name.
+    database: Database specification or alias.
+    sql_role: SQL role name.
+"""
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.DELETE_USER)
@@ -4134,10 +4445,17 @@ class ServerUserServices(ServerServiceProvider):
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
     def exists(self, user_name: str, *, database: str=None, sql_role: str=None) -> bool:
+        """Returns True if user exists.
+
+Arguments:
+    user_name: User name.
+    database: Database specification or alias.
+    sql_role: SQL role name.
+"""
         return self.get(user_name, database=database, sql_role=sql_role) is not None
 
 class ServerTraceServices(ServerServiceProvider):
-    """Trace-related server services."""
+    """Trace session actions and services."""
     def __action(self, action: ServerAction, label: str, session_id: int) -> None:
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
@@ -4149,6 +4467,15 @@ class ServerTraceServices(ServerServiceProvider):
             # response should contain the error message
             raise DatabaseError(response)
     def start(self, *, config: str, name: str=None) -> int:
+        """Start new trace session. **(ASYNC service)**
+
+Arguments:
+    config: Trace session configuration.
+    name: Trace session name.
+
+Returns:
+    Trace session ID.
+"""
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.TRACE_START)
@@ -4163,13 +4490,28 @@ class ServerTraceServices(ServerServiceProvider):
             # response should contain the error message
             raise DatabaseError(response)
     def stop(self, *, session_id: int) -> None:
+        """Stop trace session.
+
+Arguments:
+    session_id: Trace session ID.
+"""
         self.__action(ServerAction.TRACE_STOP, 'stopped', session_id)
     def suspend(self, *, session_id: int) -> None:
+        """Suspend trace session.
+
+Arguments:
+    session_id: Trace session ID.
+"""
         self.__action(ServerAction.TRACE_SUSPEND, 'paused', session_id)
     def resume(self, *, session_id: int) -> None:
+        """Resume trace session.
+
+Arguments:
+    session_id: Trace session ID.
+"""
         self.__action(ServerAction.TRACE_RESUME, 'resumed', session_id)
     @property
-    def sessions(self) -> Dict[int, Dict[str, Any]]:
+    def sessions(self) -> Dict[int, TraceSession]:
         "Dictionary with active trace sessions."
         def store():
             if current:
@@ -4212,8 +4554,11 @@ Note:
 """
     def __init__(self, svc: iService, spb: bytes, host: str):
         self._svc: iService = svc
+        #: Service Parameter Buffer (SPB) used to connect the service manager
         self.spb: bytes = spb
+        #: Server host
         self.host: str = host
+        #: Response buffer used to comunicate with service
         self.response: CBuffer = CBuffer(USHRT_MAX)
         self._eof: bool = False
         self.__line_buffer: List[str] = []
@@ -4306,17 +4651,18 @@ Note:
             tag = self.response.get_tag()
             self._eof = tag == isc_info_end
         return result
-    def get_log(self, callback: CB_OUTPUT_LINE=None) -> None:
-        assert self._svc is not None
-        self._reset_output()
-        self._svc.start(bytes([ServerAction.GET_FB_LOG]))
-        if callback:
-            for line in self:
-                callback(line)
     def is_running(self) -> bool:
+        """Returns True if service is running.
+
+Note:
+   Some services like `~.ServerDbServices.backup()` or `~.ServerDbServices.sweep()` may take
+   time to comlete, so they're called asynchronously. Until they're finished,
+   no other async service could be started.
+"""
         assert self._svc is not None
         return self.info.get_info(SrvInfoCode.RUNNING) > 0
     def readline(self) -> Optional[str]:
+        "Get next line of textual output from last service query."
         if self._eof and not self.__line_buffer:
             return None
         if not self.__line_buffer:
@@ -4330,12 +4676,19 @@ Note:
             return self.__line_buffer.pop(0)
         return None
     def readlines(self) -> List[str]:
+        "Get list of remaining output lines from last service query."
         return [line for line in self]
     def wait(self) -> None:
+        "Wait until running service completes, i.e. stops sending data."
         while self.is_running():
             for _ in self:
                 pass
     def close(self) -> None:
+        """Close the server connection now (rather than whenever `__del__` is called).
+        The instance will be unusable from this point forward; an `.Error`
+        (or subclass) exception will be raised if any operation is attempted
+        with the instance.
+        """
         if self._svc is not None:
             self._svc.detach()
             self._svc = None
@@ -4419,7 +4772,7 @@ Hooks:
         svc = provider.attach_service_manager(host, spb_buf)
     con = Server(svc, spb_buf, host)
     for hook in get_callbacks(ServerHook.ATTACHED, con):
-        hook(ServerHook.ATTACHED, con)
+        hook(con)
     return con
 
 # Register hookable classes

@@ -54,10 +54,10 @@ class ServerConfig(Config):
         #: Port used by Firebird server
         self.port: StrOption = \
             StrOption('port', "Port used by Firebird server")
-        #: Defaul user name
+        #: Defaul user name, default is envar ISC_USER or None if not specified
         self.user: StrOption = \
             StrOption('user', "Defaul user name", default=os.environ.get('ISC_USER', None))
-        #: Default user password
+        #: Default user password, default is envar ISC_PASSWORD or None if not specified
         self.password: StrOption = \
             StrOption('password', "Default user password", default=os.environ.get('ISC_PASSWORD', None))
         #: Configuration override
@@ -66,7 +66,7 @@ class ServerConfig(Config):
         #: List of authentication plugins override
         self.auth_plugin_list: StrOption = \
             StrOption('auth_plugin_list', "List of authentication plugins override")
-        #: Use trusted authentication
+        #: Use trusted authentication, default: False
         self.trusted_auth: BoolOption = \
             BoolOption('trusted_auth', "Use trusted authentication", default=False)
 
@@ -83,19 +83,19 @@ class DatabaseConfig(Config):
         #: Database file specification or alias
         self.database: StrOption = \
             StrOption('database', "Database file specification or alias")
-        #: Database filename should passed in UTF8
+        #: Database filename should be passed in UTF8
         self.utf8filename: BoolOption = \
             BoolOption('utf8filename', "Database filename should passed in UTF8")
         #: Protocol to be used for database
         self.protocol: EnumOption = \
             EnumOption('protocol', NetProtocol, "Protocol to be used for database")
-        #: Defaul user name
+        #: Defaul user name, default is envar ISC_USER or None if not specified
         self.user: StrOption = \
             StrOption('user', "Defaul user name", default=os.environ.get('ISC_USER', None))
-        #: Default user password
+        #: Default user password, default is envar ISC_PASSWORD or None if not specified
         self.password: StrOption = \
             StrOption('password', "Default user password", default=os.environ.get('ISC_PASSWORD', None))
-        #: Use trusted authentication
+        #: Use trusted authentication, default: False
         self.trusted_auth: BoolOption = \
             BoolOption('trusted_auth', "Use trusted authentication", default=False)
         #: User role
@@ -104,19 +104,19 @@ class DatabaseConfig(Config):
         #: Character set for database connection
         self.charset: StrOption = \
             StrOption('charset', "Character set for database connection")
-        #: SQL Dialect for database connection
+        #: SQL Dialect for database connection, default: 3
         self.sql_dialect: IntOption = \
             IntOption('sql_dialect', "SQL Dialect for database connection", default=3)
         #: Connection timeout
         self.timeout: IntOption = \
             IntOption('timeout', "Connection timeout")
-        #: Do not use linger for database connections
+        #: Do not use linger for database connection
         self.no_linger: BoolOption = \
             BoolOption('no_linger', "Do not use linger for database connections")
-        #: Page cache size override for database connections
+        #: Page cache size override for database connection
         self.cache_size: IntOption = \
             IntOption('cache_size', "Page cache size override for database connections")
-        #: Dummy packet interval for this database connections
+        #: Dummy packet interval for this database connection
         self.dummy_packet_interval: IntOption = \
             IntOption('dummy_packet_interval', "Dummy packet interval for this database connections")
         #: Configuration override
@@ -230,7 +230,7 @@ class DriverConfig(Config):
 
 Arguments:
     name: Server name.
-    config: Optional server configuration in ConfigParser format in [name] section.
+    config: Optional server configuration string in ConfigParser format in [name] section.
 
 Returns:
    ServerConfig: For newly registered server
@@ -252,7 +252,7 @@ Raises:
 
 Arguments:
     name: Database name.
-    config: Optional database configuration in ConfigParser format in [name] section.
+    config: Optional database configuration string in ConfigParser format in [name] section.
 
 Returns:
    DatabaseConfig: For newly registered database

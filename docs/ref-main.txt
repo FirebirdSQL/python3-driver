@@ -11,8 +11,8 @@ Constants
 .. autodata:: __VERSION__
 
 
-Imports from submodules
-=======================
+Imports from sub-modules
+========================
 
 config
 ------

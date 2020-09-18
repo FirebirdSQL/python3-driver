@@ -1480,15 +1480,18 @@ class TestStoredProc(DriverTestBase):
         self.con.close()
     def test_callproc(self):
         with self.con.cursor() as cur:
-            result = cur.callproc('sub_tot_budget', ['100'])
+            cur.callproc('sub_tot_budget', ['100'])
+            result = cur.fetchone()
             self.assertTupleEqual(result, (decimal.Decimal('3800000'), decimal.Decimal('760000'),
                                            decimal.Decimal('500000'), decimal.Decimal('1500000')))
             #
-            result = cur.callproc('sub_tot_budget', [100])
+            cur.callproc('sub_tot_budget', [100])
+            result = cur.fetchone()
             self.assertTupleEqual(result, (decimal.Decimal('3800000'), decimal.Decimal('760000'),
                                            decimal.Decimal('500000'), decimal.Decimal('1500000')))
             #
-            result = cur.callproc('proc_test', [10])
+            cur.callproc('proc_test', [10])
+            result = cur.fetchone()
             self.assertIsNone(result)
             self.con.commit()
             cur.execute('select c1 from t')
@@ -1580,19 +1583,19 @@ class TestServerServices(DriverTestBase):
         def fetchline(line):
             output.append(line)
 
-        self.svc.get_log()
+        self.svc.info.get_log()
         # fetch materialized
         log = self.svc.readlines()
         self.assertTrue(log)
         self.assertIsInstance(log, type(list()))
         # iterate over result
-        self.svc.get_log()
+        self.svc.info.get_log()
         for line in self.svc:
             self.assertIsNotNone(line)
             self.assertIsInstance(line, str)
         # callback
         output = []
-        self.svc.get_log(callback=fetchline)
+        self.svc.info.get_log(callback=fetchline)
         self.assertGreater(len(output), 0)
         self.assertEqual(output, log)
     def test_get_limbo_transaction_ids(self):
@@ -1845,7 +1848,6 @@ class TestServerDatabaseServices(DriverTestBase):
         while i < stop:
             self.assertEqual(bkp[i], lbkp[i], f"bytes differ at {i} ({i+68})")
             i += 1
-        #self.assertEqual(bkp, lbkp)
         del bkp
     def test_local_restore(self):
         backup_stream = BytesIO()
@@ -2161,8 +2163,6 @@ Stream blobs are stored as a continuous array of data bytes with no length indic
                 blob_reader.seek(0)
                 blob_reader.newline = '\r\n'
                 self.assertEqual(blob_reader.readline(), 'Firebird supports two types of blobs, stream and segmented.\r\n')
-                #self.assertEqual(blob_reader.blob_charset, None)
-                #self.assertEqual(blob_reader.charset, 'UTF-8')
     def testBlobExtended(self):
         blob = """Firebird supports two types of blobs, stream and segmented.
 The database stores segmented blobs in chunks.
@@ -2309,25 +2309,25 @@ class TestHooks(DriverTestBase):
         for item in [self._db, self._svc, self._hook_con]:
             if item:
                 item.close()
-    def __hook_service_attached(self, event, con):
+    def __hook_service_attached(self, con):
         self._svc = con
         return con
-    def __hook_db_attached(self, event, con):
+    def __hook_db_attached(self, con):
         self._db = con
         return con
-    def __hook_db_closed(self, event, con):
+    def __hook_db_closed(self, con):
         self._db = con
-    def __hook_db_detach_request_a(self, event, con):
+    def __hook_db_detach_request_a(self, con):
         # retain
         self._db = con
         return True
-    def __hook_db_detach_request_b(self, event, con):
+    def __hook_db_detach_request_b(self, con):
         # no retain
         self._db = con
         return False
-    def __hook_db_attach_request_a(self, event, dsn, dpb):
+    def __hook_db_attach_request_a(self, dsn, dpb):
         return None
-    def __hook_db_attach_request_b(self, event, dsn, dpb):
+    def __hook_db_attach_request_b(self, dsn, dpb):
         return self._hook_con
     def test_hook_db_attached(self):
         add_hook(ConnectionHook.ATTACHED, driver.Connection, self.__hook_db_attached)

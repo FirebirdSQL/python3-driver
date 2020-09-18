@@ -20,12 +20,6 @@ Run pip::
 
   $ pip install firebird-driver
 
-.. _setuptools: https://pypi.org/project/setuptools/
-.. _PYPI: https://pypi.org/
-.. _ctypes: http://docs.python.org/library/ctypes.html
-.. _pip: https://pypi.org/project/pip/
-.. _firebird-base: https://firebird-base.rtfd.io
-
 Quick-start Guide
 *****************
 
@@ -45,7 +39,7 @@ also includes the definition of connection parameters to Firebird servers and da
 
 The default configuration connects to embedded server using direct/local connection method.
 To access remote servers and databases (or local ones through remote protocols), it's
-neccessary to adjust default configuration, or `register` them in configuration manager.
+necessary to adjust default configuration, or `register` them in configuration manager.
 
 You can manipulate the configuration objects directly, or load configuration from files or
 strings (in `.ini-style` `ConfigParser` format).
@@ -105,7 +99,7 @@ such as this:
 
 .. note::
 
-   Some parameters like 'user' and 'password' could be overriden with keyword parameters.
+   Some parameters like 'user' and 'password' could be overridden with keyword parameters.
    Few parameters like 'crypt_callback' or 'no_db_triggers' could be specified **ONLY**
    as keyword arguments.
 
@@ -327,3 +321,9 @@ To *execute* a stored procedure and *access its output parameters*, use code suc
 This latter is not very elegant; it would be preferable to access the procedure's output
 parameters as the return value of `Cursor.callproc()`. The Python DB API specification
 requires the current behavior, however.
+
+.. _setuptools: https://pypi.org/project/setuptools/
+.. _PYPI: https://pypi.org/
+.. _ctypes: http://docs.python.org/library/ctypes.html
+.. _pip: https://pypi.org/project/pip/
+.. _firebird-base: https://firebird-base.rtfd.io

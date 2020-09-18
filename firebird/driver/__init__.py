@@ -54,7 +54,8 @@ from .types import Error, InterfaceError, DatabaseError, DataError, \
      TimeFromTicks, TimestampFromTicks, STRING, BINARY, NUMBER, DATETIME, ROWID, \
      get_timezone
 from .core import connect, create_database, connect_server, transaction, tpb, TPB, \
-     CHARSET_MAP, DistributedTransactionManager, Connection, Cursor, Server
+     CHARSET_MAP, DistributedTransactionManager, Connection, Cursor, \
+     Server
 
 #: Current driver version, SEMVER string.
-__VERSION__ = '0.6.0'
+__VERSION__ = '0.8.0'

@@ -440,7 +440,6 @@ class SQLDataType(IntEnum):
     INT128 = 32752 # Firebird 4
     TIMESTAMP_TZ = 32754  # Firebird 4
     TIME_TZ = 32756  # Firebird 4
-    DEC_FIXED = 32758  # Firebird 4
     DEC16 = 32760  # Firebird 4
     DEC34 = 32762  # Firebird 4
     BOOLEAN = 32764
@@ -942,7 +941,7 @@ class SrvStatFlag(IntFlag):
     RECORD_VERSIONS = 0x20
     NOCREATION = 0x80
     ENCRYPTION = 0x100  # Firebird 3.0
-    DEFAULT = DATA_PAGES | IDX_PAGES
+    DEFAULT = DATA_PAGES | DATA_PAGES | IDX_PAGES
 
 class SrvBackupFlag(IntFlag):
     "isc_spb_bkp_* flags for ServerAction.BACKUP"
