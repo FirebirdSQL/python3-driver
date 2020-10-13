@@ -2,6 +2,12 @@
 Changelog
 #########
 
+Version 1.0.0
+=============
+
+* Added support for schema and monitor modules from `firebird-lib`_ package.
+* Documentation: adjustments to css.
+
 Version 0.8.0
 =============
 
@@ -47,3 +53,5 @@ Version 0.5.0
 =============
 
 Initial release.
+
+.. _firebird-lib: https://pypi.org/project/firebird-lib/

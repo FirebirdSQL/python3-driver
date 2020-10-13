@@ -45,6 +45,7 @@ import threading
 import io
 import contextlib
 import struct
+import importlib
 from abc import ABC, abstractmethod
 from warnings import warn
 from queue import PriorityQueue
@@ -1109,6 +1110,10 @@ Arguments:
         return ConnectionFlag.ENCRYPTED in ConnectionFlag(self.get_info(DbInfoCode.CONN_FLAGS))
     # Properties
     @property
+    def id(self) -> int:
+        "Attachment ID."
+        return self.get_info(DbInfoCode.ATTACHMENT_ID)
+    @property
     def charset(self) -> str:
         "Database character set."
         if -1 not in self._cache:
@@ -1120,10 +1125,6 @@ Arguments:
     def page_size(self) -> int:
         "Page size (in bytes)."
         return self.__page_size
-    @property
-    def attachment_id(self) -> int:
-        "Attachment ID."
-        return self.get_info(DbInfoCode.ATTACHMENT_ID)
     @property
     def sql_dialect(self) -> int:
         "SQL dialect used by connected database."
@@ -1307,6 +1308,10 @@ Attributes:
         self._ic = self.query_transaction.cursor()
         self._ic._connection = weakref.proxy(self, self._ic._dead_con)
         self._ic._logging_id_ = 'Cursor.internal'
+        # firebird.lib extensions
+        self.__schema = None
+        self.__monitor = None
+        self.__FIREBIRD_LIB__ = None
     def __del__(self):
         if not self.is_closed():
             warn(f"Connection '{self.logging_id}' disposed without prior close()", ResourceWarning)
@@ -1332,6 +1337,12 @@ Attributes:
     def __stmt_deleted(self, stmt) -> None:
         self._statements.remove(stmt)
     def _close(self) -> None:
+        if self.__schema is not None:
+            self.__schema._set_internal(False)
+            self.__schema.close()
+        if self.__monitor is not None:
+            self.__monitor._set_internal(False)
+            self.__monitor.close()
         self._ic.close()
         for collector in self.__ecollectors:
             collector.close()
@@ -1617,6 +1628,23 @@ Note:
         result = [self.main_transaction, self.query_transaction]
         result.extend(self._transactions)
         return result
+    @property
+    def schema(self) -> 'Schema':
+        """Access to database schema. Requires firebird.lib package."""
+        if self.__schema is None:
+            import firebird.lib.schema
+            self.__schema = firebird.lib.schema.Schema()
+            self.__schema.bind(self)
+            self.__schema._set_internal(True)
+        return self.__schema
+    @property
+    def monitor(self) -> 'Monitor':
+        """Access to database monitoring tables. Requires firebird.lib package."""
+        if self.__monitor is None:
+            import firebird.lib.monitor
+            self.__monitor = firebird.lib.monitor.Monitor(self)
+            self.__monitor._set_internal(True)
+        return self.__monitor
 
 def tpb(isolation: Isolation, lock_timeout: int=-1, access: TraAccessMode=TraAccessMode.WRITE) -> bytes:
     """Helper function to costruct simple TPB.

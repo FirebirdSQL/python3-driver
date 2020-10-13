@@ -16,6 +16,8 @@ For detailed information about Firebird features, see the
 the excellent `The Firebird Book <http://www.ibphoenix.com/products/books/firebird_book>`__
 written by Helen Borrie and published by IBPhoenix_.
 
+.. seealso:: `firebird-lib`_ package for optional extensions to this driver.
+
 Content
 *******
 
@@ -45,3 +47,4 @@ Indices and tables
 .. _under: http://www.firebirdsql.org/en/devel-python-driver/
 .. _Firebird Project: http://www.firebirdsql.org
 .. _IBPhoenix: http://www.ibphoenix.com
+.. _firebird-lib: https://pypi.org/project/firebird-lib/

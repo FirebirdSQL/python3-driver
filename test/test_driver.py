@@ -427,7 +427,7 @@ class TestConnection(DriverTestBase):
             self.assertGreaterEqual(con.info.ods, 12.0)
             #
             self.assertEqual(con.info.page_size, 8192)
-            self.assertGreater(con.info.attachment_id, 0)
+            self.assertGreater(con.info.id, 0)
             self.assertEqual(con.info.sql_dialect, 3)
             self.assertEqual(con.info.name.upper(), self.dbfile.upper())
             self.assertIsInstance(con.info.site, str)
@@ -438,7 +438,7 @@ class TestConnection(DriverTestBase):
             self.assertGreaterEqual(con.info.ods_version, 11)
             self.assertGreaterEqual(con.info.ods_minor_version, 0)
             self.assertGreaterEqual(con.info.page_cache_size, 75)
-            self.assertEqual(con.info.pages_allocated, 389)
+            self.assertEqual(con.info.pages_allocated, 367)
             self.assertGreater(con.info.pages_used, 300)
             self.assertGreaterEqual(con.info.pages_free, 0)
             self.assertEqual(con.info.sweep_interval, 20000)
@@ -1517,7 +1517,7 @@ class TestServerStandard(DriverTestBase):
             if self.version == FB40:
                 self.assertIn('security4.fdb'.upper(), svc.info.security_database.upper())
             else:
-                self.assertIn('security3.fdb', svc.info.security_database)
+                self.assertIn('security.db', svc.info.security_database)
             x = svc.info.lock_directory
             x = svc.info.capabilities
             self.assertIn(ServerCapability.REMOTE_HOP, x)
@@ -1541,7 +1541,7 @@ class TestServerStandard(DriverTestBase):
     def test_running(self):
         with connect_server(FBTEST_HOST, user='SYSDBA', password=FBTEST_PASSWORD) as svc:
             self.assertFalse(svc.is_running())
-            svc.get_log()
+            svc.info.get_log()
             self.assertTrue(svc.is_running())
             # fetch materialized
             svc.readlines()
@@ -1549,7 +1549,7 @@ class TestServerStandard(DriverTestBase):
     def test_wait(self):
         with connect_server(FBTEST_HOST, user='SYSDBA', password=FBTEST_PASSWORD) as svc:
             self.assertFalse(svc.is_running())
-            svc.get_log()
+            svc.info.get_log()
             self.assertTrue(svc.is_running())
             svc.wait()
             self.assertFalse(svc.is_running())
@@ -2375,6 +2375,10 @@ class TestFB4(DriverTestBase):
         self.dbfile = os.path.join(self.dbpath, self.FBTEST_DB)
         self.con = connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD)
         self.con._logging_id_ = self.__class__.__name__
+        #
+        if self.con.info.engine_version < 4.0:
+            self.skipTest('Requires Firebird 4.0+')
+        #
         self.con2 = connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD, charset='utf-8')
         self.con2._logging_id_ = self.__class__.__name__
         #self.con.execute_immediate("CREATE TABLE FB4 (PK integer,T_TZ TIME WITH TIME ZONE,TS_TZ timestamp with time zone,T time,TS timestamp,DF decfloat,DF16 decfloat(16),DF34 decfloat(34),N128 numeric(34,6),D128 decimal(34,6))")

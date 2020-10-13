@@ -55,7 +55,7 @@ from .types import Error, InterfaceError, DatabaseError, DataError, \
      get_timezone
 from .core import connect, create_database, connect_server, transaction, tpb, TPB, \
      CHARSET_MAP, DistributedTransactionManager, Connection, Cursor, \
-     Server
+     Server, Statement
 
 #: Current driver version, SEMVER string.
-__VERSION__ = '0.8.0'
+__VERSION__ = '1.0.0'
