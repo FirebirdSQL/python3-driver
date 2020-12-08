@@ -1517,7 +1517,7 @@ class TestServerStandard(DriverTestBase):
             if self.version == FB40:
                 self.assertIn('security4.fdb'.upper(), svc.info.security_database.upper())
             else:
-                self.assertIn('security.db', svc.info.security_database)
+                self.assertIn('security3.fdb', svc.info.security_database)
             x = svc.info.lock_directory
             x = svc.info.capabilities
             self.assertIn(ServerCapability.REMOTE_HOP, x)
