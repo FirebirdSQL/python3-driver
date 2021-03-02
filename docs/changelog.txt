@@ -13,6 +13,7 @@ Version 1.1.0
   as `optional` (introduced by firebird-base 1.2.0), so configuration file does not require
   `firebird.db.defaults` and `firebird.server.defaults` sections (even empty).
 * Fix: unregistered bug in `InfoProvider`.
+* Fix: unregistered bug in `FirebirdAPI` initialization.
 
 Version 1.0.0
 =============
