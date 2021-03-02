@@ -45,9 +45,10 @@ from firebird.base.config import Config, StrOption, IntOption, BoolOption, EnumO
 from .types import NetProtocol
 
 class ServerConfig(Config):
-    """Server configuration."""
-    def __init__(self, name: str):
-        super().__init__(name)
+    """Server configuration.
+    """
+    def __init__(self, name: str, *, optional: bool=False):
+        super().__init__(name, optional=optional)
         #: Server host machine specification
         self.host: StrOption = \
             StrOption('host', "Server host machine specification")
@@ -59,7 +60,8 @@ class ServerConfig(Config):
             StrOption('user', "Defaul user name", default=os.environ.get('ISC_USER', None))
         #: Default user password, default is envar ISC_PASSWORD or None if not specified
         self.password: StrOption = \
-            StrOption('password', "Default user password", default=os.environ.get('ISC_PASSWORD', None))
+            StrOption('password', "Default user password",
+                      default=os.environ.get('ISC_PASSWORD', None))
         #: Configuration override
         self.config: StrOption = \
             StrOption('config', "Configuration override")
@@ -71,9 +73,10 @@ class ServerConfig(Config):
             BoolOption('trusted_auth', "Use trusted authentication", default=False)
 
 class DatabaseConfig(Config):
-    "Database configuration."
-    def __init__(self, name: str):
-        super().__init__(name)
+    """Database configuration.
+    """
+    def __init__(self, name: str, *, optional: bool=False):
+        super().__init__(name, optional=optional)
         #: Name of server where database is located
         self.server: StrOption = \
             StrOption('server', "Name of server where database is located")
@@ -94,7 +97,8 @@ class DatabaseConfig(Config):
             StrOption('user', "Defaul user name", default=os.environ.get('ISC_USER', None))
         #: Default user password, default is envar ISC_PASSWORD or None if not specified
         self.password: StrOption = \
-            StrOption('password', "Default user password", default=os.environ.get('ISC_PASSWORD', None))
+            StrOption('password', "Default user password",
+                      default=os.environ.get('ISC_PASSWORD', None))
         #: Use trusted authentication, default: False
         self.trusted_auth: BoolOption = \
             BoolOption('trusted_auth', "Use trusted authentication", default=False)
@@ -118,7 +122,8 @@ class DatabaseConfig(Config):
             IntOption('cache_size', "Page cache size override for database connections")
         #: Dummy packet interval for this database connection
         self.dummy_packet_interval: IntOption = \
-            IntOption('dummy_packet_interval', "Dummy packet interval for this database connections")
+            IntOption('dummy_packet_interval',
+                      "Dummy packet interval for this database connections")
         #: Configuration override
         self.config: StrOption = \
             StrOption('config', "Configuration override")
@@ -150,10 +155,10 @@ class DatabaseConfig(Config):
                        "Data page space usage (True = reserve space, False = Use all space)")
 
 class DriverConfig(Config):
-    "Driver configuration."
+    """Driver configuration.
+    """
     def __init__(self, name: str):
         super().__init__(name)
-        self._parser: ConfigParser = ConfigParser(interpolation=ExtendedInterpolation())
         #: Path to Firebird client library
         self.fb_client_library: StrOption = \
             StrOption('fb_client_library', "Path to Firebird client library")
@@ -163,9 +168,11 @@ class DriverConfig(Config):
                       "BLOB size threshold. Bigger BLOB will be returned as stream BLOBs.",
                       default=65536)
         #: Default database configuration ('firebird.db.defaults')
-        self.db_defaults: DatabaseConfig = DatabaseConfig('firebird.db.defaults')
+        self.db_defaults: DatabaseConfig = DatabaseConfig('firebird.db.defaults',
+                                                          optional=True)
         #: Default server configuration ('firebird.server.defaults')
-        self.server_defaults: ServerConfig = ServerConfig('firebird.server.defaults')
+        self.server_defaults: ServerConfig = ServerConfig('firebird.server.defaults',
+                                                          optional=True)
         #: Registered servers
         self.servers: ConfigListOption = \
             ConfigListOption('servers', "Registered servers", ServerConfig)
@@ -184,22 +191,24 @@ class DriverConfig(Config):
 
         Return list of successfully read files.
         """
-        read_ok = self._parser.read(filenames, encoding)
-        self._parser.clear()
-        self.load_config(self._parser)
+        parser = ConfigParser(interpolation=ExtendedInterpolation())
+        read_ok = parser.read(filenames, encoding)
+        self.load_config(parser)
         return read_ok
     def read_file(self, f):
         """Read configuration from a file-like object.
 
         The `f` argument must be iterable, returning one line at a time.
         """
-        self._parser.clear()
-        self._parser.read_file(f)
+        parser = ConfigParser(interpolation=ExtendedInterpolation())
+        parser.read_file(f)
+        self.load_config(parser)
     def read_string(self, string: str) -> None:
-        "Read configuration from a given string."
-        self._parser.clear()
-        self._parser.read_string(string)
-        self.load_config(self._parser)
+        """Read configuration from a given string.
+        """
+        parser = ConfigParser(interpolation=ExtendedInterpolation())
+        parser.read_string(string)
+        self.load_config(parser)
     def read_dict(self, dictionary: Dict) -> None:
         """Read configuration from a dictionary.
 
@@ -210,17 +219,19 @@ class DriverConfig(Config):
         All types held in the dictionary are converted to strings during
         reading, including section names, option names and keys.
         """
-        self._parser.clear()
-        self._parser.read_dict(dictionary)
-        self.load_config(self._parser)
+        parser = ConfigParser(interpolation=ExtendedInterpolation())
+        parser.read_dict(dictionary)
+        self.load_config(parser)
     def get_server(self, name: str) -> ServerConfig:
-        "Return server configuration."
+        """Returns server configuration.
+        """
         for srv in self.servers.value:
             if srv.name == name:
                 return srv
         return None
     def get_database(self, name: str) -> DatabaseConfig:
-        "Return database configuration."
+        """Returns database configuration.
+        """
         for db in self.databases.value:
             if db.name == name:
                 return db
@@ -228,46 +239,46 @@ class DriverConfig(Config):
     def register_server(self, name: str, config: str=None) -> ServerConfig:
         """Register server.
 
-Arguments:
-    name: Server name.
-    config: Optional server configuration string in ConfigParser format in [name] section.
+        Arguments:
+            name: Server name.
+            config: Optional server configuration string in ConfigParser format in [name] section.
 
-Returns:
-   ServerConfig: For newly registered server
+        Returns:
+           ServerConfig: For newly registered server
 
-Raises:
-    ValueError: If server is already registered.
-"""
+        Raises:
+            ValueError: If server is already registered.
+        """
         if self.get_server(name) is not None:
             raise ValueError(f"Server '{name}' already registered.")
         srv_config = ServerConfig(name)
         self.servers.value.append(srv_config)
         if config:
-            self._parser.clear()
-            self._parser.read_string(config)
-            srv_config.load_config(self._parser, name)
+            parser = ConfigParser(interpolation=ExtendedInterpolation())
+            parser.read_string(config)
+            srv_config.load_config(parser, name)
         return srv_config
     def register_database(self, name: str, config: str=None) -> DatabaseConfig:
         """Register database.
 
-Arguments:
-    name: Database name.
-    config: Optional database configuration string in ConfigParser format in [name] section.
+        Arguments:
+            name: Database name.
+            config: Optional database configuration string in ConfigParser format in [name] section.
 
-Returns:
-   DatabaseConfig: For newly registered database
+        Returns:
+           DatabaseConfig: For newly registered database
 
-Raises:
-    ValueError: If database is already registered.
-"""
+        Raises:
+            ValueError: If database is already registered.
+        """
         if self.get_database(name) is not None:
             raise ValueError(f"Database '{name}' already registered.")
         db_config = DatabaseConfig(name)
         self.databases.value.append(db_config)
         if config:
-            self._parser.clear()
-            self._parser.read_string(config)
-            db_config.load_config(self._parser, name)
+            parser = ConfigParser(interpolation=ExtendedInterpolation())
+            parser.read_string(config)
+            db_config.load_config(parser, name)
         return db_config
 
 # Configuration

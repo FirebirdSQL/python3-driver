@@ -2,6 +2,18 @@
 Changelog
 #########
 
+Version 1.1.0
+=============
+
+* Important: Support for Firebird 4 TIMEZONE is broken (for FB4 RC1). It will be fixed in
+  next driver version.
+* Build scheme changed to `PEP 517`.
+* Various changes to documentation and type hint adjustments.
+* Changed: `.DriverConfig.db_defaults` and `.DriverConfig.server_defaults` are now created
+  as `optional` (introduced by firebird-base 1.2.0), so configuration file does not require
+  `firebird.db.defaults` and `firebird.server.defaults` sections (even empty).
+* Fix: unregistered bug in `InfoProvider`.
+
 Version 1.0.0
 =============
 

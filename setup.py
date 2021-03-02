@@ -1,11 +1,10 @@
+#!/usr/bin/env python
 #coding:utf-8
-"""A setuptools based setup module for firebird-driver package.
-See:
-https://packaging.python.org/en/latest/distributing.html
-https://github.com/pypa/sampleproject
-"""
 
-# Always prefer setuptools over distutils
-from setuptools import setup
+# This file is only a shim to allow editable installs. It's not necessary to build
+# and install the package via pip (see pyproject.toml and setup.cfg).
 
-setup()
+import setuptools
+
+if __name__ == "__main__":
+    setuptools.setup()

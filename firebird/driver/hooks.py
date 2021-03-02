@@ -39,11 +39,13 @@ from enum import Enum, auto
 from firebird.base.hooks import register_class, get_callbacks, add_hook, hook_manager
 
 class APIHook(Enum):
-    "Firebird API hooks"
+    """Firebird API hooks.
+    """
     LOADED = auto()
 
 class ConnectionHook(Enum):
-    "Connection hooks"
+    """Connection hooks.
+    """
     ATTACH_REQUEST = auto()
     ATTACHED = auto()
     DETACH_REQUEST = auto()
@@ -51,5 +53,6 @@ class ConnectionHook(Enum):
     DROPPED = auto()
 
 class ServerHook(Enum):
-    "Server hooks"
+    """Server hooks.
+    """
     ATTACHED = auto()

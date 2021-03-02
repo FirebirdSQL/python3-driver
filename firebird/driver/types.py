@@ -48,11 +48,12 @@ from firebird.base.types import Error
 
 class InterfaceError(Error):
     """Exception raised for errors that are reported by the driver rather than
-the Firebird itself.
-"""
+    the Firebird itself.
+    """
 
 class DatabaseError(Error):
-    """Exception raised for all errors reported by Firebird."""
+    """Exception raised for all errors reported by Firebird.
+    """
 
     #: Returned SQLSTATE or None
     sqlstate: str = None
@@ -63,66 +64,68 @@ class DatabaseError(Error):
 
 class DataError(DatabaseError):
     """Exception raised for errors that are due to problems with the processed
-data like division by zero, numeric value out of range, etc.
+    data like division by zero, numeric value out of range, etc.
 
-Important:
-    This exceptions is never directly thrown by Firebird driver.
-"""
+    Important:
+        This exceptions is never directly thrown by Firebird driver.
+    """
 
 class OperationalError(DatabaseError):
     """Exception raised for errors that are related to the database's operation
-and not necessarily under the control of the programmer, e.g. an unexpected
-disconnect occurs, the data source name is not found, a transaction could not
-be processed, a memory allocation error occurred during processing, etc.
+    and not necessarily under the control of the programmer, e.g. an unexpected
+    disconnect occurs, the data source name is not found, a transaction could not
+    be processed, a memory allocation error occurred during processing, etc.
 
-Important:
-    This exceptions is never directly thrown by Firebird driver.
-"""
+    Important:
+        This exceptions is never directly thrown by Firebird driver.
+    """
 
 class IntegrityError(DatabaseError):
     """Exception raised when the relational integrity of the database is affected,
-e.g. a foreign key check fails.
+    e.g. a foreign key check fails.
 
-Important:
-    This exceptions is never directly thrown by Firebird driver.
-"""
+    Important:
+        This exceptions is never directly thrown by Firebird driver.
+    """
 
 class InternalError(DatabaseError):
     """Exception raised when the database encounters an internal error, e.g. the
-cursor is not valid anymore, the transaction is out of sync, etc.
+    cursor is not valid anymore, the transaction is out of sync, etc.
 
-Important:
-    This exceptions is never directly thrown by Firebird driver.
-"""
+    Important:
+        This exceptions is never directly thrown by Firebird driver.
+    """
 
 class ProgrammingError(DatabaseError):
     """Exception raised for programming errors, e.g. table not found or already
-exists, syntax error in the SQL statement, wrong number of parameters specified,
-etc.
+    exists, syntax error in the SQL statement, wrong number of parameters specified,
+    etc.
 
-Important:
-    This exceptions is never directly thrown by Firebird driver.
-"""
+    Important:
+        This exceptions is never directly thrown by Firebird driver.
+    """
 
 class NotSupportedError(DatabaseError):
     """Exception raised in case a method or database API was used which is not
-supported by the database
+    supported by the database
 
-Important:
-    This exceptions is never directly thrown by Firebird driver.
-"""
+    Important:
+        This exceptions is never directly thrown by Firebird driver.
+    """
 
 # Enums
 
 class NetProtocol(IntEnum):
-    "Network protocol options available for connection"
+    """Network protocol options available for connection.
+    """
     XNET = 1
     INET = 2
     INET4 = 3
     WNET = 4
 
 class DirectoryCode(IntEnum):
-    "IConfigManager directory codes"
+    """IConfigManager directory codes.
+    """
     DIR_BIN = 0
     DIR_SBIN = 1
     DIR_CONF = 2
@@ -143,7 +146,8 @@ class DirectoryCode(IntEnum):
     DIR_TZDATA = 17 # >>> Firebird 4
 
 class XpbKind(IntEnum):
-    "Xpb builder kinds"
+    """Xpb builder kinds.
+    """
     DPB = 1
     SPB_ATTACH = 2
     SPB_START = 3
@@ -157,26 +161,30 @@ class XpbKind(IntEnum):
 
 
 class StateResult(IntEnum):
-    "IState result codes"
+    """IState result codes.
+    """
     ERROR = -1
     OK = 0
     NO_DATA = 1
     SEGMENT = 2
 
 class PageSize(IntEnum):
-    "Supported database page sizes"
+    """Supported database page sizes.
+    """
     PAGE_4K = 4096
     PAGE_8K = 8192
     PAGE_16K = 16384
     PAGE_32K = 32768  # Firebird 4
 
 class DBKeyScope(IntEnum):
-    "Scope of DBKey context"
+    """Scope of DBKey context.
+    """
     TRANSACTION = 0
     ATTACHMENT = 1
 
 class InfoItemType(IntEnum):
-    "Data type of information item"
+    """Data type of information item.
+    """
     BYTE = 1
     INTEGER = 2
     BIGINT = 3
@@ -185,7 +193,8 @@ class InfoItemType(IntEnum):
     STRING = 6
 
 class SrvInfoCode(IntEnum):
-    "Service information (isc_info_svc_*) codes"
+    """Service information (isc_info_svc_*) codes.
+    """
     SRV_DB_INFO = 50
     GET_CONFIG = 53
     VERSION = 54
@@ -206,14 +215,16 @@ class SrvInfoCode(IntEnum):
     STDIN = 78
 
 class BlobInfoCode(IntEnum):
-    "BLOB information (isc_info_blob_*) codes"
+    """BLOB information (isc_info_blob_*) codes.
+    """
     NUM_SEGMENTS = 4
     MAX_SEGMENT = 5
     TOTAL_LENGTH = 6
     TYPE = 7
 
 class DbInfoCode(IntEnum):
-    "Database information (isc_info_*) codes"
+    """Database information (isc_info_*) codes.
+    """
     DB_ID = 4
     READS = 5
     WRITES = 6
@@ -294,7 +305,8 @@ class DbInfoCode(IntEnum):
     CREATION_TIMESTAMP_TZ = 139
 
 class StmtInfoCode(IntEnum):
-    "Statement information (isc_info_sql_*) codes"
+    """Statement information (isc_info_sql_*) codes.
+    """
     SELECT = 4
     BIND = 5
     NUM_VARIABLES = 6
@@ -325,7 +337,8 @@ class StmtInfoCode(IntEnum):
     BLOB_ALIGN = 30
 
 class TraInfoCode(IntEnum):
-    "Transaction information (isc_info_tra_*) codes"
+    """Transaction information (isc_info_tra_*) codes.
+    """
     ID = 4
     OLDEST_INTERESTING = 5
     OLDEST_SNAPSHOT = 6
@@ -336,40 +349,47 @@ class TraInfoCode(IntEnum):
     DBPATH = 11
 
 class TraInfoIsolation(IntEnum):
-    "Transaction isolation response"
+    """Transaction isolation response.
+    """
     CONSISTENCY = 1
     CONCURRENCY = 2
     READ_COMMITTED = 3
 
 class TraInfoReadCommitted(IntEnum):
-    "Transaction isolation Read Committed response"
+    """Transaction isolation Read Committed response.
+    """
     NO_RECORD_VERSION = 0
     RECORD_VERSION = 1
     READ_CONSISTENCY = 2  # Firebird 4
 
 class TraInfoAccess(IntEnum):
-    "Transaction isolation access mode response"
+    """Transaction isolation access mode response.
+    """
     READ_ONLY = 0
     READ_WRITE = 1
 
 class TraAccessMode(IntEnum):
-    "Transaction Access Mode TPB parameters"
+    """Transaction Access Mode TPB parameters.
+    """
     READ = 8
     WRITE = 9
 
 class TraIsolation(IntEnum):
-    "Transaction Isolation TPB paremeters"
+    """Transaction Isolation TPB paremeters.
+    """
     CONSISTENCY = 1
     CONCURRENCY = 2
     READ_COMMITTED = 15
 
 class TraReadCommitted(IntEnum):
-    "Read Committed Isolation TPB paremeters"
+    """Read Committed Isolation TPB paremeters.
+    """
     RECORD_VERSION = 17
     NO_RECORD_VERSION = 18
 
 class Isolation(IntEnum):
-    "Transaction Isolation TPB parameters"
+    """Transaction Isolation TPB parameters.
+    """
     READ_COMMITTED = -1
     SERIALIZABLE = 1
     SNAPSHOT = 2
@@ -382,28 +402,33 @@ class Isolation(IntEnum):
     CONSISTENCY = SERIALIZABLE
 
 class TraLockResolution(IntEnum):
-    "Transaction Lock resolution TPB parameters"
+    """Transaction Lock resolution TPB parameters.
+    """
     WAIT = 6
     NO_WAIT = 7
 
 class TableShareMode(IntEnum):
-    "Transaction table share mode TPB parameters"
+    """Transaction table share mode TPB parameters.
+    """
     SHARED = 3
     PROTECTED = 4
     EXCLUSIVE = 5
 
 class TableAccessMode(IntEnum):
-    "Transaction Access Mode TPB parameters"
+    """Transaction Access Mode TPB parameters.
+    """
     LOCK_READ = 10
     LOCK_WRITE = 11
 
 class DefaultAction(IntEnum):
-    "Default action when transaction is ended automatically"
+    """Default action when transaction is ended automatically.
+    """
     COMMIT = 1
     ROLLBACK = 2
 
 class StatementType(IntEnum):
-    "Statement type"
+    """Statement type.
+    """
     SELECT = 1
     INSERT = 2
     UPDATE = 3
@@ -420,7 +445,8 @@ class StatementType(IntEnum):
     SAVEPOINT = 14
 
 class SQLDataType(IntEnum):
-    "SQL data type"
+    """SQL data type.
+    """
     TEXT = 452
     VARYING = 448
     SHORT = 500
@@ -446,7 +472,8 @@ class SQLDataType(IntEnum):
     NULL = 32766
 
 class DPBItem(IntEnum):
-    "isc_dpb_* items (VERSION2)"
+    """isc_dpb_* items (VERSION2).
+    """
     PAGE_SIZE = 4
     NUM_BUFFERS = 5
     DBKEY_SCOPE = 13
@@ -497,7 +524,8 @@ class DPBItem(IntEnum):
     DECFLOAT_TRAPS = 95
 
 class TPBItem(IntEnum):
-    "isc_tpb_* items"
+    """isc_tpb_* items.
+    """
     VERSION3 = 3
     IGNORE_LIMBO = 14
     AUTOCOMMIT = 16
@@ -508,7 +536,8 @@ class TPBItem(IntEnum):
     AT_SNAPSHOT_NUMBER = 23
 
 class SPBItem(IntEnum):
-    "isc_spb_* items"
+    """isc_spb_* items.
+    """
     USER_NAME = 28
     PASSWORD = 29
     CONNECT_TIMEOUT = 57
@@ -528,7 +557,8 @@ class SPBItem(IntEnum):
     CONFIG = 123
 
 class BPBItem(IntEnum):
-    "isc_bpb_* items"
+    """isc_bpb_* items.
+    """
     SOURCE_TYPE = 1
     TARGET_TYPE = 2
     TYPE = 3
@@ -538,17 +568,20 @@ class BPBItem(IntEnum):
     STORAGE = 7
 
 class BlobType(IntEnum):
-    "Blob type"
+    """Blob type.
+    """
     SEGMENTED = 0x0
     STREAM = 0x1
 
 class BlobStorage(IntEnum):
-    "Blob storage"
+    """Blob storage.
+    """
     MAIN = 0x0
     TEMP = 0x2
 
 class ServerAction(IntEnum):
-    "isc_action_svc_* items"
+    """isc_action_svc_* items.
+    """
     BACKUP = 1
     RESTORE = 2
     REPAIR = 3
@@ -572,12 +605,14 @@ class ServerAction(IntEnum):
     VALIDATE = 30
 
 class SrvDbInfoOption(IntEnum):
-    "Parameters for SvcInfoCode.SRV_DB_INFO"
+    """Parameters for SvcInfoCode.SRV_DB_INFO.
+    """
     ATT = 5
     DB = 6
 
 class SrvRepairOption(IntEnum):
-    "Parameters for ServerAction.REPAIR"
+    """Parameters for ServerAction.REPAIR.
+    """
     COMMIT_TRANS = 15
     ROLLBACK_TRANS = 34
     RECOVER_TWO_PHASE = 17
@@ -604,7 +639,8 @@ class SrvRepairOption(IntEnum):
     RECOVER_TWO_PHASE_64 = 51
 
 class SrvBackupOption(IntEnum):
-    "Parameters for ServerAction.BACKUP"
+    """Parameters for ServerAction.BACKUP.
+    """
     FILE = 5
     FACTOR = 6
     LENGTH = 7
@@ -617,7 +653,8 @@ class SrvBackupOption(IntEnum):
     INCLUDE_DATA = 19
 
 class SrvRestoreOption(IntEnum):
-    "Parameters for ServerAction.RESTORE"
+    """Parameters for ServerAction.RESTORE.
+    """
     FILE = 5
     SKIP_DATA = 8
     BUFFERS = 9
@@ -633,7 +670,8 @@ class SrvRestoreOption(IntEnum):
     CRYPT = 18
 
 class SrvNBackupOption(IntEnum):
-    "Parameters for ServerAction.NBAK"
+    """Parameters for ServerAction.NBAK.
+    """
     LEVEL = 5
     FILE = 6
     DIRECT = 7
@@ -641,13 +679,15 @@ class SrvNBackupOption(IntEnum):
     GUID = 8
 
 class SrvTraceOption(IntEnum):
-    "Parameters for ServerAction.TRACE_*"
+    """Parameters for ServerAction.TRACE_*.
+    """
     ID = 1
     NAME = 2
     CONFIG = 3
 
 class SrvPropertiesOption(IntEnum):
-    "Parameters for ServerAction.PROPERTIES"
+    """Parameters for ServerAction.PROPERTIES.
+    """
     PAGE_BUFFERS = 5
     SWEEP_INTERVAL = 6
     SHUTDOWN_DB = 7
@@ -664,7 +704,8 @@ class SrvPropertiesOption(IntEnum):
     ONLINE_MODE = 45
 
 class SrvValidateOption(IntEnum):
-    "Parameters for ServerAction.VALIDATE"
+    """Parameters for ServerAction.VALIDATE.
+    """
     INCLUDE_TABLE = 1
     EXCLUDE_TABLE = 2
     INCLUDE_INDEX = 3
@@ -672,7 +713,8 @@ class SrvValidateOption(IntEnum):
     LOCK_TIMEOUT = 5
 
 class SrvUserOption(IntEnum):
-    "Parameters for ServerAction.ADD_USER|DELETE_USER|MODIFY_USER|DISPLAY_USER"
+    """Parameters for ServerAction.ADD_USER|DELETE_USER|MODIFY_USER|DISPLAY_USER.
+    """
     USER_ID = 5
     GROUP_ID = 6
     USER_NAME = 7
@@ -684,54 +726,63 @@ class SrvUserOption(IntEnum):
     ADMIN = 13
 
 class DbAccessMode(IntEnum):
-    "Values for isc_spb_prp_access_mode"
+    """Values for isc_spb_prp_access_mode.
+    """
     READ_ONLY = 39
     READ_WRITE = 40
 
 class DbSpaceReservation(IntEnum):
-    "Values for isc_spb_prp_reserve_space"
+    """Values for isc_spb_prp_reserve_space.
+    """
     USE_FULL = 35
     RESERVE = 36
 
 class DbWriteMode(IntEnum):
-    "Values for isc_spb_prp_write_mode"
+    """Values for isc_spb_prp_write_mode.
+    """
     ASYNC = 37
     SYNC = 38
 
 class ShutdownMode(IntEnum):
-    "Values for isc_spb_prp_shutdown_mode"
+    """Values for isc_spb_prp_shutdown_mode.
+    """
     MULTI = 1
     SINGLE = 2
     FULL = 3
 
 class OnlineMode(IntEnum):
-    "Values for isc_spb_prp_online_mode"
+    """Values for isc_spb_prp_online_mode.
+    """
     NORMAL = 0
     MULTI = 1
     SINGLE = 2
 
 class ShutdownMethod(IntEnum):
-    "Database shutdown method options"
+    """Database shutdown method options.
+    """
     FORCED = 41
     DENNY_ATTACHMENTS = 42
     DENNY_TRANSACTIONS = 43
 
 class TransactionState(IntEnum):
-    "Transaction state"
+    """Transaction state.
+    """
     UNKNOWN = 0
     COMMIT = 1
     ROLLBACK = 2
     LIMBO = 3
 
 class DbProvider(IntEnum):
-    "Database Providers"
+    """Database Providers.
+    """
     RDB_ELN = 1
     RDB_VMS = 2
     INTERBASE = 3
     FIREBIRD = 4
 
 class DbClass(IntEnum):
-    "Database Classes"
+    """Database Classes.
+    """
     UNKNOWN = 0
     ACCESS = 1
     Y_VALVE = 2
@@ -747,7 +798,8 @@ class DbClass(IntEnum):
     SERVER_ACCESS = 14
 
 class Implementation(IntEnum):
-    "Implementation - Legacy format"
+    """Implementation - Legacy format.
+    """
     RDB_VMS = 1
     RDB_ELN = 2
     RDB_ELN_DEV = 3
@@ -821,7 +873,8 @@ class Implementation(IntEnum):
     LINUX_RISCV64 = 88
 
 class ImpCPU(IntEnum):
-    "Implementation - CPU"
+    """Implementation - CPU.
+    """
     INTEL386 = 0
     AMD_INTEL_X64 = 1
     ULTRA_SPARC = 2
@@ -842,7 +895,8 @@ class ImpCPU(IntEnum):
     M68K = 17
 
 class ImpOS(IntEnum):
-    "Implementation - CPU"
+    """Implementation - CPU.
+    """
     WINDOWS = 0
     LINUX = 1
     DARWIN = 2
@@ -854,7 +908,8 @@ class ImpOS(IntEnum):
     NET_BSD = 8
 
 class ImpCompiler(IntEnum):
-    "Implementation - Compiler"
+    """Implementation - Compiler.
+    """
     MSVC = 0
     GCC = 1
     XLC = 2
@@ -865,13 +920,15 @@ class ImpCompiler(IntEnum):
 # Flags
 
 class StateFlag(IntFlag):
-    "IState flags"
+    """IState flags.
+    """
     NONE = 0
     WARNINGS = 1
     ERRORS = 2
 
 class PreparePrefetchFlag(IntFlag):
-    "Flags for Statement Prefetch"
+    """Flags for Statement Prefetch.
+    """
     NONE = 0
     TYPE = 1
     INPUT_PARAMETERS = 2
@@ -884,24 +941,28 @@ class PreparePrefetchFlag(IntFlag):
     ALL = METADATA | LEGACY_PLAN | DETAILED_PLAN | AFFECTED_RECORDS
 
 class StatementFlag(IntFlag):
-    "Statement flags"
+    """Statement flags.
+    """
     NONE = 0
     HAS_CURSOR = 1
     REPEAT_EXECUTE = 2
 
 class CursorFlag(IntFlag):
-    "Cursor flags"
+    """Cursor flags.
+    """
     NONE = 0
     SCROLLABLE = 1
 
 class ConnectionFlag(IntFlag):
-    "Flags returned for DbInfoCode.CONN_FLAGS"
+    """Flags returned for DbInfoCode.CONN_FLAGS.
+    """
     NONE = 0
     COMPRESSED = 0x01
     ENCRYPTED = 0x02
 
 class ServerCapability(IntFlag):
-    "Server capabilities (returned by isc_info_svc_capabilities)"
+    """Server capabilities (returned by isc_info_svc_capabilities).
+    """
     NONE = 0
     WAL = 0b00000000001
     MULTI_CLIENT = 0b00000000010
@@ -916,7 +977,8 @@ class ServerCapability(IntFlag):
     QUOTED_FILENAME = 0b10000000000
 
 class SrvRepairFlag(IntFlag):
-    "isc_spb_rpr_* flags for ServerAction.REPAIR"
+    """isc_spb_rpr_* flags for ServerAction.REPAIR.
+    """
     VALIDATE_DB = 0x01
     SWEEP_DB = 0x02
     MEND_DB = 0x04
@@ -931,7 +993,8 @@ class SrvRepairFlag(IntFlag):
     REPAIR = MEND_DB | FULL | IGNORE_CHECKSUM
 
 class SrvStatFlag(IntFlag):
-    "isc_spb_sts_* flags for ServerAction.DB_STATS"
+    """isc_spb_sts_* flags for ServerAction.DB_STATS.
+    """
     NONE = 0
     DATA_PAGES = 0x01
     DB_LOG = 0x02
@@ -944,7 +1007,8 @@ class SrvStatFlag(IntFlag):
     DEFAULT = DATA_PAGES | DATA_PAGES | IDX_PAGES
 
 class SrvBackupFlag(IntFlag):
-    "isc_spb_bkp_* flags for ServerAction.BACKUP"
+    """isc_spb_bkp_* flags for ServerAction.BACKUP.
+    """
     NONE = 0
     IGNORE_CHECKSUMS = 0x01
     IGNORE_LIMBO = 0x02
@@ -959,7 +1023,8 @@ class SrvBackupFlag(IntFlag):
     ZIP = 0x010000
 
 class SrvRestoreFlag(IntFlag):
-    "isc_spb_res_* flags for ServerAction.RESTORE"
+    """isc_spb_res_* flags for ServerAction.RESTORE.
+    """
     METADATA_ONLY = 0x04
     DEACTIVATE_IDX = 0x0100
     NO_SHADOW = 0x0200
@@ -971,20 +1036,23 @@ class SrvRestoreFlag(IntFlag):
     NO_TRIGGERS = 0x8000
 
 class SrvNBackupFlag(IntFlag):
-    "isc_spb_nbk_* flags for ServerAction.NBAK"
+    """isc_spb_nbk_* flags for ServerAction.NBAK.
+    """
     NONE = 0
     NO_TRIGGERS = 0x01
     # Firebird 4
     IN_PLACE = 0x02
 
 class SrvPropertiesFlag(IntFlag):
-    "isc_spb_prp_* flags for ServerAction.PROPERTIES"
+    """isc_spb_prp_* flags for ServerAction.PROPERTIES.
+    """
     ACTIVATE = 0x0100
     DB_ONLINE = 0x0200
     NOLINGER = 0x0400
 
 class ImpFlags(IntFlag):
-    "Implementation - Endianness"
+    """Implementation - Endianness.
+    """
     LITTLE_ENDIAN = 0
     BIG_ENDIAN = 1
 
@@ -994,22 +1062,22 @@ class ImpFlags(IntFlag):
 class ItemMetadata:
     """Information for single item from `iMessageMetadata`.
 
-This `dataclass` is used internally, and it's not intended for general use.
+    This `dataclass` is used internally, and it's not intended for general use.
 
-Attributes:
-    field (str): Field name
-    relation (str): Relation name
-    owner (str): Owner name
-    alias (str): Field alias
-    datatype (SQLDataType): Data type
-    nullable (bool): Whether NULLs are allowed
-    subtype (int): Data sub-type
-    length (int): Size of raw field data in message buffer
-    scale (int): Field scale
-    charset (int): Character set
-    offset (int): Offset of raw field data in message buffer
-    null_offset (int): Offset of null flag in message buffer
-"""
+    Attributes:
+        field (str): Field name
+        relation (str): Relation name
+        owner (str): Owner name
+        alias (str): Field alias
+        datatype (SQLDataType): Data type
+        nullable (bool): Whether NULLs are allowed
+        subtype (int): Data sub-type
+        length (int): Size of raw field data in message buffer
+        scale (int): Field scale
+        charset (int): Character set
+        offset (int): Offset of raw field data in message buffer
+        null_offset (int): Offset of null flag in message buffer
+    """
     field: str
     relation: str
     owner: str
@@ -1027,21 +1095,21 @@ Attributes:
 class TableAccessStats:
     """Table access statistics.
 
-Data structure returned by `.Connection.get_table_access_stats()`.
+    Data structure returned by `.Connection.get_table_access_stats()`.
 
-Attributes:
-    table_id (int): Relation ID
-    sequential (int): Number of sequential table scans (row reads)
-    indexed (int): Number of reads done via an index
-    inserts (int): Number of inserts
-    updates (int): Number of updates
-    deletes (int): Number of deleted
-    backouts (int): Number of removals of a version of a record
-    purges (int): Number of removals of old versions of fully mature records (records that
-                  are committed, so that older ancestor versions are no longer needed)
-    expunges (int): Number of removals of a record and all of its ancestors, for records
-                    whose deletions have been committed
-"""
+    Attributes:
+        table_id (int): Relation ID
+        sequential (int): Number of sequential table scans (row reads)
+        indexed (int): Number of reads done via an index
+        inserts (int): Number of inserts
+        updates (int): Number of updates
+        deletes (int): Number of deleted
+        backouts (int): Number of removals of a version of a record
+        purges (int): Number of removals of old versions of fully mature records (records that
+                      are committed, so that older ancestor versions are no longer needed)
+        expunges (int): Number of removals of a record and all of its ancestors, for records
+                        whose deletions have been committed
+    """
     table_id: int
     sequential: int = None
     indexed: int = None
@@ -1056,19 +1124,19 @@ Attributes:
 class UserInfo:
     """Information about Firebird user.
 
-Data structure returned by `.Service.get_user()` and `.Service.get_users()`.
+    Data structure returned by `.Service.get_user()` and `.Service.get_users()`.
 
-Attributes:
-    user_name (str): User (login) name
-    password (str): User password
-    first_name (str): First name
-    middle_name (str): Middle name
-    last_name (str): Last name
-    user_id (int): User ID
-    group_id (int): User Group ID
-    group_name (str): Group name
-    admin (bool): True is user has admin priviledges
-"""
+    Attributes:
+        user_name (str): User (login) name
+        password (str): User password
+        first_name (str): First name
+        middle_name (str): Middle name
+        last_name (str): Last name
+        user_id (int): User ID
+        group_id (int): User Group ID
+        group_name (str): Group name
+        admin (bool): True is user has admin priviledges
+    """
     user_name: str
     password: str = None
     first_name: str = None
@@ -1083,11 +1151,11 @@ Attributes:
 class BCD:
     """BCD number.
 
-Attributes:
-    sign (int): Sign
-    number (bytes): Number
-    exp (int): Exponent
-"""
+    Attributes:
+        sign (int): Sign
+        number (bytes): Number
+        exp (int): Exponent
+    """
     sign: int
     number: bytes
     exp: int
@@ -1096,12 +1164,12 @@ Attributes:
 class TraceSession:
     """Information about active trace session.
 
-Attributes:
-    id (int): Session ID number
-    timestamp (datetime.datetime): Session start timestamp
-    name (str): Session name (if defined)
-    flags (list): List with session flag names
-"""
+    Attributes:
+        id (int): Session ID number
+        timestamp (datetime.datetime): Session start timestamp
+        name (str): Session name (if defined)
+        flags (list): List with session flag names
+    """
     id: int
     user: str
     timestamp: datetime.datetime
@@ -1141,24 +1209,28 @@ Timestamp = datetime.datetime
 
 def DateFromTicks(ticks: float) -> Date: # pragma: no cover
     """Constructs an object holding a date value from the given ticks value
-(number of seconds since the epoch)."""
+    (number of seconds since the epoch).
+    """
     return Date(time.localtime(ticks)[:3])
 
 def TimeFromTicks(ticks: float) -> Time: # pragma: no cover
     """Constructs an object holding a time value from the given ticks value
-(number of seconds since the epoch)."""
+    (number of seconds since the epoch).
+    """
     return Time(time.localtime(ticks)[3:6])
 
 def TimestampFromTicks(ticks: float) -> Timestamp: # pragma: no cover
     """Constructs an object holding a time stamp value from the given ticks value
-(number of seconds since the epoch)."""
+    (number of seconds since the epoch).
+    """
     return Timestamp(time.localtime(ticks)[:6])
 
 #: This callable constructs an object capable of holding a binary (long) string value.
 Binary = memoryview
 
 class DBAPITypeObject:
-    "Python DB API 2.0 - type support"
+    """Python DB API 2.0 - type support.
+    """
     def __init__(self, *values):
         self.values = values
     def __cmp__(self, other): # pragma: no cover
@@ -1189,16 +1261,20 @@ CB_OUTPUT_LINE = Callable[[str], None]
 class Transactional(Protocol):  # pragma: no cover
     """Protocol type for object that supports transactional processing."""
     def begin(self, tpb: bytes = None) -> None:
-        "Begin transaction."
+        """Begin transaction.
+        """
         ...
     def commit(self, *, retaining: bool = False) -> None:
-        "Commit transaction."
+        """Commit transaction.
+        """
         ...
     def rollback(self, *, retaining: bool = False, savepoint: str = None) -> None:
-        "Rollback transaction."
+        """Rollback transaction.
+        """
         ...
     def is_active(self) -> bool:
-        "Returns true if transaction is active"
+        """Returns True if transaction is active.
+        """
         ...
 
 # timezone
@@ -1206,12 +1282,12 @@ class Transactional(Protocol):  # pragma: no cover
 def get_timezone(timezone: str=None) -> datetime.tzinfo:
     """Returns `datetime.tzinfo` for specified time zone.
 
-This is preferred method to obtain timezone information for construction of timezone-aware
-`datetime.datetime` and `datetime.time` objects. Current implementation uses `dateutil.tz`
-for timezone tzinfo objects, but adds metadata neccessary to store timezone regions into
-database instead zoned time, and to handle offset-based timezones in format required by
-Firebird.
-"""
+    This is preferred method to obtain timezone information for construction of timezone-aware
+    `datetime.datetime` and `datetime.time` objects. Current implementation uses `dateutil.tz`
+    for timezone tzinfo objects, but adds metadata neccessary to store timezone regions into
+    database instead zoned time, and to handle offset-based timezones in format required by
+    Firebird.
+    """
     if timezone[0] in ['+', '-']:
         timezone = 'UTC' + timezone
     result = tz.gettz(timezone)

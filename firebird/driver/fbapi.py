@@ -1815,97 +1815,96 @@ def exception_from_status(error, status: ISC_STATUS_ARRAY, preamble: str = None)
 
 class FirebirdAPI:
     """Firebird Client API interface object. Loads Firebird Client Library and
-exposes `fb_get_master_interface()`. Uses :ref:`ctypes <python:module-ctypes>`
-for bindings.
+    exposes `fb_get_master_interface()`. Uses :ref:`ctypes <python:module-ctypes>`
+    for bindings.
 
-Arguments:
-    filename (`~pathlib.Path`): Firebird client library to be loaded. If it's not provided,
-        the driver uses :func:`~ctypes.util.find_library()` to locate the library.
+    Arguments:
+        filename (`~pathlib.Path`): Firebird client library to be loaded. If it's not provided,
+            the driver uses :func:`~ctypes.util.find_library()` to locate the library.
 
-Attributes:
-    client_library (`~ctypes.ctypes.CDLL`): Loaded Firebird client library :mod:`ctypes` handler
-    client_library_name (`~pathlib.Path`): Path to loaded Firebird client library
-    master (iMaster): Firebird API IMaster interface
-    util (iUtil): Firebird API IUtil interface
+    Attributes:
+        client_library (`~ctypes.ctypes.CDLL`): Loaded Firebird client library :mod:`ctypes` handler
+        client_library_name (`~pathlib.Path`): Path to loaded Firebird client library
+        master (iMaster): Firebird API IMaster interface
+        util (iUtil): Firebird API IUtil interface
 
-Methods:
-    fb_get_master_interface():
-        This function is used to obtain primary Firebird interface, required
-        to access all the rest of interfaces. Has no parameters and always succeeds.
+    Methods:
+        fb_get_master_interface():
+            This function is used to obtain primary Firebird interface, required
+            to access all the rest of interfaces. Has no parameters and always succeeds.
 
-        Returns:
-            `.iMaster`
+            Returns:
+                `.iMaster`
 
-    fb_get_database_handle():
-        Helper function that returns database handle for specified IAttachment interface.
+        fb_get_database_handle():
+            Helper function that returns database handle for specified IAttachment interface.
 
-        Arguments:
-            status (`ISC_STATUS_PTR`): :ISC status
-            db_handle (`FB_API_HANDLE_PTR`): database handle
-            att (iAttachment): attachment
+            Arguments:
+                status (`ISC_STATUS_PTR`): :ISC status
+                db_handle (`FB_API_HANDLE_PTR`): database handle
+                att (iAttachment): attachment
 
-        Returns:
-            `ISC_STATUS`
+            Returns:
+                `ISC_STATUS`
 
-    fb_get_transaction_handle():
-        Helper function that returns database handle for specified ITransaction interface.
+        fb_get_transaction_handle():
+            Helper function that returns database handle for specified ITransaction interface.
 
-        Arguments:
-            status (`ISC_STATUS_PTR`): ISC status
-            tra_handle (`FB_API_HANDLE_PTR`): Transaction handle
-            att (iTransaction): Transaction
+            Arguments:
+                status (`ISC_STATUS_PTR`): ISC status
+                tra_handle (`FB_API_HANDLE_PTR`): Transaction handle
+                att (iTransaction): Transaction
 
-        Returns:
-            `ISC_STATUS`
+            Returns:
+                `ISC_STATUS`
 
-    fb_interpret():
-        Helper function that fills buffer with text for errors noted in ISC status.
+        fb_interpret():
+            Helper function that fills buffer with text for errors noted in ISC status.
 
-        Arguments:
-            buffer (`STRING`): Buffer for message
-            buf_size (int): Buffer size
-            status_ptr: Pointer to `ISC_STATUS_PTR`
+            Arguments:
+                buffer (`STRING`): Buffer for message
+                buf_size (int): Buffer size
+                status_ptr: Pointer to `ISC_STATUS_PTR`
 
-        Returns:
-            `ISC_LONG`
+            Returns:
+                `ISC_LONG`
 
-    fb_sqlstate():
-        Helper function that returns SQLSTATE for ISC_STATUS.
+        fb_sqlstate():
+            Helper function that returns SQLSTATE for ISC_STATUS.
 
-        Arguments:
-            status (`ISC_STATUS_PTR`): ISC status
+            Arguments:
+                status (`ISC_STATUS_PTR`): ISC status
 
-        Returns:
-            `STRING` - 5 characters of SQLSTATE
+            Returns:
+                `STRING` - 5 characters of SQLSTATE
 
-    isc_sqlcode():
-        Helper function that returns SQLCODE for ISC_STATUS.
+        isc_sqlcode():
+            Helper function that returns SQLCODE for ISC_STATUS.
 
-        Arguments:
-            status (`ISC_STATUS_PTR`): ISC status
+            Arguments:
+                status (`ISC_STATUS_PTR`): ISC status
 
-        Returns:
-            `ISC_LONG`
+            Returns:
+                `ISC_LONG`
 
-    isc_array_lookup_bounds():
-        Old API function isc_array_lookup_bounds()
+        isc_array_lookup_bounds():
+            Old API function isc_array_lookup_bounds()
 
-    isc_array_put_slice():
-        Old API function isc_array_put_slice()
+        isc_array_put_slice():
+            Old API function isc_array_put_slice()
 
-    isc_array_get_slice():
-        Old API function isc_array_get_slice()
+        isc_array_get_slice():
+            Old API function isc_array_get_slice()
 
-    isc_que_events():
-        Old API function isc_que_events()
+        isc_que_events():
+            Old API function isc_que_events()
 
-    isc_event_counts():
-        Old API function isc_event_counts()
+        isc_event_counts():
+            Old API function isc_event_counts()
 
-    isc_cancel_events():
-        Old API function isc_cancel_events()
-"""
-
+        isc_cancel_events():
+            Old API function isc_cancel_events()
+    """
     def __init__(self, filename: Path = None):
         decimal.getcontext().prec = 34
         if filename is None:
@@ -1930,9 +1929,9 @@ Methods:
             filename = file_name
         self.client_library: ctypes.CDLL = None
         if sys.platform in ['win32', 'cygwin', 'os2', 'os2emx']:
-            self.client_library: ctypes.CDLL = ctypes.WinDLL(filename)
+            self.client_library: ctypes.CDLL = ctypes.WinDLL(str(filename))
         else:
-            self.client_library: ctypes.CDLL = ctypes.CDLL(filename)
+            self.client_library: ctypes.CDLL = ctypes.CDLL(str(filename))
         #
         self.client_library_name: Path = Path(filename)
         #
@@ -2005,7 +2004,8 @@ Methods:
 
     def isc_event_block(self, event_buffer: bytes, result_buffer: bytes, *args) -> int:
         """Convenience wrapper for isc_event_block() API function. Injects variable
-number of parameters into `C_isc_event_block` call"""
+        number of parameters into `C_isc_event_block` call.
+        """
         if len(args) > 15:
             raise ValueError("isc_event_block takes no more than 15 event names")
         newargs = list(self.P_isc_event_block_args)
@@ -2014,25 +2014,26 @@ number of parameters into `C_isc_event_block` call"""
         return self.C_isc_event_block(event_buffer, result_buffer, len(args), *args)
 
 def has_api() -> bool:
-    "Reaturns True if Firebird API is already loaded"
+    """Reaturns True if Firebird API is already loaded.
+    """
     return api is not None
 
 def load_api(filename: Union[None, str, Path] = None) -> None:
     """Initializes bindings to Firebird Client Library unless they are already initialized.
-Called automatically by `get_api()`.
+    Called automatically by `get_api()`.
 
-Args:
-    filename: Path to Firebird Client Library.
-    When it's not specified, driver does its best to locate appropriate client library.
+    Args:
+        filename: Path to Firebird Client Library.
+        When it's not specified, driver does its best to locate appropriate client library.
 
-Returns:
-    `FirebirdAPI` instance.
+    Returns:
+        `FirebirdAPI` instance.
 
-Hooks:
-    Event `HookType.HOOK_API_LOADED`: Executed after api is initialized.
-    Hook routine must have signature: `hook_func(api)`. Any value returned by
-    hook is ignored.
-"""
+    Hooks:
+        Event `HookType.HOOK_API_LOADED`: Executed after api is initialized.
+        Hook routine must have signature: `hook_func(api)`. Any value returned by
+        hook is ignored.
+    """
     if not has_api():
         if filename is None:
             filename = driver_config.fb_client_library.value
@@ -2044,7 +2045,8 @@ Hooks:
             hook(_api)
 
 def get_api() -> FirebirdAPI:
-    "Returns Firebird API. Loads the API if needed."
+    """Returns Firebird API. Loads the API if needed.
+    """
     if not has_api():
         load_api()
     return api

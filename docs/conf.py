@@ -23,10 +23,10 @@ copyright = '2020, The Firebird Project'
 author = 'Pavel Císař'
 
 # The short X.Y version
-version = '1.0.0'
+version = '1.1.0'
 
 # The full version, including alpha/beta/rc tags
-release = '1.0.0'
+release = '1.1.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -37,7 +37,7 @@ release = '1.0.0'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
-    'sphinxcontrib.napoleon',
+    'sphinx.ext.napoleon',
     'sphinx_autodoc_typehints',
     'sphinx.ext.todo',
 ]
@@ -179,7 +179,9 @@ napoleon_include_special_with_doc = True
 napoleon_use_admonition_for_examples = False
 napoleon_use_admonition_for_notes = True
 napoleon_use_admonition_for_references = True
-napoleon_use_ivar = True
+napoleon_use_ivar = False
+napoleon_use_rtype = True
+napoleon_attr_annotations = True
 
 # -- Options for intersphinx extension ---------------------------------------
 

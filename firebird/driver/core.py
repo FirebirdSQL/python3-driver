@@ -45,7 +45,6 @@ import threading
 import io
 import contextlib
 import struct
-import importlib
 from abc import ABC, abstractmethod
 from warnings import warn
 from queue import PriorityQueue
@@ -243,16 +242,16 @@ def transaction(transact_object: Transactional, *, tpb: bytes=None,
                 bypass: bool=False) -> Transactional:
     """Context manager for `~firebird.driver.types.Transactional` objects.
 
-Starts new transaction when context is entered. On exit calls `rollback()` when
-exception was raised, or `commit()` if there was no error. Exception raised
-in managed context is NOT suppressed.
+    Starts new transaction when context is entered. On exit calls `rollback()` when
+    exception was raised, or `commit()` if there was no error. Exception raised
+    in managed context is NOT suppressed.
 
-Arguments:
-    transact_object: Managed transactional object.
-    tpb: Transaction parameter buffer used to start the transaction.
-    bypass: When both `bypass` and `transact_object.is_active()` are `True` when
-            context is entered, the context manager does nothing on exit.
-"""
+    Arguments:
+        transact_object: Managed transactional object.
+        tpb: Transaction parameter buffer used to start the transaction.
+        bypass: When both `bypass` and `transact_object.is_active()` are `True` when
+                context is entered, the context manager does nothing on exit.
+    """
     if bypass and transact_object.is_active():
         yield transact_object
     else:
@@ -270,7 +269,8 @@ _OP_RECORD_AND_REREGISTER = object()
 
 # Managers for Parameter buffers
 class TPB:
-    "Transaction Parameter Buffer"
+    """Transaction Parameter Buffer.
+    """
     def __init__(self, *, access_mode: TraAccessMode = TraAccessMode.WRITE,
                  isolation: Isolation = Isolation.SNAPSHOT,
                  lock_timeout: int = -1, no_auto_undo: bool = False,
@@ -283,7 +283,8 @@ class TPB:
         self.ignore_limbo: bool = ignore_limbo
         self._table_reservation: List[Tuple[str, TableShareMode, TableAccessMode]] = []
     def clear(self) -> None:
-        "Clear all information."
+        """Clear all information.
+        """
         self.access_mode = TraAccessMode.WRITE
         self.isolation = Isolation.SNAPSHOT
         self.lock_timeout = -1
@@ -292,7 +293,8 @@ class TPB:
         self.ignore_limbo = False
         self._table_reservation = []
     def parse_buffer(self, buffer: bytes) -> None:
-        "Load information from TPB."
+        """Load information from TPB.
+        """
         self.clear()
         with a.get_api().util.get_xpb_builder(XpbKind.TPB, buffer) as tpb:
             while not tpb.is_eof():
@@ -331,7 +333,8 @@ class TPB:
                     self.reserve_table(tbl_name, tbl_share, tbl_access)
                 tpb.move_next()
     def get_buffer(self) -> bytes:
-        "Create TPB from stored information."
+        """Create TPB from stored information.
+        """
         with a.get_api().util.get_xpb_builder(XpbKind.TPB) as tpb:
             tpb.insert_tag(self.access_mode)
             isolation = (Isolation.READ_COMMITTED_RECORD_VERSION
@@ -360,11 +363,13 @@ class TPB:
             result = tpb.get_buffer()
         return result
     def reserve_table(self, name: str, share_mode: TableShareMode, access_mode: TableAccessMode) -> None:
-        "Set information about table reservation"
+        """Set information about table reservation.
+        """
         self._table_reservation.append((name, share_mode, access_mode))
 
 class DPB:
-    "Database Parameter Buffer"
+    """Database Parameter Buffer.
+    """
     def __init__(self, *, user: str = None, password: str = None, role: str = None,
                  trusted_auth: bool = False, sql_dialect: int = 3, timeout: int = None,
                  charset: str = 'UTF8', cache_size: int = None, no_gc: bool = False,
@@ -434,7 +439,8 @@ class DPB:
         #: Character set for the database [db create only]
         self.db_charset: Optional[str] = db_charset
     def clear(self) -> None:
-        "Clear all information."
+        """Clear all information.
+        """
         self.config = None
         # Connect
         self.trusted_auth = False
@@ -463,7 +469,8 @@ class DPB:
         self.db_sql_dialect = None
         self.db_charset = None
     def parse_buffer(self, buffer: bytes) -> None:
-        "Load information from DPB."
+        """Load information from DPB.
+        """
         self.clear()
         with a.get_api().util.get_xpb_builder(XpbKind.DPB, buffer) as dpb:
             while not dpb.is_eof():
@@ -519,7 +526,8 @@ class DPB:
                 elif tag == DPBItem.SET_DB_CHARSET:
                     self.db_charset = dpb.get_string()
     def get_buffer(self, *, for_create: bool = False) -> bytes:
-        "Create DPB from stored information."
+        """Create DPB from stored information.
+        """
         with a.get_api().util.get_xpb_builder(XpbKind.DPB) as dpb:
             if self.config is not None:
                 dpb.insert_string(DPBItem.CONFIG, self.config)
@@ -580,7 +588,8 @@ class DPB:
         return result
 
 class SPB_ATTACH:
-    "Service Parameter Buffer"
+    """Service Parameter Buffer.
+    """
     def __init__(self, *, user: str = None, password: str = None, trusted_auth: bool = False,
                  config: str = None, auth_plugin_list: str = None):
         self.user: str = user
@@ -589,13 +598,15 @@ class SPB_ATTACH:
         self.config: str = config
         self.auth_plugin_list: str = auth_plugin_list
     def clear(self) -> None:
-        "Clear all information."
+        """Clear all information.
+        """
         self.user = None
         self.password = None
         self.trusted_auth = False
         self.config = None
     def parse_buffer(self, buffer: bytes) -> None:
-        "Load information from SPB_ATTACH."
+        """Load information from SPB_ATTACH.
+        """
         self.clear()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_ATTACH, buffer) as spb:
             while not spb.is_eof():
@@ -611,7 +622,8 @@ class SPB_ATTACH:
                 elif tag == SPBItem.PASSWORD:
                     self.password = spb.get_string()
     def get_buffer(self) -> bytes:
-        "Create SPB_ATTACH from stored information."
+        """Create SPB_ATTACH from stored information.
+        """
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_ATTACH) as spb:
             if self.config is not None:
                 spb.insert_string(SPBItem.CONFIG, self.config)
@@ -629,33 +641,41 @@ class SPB_ATTACH:
 
 
 class Buffer(MemoryBuffer):
-    "MemoryBuffer with extensions"
+    """MemoryBuffer with extensions.
+    """
     def __init__(self, init: Union[int, bytes], size: int = None, *,
                  factory: Type[BufferFactory]=BytesBufferFactory,
                  max_size: Union[int, Sentinel]=UNLIMITED, byteorder: ByteOrder=ByteOrder.LITTLE):
         super().__init__(init, size, factory=factory, eof_marker=isc_info_end,
                          max_size=max_size, byteorder=byteorder)
     def seek_last_data(self) -> int:
-        "Set the position in buffer to first non-zero byte when searched from the end of buffer."
+        """Set the position in buffer to first non-zero byte when searched from
+        the end of buffer.
+        """
         self.pos = self.last_data
     def get_tag(self) -> int:
-        "Read 1 byte number (c_ubyte)"
+        """Read 1 byte number (c_ubyte).
+        """
         return self.read_byte()
     def rewind(self) -> None:
-        "Set current position in buffer to beginning."
+        """Set current position in buffer to beginning.
+        """
         self.pos = 0
     def is_truncated(self) -> bool:
-        "Return True when positioned on `isc_info_truncated` tag"
+        """Return True when positioned on `isc_info_truncated` tag.
+        """
         return safe_ord(self.raw[self.pos]) == isc_info_truncated
 
 class CBuffer(Buffer):
-    "ctypes MemoryBuffer with extensions"
+    """ctypes MemoryBuffer with extensions.
+    """
     def __init__(self, init: Union[int, bytes], size: int = None, *,
                  max_size: Union[int, Sentinel]=UNLIMITED, byteorder: ByteOrder=ByteOrder.LITTLE):
         super().__init__(init, size, factory=CTypesBufferFactory, max_size=max_size, byteorder=byteorder)
 
 class EventBlock:
-    "Used internally by `EventCollector`."
+    """Used internally by `EventCollector`.
+    """
     def __init__(self, queue, db_handle: a.FB_API_HANDLE, event_names: List[str]):
         self.__first = True
         def callback(result, length, updated):
@@ -697,7 +717,8 @@ class EventBlock:
     def _begin(self) -> None:
         self.__wait_for_events()
     def count_and_reregister(self) -> Dict[str, int]:
-        "Count event occurences and re-register interest in further notifications."
+        """Count event occurences and re-register interest in further notifications.
+        """
         result = {}
         a.api.isc_event_counts(self.__results, self.buf_length,
                                self.event_buf, self.result_buf)
@@ -712,7 +733,8 @@ class EventBlock:
         self.__wait_for_events()
         return result
     def close(self) -> None:
-        "Close this block canceling managed events."
+        """Close this block canceling managed events.
+        """
         if not self.__closed:
             a.api.isc_cancel_events(self._isc_status, self._db_handle, self.event_id)
             self.__closed = True
@@ -721,36 +743,37 @@ class EventBlock:
                 raise a.exception_from_status(DatabaseError, self._isc_status,
                                               "Error while canceling events.")
     def is_closed(self) -> bool:
-        "Returns True if event block is closed."
+        """Returns True if event block is closed.
+        """
         return self.__closed
 
 
 class EventCollector:
     """Collects database event notifications.
 
-Notifications of events are not accumulated until `.begin()` method is called.
+    Notifications of events are not accumulated until `.begin()` method is called.
 
-From the moment the `.begin()` is called, notifications of any events that occur
-will accumulate asynchronously within the conduit’s internal queue until the collector
-is closed either explicitly (via the `.close()` method) or implicitly
-(via garbage collection).
+    From the moment the `.begin()` is called, notifications of any events that occur
+    will accumulate asynchronously within the conduit’s internal queue until the collector
+    is closed either explicitly (via the `.close()` method) or implicitly
+    (via garbage collection).
 
-Note:
+    Note:
 
-    `EventCollector` implements context manager protocol to call method `.begin()`
-    and `.close()` automatically.
+        `EventCollector` implements context manager protocol to call method `.begin()`
+        and `.close()` automatically.
 
-Example::
+    Example::
 
-   with connection.event_collector(['event_a', 'event_b']) as collector:
-       events = collector.wait()
-       process_events(events)
+       with connection.event_collector(['event_a', 'event_b']) as collector:
+           events = collector.wait()
+           process_events(events)
 
-Important:
+    Important:
 
-   DO NOT create instances of this class directly! Use only
-   `Connection.event_collector` to get EventCollector instances.
-"""
+       DO NOT create instances of this class directly! Use only
+       `Connection.event_collector` to get EventCollector instances.
+    """
     def __init__(self, db_handle: a.FB_API_HANDLE, event_names: Sequence[str]):
         self._db_handle: a.FB_API_HANDLE = db_handle
         self._isc_status: a.ISC_STATUS_ARRAY = a.ISC_STATUS_ARRAY(0)
@@ -774,7 +797,8 @@ Important:
     def begin(self) -> None:
         """Starts listening for events.
 
-Must be called directly or through context manager interface."""
+        Must be called directly or through context manager interface.
+        """
         def event_process(queue: PriorityQueue):
             while True:
                 operation, data = queue.get()
@@ -798,35 +822,35 @@ Must be called directly or through context manager interface."""
     def wait(self, timeout: Union[int, float]=None) -> Dict[str, int]:
         """Wait for events.
 
-Blocks the calling thread until at least one of the events occurs, or
-the specified timeout (if any) expires.
+        Blocks the calling thread until at least one of the events occurs, or
+        the specified timeout (if any) expires.
 
-Arguments:
-    timeout: Number of seconds (use a float to indicate fractions of
-        seconds). If not even one of the relevant events has
-        occurred after timeout seconds, this method will unblock
-        and return None. The default timeout is infinite.
+        Arguments:
+            timeout: Number of seconds (use a float to indicate fractions of
+                seconds). If not even one of the relevant events has
+                occurred after timeout seconds, this method will unblock
+                and return None. The default timeout is infinite.
 
-Returns:
-    `None` if the wait timed out, otherwise a dictionary that maps
-    `event_name -> event_occurrence_count`.
+        Returns:
+            `None` if the wait timed out, otherwise a dictionary that maps
+            `event_name -> event_occurrence_count`.
 
-Example::
+        Example::
 
-   >>> collector = connection.event_collector(['event_a', 'event_b'])
-   >>> collector.begin()
-   >>> collector.wait()
-   {
-    'event_a': 1,
-    'event_b': 0
-   }
+           >>> collector = connection.event_collector(['event_a', 'event_b'])
+           >>> collector.begin()
+           >>> collector.wait()
+           {
+            'event_a': 1,
+            'event_b': 0
+           }
 
-In the example above `event_a` occurred once and `event_b` did not occur
-at all.
+        In the example above `event_a` occurred once and `event_b` did not occur
+        at all.
 
-Raises:
-    InterfaceError: When collector does not listen for events.
-"""
+        Raises:
+            InterfaceError: When collector does not listen for events.
+        """
         if not self.__initialized:
             raise InterfaceError("Event collection not initialized (begin() not called).")
         if not self.__closed:
@@ -834,18 +858,17 @@ Raises:
             return self.__events.copy()
     def flush(self) -> None:
         """Clear any event notifications that have accumulated in the collector’s
-internal queue.
-"""
+        internal queue.
+        """
         if not self.__closed:
             self.__events_ready.clear()
             self.__events = dict.fromkeys(self.__event_names, 0)
     def close(self) -> None:
         """Cancels the standing request for this collector to be notified of events.
 
-After this method has been called, this EventCollector instance is useless,
-and should be discarded.
-"""
-
+        After this method has been called, this EventCollector instance is useless,
+        and should be discarded.
+        """
         if not self.__closed:
             self.__queue.put((_OP_DIE, self))
             self.__process_thread.join()
@@ -853,16 +876,17 @@ and should be discarded.
                 block.close()
             self.__closed = True
     def is_closed(self) -> bool:
-        "Returns True if collector is closed."
+        """Returns True if collector is closed.
+        """
         return self.__closed
 
 class InfoProvider(ABC):
     """Abstract base class for embedded information providers.
 
-Attributes:
-    response (CBuffer): Internal buffer for response packet acquired via Firebird API.
-    request (Buffer): Internal buffer for information request packet needed by Firebird API.
-"""
+    Attributes:
+        response (CBuffer): Internal buffer for response packet acquired via Firebird API.
+        request (Buffer): Internal buffer for information request packet needed by Firebird API.
+    """
     def __init__(self, charset: str, buffer_size: int=256):
         self._charset: str = charset
         self.response: CBuffer = CBuffer(buffer_size)
@@ -870,31 +894,32 @@ Attributes:
         self._cache: Dict = {}
     @abstractmethod
     def _close(self) -> None:
-        """Close the information source."""
+        """Close the information source.
+        """
     @abstractmethod
     def _acquire(self, request: bytes) -> None:
         """Acquire information specified by parameter. Information must be stored in
-`response` buffer.
+        `response` buffer.
 
-Arguments:
-    request: Data specifying the required information.
-"""
+        Arguments:
+            request: Data specifying the required information.
+        """
     def _get_data(self, request: bytes, max_size: int=SHRT_MAX) -> None:
         """Helper function that aquires information specified by parameter into internal
-`response` buffer. If information source couldn't store all required data because the buffer
-is too small, this function tries to `.acquire()` the information again with buffer of doubled size.
+        `response` buffer. If information source couldn't store all required data because
+        the buffer is too small, this function tries to `.acquire()` the information again
+        with buffer of doubled size.
 
-Arguments:
-    request: Data specifying the required information.
-    max_size: Maximum response size.
+        Arguments:
+            request: Data specifying the required information.
+            max_size: Maximum response size.
 
-Raises:
-    InterfaceError: If information cannot be successfuly stored into buffer of `max_size`,
-        or response is ivalid.
-"""
+        Raises:
+            InterfaceError: If information cannot be successfuly stored into buffer
+                of `max_size`, or response is ivalid.
+        """
         while True:
             self._acquire(request)
-            self.response.seek_last_data()
             if self.response.is_truncated():
                 if (buf_size := len(self.response.raw)) < max_size:
                     buf_size = min(buf_size * 2, max_size)
@@ -904,6 +929,7 @@ Raises:
                     raise InterfaceError("Response too large")
             else:
                 break
+        self.response.seek_last_data()
         if not self.response.is_eof():  # pragma: no cover
             raise InterfaceError("Invalid response format")
         self.response.rewind()
@@ -911,11 +937,11 @@ Raises:
 class DatabaseInfoProvider(InfoProvider):
     """Provides access to information about attached database.
 
-Important:
-   Do NOT create instances of this class directly! Use `Connection.info` property to
-   access the instance already bound to attached database.
+    Important:
+       Do NOT create instances of this class directly! Use `Connection.info` property to
+       access the instance already bound to attached database.
 
-"""
+    """
     def __init__(self, connection: Connection):
         super().__init__(connection._py_charset)
         self._con: Connection = weakref.ref(connection)
@@ -934,26 +960,27 @@ Important:
         x = self.__version.split('.')
         self.__engine_version = float(f'{x[0]}.{x[1]}')
     def _close(self) -> None:
-        "Drops the association with attached database."
+        """Drops the association with attached database.
+        """
         self._con = None
     def _acquire(self, request: bytes) -> None:
         """Acquires information from associated attachment. Information is stored in native
-format in `response` buffer.
+        format in `response` buffer.
 
-Arguments:
-    request: Data specifying the required information.
-"""
+        Arguments:
+            request: Data specifying the required information.
+        """
         self._con()._att.get_info(request, self.response.raw)
     def get_info(self, info_code: DbInfoCode, page_number: int=None) -> Any:
         """Returns requested information from associated attachment.
 
-Arguments:
-    info_code: A code specifying the required information.
-    page_number: A page number for `DbInfoCode.PAGE_CONTENTS` request. Ignored for other requests.
+        Arguments:
+            info_code: A code specifying the required information.
+            page_number: A page number for `DbInfoCode.PAGE_CONTENTS` request. Ignored for other requests.
 
-Returns:
-    The data type of returned value depends on information required.
-"""
+        Returns:
+            The data type of returned value depends on information required.
+        """
         if info_code in self._cache:
             return self._cache[info_code]
         self.response.clear()
@@ -1077,18 +1104,21 @@ Returns:
     def get_page_content(self, page_number: int) -> bytes:
         """Returns content of single database page.
 
-Arguments:
-   page_number: Sequence number of database page to be fetched from server.
-"""
+        Arguments:
+           page_number: Sequence number of database page to be fetched from server.
+        """
         return self.get_info(DbInfoCode.PAGE_CONTENTS, page_number)
     def get_active_transaction_ids(self) -> List[int]:
-        "Returns list of IDs of active transactions."
+        """Returns list of IDs of active transactions.
+        """
         return self.get_info(DbInfoCode.ACTIVE_TRANSACTIONS)
     def get_active_transaction_count(self) -> int:
-        "Returns number of active transactions."
+        """Returns number of active transactions.
+        """
         return self.get_info(DbInfoCode.ACTIVE_TRAN_COUNT)
     def get_table_access_stats(self) -> List[TableAccessStats]:
-        "Returns actual table access statistics."
+        """Returns actual table access statistics.
+        """
         tables = {}
         info_codes = [DbInfoCode.READ_SEQ_COUNT, DbInfoCode.READ_IDX_COUNT,
                       DbInfoCode.INSERT_COUNT, DbInfoCode.UPDATE_COUNT,
@@ -1103,19 +1133,23 @@ Arguments:
                                            for code, count in tables[table].items()})
                 for table in tables]
     def is_compressed(self) -> bool:
-        "Returns True if connection to the server uses data compression"
+        """Returns True if connection to the server uses data compression.
+        """
         return ConnectionFlag.COMPRESSED in ConnectionFlag(self.get_info(DbInfoCode.CONN_FLAGS))
     def is_encrypted(self) -> bool:
-        "Returns True if connection to the server uses data encryption"
+        """Returns True if connection to the server uses data encryption.
+        """
         return ConnectionFlag.ENCRYPTED in ConnectionFlag(self.get_info(DbInfoCode.CONN_FLAGS))
     # Properties
     @property
     def id(self) -> int:
-        "Attachment ID."
+        """Attachment ID.
+        """
         return self.get_info(DbInfoCode.ATTACHMENT_ID)
     @property
     def charset(self) -> str:
-        "Database character set."
+        """Database character set.
+        """
         if -1 not in self._cache:
             with transaction(self._con()._tra_qry, bypass=True):
                 with self._con()._ic.execute("SELECT RDB$CHARACTER_SET_NAME FROM RDB$DATABASE"):
@@ -1123,151 +1157,185 @@ Arguments:
         return self._cache[-1]
     @property
     def page_size(self) -> int:
-        "Page size (in bytes)."
+        """Page size (in bytes).
+        """
         return self.__page_size
     @property
     def sql_dialect(self) -> int:
-        "SQL dialect used by connected database."
+        """SQL dialect used by connected database.
+        """
         return self.get_info(DbInfoCode.DB_SQL_DIALECT)
     @property
     def name(self) -> str:
-        "Database name (filename or alias)."
+        """Database name (filename or alias).
+        """
         return self.get_info(DbInfoCode.DB_ID)[0]
     @property
     def site(self) -> str:
-        "Database site name."
+        """Database site name.
+        """
         return self.get_info(DbInfoCode.DB_ID)[1]
     @property
     def server_version(self) -> str:
-        "Firebird server version (compatible with InterBase version)."
+        """Firebird server version (compatible with InterBase version).
+        """
         return self.get_info(DbInfoCode.VERSION)
     @property
     def firebird_version(self) -> str:
-        "Firebird server version."
+        """Firebird server version.
+        """
         return self.get_info(DbInfoCode.FIREBIRD_VERSION)
     @property
     def implementation(self) -> Implementation:
-        "Implementation (old format)."
+        """Implementation (old format).
+        """
         return Implementation(self.get_info(DbInfoCode.IMPLEMENTATION_OLD)[0])
     @property
     def provider(self) -> DbProvider:
-        "Database Provider."
+        """Database Provider.
+        """
         return DbProvider(self.get_info(DbInfoCode.DB_PROVIDER))
     @property
     def db_class(self) -> DbClass:
-        "Database Class."
+        """Database Class.
+        """
         return DbClass(self.get_info(DbInfoCode.DB_CLASS))
     @property
     def creation_date(self) -> datetime.date:
-        "Date when database was created."
+        """Date when database was created.
+        """
         return self.get_info(DbInfoCode.CREATION_DATE)
     @property
     def ods(self) -> float:
-        "Database On-Disk Structure version (<major>.<minor>)."
+        """Database On-Disk Structure version (<major>.<minor>).
+        """
         return float(f'{self.ods_version}.{self.ods_minor_version}')
     @property
     def ods_version(self) -> int:
-        "Database On-Disk Structure MAJOR version."
+        """Database On-Disk Structure MAJOR version.
+        """
         return self.get_info(DbInfoCode.ODS_VERSION)
     @property
     def ods_minor_version(self) -> int:
-        "Database On-Disk Structure MINOR version."
+        """Database On-Disk Structure MINOR version.
+        """
         return self.get_info(DbInfoCode.ODS_MINOR_VERSION)
     @property
     def page_cache_size(self) -> int:
-        "Size of page cache used by connection."
+        """Size of page cache used by connection.
+        """
         return self.get_info(DbInfoCode.NUM_BUFFERS)
     @property
     def pages_allocated(self) -> int:
-        "Number of pages allocated for database."
+        """Number of pages allocated for database.
+        """
         return self.get_info(DbInfoCode.ALLOCATION)
     @property
     def pages_used(self) -> int:
-        "Number of database pages in active use."
+        """Number of database pages in active use.
+        """
         return self.get_info(DbInfoCode.PAGES_USED)
     @property
     def pages_free(self) -> int:
-        "Number of free allocated pages in database."
+        """Number of free allocated pages in database.
+        """
         return self.get_info(DbInfoCode.PAGES_FREE)
     @property
     def sweep_interval(self) -> int:
-        "Sweep interval."
+        """Sweep interval.
+        """
         return self.get_info(DbInfoCode.SWEEP_INTERVAL)
     @property
     def space_reservation(self) -> DbSpaceReservation:
-        "Data page space usage (USE_FULL or RESERVE)."
+        """Data page space usage (USE_FULL or RESERVE).
+        """
         return DbSpaceReservation.USE_FULL if self.get_info(DbInfoCode.NO_RESERVE) else DbSpaceReservation.RESERVE
     @property
     def write_mode(self) -> DbWriteMode:
-        "Database write mode (SYNC or ASYNC)."
+        """Database write mode (SYNC or ASYNC).
+        """
         return DbWriteMode.SYNC if self.get_info(DbInfoCode.FORCED_WRITES) else DbWriteMode.ASYNC
     @property
     def access_mode(self) -> DbAccessMode:
-        "Database access mode (READ_ONLY or READ_WRITE)."
+        """Database access mode (READ_ONLY or READ_WRITE).
+        """
         return DbAccessMode.READ_ONLY if self.get_info(DbInfoCode.DB_READ_ONLY) else DbAccessMode.READ_WRITE
     @property
     def reads(self) -> int:
-        "Current I/O statistics - Reads from disk to page cache"
+        """Current I/O statistics - Reads from disk to page cache.
+        """
         return self.get_info(DbInfoCode.READS)
     @property
     def fetches(self) -> int:
-        "Current I/O statistics - Fetches from page cache"
+        """Current I/O statistics - Fetches from page cache.
+        """
         return self.get_info(DbInfoCode.FETCHES)
     @property
     def cache_hit_ratio(self) -> int:
-        "Cache hit ratio = 1 - (reads / fetches)."
+        """Cache hit ratio = 1 - (reads / fetches).
+        """
         return 1 - (self.reads / self.fetches)
     @property
     def writes(self) -> int:
-        "Current I/O statistics - Writes from page cache to disk"
+        """Current I/O statistics - Writes from page cache to disk.
+        """
         return self.get_info(DbInfoCode.WRITES)
     @property
     def marks(self) -> int:
-        "Current I/O statistics - Writes to page in cache"
+        """Current I/O statistics - Writes to page in cache.
+        """
         return self.get_info(DbInfoCode.MARKS)
     @property
     def current_memory(self) -> int:
-        "Total amount of memory curretly used by database engine."
+        """Total amount of memory curretly used by database engine.
+        """
         return self.get_info(DbInfoCode.CURRENT_MEMORY)
     @property
     def max_memory(self) -> int:
-        "Max. total amount of memory so far used by database engine."
+        """Max. total amount of memory so far used by database engine.
+        """
         return self.get_info(DbInfoCode.MAX_MEMORY)
     @property
     def oit(self) -> int:
-        "ID of Oldest Interesting Transaction."
+        """ID of Oldest Interesting Transaction.
+        """
         return self.get_info(DbInfoCode.OLDEST_TRANSACTION)
     @property
     def oat(self) -> int:
-        "ID of Oldest Active Transaction."
+        """ID of Oldest Active Transaction.
+        """
         return self.get_info(DbInfoCode.OLDEST_ACTIVE)
     @property
     def ost(self) -> int:
-        "ID of Oldest Snapshot Transaction."
+        """ID of Oldest Snapshot Transaction.
+        """
         return self.get_info(DbInfoCode.OLDEST_SNAPSHOT)
     @property
     def next_transaction(self) -> int:
-        "ID for next transaction."
+        """ID for next transaction.
+        """
         return self.get_info(DbInfoCode.NEXT_TRANSACTION)
     @property
     def version(self) -> str:
-        "Firebird version as SEMVER string."
+        """Firebird version as SEMVER string.
+        """
         return self.__version
     @property
     def engine_version(self) -> float:
-        "Firebird version as <major>.<minor> float number."
+        """Firebird version as <major>.<minor> float number.
+        """
         return self.__engine_version
 
 class Connection(LoggingIdMixin):
     """Connection to the database.
 
-Note:
-    Implements context manager protocol to call `.close()` automatically.
+    Note:
+        Implements context manager protocol to call `.close()` automatically.
 
-Attributes:
-    default_tpb (bytes): Default Transaction parameter buffer for started transactions.
-        Default is set to SNAPSHOT isolation with WAIT lock resolution (infinite lock timeout).
-"""
+    Attributes:
+        default_tpb (bytes): Default Transaction parameter buffer for started transactions.
+            Default is set to SNAPSHOT isolation with WAIT lock resolution (infinite lock timeout).
+    """
     # PEP 249 (Python DB API 2.0) extension
     Warning = Warning
     Error = Error
@@ -1431,19 +1499,19 @@ Attributes:
     def drop_database(self) -> None:
         """Drops the connected database.
 
-Note:
+        Note:
 
-    Closes all event collectors, transaction managers (with rollback) and statements
-    associated with this connection before attempt to drop the database.
+            Closes all event collectors, transaction managers (with rollback) and statements
+            associated with this connection before attempt to drop the database.
 
-Hooks:
-    Event `.ConnectionHook.DROPPED`: Executed after database is sucessfuly dropped.
-    Hook must have signature::
+        Hooks:
+            Event `.ConnectionHook.DROPPED`: Executed after database is sucessfuly dropped.
+            Hook must have signature::
 
-        hook_func(connection: Connection) -> None
+                hook_func(connection: Connection) -> None
 
-    Any value returned by hook is ignored.
-"""
+            Any value returned by hook is ignored.
+        """
         self._close()
         self._close_internals()
         self._att.drop_database()
@@ -1453,22 +1521,22 @@ Hooks:
     def execute_immediate(self, sql: str) -> None:
         """Executes SQL statement.
 
-Important:
+        Important:
 
-    The statement MUST NOT return any result. The statement is executed in the
-    context of `.main_transaction`.
+            The statement MUST NOT return any result. The statement is executed in the
+            context of `.main_transaction`.
 
-Arguments:
-   sql: SQL statement to be executed.
-"""
+        Arguments:
+           sql: SQL statement to be executed.
+        """
         assert self._att is not None
         self.main_transaction.execute_immediate(sql)
     def event_collector(self, event_names: Sequence[str]) -> EventCollector:
         """Create new `EventCollector` instance for this connection.
 
-Arguments:
-    event_names: Sequence of database event names to whom the collector should be subscribed.
-"""
+        Arguments:
+            event_names: Sequence of database event names to whom the collector should be subscribed.
+        """
         isc_status = a.ISC_STATUS_ARRAY()
         db_handle = a.FB_API_HANDLE(0)
         a.api.fb_get_database_handle(isc_status, db_handle, self._att)
@@ -1482,30 +1550,30 @@ Arguments:
     def close(self) -> None:
         """Close the connection and release all associated resources.
 
-Closes all event collectors, transaction managers (with rollback) and statements
-associated with this connection before attempt (see Hooks) to close the
-connection itself.
+        Closes all event collectors, transaction managers (with rollback) and statements
+        associated with this connection before attempt (see Hooks) to close the
+        connection itself.
 
-Hooks:
-    Event `.ConnectionHook.DETACH_REQUEST`: Executed before connection
-    is closed. Hook must have signature::
+        Hooks:
+            Event `.ConnectionHook.DETACH_REQUEST`: Executed before connection
+            is closed. Hook must have signature::
 
-        hook_func(connection: Connection) -> bool
+                hook_func(connection: Connection) -> bool
 
-    .. note::
+            .. note::
 
-       If any hook function returns True, connection is NOT closed.
+               If any hook function returns True, connection is NOT closed.
 
-    Event `.ConnectionHook.CLOSED`: Executed after connection is closed.
-    Hook must have signature::
+            Event `.ConnectionHook.CLOSED`: Executed after connection is closed.
+            Hook must have signature::
 
-        hook_func(connection: Connection) -> None
+                hook_func(connection: Connection) -> None
 
-    Any value returned by hook is ignored.
+            Any value returned by hook is ignored.
 
-Important:
-    Closed connection SHALL NOT be used anymore.
-"""
+        Important:
+            Closed connection SHALL NOT be used anymore.
+        """
         if not self.is_closed():
             self._close()
             retain = False
@@ -1526,10 +1594,10 @@ Important:
                             default_action: DefaultAction=DefaultAction.COMMIT) -> TransactionManager:
         """Create new `TransactionManager` instance for this connection.
 
-Arguments:
-    default_tpb: Default Transaction parameter buffer.
-    default_action: Default action to be performed on implicit transaction end.
-"""
+        Arguments:
+            default_tpb: Default Transaction parameter buffer.
+            default_action: Default action to be performed on implicit transaction end.
+        """
         assert self._att is not None
         transaction = TransactionManager(self, default_tpb if default_tpb else self.default_tpb,
                                          default_action)
@@ -1538,99 +1606,108 @@ Arguments:
     def begin(self, tpb: bytes = None) -> None:
         """Starts new transaction managed by `.main_transaction`.
 
-Arguments:
-    tpb: Transaction parameter buffer with transaction parameters. If not specified,
-         the `.default_tpb` is used.
-"""
+        Arguments:
+            tpb: Transaction parameter buffer with transaction parameters. If not specified,
+                 the `.default_tpb` is used.
+        """
         assert self._att is not None
         self.main_transaction.begin(tpb)
     def savepoint(self, name: str) -> None:
         """Creates a new savepoint for transaction managed by `.main_transaction`.
 
-Arguments:
-    name: Name for the savepoint
-"""
+        Arguments:
+            name: Name for the savepoint
+        """
         assert self._att is not None
         return self.main_transaction.savepoint(name)
     def commit(self, *, retaining: bool=False) -> None:
         """Commits the transaction managed by `.main_transaction`.
 
-Arguments:
-    retaining: When True, the transaction context is retained after commit.
-"""
+        Arguments:
+            retaining: When True, the transaction context is retained after commit.
+        """
         assert self._att is not None
         self.main_transaction.commit(retaining=retaining)
     def rollback(self, *, retaining: bool=False, savepoint: str=None) -> None:
         """Rolls back the transaction managed by `.main_transaction`.
 
-Arguments:
-    retaining: When True, the transaction context is retained after rollback.
-    savepoint: When specified, the transaction is rolled back to savepoint with given name.
-"""
+        Arguments:
+            retaining: When True, the transaction context is retained after rollback.
+            savepoint: When specified, the transaction is rolled back to savepoint with given name.
+        """
         assert self._att is not None
         self.main_transaction.rollback(retaining=retaining, savepoint=savepoint)
     def cursor(self) -> Cursor:
-        "Returns new `Cursor` instance associated with `.main_transaction`."
+        """Returns new `Cursor` instance associated with `.main_transaction`.
+        """
         assert self._att is not None
         return self.main_transaction.cursor()
     def ping(self) -> None:
         """Checks connection status. If test fails the only operation possible
-with connection is to close it.
+        with connection is to close it.
 
-Raises:
-  DatabaseError: When connection is dead.
-"""
+        Raises:
+          DatabaseError: When connection is dead.
+        """
         assert self._att is not None
         self._att.ping()
     def is_active(self) -> bool:
-        "Returns True if `.main_transaction` has active transaction."
+        """Returns True if `.main_transaction` has active transaction.
+        """
         return self._tra_main.is_active()
     def is_closed(self) -> bool:
         """Returns True if connection to the database is closed.
 
-Important:
-    Closed connection SHALL NOT be used anymore.
-"""
+        Important:
+            Closed connection SHALL NOT be used anymore.
+        """
         return self._att is None
     @property
     def dsn(self) -> str:
-        "Connection string"
+        """Connection string.
+        """
         return self.__dsn
     @property
     def info(self) -> DatabaseInfoProvider:
-        "Access to various information about attached database."
+        """Access to various information about attached database.
+        """
         if self.__info is None:
             self.__info = DatabaseInfoProvider(self)
         return self.__info
     @property
     def charset(self) -> str:
-        "Connection character set."
+        """Connection character set.
+        """
         return self.__charset
     @property
     def sql_dialect(self) -> int:
-        "Connection SQL dialect."
+        """Connection SQL dialect.
+        """
         return self.__sql_dialect
     @property
     def main_transaction(self) -> TransactionManager:
-        "Main transaction manager for this connection."
+        """Main transaction manager for this connection.
+        """
         return self._tra_main
     @property
     def query_transaction(self) -> TransactionManager:
-        "Transaction manager for Read-committed Read-only query transactions."
+        """Transaction manager for Read-committed Read-only query transactions.
+        """
         return self._tra_qry
     @property
     def transactions(self) -> List[TransactionManager]:
         """List of all transaction managers associated with connection.
 
-Note:
-    The first two are always `.main_transaction` and `.query_transaction` managers.
-"""
+        Note:
+            The first two are always `.main_transaction` and `.query_transaction` managers.
+        """
         result = [self.main_transaction, self.query_transaction]
         result.extend(self._transactions)
         return result
     @property
-    def schema(self) -> 'Schema':
-        """Access to database schema. Requires firebird.lib package."""
+    def schema(self) -> 'firebird.lib.schema.Schema':
+        """Access to database schema. Requires firebird.lib package.
+        """
         if self.__schema is None:
             import firebird.lib.schema
             self.__schema = firebird.lib.schema.Schema()
@@ -1638,8 +1715,9 @@ Note:
             self.__schema._set_internal(True)
         return self.__schema
     @property
-    def monitor(self) -> 'Monitor':
-        """Access to database monitoring tables. Requires firebird.lib package."""
+    def monitor(self) -> 'firebird.lib.monitor.Monitor':
+        """Access to database monitoring tables. Requires firebird.lib package.
+        """
         if self.__monitor is None:
             import firebird.lib.monitor
             self.__monitor = firebird.lib.monitor.Monitor(self)
@@ -1649,11 +1727,11 @@ Note:
 def tpb(isolation: Isolation, lock_timeout: int=-1, access: TraAccessMode=TraAccessMode.WRITE) -> bytes:
     """Helper function to costruct simple TPB.
 
-Arguments:
-    isolation: Isolation level.
-    lock_timeout: Lock timeout (-1 = Infinity)
-    access: Access mode.
-"""
+    Arguments:
+        isolation: Isolation level.
+        lock_timeout: Lock timeout (-1 = Infinity)
+        access: Access mode.
+    """
     return TPB(isolation=isolation, lock_timeout=lock_timeout, access_mode=access).get_buffer()
 
 def _connect_helper(dsn: str, host: str, port: str, database: str, protocol: NetProtocol) -> str:
@@ -1716,35 +1794,35 @@ def connect(database: str, *, user: str=None, password: str=None, role: str=None
             crypt_callback: iCryptKeyCallbackImpl=None, charset: str=None) -> Connection:
     """Establishes a connection to the database.
 
-Arguments:
-    database: DSN or Database configuration name.
-    user: User name.
-    password: User password.
-    role: User role.
-    no_gc: Do not perform garbage collection for this connection.
-    no_db_triggers: Do not execute database triggers for this connection.
-    dbkey_scope: DBKEY scope override for connection.
-    crypt_callback: Callback that provides encryption key for the database.
-    charset: Character set for connection.
+    Arguments:
+        database: DSN or Database configuration name.
+        user: User name.
+        password: User password.
+        role: User role.
+        no_gc: Do not perform garbage collection for this connection.
+        no_db_triggers: Do not execute database triggers for this connection.
+        dbkey_scope: DBKEY scope override for connection.
+        crypt_callback: Callback that provides encryption key for the database.
+        charset: Character set for connection.
 
-Hooks:
-    Event `.ConnectionHook.ATTACH_REQUEST`: Executed after all parameters
-    are preprocessed and before `Connection` is created. Hook
-    must have signature::
+    Hooks:
+        Event `.ConnectionHook.ATTACH_REQUEST`: Executed after all parameters
+        are preprocessed and before `Connection` is created. Hook
+        must have signature::
 
-        hook_func(dsn: str, dpb: bytes) -> Optional[Connection]
+            hook_func(dsn: str, dpb: bytes) -> Optional[Connection]
 
-    Hook may return `Connection` instance or None.
-    First instance returned by any hook will become the return value
-    of this function and other hooks are not called.
+        Hook may return `Connection` instance or None.
+        First instance returned by any hook will become the return value
+        of this function and other hooks are not called.
 
-    Event `.ConnectionHook.ATTACHED`: Executed before `Connection` instance is
-    returned. Hook must have signature::
+        Event `.ConnectionHook.ATTACHED`: Executed before `Connection` instance is
+        returned. Hook must have signature::
 
-        hook_func(connection: Connection) -> None
+            hook_func(connection: Connection) -> None
 
-    Any value returned by hook is ignored.
-"""
+        Any value returned by hook is ignored.
+    """
     db_config = driver_config.get_database(database)
     if db_config is None:
         db_config = driver_config.db_defaults
@@ -1788,26 +1866,26 @@ def create_database(database: str, *, user: str=None, password: str=None, role: 
                     overwrite: bool=False) -> Connection:
     """Creates new database.
 
-Arguments:
-    database: DSN or Database configuration name.
-    user: User name.
-    password: User password.
-    role: User role.
-    no_gc: Do not perform garbage collection for this connection.
-    no_db_triggers: Do not execute database triggers for this connection.
-    dbkey_scope: DBKEY scope override for connection.
-    crypt_callback: Callback that provides encryption key for the database.
-    charset: Character set for connection.
-    overwrite: Overwite the existing database.
+    Arguments:
+        database: DSN or Database configuration name.
+        user: User name.
+        password: User password.
+        role: User role.
+        no_gc: Do not perform garbage collection for this connection.
+        no_db_triggers: Do not execute database triggers for this connection.
+        dbkey_scope: DBKEY scope override for connection.
+        crypt_callback: Callback that provides encryption key for the database.
+        charset: Character set for connection.
+        overwrite: Overwite the existing database.
 
-Hooks:
-    Event `.ConnectionHook.ATTACHED`: Executed before `Connection` instance is
-    returned. Hook must have signature::
+    Hooks:
+        Event `.ConnectionHook.ATTACHED`: Executed before `Connection` instance is
+        returned. Hook must have signature::
 
-        hook_func(connection: Connection) -> None
+            hook_func(connection: Connection) -> None
 
-    Any value returned by hook is ignored.
-"""
+        Any value returned by hook is ignored.
+    """
     db_config = driver_config.get_database(database)
     if db_config is None:
         db_config = driver_config.db_defaults
@@ -1855,10 +1933,10 @@ Hooks:
 class TransactionInfoProvider(InfoProvider):
     """Provides access to information about attached database.
 
-Important:
-   Do NOT create instances of this class directly! Use `TransactionManager.info` property
-   to access the instance already bound to transaction context.
-"""
+    Important:
+       Do NOT create instances of this class directly! Use `TransactionManager.info`
+       property to access the instance already bound to transaction context.
+    """
     def __init__(self, charset: str, tra: TransactionManager):
         super().__init__(charset)
         self._mngr: TransactionManager = weakref.ref(tra)
@@ -1896,49 +1974,57 @@ Important:
         return result
     # Functions
     def is_read_only(self) -> bool:
-        "Returns True if transaction is Read Only."
+        """Returns True if transaction is Read Only.
+        """
         return self.get_info(TraInfoCode.ACCESS) == TraInfoAccess.READ_ONLY
     # Properties
     @property
     def id(self) -> int:
-        "Transaction ID"
+        """Transaction ID.
+        """
         return self.get_info(TraInfoCode.ID)
     @property
     def oit(self) -> int:
-        "ID of Oldest Interesting Transaction at the time this transaction started"
+        """ID of Oldest Interesting Transaction at the time this transaction started.
+        """
         return self.get_info(TraInfoCode.OLDEST_INTERESTING)
     @property
     def oat(self) -> int:
-        "ID of Oldest Active Transaction at the time this transaction started"
+        """ID of Oldest Active Transaction at the time this transaction started.
+        """
         return self.get_info(TraInfoCode.OLDEST_ACTIVE)
     @property
     def ost(self) -> int:
-        "ID of Oldest Snapshot Transaction at the time this transaction started"
+        """ID of Oldest Snapshot Transaction at the time this transaction started.
+        """
         return self.get_info(TraInfoCode.OLDEST_SNAPSHOT)
     @property
     def isolation(self) -> Isolation:
-        "Isolation level"
+        """Isolation level.
+        """
         return self.get_info(TraInfoCode.ISOLATION)
     @property
     def lock_timeout(self) -> int:
-        "Lock timeout"
+        """Lock timeout.
+        """
         return self.get_info(TraInfoCode.LOCK_TIMEOUT)
     @property
     def database(self) -> str:
-        "Database filename"
+        """Database filename.
+        """
         return self.get_info(TraInfoCode.DBPATH)
 
 class TransactionManager(LoggingIdMixin):
     """Transaction manager.
 
-Note:
-    Implements context manager protocol to call `.close()` automatically.
+    Note:
+        Implements context manager protocol to call `.close()` automatically.
 
-Attributes:
-    default_tpb (bytes): Default Transaction parameter buffer.
-    default_action (DefaultAction): Default action for implicit transaction end.
-    info (TransactionInfoProvider): Object that provides information about active transaction.
-"""
+    Attributes:
+        default_tpb (bytes): Default Transaction parameter buffer.
+        default_action (DefaultAction): Default action for implicit transaction end.
+        info (TransactionInfoProvider): Object that provides information about active transaction.
+    """
     def __init__(self, connection: Connection, default_tpb: bytes,
                  default_action: DefaultAction=DefaultAction.COMMIT):
         self._connection: Callable[[], Connection] = weakref.ref(connection, self.__dead_con)
@@ -1983,9 +2069,9 @@ Attributes:
     def close(self) -> None:
         """Close the transaction manager and release all associated resources.
 
-Important:
-    Closed instance SHALL NOT be used anymore.
-"""
+        Important:
+            Closed instance SHALL NOT be used anymore.
+        """
         if not self.__closed:
             try:
                 self._finish()
@@ -2000,9 +2086,9 @@ Important:
     def execute_immediate(self, sql: str) -> None:
         """Executes SQL statement. The statement MUST NOT return any result.
 
-Arguments:
-   sql: SQL statement to be executed.
-"""
+        Arguments:
+           sql: SQL statement to be executed.
+        """
         assert not self.__closed
         if not self.is_active():
             self.begin()
@@ -2010,19 +2096,19 @@ Arguments:
     def begin(self, tpb: bytes=None) -> None:
         """Starts new transaction managed by this instance.
 
-Arguments:
-    tpb: Transaction parameter buffer with transaction's parameters. If not specified,
-         the `.default_tpb` is used.
-"""
+        Arguments:
+            tpb: Transaction parameter buffer with transaction's parameters. If not specified,
+                 the `.default_tpb` is used.
+        """
         assert not self.__closed
         self._finish()  # Make sure that previous transaction (if any) is ended
         self._tra = self._connection()._att.start_transaction(tpb if tpb else self.default_tpb)
     def commit(self, *, retaining: bool=False) -> None:
         """Commits the transaction managed by this instance.
 
-Arguments:
-    retaining: When True, the transaction context is retained after commit.
-"""
+        Arguments:
+            retaining: When True, the transaction context is retained after commit.
+        """
         assert not self.__closed
         assert self.is_active()
         if retaining:
@@ -2035,13 +2121,13 @@ Arguments:
     def rollback(self, *, retaining: bool=False, savepoint: str=None) -> None:
         """Rolls back the transaction managed by this instance.
 
-Arguments:
-    retaining: When True, the transaction context is retained after rollback.
-    savepoint: When specified, the transaction is rolled back to savepoint with given name.
+        Arguments:
+            retaining: When True, the transaction context is retained after rollback.
+            savepoint: When specified, the transaction is rolled back to savepoint with given name.
 
-Raises:
-    InterfaceError: When both retaining and savepoint parameters are specified.
-"""
+        Raises:
+            InterfaceError: When both retaining and savepoint parameters are specified.
+        """
         assert not self.__closed
         assert self.is_active()
         if retaining and savepoint:
@@ -2059,26 +2145,30 @@ Raises:
     def savepoint(self, name: str) -> None:
         """Creates a new savepoint for transaction managed by this instance.
 
-Arguments:
-    name: Name for the savepoint
-"""
+        Arguments:
+            name: Name for the savepoint
+        """
         self.execute_immediate(f'SAVEPOINT {name}')
     def cursor(self) -> Cursor:
-        "Returns new `Cursor` instance associated with this instance."
+        """Returns new `Cursor` instance associated with this instance.
+        """
         assert not self.__closed
         cur = Cursor(self._connection(), self)
         self._cursors.append(weakref.ref(cur, self._cursor_deleted))
         return cur
     def is_active(self) -> bool:
-        "Returns True if transaction is active."
+        """Returns True if transaction is active.
+        """
         return self._tra is not None
     def is_closed(self) -> bool:
-        "Returns True if this transaction manager is closed."
+        """Returns True if this transaction manager is closed.
+        """
         return self.__closed
     # Properties
     @property
     def info(self) -> TransactionInfoProvider:
-        "Access to various information about active transaction."
+        """Access to various information about active transaction.
+        """
         if self.__info is None:
             self.__info = TransactionInfoProvider(self._connection()._py_charset, self)
         return self.__info
@@ -2089,20 +2179,21 @@ Arguments:
         return self._connection()
     @property
     def cursors(self) -> List[Cursor]:
-        "Cursors associated with this transaction"
+        """Cursors associated with this transaction.
+        """
         return [x() for x in self._cursors]
 
 class DistributedTransactionManager(TransactionManager):
     """Manages distributed transaction over multiple connections that use two-phase
-commit protocol.
+    commit protocol.
 
-Note:
-    Implements context manager protocol to call `.close()` automatically.
+    Note:
+        Implements context manager protocol to call `.close()` automatically.
 
-Attributes:
-    default_tpb (bytes): Default Transaction parameter buffer
-    default_action (DefaultAction): Default action for implicit transaction end
-"""
+    Attributes:
+        default_tpb (bytes): Default Transaction parameter buffer
+        default_action (DefaultAction): Default action for implicit transaction end
+    """
     def __init__(self, connections: Sequence[Connection], default_tpb: bytes=None,
                  default_action: DefaultAction=DefaultAction.COMMIT):
         self._connections: List[Connection] = list(connections)
@@ -2115,11 +2206,11 @@ Attributes:
         self._logging_id_ = 'DTransaction'
     def close(self) -> None:
         """Close the distributed transaction manager and release all associated
-resources.
+        resources.
 
-Important:
-    Closed instance SHALL NOT be used anymore.
-"""
+        Important:
+            Closed instance SHALL NOT be used anymore.
+        """
         if not self.__closed:
             try:
                 self._finish()
@@ -2128,11 +2219,11 @@ Important:
                 self.__closed = True
     def execute_immediate(self, sql: str) -> None:
         """Executes SQL statement on all connections in distributed transaction.
-The statement MUST NOT return any result.
+        The statement MUST NOT return any result.
 
-Arguments:
-   sql: SQL statement to be executed.
-"""
+        Arguments:
+           sql: SQL statement to be executed.
+        """
         assert not self.__closed
         if not self.is_active():
             self.begin()
@@ -2141,10 +2232,10 @@ Arguments:
     def begin(self, tpb: bytes=None) -> None:
         """Starts new distributed transaction managed by this instance.
 
-Arguments:
-    tpb: Transaction parameter buffer with transaction's parameters. If not specified,
-         the `.default_tpb` is used.
-"""
+        Arguments:
+            tpb: Transaction parameter buffer with transaction's parameters. If not specified,
+                 the `.default_tpb` is used.
+        """
         assert not self.__closed
         self._finish()  # Make sure that previous transaction (if any) is ended
         with self._dtc.start_builder() as builder:
@@ -2154,19 +2245,19 @@ Arguments:
     def prepare(self) -> None:
         """Manually triggers the first phase of a two-phase commit (2PC).
 
-Note:
-   Direct use of this method is optional; if preparation is not triggered
-   manually, it will be performed implicitly by `.commit()` in a 2PC.
-"""
+        Note:
+           Direct use of this method is optional; if preparation is not triggered
+           manually, it will be performed implicitly by `.commit()` in a 2PC.
+        """
         assert not self.__closed
         assert self.is_active()
         self._tra.prepare()
     def commit(self, *, retaining: bool=False) -> None:
         """Commits the distributed transaction managed by this instance.
 
-Arguments:
-    retaining: When True, the transaction context is retained after commit.
-"""
+        Arguments:
+            retaining: When True, the transaction context is retained after commit.
+        """
         assert not self.__closed
         assert self.is_active()
         if retaining:
@@ -2179,13 +2270,13 @@ Arguments:
     def rollback(self, *, retaining: bool=False, savepoint: str=None) -> None:
         """Rolls back the distributed transaction managed by this instance.
 
-Arguments:
-    retaining: When True, the transaction context is retained after rollback.
-    savepoint: When specified, the transaction is rolled back to savepoint with given name.
+        Arguments:
+            retaining: When True, the transaction context is retained after rollback.
+            savepoint: When specified, the transaction is rolled back to savepoint with given name.
 
-Raises:
-    InterfaceError: When both retaining and savepoint parameters are specified.
-"""
+        Raises:
+            InterfaceError: When both retaining and savepoint parameters are specified.
+        """
         assert not self.__closed
         assert self.is_active()
         if retaining and savepoint:
@@ -2203,18 +2294,18 @@ Raises:
     def savepoint(self, name: str) -> None:
         """Creates a new savepoint for distributed transaction managed by this instance.
 
-Arguments:
-    name: Name for the savepoint
-"""
+        Arguments:
+            name: Name for the savepoint
+        """
         self.execute_immediate(f'SAVEPOINT {name}')
     def cursor(self, connection: Connection) -> Cursor:
         """Returns new `Cursor` instance associated with specified connection and
-this distributed transaction manager.
+        this distributed transaction manager.
 
-Raises:
-    InterfaceError: When specified connection is not associated with distributed
-                    connection manager.
-"""
+        Raises:
+            InterfaceError: When specified connection is not associated with distributed
+                            connection manager.
+        """
         assert not self.__closed
         if connection not in self._connections:
             raise InterfaceError("Cannot create cursor for connection that does "
@@ -2230,9 +2321,9 @@ Raises:
 class Statement(LoggingIdMixin):
     """Prepared SQL statement.
 
-Note:
-    Implements context manager protocol to call `.free()` automatically.
-"""
+    Note:
+        Implements context manager protocol to call `.free()` automatically.
+    """
     def __init__(self, connection: Connection, stmt: iStatement, sql: str, dialect: int):
         self._connection: Callable[[], Connection] = weakref.ref(connection, self.__dead_con)
         self._dialect: int = dialect
@@ -2284,9 +2375,9 @@ Note:
     def free(self) -> None:
         """Release the statement and all associated resources.
 
-Important:
-    The statement SHALL NOT be used after call to this method.
-"""
+        Important:
+            The statement SHALL NOT be used after call to this method.
+        """
         if self._in_meta is not None:
             self._in_meta.release()
             self._in_meta = None
@@ -2297,11 +2388,13 @@ Important:
             self._istmt.free()
             self._istmt = None
     def has_cursor(self) -> bool:
-        "Returns True if statement has cursor (can return multiple rows)."
+        """Returns True if statement has cursor (can return multiple rows).
+        """
         assert self._istmt is not None
         return StatementFlag.HAS_CURSOR in self._flags
     def can_repeat(self) -> bool:
-        "Returns True if statement could be executed repeatedly."
+        """Returns True if statement could be executed repeatedly.
+        """
         assert self._istmt is not None
         return StatementFlag.REPEAT_EXECUTE in self._flags
     # Properties
@@ -2312,36 +2405,40 @@ Important:
         return self._connection()
     @property
     def plan(self) -> str:
-        "Execution plan in classic format."
+        """Execution plan in classic format.
+        """
         return self.__get_plan(False)
     @property
     def detailed_plan(self) -> str:
-        "Execution plan in new format (explained)."
+        """Execution plan in new format (explained).
+        """
         return self.__get_plan(True)
     @property
     def sql(self) -> str:
-        "SQL statement."
+        """SQL statement.
+        """
         return self.__sql
     @property
     def type(self) -> StatementType:
-        "Statement type."
+        """Statement type.
+        """
         return self._type
 
 class BlobReader(io.IOBase, LoggingIdMixin):
     """Handler for large BLOB values returned by server.
 
-The BlobReader is a “file-like” class, so it acts much like an open file instance.
+    The BlobReader is a “file-like” class, so it acts much like an open file instance.
 
-Attributes:
-    sub_type (int): BLOB sub-type
-    newline (str): Sequence used as line terminator, default `'\\\\n'`
+    Attributes:
+        sub_type (int): BLOB sub-type
+        newline (str): Sequence used as line terminator, default `'\\\\n'`
 
-Note:
-    Implements context manager protocol to call `.close()` automatically.
+    Note:
+        Implements context manager protocol to call `.close()` automatically.
 
-Attributes:
-    sub_type (int): BLOB sub-type
-"""
+    Attributes:
+        sub_type (int): BLOB sub-type
+    """
     def __init__(self, blob: iBlob, blob_id: a.ISC_QUAD, sub_type: int,
                  length: int, segment_size: int, charset: str, owner: Any=None):
         self._blob: iBlob = blob
@@ -2388,22 +2485,25 @@ Attributes:
     def __repr__(self):
         return f'{self.logging_id}[size={self.length}]'
     def flush(self) -> None:
-        """Does nothing."""
+        """Does nothing.
+        """
         pass
     def close(self) -> None:
+        """Close the BlobReader.
+        """
         if self._blob is not None:
             self._blob.close()
             self._blob = None
     def read(self, size: int=-1) -> Union[str, bytes]:
         """Read at most size bytes from the file (less if the read hits EOF
-before obtaining size bytes). If the size argument is negative or omitted,
-read all data until EOF is reached. The bytes are returned as a string
-object. An empty string is returned when EOF is encountered immediately.
-Like `file.read()`.
+        before obtaining size bytes). If the size argument is negative or omitted,
+        read all data until EOF is reached. The bytes are returned as a string
+        object. An empty string is returned when EOF is encountered immediately.
+        Like `file.read()`.
 
-Note:
-   Performs automatic conversion to `str` for TEXT BLOBs.
-"""
+        Note:
+           Performs automatic conversion to `str` for TEXT BLOBs.
+        """
         assert self._blob is not None
         if size >= 0:
             to_read = min(size, self._blob_length - self.__pos)
@@ -2431,13 +2531,13 @@ Note:
         return result
     def readline(self, size: int=-1) -> str:
         """Read and return one line from the BLOB. If size is specified, at most size bytes
-will be read.
+        will be read.
 
-Uses `newline` as the line terminator.
+        Uses `newline` as the line terminator.
 
-Raises:
-   InterfaceError: For non-textual BLOBs.
-"""
+        Raises:
+           InterfaceError: For non-textual BLOBs.
+        """
         assert self._blob is not None
         if self.sub_type != 1:
             raise InterfaceError("Can't read line from binary BLOB")
@@ -2471,16 +2571,16 @@ Raises:
         return result
     def readlines(self, hint: int=-1) -> List[str]:
         """Read and return a list of lines from the stream. `hint` can be specified to
-control the number of lines read: no more lines will be read if the total size
-(in bytes/characters) of all lines so far exceeds hint.
+        control the number of lines read: no more lines will be read if the total size
+        (in bytes/characters) of all lines so far exceeds hint.
 
-Note:
-    It’s already possible to iterate on BLOB using `for line in blob:` ... without
-    calling `.readlines()`.
+        Note:
+            It’s already possible to iterate on BLOB using `for line in blob:` ... without
+            calling `.readlines()`.
 
-Raises:
-   InterfaceError: For non-textual BLOBs.
-"""
+        Raises:
+           InterfaceError: For non-textual BLOBs.
+        """
         result = []
         line = self.readline()
         while line:
@@ -2492,29 +2592,30 @@ Raises:
     def seek(self, offset: int, whence: int=os.SEEK_SET) -> None:
         """Set the file’s current position, like stdio‘s `fseek()`.
 
-See:
-    :meth:`io.IOBase.seek()` for details.
+        See:
+            :meth:`io.IOBase.seek()` for details.
 
-Arguments:
-    offset: Offset from specified position.
-    whence: Context for offset. Accepted values: os.SEEK_SET, os.SEEK_CUR or os.SEEK_END
+        Arguments:
+            offset: Offset from specified position.
+            whence: Context for offset. Accepted values: os.SEEK_SET, os.SEEK_CUR or os.SEEK_END
 
-Warning:
-   If BLOB was NOT CREATED as `stream` BLOB, this method raises `DatabaseError`
-   exception. This constraint is set by Firebird.
-"""
+        Warning:
+           If BLOB was NOT CREATED as `stream` BLOB, this method raises `DatabaseError`
+           exception. This constraint is set by Firebird.
+        """
         assert self._blob is not None
         self.__pos = self._blob.seek(whence, offset)
         self.__reset_buffer()
     def tell(self) -> int:
         """Return current position in BLOB.
 
-See:
-    :meth:`io.IOBase.tell()` for details.
-"""
+        See:
+            :meth:`io.IOBase.tell()` for details.
+        """
         return self.__pos
     def is_text(self) -> bool:
-        "True if BLOB is a text BLOB"
+        """True if BLOB is a text BLOB.
+        """
         return self.sub_type == 1
     # Properties
     @property
@@ -2526,33 +2627,38 @@ See:
         return 'Owner.GC'
     @property
     def length(self) -> int:
-        "BLOB length"
+        """BLOB length.
+        """
         return self._blob_length
     @property
     def closed(self) -> bool:
-        "True if the BLOB is closed."
+        """True if the BLOB is closed.
+        """
         return self._blob is None
     @property
     def mode(self) -> str:
-        "File mode ('r' or 'rb')"
+        """File mode ('r' or 'rb').
+        """
         return 'rb' if self.sub_type != 1 else 'r'
     @property
     def blob_id(self) -> a.ISC_QUAD:
-        "BLOB ID"
+        """BLOB ID.
+        """
         return self.__blob_id
     @property
     def blob_type(self) -> BlobType:
-        "BLOB type"
+        """BLOB type.
+        """
         result = self._blob.get_info2(BlobInfoCode.TYPE)
         return BlobType(result)
 
 class Cursor(LoggingIdMixin):
     """Represents a database cursor, which is used to execute SQL statement and
-manage the context of a fetch operation.
+    manage the context of a fetch operation.
 
-Note:
-    Implements context manager protocol to call `.close()` automatically.
-"""
+    Note:
+        Implements context manager protocol to call `.close()` automatically.
+    """
     #: This read/write attribute specifies the number of rows to fetch at a time with
     #: .fetchmany(). It defaults to 1 meaning to fetch a single row at a time.
     #:
@@ -3221,18 +3327,18 @@ Note:
     def callproc(self, proc_name: str, parameters: Sequence=None) -> None:
         """Executes a stored procedure with the given name.
 
-Arguments:
-    proc_name: Stored procedure name.
-    parameters: Sequence of parameters. Must contain one entry for each argument
-                that the procedure expects.
+        Arguments:
+            proc_name: Stored procedure name.
+            parameters: Sequence of parameters. Must contain one entry for each argument
+                        that the procedure expects.
 
-.. note::
+        .. note::
 
-   If stored procedure does have output parameters, you must retrieve their values
-   saparatelly by `.Cursor.fetchone()` call. This method is not very convenient, but conforms
-   to Python DB API 2.0. If you don't require conformance to Python DB API, it's recommended
-   to use more convenient method `.Cursor.call_procedure()` instead.
-"""
+           If stored procedure does have output parameters, you must retrieve their values
+           saparatelly by `.Cursor.fetchone()` call. This method is not very convenient, but conforms
+           to Python DB API 2.0. If you don't require conformance to Python DB API, it's recommended
+           to use more convenient method `.Cursor.call_procedure()` instead.
+        """
         params = [] if parameters is None else parameters
         sql = ('EXECUTE PROCEDURE ' + proc_name + ' '
                + ','.join('?' * len(params)))
@@ -3240,22 +3346,22 @@ Arguments:
     def call_procedure(self, proc_name: str, parameters: Sequence=None) -> Optional[Tuple]:
         """Executes a stored procedure with the given name.
 
-Arguments:
-    proc_name: Stored procedure name.
-    parameters: Sequence of parameters. Must contain one entry for each argument
-                that the procedure expects.
+        Arguments:
+            proc_name: Stored procedure name.
+            parameters: Sequence of parameters. Must contain one entry for each argument
+                        that the procedure expects.
 
-Returns:
-    None or tuple with values returned by stored procedure.
-"""
+        Returns:
+            None or tuple with values returned by stored procedure.
+        """
         self.callproc(proc_name, parameters)
         return self.fetchone() if self._stmt._out_cnt > 0 else None
     def set_cursor_name(self, name: str) -> None:
         """Sets name for the SQL cursor.
 
-Arguments:
-    name: Cursor name.
-"""
+        Arguments:
+            name: Cursor name.
+        """
         if not self._executed:
             raise InterfaceError("Cannot set name for cursor has not yet "
                                  "executed a statement")
@@ -3267,105 +3373,106 @@ Arguments:
     def prepare(self, operation: str) -> Statement:
         """Creates prepared statement for repeated execution.
 
-Arguments:
-    operation: SQL command.
-"""
+        Arguments:
+            operation: SQL command.
+        """
         return self._connection._prepare(operation, self._transaction)
     def open(self, operation: Union[str, Statement], parameters: Sequence[Any]=None) -> Cursor:
         """Executes SQL command or prepared `Statement` as scrollable.
 
-Starts new transaction if transaction manager associated with cursor is not active.
+        Starts new transaction if transaction manager associated with cursor is not active.
 
-Arguments:
-    operation: SQL command or prepared `Statement`.
-    parameters: Sequence of parameters. Must contain one entry for each argument
-                that the operation expects.
+        Arguments:
+            operation: SQL command or prepared `Statement`.
+            parameters: Sequence of parameters. Must contain one entry for each argument
+                        that the operation expects.
 
-Note:
-    If `operation` is a string with SQL command that is exactly the same as the
-    last executed command, the internally prepared `Statement` from last execution
-    is reused.
+        Note:
+            If `operation` is a string with SQL command that is exactly the same as the
+            last executed command, the internally prepared `Statement` from last execution
+            is reused.
 
-    If cursor is open, it's closed before new statement is executed.
-"""
+            If cursor is open, it's closed before new statement is executed.
+        """
         self._execute(operation, parameters, CursorFlag.SCROLLABLE)
     def execute(self, operation: Union[str, Statement], parameters: Sequence[Any]=None) -> Cursor:
         """Executes SQL command or prepared `Statement`.
 
-Starts new transaction if transaction manager associated with cursor is not active.
+        Starts new transaction if transaction manager associated with cursor is not active.
 
-Arguments:
-    operation: SQL command or prepared `Statement`.
-    parameters: Sequence of parameters. Must contain one entry for each argument
-                that the operation expects.
+        Arguments:
+            operation: SQL command or prepared `Statement`.
+            parameters: Sequence of parameters. Must contain one entry for each argument
+                        that the operation expects.
 
-Returns:
-    `self` so call to execute could be used as iterator over returned rows.
+        Returns:
+            `self` so call to execute could be used as iterator over returned rows.
 
-Note:
-    If `operation` is a string with SQL command that is exactly the same as the
-    last executed command, the internally prepared `Statement` from last execution
-    is reused.
+        Note:
+            If `operation` is a string with SQL command that is exactly the same as the
+            last executed command, the internally prepared `Statement` from last execution
+            is reused.
 
-    If cursor is open, it's closed before new statement is executed.
-"""
+            If cursor is open, it's closed before new statement is executed.
+        """
         self._execute(operation, parameters)
         return self
     def executemany(self, operation: Union[str, Statement],
                     seq_of_parameters: Sequence[Sequence[Any]]) -> None:
         """Executes SQL command or prepared statement against all parameter
-sequences found in the sequence `seq_of_parameters`.
+        sequences found in the sequence `seq_of_parameters`.
 
-Starts new transaction if transaction manager associated with cursor is not active.
+        Starts new transaction if transaction manager associated with cursor is not active.
 
-Arguments:
-    operation: SQL command or prepared `Statement`.
-    seq_of_parameters: Sequence of sequences of parameters. Must contain
-                       one sequence of parameters for each execution
-                       that has one entry for each argument that the
-                       operation expects.
+        Arguments:
+            operation: SQL command or prepared `Statement`.
+            seq_of_parameters: Sequence of sequences of parameters. Must contain
+                               one sequence of parameters for each execution
+                               that has one entry for each argument that the
+                               operation expects.
 
-Note:
-    This function simply calls `.execute` in a loop, feeding it with
-    parameters from `seq_of_parameters`. Because `.execute` reuses the statement,
-    calling `executemany` is equally efective as direct use of prepared `Statement`
-    and calling `execute` in a loop directly in application.
-"""
+        Note:
+            This function simply calls `.execute` in a loop, feeding it with
+            parameters from `seq_of_parameters`. Because `.execute` reuses the statement,
+            calling `executemany` is equally efective as direct use of prepared `Statement`
+            and calling `execute` in a loop directly in application.
+        """
         for parameters in seq_of_parameters:
             self.execute(operation, parameters)
     def close(self) -> None:
         """Close the cursor and release all associated resources.
 
-The result set (if any) from last executed statement is released, and if executed
-`Statement` was not supplied externally, it's released as well.
+        The result set (if any) from last executed statement is released, and if executed
+        `Statement` was not supplied externally, it's released as well.
 
-Note:
-    The closed cursor could be used to execute further SQL commands.
-"""
+        Note:
+            The closed cursor could be used to execute further SQL commands.
+        """
         self._clear()
         if self._stmt is not None:
             if self.__internal:
                 self._stmt.free()
             self._stmt = None
     def fetchone(self) -> Tuple:
-        """Fetch the next row of a query result set."""
+        """Fetch the next row of a query result set.
+        """
         if self._stmt:
             return self._fetchone()
         else:
             raise InterfaceError("Cannot fetch from cursor that did not executed a statement.")
     def fetchmany(self, size: int=None) -> List[Tuple]:
         """Fetch the next set of rows of a query result, returning a sequence of
-sequences (e.g. a list of tuples).
+        sequences (e.g. a list of tuples).
 
-An empty sequence is returned when no more rows are available. The number of rows
-to fetch per call is specified by the parameter. If it is not given, the cursor’s
-`.arraysize` determines the number of rows to be fetched. The method does try to
-fetch as many rows as indicated by the size parameter. If this is not possible due
-to the specified number of rows not being available, fewer rows may be returned.
+        An empty sequence is returned when no more rows are available. The number of rows
+        to fetch per call is specified by the parameter. If it is not given, the cursor’s
+        `.arraysize` determines the number of rows to be fetched. The method does try to
+        fetch as many rows as indicated by the size parameter. If this is not possible due
+        to the specified number of rows not being available, fewer rows may be returned.
 
-Arguments:
-    size: The number of rows to fetch.
-"""
+        Arguments:
+            size: The number of rows to fetch.
+        """
         if size is None:
             size = self.arraysize
         result = []
@@ -3376,13 +3483,14 @@ Arguments:
                 break
         return result
     def fetchall(self) -> List[Tuple]:
-        """Fetch all remaining rows of a query result set."""
+        """Fetch all remaining rows of a query result set.
+        """
         return [row for row in self]
     def fetch_next(self) -> Optional[Tuple]:
         """Fetch the next row of a scrollable query result set.
 
-Returns None if there is no row to be fetched.
-"""
+        Returns None if there is no row to be fetched.
+        """
         assert self._result is not None
         self._last_fetch_status = self._result.fetch_next(self._stmt._out_buffer)
         if self._last_fetch_status == StateResult.OK:
@@ -3392,8 +3500,8 @@ Returns None if there is no row to be fetched.
     def fetch_prior(self) -> Optional[Tuple]:
         """Fetch the previous row of a scrollable query result set.
 
-Returns None if there is no row to be fetched.
-"""
+        Returns None if there is no row to be fetched.
+        """
         assert self._result is not None
         self._last_fetch_status = self._result.fetch_prior(self._stmt._out_buffer)
         if self._last_fetch_status == StateResult.OK:
@@ -3403,8 +3511,8 @@ Returns None if there is no row to be fetched.
     def fetch_first(self) -> Optional[Tuple]:
         """Fetch the first row of a scrollable query result set.
 
-Returns None if there is no row to be fetched.
-"""
+        Returns None if there is no row to be fetched.
+        """
         assert self._result is not None
         self._last_fetch_status = self._result.fetch_first(self._stmt._out_buffer)
         if self._last_fetch_status == StateResult.OK:
@@ -3414,8 +3522,8 @@ Returns None if there is no row to be fetched.
     def fetch_last(self) -> Optional[Tuple]:
         """Fetch the last row of a scrollable query result set.
 
-Returns None if there is no row to be fetched.
-"""
+        Returns None if there is no row to be fetched.
+        """
         assert self._result is not None
         self._last_fetch_status = self._result.fetch_last(self._stmt._out_buffer)
         if self._last_fetch_status == StateResult.OK:
@@ -3425,11 +3533,11 @@ Returns None if there is no row to be fetched.
     def fetch_absolute(self, position: int) -> Optional[Tuple]:
         """Fetch the row of a scrollable query result set specified by absolute position.
 
-Returns None if there is no row to be fetched.
+        Returns None if there is no row to be fetched.
 
-Arguments:
-    position: Absolute position number of row in result set.
-"""
+        Arguments:
+            position: Absolute position number of row in result set.
+        """
         assert self._result is not None
         self._last_fetch_status = self._result.fetch_absolute(position, self._stmt._out_buffer)
         if self._last_fetch_status == StateResult.OK:
@@ -3439,12 +3547,12 @@ Arguments:
     def fetch_relative(self, offset: int) -> Optional[Tuple]:
         """Fetch the row of a scrollable query result set specified by relative position.
 
-Returns None if there is no row to be fetched.
+        Returns None if there is no row to be fetched.
 
-Arguments:
-    offset: Relative position number of row in result set. Negative value refers
-            to previous row, positive to next row.
-"""
+        Arguments:
+            offset: Relative position number of row in result set. Negative value refers
+                    to previous row, positive to next row.
+        """
         assert self._result is not None
         self._last_fetch_status = self._result.fetch_relative(offset, self._stmt._out_buffer)
         if self._last_fetch_status == StateResult.OK:
@@ -3452,41 +3560,48 @@ Arguments:
         else:
             return None
     def setinputsizes(self, sizes: Sequence[Type]) -> None:
-        """Required by Python DB API 2.0, but pointless for Firebird, so it does nothing."""
+        """Required by Python DB API 2.0, but pointless for Firebird, so it does nothing.
+        """
         pass
     def setoutputsize(self, size: int, column: int=None) -> None:
-        """Required by Python DB API 2.0, but pointless for Firebird, so it does nothing."""
+        """Required by Python DB API 2.0, but pointless for Firebird, so it does nothing.
+        """
         pass
     def is_closed(self) -> bool:
-        "Returns True if cursor is closed."
+        """Returns True if cursor is closed.
+        """
         return self._stmt is None
     def is_eof(self) -> bool:
-        """Returns True is scrollable cursor is positioned at the end."""
+        """Returns True is scrollable cursor is positioned at the end.
+        """
         assert self._result is not None
         return self._result.is_eof()
     def is_bof(self) -> bool:
-        """Returns True is scrollable cursor is positioned at the beginning."""
+        """Returns True is scrollable cursor is positioned at the beginning.
+        """
         assert self._result is not None
         return self._result.is_bof()
     # Properties
     @property
     def connection(self) -> Connection:
-        "Connection associated with cursor."
+        """Connection associated with cursor.
+        """
         return self._connection
     @property
     def log_context(self) -> Connection:
         return self._connection
     @property
     def statement(self) -> Statement:
-        "Executed `Statement` or None if cursor does not executed a statement yet."
+        """Executed `Statement` or None if cursor does not executed a statement yet.
+        """
         return self._stmt
     @property
     def description(self) -> DESCRIPTION:
         """List of tuples (with 7-items).
 
-Each of these tuples contains information describing one result column:
-(name, type_code, display_size,internal_size, precision, scale, null_ok)
-"""
+        Each of these tuples contains information describing one result column:
+        (name, type_code, display_size,internal_size, precision, scale, null_ok)
+        """
         if self._stmt is None:
             return []
         if self._stmt._desc is None:
@@ -3555,19 +3670,19 @@ Each of these tuples contains information describing one result column:
     @property
     def affected_rows(self) -> int:
         """Specifies the number of rows that the last `.execute` or `.open`
-produced (for DQL statements like select) or affected (for DML statements
-like update or insert ).
+        produced (for DQL statements like select) or affected (for DML statements
+        like update or insert ).
 
-The attribute is -1 in case no statement was executed on the cursor
-or the rowcount of the last operation is not determinable by the interface.
+        The attribute is -1 in case no statement was executed on the cursor
+        or the rowcount of the last operation is not determinable by the interface.
 
-Note:
-    The database engine's own support for the determination of
-    “rows affected”/”rows selected” is quirky. The database engine only
-    supports the determination of rowcount for INSERT, UPDATE, DELETE,
-    and SELECT statements. When stored procedures become involved, row
-    count figures are usually not available to the client.
-"""
+        Note:
+            The database engine's own support for the determination of
+            “rows affected”/”rows selected” is quirky. The database engine only
+            supports the determination of rowcount for INSERT, UPDATE, DELETE,
+            and SELECT statements. When stored procedures become involved, row
+            count figures are usually not available to the client.
+        """
         if self._stmt is None:
             return -1
         result = -1
@@ -3597,20 +3712,22 @@ Note:
     rowcount = affected_rows
     @property
     def transaction(self) -> TransactionManager:
-        "Transaction manager associated with cursor."
+        """Transaction manager associated with cursor.
+        """
         return self._transaction
     @property
     def name(self) -> str:
-        "Name set for cursor."
+        """Name set for cursor.
+        """
         return self._name
 
 class ServerInfoProvider(InfoProvider):
     """Provides access to information about attached server.
 
-Important:
-   Do NOT create instances of this class directly! Use `Server.info` property to access
-   the instance already bound to connectected server.
-"""
+    Important:
+       Do NOT create instances of this class directly! Use `Server.info` property to access
+       the instance already bound to connectected server.
+    """
     def __init__(self, charset: str, server: Server):
         super().__init__(charset)
         self._srv: Server = weakref.ref(server)
@@ -3627,25 +3744,26 @@ Important:
         x = self.__version.split('.')
         self.__engine_version = float(f'{x[0]}.{x[1]}')
     def _close(self) -> None:
-        "Drops the association with attached server."
+        """Drops the association with attached server.
+        """
         self._srv = None
     def _acquire(self, request: bytes) -> None:
         """Acquires information from associated attachment. Information is stored in native
-format in `response` buffer.
+        format in `response` buffer.
 
-Arguments:
-    request: Data specifying the required information.
-"""
+        Arguments:
+            request: Data specifying the required information.
+        """
         self._srv()._svc.query(None, request, self.response.raw)
     def get_info(self, info_code: SrvInfoCode) -> Any:
         """Returns requested information from connected server.
 
-Arguments:
-    info_code: A code specifying the required information.
+        Arguments:
+            info_code: A code specifying the required information.
 
-Returns:
-    The data type of returned value depends on information required.
-"""
+        Returns:
+            The data type of returned value depends on information required.
+        """
         if info_code in self._cache:
             return self._cache[info_code]
         self.response.clear()
@@ -3690,9 +3808,9 @@ Returns:
     def get_log(self, callback: CB_OUTPUT_LINE=None) -> None:
         """Request content of Firebird Server log. **(ASYNC service)**
 
-Arguments:
-    callback: Function to call back with each output line.
-"""
+        Arguments:
+            callback: Function to call back with each output line.
+        """
         assert self._srv()._svc is not None
         self._srv()._reset_output()
         self._srv()._svc.start(bytes([ServerAction.GET_FB_LOG]))
@@ -3701,70 +3819,83 @@ Arguments:
                 callback(line)
     @property
     def version(self) -> str:
-        "Firebird version as SEMVER string."
+        """Firebird version as SEMVER string.
+        """
         return self.__version
     @property
     def engine_version(self) -> float:
-        "Firebird version as <major>.<minor> float number."
+        """Firebird version as <major>.<minor> float number.
+        """
         return self.__engine_version
     @property
     def manager_version(self) -> int:
-        "Service manager version."
+        """Service manager version.
+        """
         return self.get_info(SrvInfoCode.VERSION)
     @property
     def architecture(self) -> str:
-        "Server implementation description."
+        """Server implementation description.
+        """
         return self.get_info(SrvInfoCode.IMPLEMENTATION)
     @property
     def home_directory(self) -> str:
-        "Server home directory."
+        """Server home directory.
+        """
         return self.get_info(SrvInfoCode.GET_ENV)
     @property
     def security_database(self) -> str:
-        "Path to security database."
+        """Path to security database.
+        """
         return self.get_info(SrvInfoCode.USER_DBPATH)
     @property
     def lock_directory(self) -> str:
-        "Directory with lock file(s)."
+        """Directory with lock file(s).
+        """
         return self.get_info(SrvInfoCode.GET_ENV_LOCK)
     @property
     def message_directory(self) -> str:
-        "Directory with message file(s)."
+        """Directory with message file(s).
+        """
         return self.get_info(SrvInfoCode.GET_ENV_MSG)
     @property
     def capabilities(self) -> ServerCapability:
-        "Server capabilities."
+        """Server capabilities.
+        """
         return ServerCapability(self.get_info(SrvInfoCode.CAPABILITIES))
     @property
     def connection_count(self) -> int:
-        "Number of database attachments."
+        """Number of database attachments.
+        """
         return self.get_info(SrvInfoCode.SRV_DB_INFO)[0]
     @property
     def attached_databases(self) -> List[str]:
-        "List of attached databases."
+        """List of attached databases.
+        """
         return self.get_info(SrvInfoCode.SRV_DB_INFO)[1]
 
 class ServerServiceProvider:
-    """Base class for server service providers."""
+    """Base class for server service providers.
+    """
     def __init__(self, server: Server):
         self._srv: Server = weakref.ref(server)
     def _close(self) -> None:
         self._srv = None
 
 class ServerDbServices(ServerServiceProvider):
-    """Database-related actions and services."""
+    """Database-related actions and services.
+    """
     def get_statistics(self, *, database: str,
                        flags: SrvStatFlag=SrvStatFlag.DEFAULT,
                        tables: Sequence[str]=None,
                        callback: CB_OUTPUT_LINE=None) -> None:
         """Return database statistics produced by gstat utility. **(ASYNC service)**
 
-Arguments:
-    database: Database specification or alias.
-    flags: Flags indicating which statistics shall be collected.
-    tables: List of database tables whose statistics are to be collected.
-    callback: Function to call back with each output line.
-"""
+        Arguments:
+            database: Database specification or alias.
+            flags: Flags indicating which statistics shall be collected.
+            tables: List of database tables whose statistics are to be collected.
+            callback: Function to call back with each output line.
+        """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.DB_STATS)
@@ -3785,16 +3916,16 @@ Arguments:
                verbose: bool=False, skip_data: str=None) -> None:
         """Request logical (GBAK) database backup. **(ASYNC service)**
 
-Arguments:
-    database: Database specification or alias.
-    backup: Backup filespec, or list of backup file specifications.
-    backup_file_sizes: List of file sizes for backup files.
-    flags: Backup options.
-    callback: Function to call back with each output line.
-    stats: Backup statistic options (TDWR).
-    verbose: Whether output should be verbose or not.
-    skip_data: String with table names whose data should be excluded from backup.
-"""
+        Arguments:
+            database: Database specification or alias.
+            backup: Backup filespec, or list of backup file specifications.
+            backup_file_sizes: List of file sizes for backup files.
+            flags: Backup options.
+            callback: Function to call back with each output line.
+            stats: Backup statistic options (TDWR).
+            verbose: Whether output should be verbose or not.
+            skip_data: String with table names whose data should be excluded from backup.
+        """
         if isinstance(backup, str):
             backup = [backup]
             assert len(backup_file_sizes) == 0
@@ -3829,19 +3960,19 @@ Arguments:
                 buffers: int=None, access_mode: DbAccessMode=DbAccessMode.READ_WRITE) -> None:
         """Request database restore from logical (GBAK) backup. **(ASYNC service)**
 
-Arguments:
-    backup: Backup filespec, or list of backup file specifications.
-    database: Database specification or alias, or list of those.
-    db_file_pages: List of database file sizes (in pages).
-    flags: Restore options.
-    callback: Function to call back with each output line.
-    stats: Restore statistic options (TDWR).
-    verbose: Whether output should be verbose or not.
-    skip_data: String with table names whose data should be excluded from restore.
-    page_size: Page size for restored database.
-    buffers: Cache size for restored database.
-    access_mode: Restored database access mode (R/W or R/O).
-"""
+        Arguments:
+            backup: Backup filespec, or list of backup file specifications.
+            database: Database specification or alias, or list of those.
+            db_file_pages: List of database file sizes (in pages).
+            flags: Restore options.
+            callback: Function to call back with each output line.
+            stats: Restore statistic options (TDWR).
+            verbose: Whether output should be verbose or not.
+            skip_data: String with table names whose data should be excluded from restore.
+            page_size: Page size for restored database.
+            buffers: Cache size for restored database.
+            access_mode: Restored database access mode (R/W or R/O).
+        """
         if isinstance(backup, str):
             backup = [backup]
         if isinstance(database, str):
@@ -3879,12 +4010,12 @@ Arguments:
                      flags: SrvBackupFlag=SrvBackupFlag.NONE, skip_data: str=None) -> None:
         """Request logical (GBAK) database backup into local byte stream. **(SYNC service)**
 
-Arguments:
-    database: Database specification or alias.
-    backup_stream: Binary stream to which the backup is to be written.
-    flags: Backup options.
-    skip_data: String with table names whose data should be excluded from backup.
-"""
+        Arguments:
+            database: Database specification or alias.
+            backup_stream: Binary stream to which the backup is to be written.
+            flags: Backup options.
+            skip_data: String with table names whose data should be excluded from backup.
+        """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.BACKUP)
@@ -3903,18 +4034,18 @@ Arguments:
                       skip_data: str=None, page_size: int=None, buffers: int=None,
                       access_mode: DbAccessMode=DbAccessMode.READ_WRITE) -> None:
         """Request database restore from logical (GBAK) backup stored in local byte stream.
-**(SYNC service)**
+        **(SYNC service)**
 
-Arguments:
-    backup_stream: Binary stream with the backup.
-    database: Database specification or alias, or list of those.
-    db_file_pages: List of database file sizes (in pages).
-    flags: Restore options.
-    skip_data: String with table names whose data should be excluded from restore.
-    page_size: Page size for restored database.
-    buffers: Cache size for restored database.
-    access_mode: Restored database access mode (R/W or R/O).
-"""
+        Arguments:
+            backup_stream: Binary stream with the backup.
+            database: Database specification or alias, or list of those.
+            db_file_pages: List of database file sizes (in pages).
+            flags: Restore options.
+            skip_data: String with table names whose data should be excluded from restore.
+            page_size: Page size for restored database.
+            buffers: Cache size for restored database.
+            access_mode: Restored database access mode (R/W or R/O).
+        """
         if isinstance(database, str):
             database = [database]
             assert len(db_file_pages) == 0
@@ -3971,13 +4102,13 @@ Arguments:
                 direct: bool=None, flags: SrvNBackupFlag=SrvNBackupFlag.NONE) -> None:
         """Perform physical (NBACKUP) database backup. **(SYNC service)**
 
-Arguments:
-    database: Database specification or alias.
-    backup: Backup file specification.
-    level: Backup level.
-    direct: Direct I/O override.
-    flags: Backup options.
-"""
+        Arguments:
+            database: Database specification or alias.
+            backup: Backup file specification.
+            level: Backup level.
+            direct: Direct I/O override.
+            flags: Backup options.
+        """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.NBAK)
@@ -3993,12 +4124,12 @@ Arguments:
                  direct: bool=False, flags: SrvNBackupFlag=SrvNBackupFlag.NONE) -> None:
         """Perform restore from physical (NBACKUP) database backup.  **(SYNC service)**
 
-Arguments:
-    backups: Backup file(s) specification.
-    database: Database specification or alias.
-    direct: Direct I/O override.
-    flags: Restore options.
-"""
+        Arguments:
+            backups: Backup file(s) specification.
+            database: Database specification or alias.
+            direct: Direct I/O override.
+            flags: Restore options.
+        """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.NREST)
@@ -4013,10 +4144,10 @@ Arguments:
     def set_default_cache_size(self, *, database: str, size: int) -> None:
         """Set individual page cache size for database.
 
-Arguments:
-    database: Database specification or alias.
-    size: New value.
-"""
+        Arguments:
+            database: Database specification or alias.
+            size: New value.
+        """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
@@ -4026,10 +4157,10 @@ Arguments:
     def set_sweep_interval(self, *, database: str, interval: int) -> None:
         """Set database sweep interval.
 
-Arguments:
-    database: Database specification or alias.
-    interval: New value.
-"""
+        Arguments:
+            database: Database specification or alias.
+            interval: New value.
+        """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
@@ -4039,10 +4170,10 @@ Arguments:
     def set_space_reservation(self, *, database: str, mode: DbSpaceReservation) -> None:
         """Set space reservation for database.
 
-Arguments:
-    database: Database specification or alias.
-    mode: New value.
-"""
+        Arguments:
+            database: Database specification or alias.
+            mode: New value.
+        """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
@@ -4053,10 +4184,10 @@ Arguments:
     def set_write_mode(self, *, database: str, mode: DbWriteMode) -> None:
         """Set database write mode (SYNC/ASYNC).
 
-Arguments:
-    database: Database specification or alias.
-    mode: New value.
-"""
+        Arguments:
+            database: Database specification or alias.
+            mode: New value.
+        """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
@@ -4067,10 +4198,10 @@ Arguments:
     def set_access_mode(self, *, database: str, mode: DbAccessMode) -> None:
         """Set database access mode (R/W or R/O).
 
-Arguments:
-    database: Database specification or alias.
-    mode: New value.
-"""
+        Arguments:
+            database: Database specification or alias.
+            mode: New value.
+        """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
@@ -4081,10 +4212,10 @@ Arguments:
     def set_sql_dialect(self, *, database: str, dialect: int) -> None:
         """Set database SQL dialect.
 
-Arguments:
-    database: Database specification or alias.
-    dialect: New value.
-"""
+        Arguments:
+            database: Database specification or alias.
+            dialect: New value.
+        """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
@@ -4094,9 +4225,9 @@ Arguments:
     def activate_shadow(self, *, database: str) -> None:
         """Activate database shadow.
 
-Arguments:
-    database: Database specification or alias.
-"""
+        Arguments:
+            database: Database specification or alias.
+        """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
@@ -4106,9 +4237,9 @@ Arguments:
     def no_linger(self, *, database: str) -> None:
         """Set one-off override for database linger.
 
-Arguments:
-    database: Database specification or alias.
-"""
+        Arguments:
+            database: Database specification or alias.
+        """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
@@ -4119,12 +4250,12 @@ Arguments:
                  method: ShutdownMethod, timeout: int) -> None:
         """Database shutdown.
 
-Arguments:
-    database: Database specification or alias.
-    mode: Shutdown mode.
-    method: Shutdown method.
-    timeout: Timeout for shutdown.
-"""
+        Arguments:
+            database: Database specification or alias.
+            mode: Shutdown mode.
+            method: Shutdown method.
+            timeout: Timeout for shutdown.
+        """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
@@ -4135,10 +4266,10 @@ Arguments:
     def bring_online(self, *, database: str, mode: OnlineMode=OnlineMode.NORMAL) -> None:
         """Bring previously shut down database back online.
 
-Arguments:
-    database: Database specification or alias.
-    mode: Online mode.
-"""
+        Arguments:
+            database: Database specification or alias.
+            mode: Online mode.
+        """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
@@ -4148,9 +4279,9 @@ Arguments:
     def sweep(self, *, database: str) -> None:
         """Perform database sweep operation.
 
-Arguments:
-    database: Database specification or alias.
-"""
+        Arguments:
+            database: Database specification or alias.
+        """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.REPAIR)
@@ -4161,10 +4292,10 @@ Arguments:
     def repair(self, *, database: str, flags: SrvRepairFlag=SrvRepairFlag.REPAIR) -> bytes:
         """Perform database repair operation.  **(SYNC service)**
 
-Arguments:
-    database: Database specification or alias.
-    flags: Repair flags.
-"""
+        Arguments:
+            database: Database specification or alias.
+            flags: Repair flags.
+        """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.REPAIR)
@@ -4178,17 +4309,17 @@ Arguments:
                  callback: CB_OUTPUT_LINE=None) -> None:
         """Perform database validation. **(ASYNC service)**
 
-Arguments:
-    database: Database specification or alias.
-    flags: Repair flags.
-    include_table: Regex pattern for table names to include in validation run.
-    exclude_table: Regex pattern for table names to exclude in validation run.
-    include_index: Regex pattern for index names to include in validation run.
-    exclude_index: Regex pattern for index names to exclude in validation run.
-    lock_timeout: Lock timeout (seconds), used to acquire locks for table to validate,
-      default is 10 secs. 0 is no-wait, -1 is infinite wait.
-    callback: Function to call back with each output line.
-"""
+        Arguments:
+            database: Database specification or alias.
+            flags: Repair flags.
+            include_table: Regex pattern for table names to include in validation run.
+            exclude_table: Regex pattern for table names to exclude in validation run.
+            include_index: Regex pattern for index names to include in validation run.
+            exclude_index: Regex pattern for index names to exclude in validation run.
+            lock_timeout: Lock timeout (seconds), used to acquire locks for table to validate,
+              default is 10 secs. 0 is no-wait, -1 is infinite wait.
+            callback: Function to call back with each output line.
+        """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.VALIDATE)
@@ -4210,9 +4341,9 @@ Arguments:
     def get_limbo_transaction_ids(self, *, database: str) -> List[int]:
         """Returns list of transactions in limbo.
 
-Arguments:
-    database: Database specification or alias.
-"""
+        Arguments:
+            database: Database specification or alias.
+        """
         raise NotImplementedError
         #with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             #spb.insert_tag(ServerAction .REPAIR)
@@ -4279,10 +4410,10 @@ Arguments:
     def commit_limbo_transaction(self, *, database: str, transaction_id: int) -> None:
         """Resolve limbo transaction with commit.
 
-Arguments:
-    database: Database specification or alias.
-    transaction_id: ID of Transaction to resolve.
-"""
+        Arguments:
+            database: Database specification or alias.
+            transaction_id: ID of Transaction to resolve.
+        """
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.REPAIR)
             spb.insert_string(SPBItem.DBNAME, database)
@@ -4295,10 +4426,10 @@ Arguments:
     def rollback_limbo_transaction(self, *, database: str, transaction_id: int) -> None:
         """Resolve limbo transaction with rollback.
 
-Arguments:
-    database: Database specification or alias.
-    transaction_id: ID of Transaction to resolve.
-"""
+        Arguments:
+            database: Database specification or alias.
+            transaction_id: ID of Transaction to resolve.
+        """
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.REPAIR)
             spb.insert_string(SPBItem.DBNAME, database)
@@ -4310,7 +4441,8 @@ Arguments:
         self._srv()._read_all_binary_output()
 
 class ServerUserServices(ServerServiceProvider):
-    """User-related actions and services."""
+    """User-related actions and services.
+    """
     def __fetch_users(self, data: Buffer) -> List[UserInfo]:
         users = []
         user = {}
@@ -4345,10 +4477,10 @@ class ServerUserServices(ServerServiceProvider):
     def get_all(self, *, database: str=None, sql_role: str=None) -> List[UserInfo]:
         """Get information about users.
 
-Arguments:
-    database: Database specification or alias.
-    sql_role: SQL role name.
-"""
+        Arguments:
+            database: Database specification or alias.
+            sql_role: SQL role name.
+        """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.DISPLAY_USER_ADM)
@@ -4361,11 +4493,11 @@ Arguments:
     def get(self, user_name: str, *, database: str=None, sql_role: str=None) -> Optional[UserInfo]:
         """Get information about user.
 
-Arguments:
-    user_name: User name.
-    database: Database specification or alias.
-    sql_role: SQL role name.
-"""
+        Arguments:
+            user_name: User name.
+            database: Database specification or alias.
+            sql_role: SQL role name.
+        """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.DISPLAY_USER_ADM)
@@ -4383,18 +4515,18 @@ Arguments:
                  sql_role: str=None) -> None:
         """Add new user.
 
-Arguments:
-    user_name: User name.
-    password: User password.
-    user_id: User ID.
-    group_id: Group ID.
-    firest_name: User's first name.
-    middle_name: User's middle name.
-    last_name: User's last name.
-    admin: Admin flag.
-    database: Database specification or alias.
-    sql_role: SQL role name.
-"""
+        Arguments:
+            user_name: User name.
+            password: User password.
+            user_id: User ID.
+            group_id: Group ID.
+            firest_name: User's first name.
+            middle_name: User's middle name.
+            last_name: User's last name.
+            admin: Admin flag.
+            database: Database specification or alias.
+            sql_role: SQL role name.
+        """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.ADD_USER)
@@ -4424,16 +4556,16 @@ Arguments:
                     last_name: str=None, admin: bool=None) -> None:
         """Update user information.
 
-Arguments:
-    user_name: User name.
-    password: User password.
-    user_id: User ID.
-    group_id: Group ID.
-    firest_name: User's first name.
-    middle_name: User's middle name.
-    last_name: User's last name.
-    admin: Admin flag.
-"""
+        Arguments:
+            user_name: User name.
+            password: User password.
+            user_id: User ID.
+            group_id: Group ID.
+            firest_name: User's first name.
+            middle_name: User's middle name.
+            last_name: User's last name.
+            admin: Admin flag.
+        """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.MODIFY_USER)
@@ -4457,11 +4589,11 @@ Arguments:
     def delete(self, user_name: str, *, database: str=None, sql_role: str=None) -> None:
         """Delete user.
 
-Arguments:
-    user_name: User name.
-    database: Database specification or alias.
-    sql_role: SQL role name.
-"""
+        Arguments:
+            user_name: User name.
+            database: Database specification or alias.
+            sql_role: SQL role name.
+        """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.DELETE_USER)
@@ -4475,15 +4607,16 @@ Arguments:
     def exists(self, user_name: str, *, database: str=None, sql_role: str=None) -> bool:
         """Returns True if user exists.
 
-Arguments:
-    user_name: User name.
-    database: Database specification or alias.
-    sql_role: SQL role name.
-"""
+        Arguments:
+            user_name: User name.
+            database: Database specification or alias.
+            sql_role: SQL role name.
+        """
         return self.get(user_name, database=database, sql_role=sql_role) is not None
 
 class ServerTraceServices(ServerServiceProvider):
-    """Trace session actions and services."""
+    """Trace session actions and services.
+    """
     def __action(self, action: ServerAction, label: str, session_id: int) -> None:
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
@@ -4497,13 +4630,13 @@ class ServerTraceServices(ServerServiceProvider):
     def start(self, *, config: str, name: str=None) -> int:
         """Start new trace session. **(ASYNC service)**
 
-Arguments:
-    config: Trace session configuration.
-    name: Trace session name.
+        Arguments:
+            config: Trace session configuration.
+            name: Trace session name.
 
-Returns:
-    Trace session ID.
-"""
+        Returns:
+            Trace session ID.
+        """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.TRACE_START)
@@ -4520,27 +4653,28 @@ Returns:
     def stop(self, *, session_id: int) -> None:
         """Stop trace session.
 
-Arguments:
-    session_id: Trace session ID.
-"""
+        Arguments:
+            session_id: Trace session ID.
+        """
         self.__action(ServerAction.TRACE_STOP, 'stopped', session_id)
     def suspend(self, *, session_id: int) -> None:
         """Suspend trace session.
 
-Arguments:
-    session_id: Trace session ID.
-"""
+        Arguments:
+            session_id: Trace session ID.
+        """
         self.__action(ServerAction.TRACE_SUSPEND, 'paused', session_id)
     def resume(self, *, session_id: int) -> None:
         """Resume trace session.
 
-Arguments:
-    session_id: Trace session ID.
-"""
+        Arguments:
+            session_id: Trace session ID.
+        """
         self.__action(ServerAction.TRACE_RESUME, 'resumed', session_id)
     @property
     def sessions(self) -> Dict[int, TraceSession]:
-        "Dictionary with active trace sessions."
+        """Dictionary with active trace sessions.
+        """
         def store():
             if current:
                 session = TraceSession(**current)
@@ -4577,9 +4711,9 @@ Arguments:
 class Server(LoggingIdMixin):
     """Represents connection to Firebird Service Manager.
 
-Note:
-    Implements context manager protocol to call `.close()` automatically.
-"""
+    Note:
+        Implements context manager protocol to call `.close()` automatically.
+    """
     def __init__(self, svc: iService, spb: bytes, host: str):
         self._svc: iService = svc
         #: Service Parameter Buffer (SPB) used to connect the service manager
@@ -4682,15 +4816,16 @@ Note:
     def is_running(self) -> bool:
         """Returns True if service is running.
 
-Note:
-   Some services like `~.ServerDbServices.backup()` or `~.ServerDbServices.sweep()` may take
-   time to comlete, so they're called asynchronously. Until they're finished,
-   no other async service could be started.
-"""
+        Note:
+           Some services like `~.ServerDbServices.backup()` or `~.ServerDbServices.sweep()`
+           may take time to comlete, so they're called asynchronously. Until they're finished,
+           no other async service could be started.
+        """
         assert self._svc is not None
         return self.info.get_info(SrvInfoCode.RUNNING) > 0
     def readline(self) -> Optional[str]:
-        "Get next line of textual output from last service query."
+        """Get next line of textual output from last service query.
+        """
         if self._eof and not self.__line_buffer:
             return None
         if not self.__line_buffer:
@@ -4704,10 +4839,12 @@ Note:
             return self.__line_buffer.pop(0)
         return None
     def readlines(self) -> List[str]:
-        "Get list of remaining output lines from last service query."
+        """Get list of remaining output lines from last service query.
+        """
         return [line for line in self]
     def wait(self) -> None:
-        "Wait until running service completes, i.e. stops sending data."
+        """Wait until running service completes, i.e. stops sending data.
+        """
         while self.is_running():
             for _ in self:
                 pass
@@ -4735,25 +4872,29 @@ Note:
     # Properties
     @property
     def info(self) -> ServerInfoProvider:
-        "Access to various information about attached server."
+        """Access to various information about attached server.
+        """
         if self.__info is None:
             self.__info = ServerInfoProvider(self.charset, self)
         return self.__info
     @property
     def database(self) -> ServerDbServices:
-        "Access to various database-related actions and services."
+        """Access to various database-related actions and services.
+        """
         if self.__dbsvc is None:
             self.__dbsvc = ServerDbServices(self)
         return self.__dbsvc
     @property
     def trace(self) -> ServerTraceServices:
-        "Access to various database-related actions and services."
+        """Access to various database-related actions and services.
+        """
         if self.__trace is None:
             self.__trace = ServerTraceServices(self)
         return self.__trace
     @property
     def user(self) -> ServerUserServices:
-        "Access to various user-related actions and services."
+        """Access to various user-related actions and services.
+        """
         if self.__user is None:
             self.__user = ServerUserServices(self)
         return self.__user
@@ -4762,20 +4903,20 @@ def connect_server(server: str, *, user: str=None, password: str=None,
                    crypt_callback: iCryptKeyCallbackImpl=None) -> Server:
     """Establishes a connection to server's service manager.
 
-Arguments:
-    host: Server host machine or Server configuration name.
-    user: User name.
-    password: User password.
-    crypt_callback: Callback that provides encryption key.
+    Arguments:
+        host: Server host machine or Server configuration name.
+        user: User name.
+        password: User password.
+        crypt_callback: Callback that provides encryption key.
 
-Hooks:
-    Event `.ServerHook.ATTACHED`: Executed before `Service` instance is
-    returned. Hook must have signature::
+    Hooks:
+        Event `.ServerHook.ATTACHED`: Executed before `Service` instance is
+        returned. Hook must have signature::
 
-        hook_func(server: Server) -> None
+            hook_func(server: Server) -> None
 
-    Any value returned by hook is ignored.
-"""
+        Any value returned by hook is ignored.
+    """
     srv_config = driver_config.get_server(server)
     if srv_config is None:
         srv_config = driver_config.server_defaults
