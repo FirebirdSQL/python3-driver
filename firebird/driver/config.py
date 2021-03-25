@@ -47,8 +47,8 @@ from .types import NetProtocol
 class ServerConfig(Config):
     """Server configuration.
     """
-    def __init__(self, name: str, *, optional: bool=False):
-        super().__init__(name, optional=optional)
+    def __init__(self, name: str, *, optional: bool=False, description: str=None):
+        super().__init__(name, optional=optional, description=description)
         #: Server host machine specification
         self.host: StrOption = \
             StrOption('host', "Server host machine specification")
@@ -75,8 +75,8 @@ class ServerConfig(Config):
 class DatabaseConfig(Config):
     """Database configuration.
     """
-    def __init__(self, name: str, *, optional: bool=False):
-        super().__init__(name, optional=optional)
+    def __init__(self, name: str, *, optional: bool=False, description: str=None):
+        super().__init__(name, optional=optional, description=description)
         #: Name of server where database is located
         self.server: StrOption = \
             StrOption('server', "Name of server where database is located")
@@ -88,7 +88,7 @@ class DatabaseConfig(Config):
             StrOption('database', "Database file specification or alias")
         #: Database filename should be passed in UTF8
         self.utf8filename: BoolOption = \
-            BoolOption('utf8filename', "Database filename should passed in UTF8")
+            BoolOption('utf8filename', "Database filename should be passed in UTF8")
         #: Protocol to be used for database
         self.protocol: EnumOption = \
             EnumOption('protocol', NetProtocol, "Protocol to be used for database")
@@ -116,14 +116,14 @@ class DatabaseConfig(Config):
             IntOption('timeout', "Connection timeout")
         #: Do not use linger for database connection
         self.no_linger: BoolOption = \
-            BoolOption('no_linger', "Do not use linger for database connections")
+            BoolOption('no_linger', "Do not use linger for database connection")
         #: Page cache size override for database connection
         self.cache_size: IntOption = \
-            IntOption('cache_size', "Page cache size override for database connections")
+            IntOption('cache_size', "Page cache size override for database connection")
         #: Dummy packet interval for this database connection
         self.dummy_packet_interval: IntOption = \
             IntOption('dummy_packet_interval',
-                      "Dummy packet interval for this database connections")
+                      "Dummy packet interval")
         #: Configuration override
         self.config: StrOption = \
             StrOption('config', "Configuration override")
@@ -133,29 +133,29 @@ class DatabaseConfig(Config):
         # Create options
         #: Database create option. Page size to be used.
         self.page_size: IntOption = \
-            IntOption('page_size', "Page size to be used")
+            IntOption('page_size', "Page size to be used for created database.")
         #: Database create option. Write mode (True = sync/False = async).
         self.forced_writes: BoolOption = \
-            BoolOption('forced_writes', "Write mode (True = sync/False = async)")
+            BoolOption('forced_writes', "Write mode for created database (True = sync, False = async)")
         #: Database create option. Character set for the database.
         self.db_charset: StrOption = \
-            StrOption('db_charset', "Character set for the database")
+            StrOption('db_charset', "Character set for created database")
         #: Database create option. SQL dialect for the database.
         self.db_sql_dialect: IntOption = \
-            IntOption('db_sql_dialect', "SQL dialect for the database")
+            IntOption('db_sql_dialect', "SQL dialect for created database")
         #: Database create option. Page cache size override for database.
         self.db_cache_size: IntOption = \
-            IntOption('db_cache_size', "Page cache size override for database")
+            IntOption('db_cache_size', "Page cache size override for created database")
         #: Database create option. Sweep interval for the database.
         self.sweep_interval: IntOption = \
-            IntOption('sweep_interval', "Sweep interval for the database")
+            IntOption('sweep_interval', "Sweep interval for created database")
         #: Database create option. Data page space usage (True = reserve space, False = Use all space).
         self.reserve_space: BoolOption = \
             BoolOption('reserve_space',
-                       "Data page space usage (True = reserve space, False = Use all space)")
+                       "Data page space usage for created database (True = reserve space, False = Use all space)")
 
 class DriverConfig(Config):
-    """Driver configuration.
+    """Firebird driver configuration.
     """
     def __init__(self, name: str):
         super().__init__(name)
@@ -169,10 +169,12 @@ class DriverConfig(Config):
                       default=65536)
         #: Default database configuration ('firebird.db.defaults')
         self.db_defaults: DatabaseConfig = DatabaseConfig('firebird.db.defaults',
-                                                          optional=True)
+                                                          optional=True,
+                                                          description="Default database configuration.")
         #: Default server configuration ('firebird.server.defaults')
         self.server_defaults: ServerConfig = ServerConfig('firebird.server.defaults',
-                                                          optional=True)
+                                                          optional=True,
+                                                          description="Default server configuration.")
         #: Registered servers
         self.servers: ConfigListOption = \
             ConfigListOption('servers', "Registered servers", ServerConfig)
