@@ -4904,7 +4904,7 @@ def connect_server(server: str, *, user: str=None, password: str=None,
     """Establishes a connection to server's service manager.
 
     Arguments:
-        host: Server host machine or Server configuration name.
+        server: Server host machine or Server configuration name.
         user: User name.
         password: User password.
         crypt_callback: Callback that provides encryption key.
@@ -4923,6 +4923,8 @@ def connect_server(server: str, *, user: str=None, password: str=None,
         host = server
     else:
         host = srv_config.host.value
+    if host is None:
+        host = 'service_mgr'
     if not host.endswith('service_mgr'):
         if host and not host.endswith(':'):
             host += ':'
