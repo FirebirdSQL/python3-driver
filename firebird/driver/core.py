@@ -2953,6 +2953,8 @@ class Cursor(LoggingIdMixin):
                 offset = in_meta.get_offset(i)
                 # handle NULL value
                 in_buffer[in_meta.get_null_offset(i)] = 1 if value is None else 0
+                if value is None:
+                    continue
                 # store parameter value
                 if _is_str_param(value, datatype):
                     # Implicit conversion to string

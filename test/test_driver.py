@@ -2596,6 +2596,31 @@ class TestFB4(DriverTestBase):
                 self.assertIsInstance(d128, decimal.Decimal)
                 self.assertEqual(d128, d[1])
 
+class TestIssues(DriverTestBase):
+    def setUp(self):
+        super().setUp()
+        self.dbfile = os.path.join(self.dbpath, self.FBTEST_DB)
+        self.con = connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD)
+        self.con._logging_id_ = self.__class__.__name__
+        self.con2 = connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD, charset='utf-8')
+        self.con2._logging_id_ = self.__class__.__name__
+        #self.con.execute_immediate("recreate table t (c1 integer)")
+        #self.con.commit()
+        #self.con.execute_immediate("RECREATE TABLE T2 (C1 Smallint,C2 Integer,C3 Bigint,C4 Char(5),C5 Varchar(10),C6 Date,C7 Time,C8 Timestamp,C9 Blob sub_type 1,C10 Numeric(18,2),C11 Decimal(18,2),C12 Float,C13 Double precision,C14 Numeric(8,4),C15 Decimal(8,4))")
+        self.con.execute_immediate("delete from t")
+        self.con.execute_immediate("delete from t2")
+        self.con.commit()
+    def tearDown(self):
+        self.con2.close()
+        self.con.close()
+    def test_issue_02(self):
+        with self.con.cursor() as cur:
+            cur.execute('insert into T2 (C1,C2,C3) values (?,?,?)', [1, None, 1])
+            self.con.commit()
+            cur.execute('select C1,C2,C3 from T2 where C1 = 1')
+            rows = cur.fetchall()
+            self.assertListEqual(rows, [(1, None, 1)])
+
 if __name__ == '__main__':
     unittest.main()
 
