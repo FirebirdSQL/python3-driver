@@ -47,7 +47,7 @@ from .types import Error, InterfaceError, DatabaseError, DataError, \
      DbAccessMode, DbSpaceReservation, DbWriteMode, ShutdownMode, OnlineMode, \
      ShutdownMethod, \
      ServerCapability, SrvRepairFlag, SrvStatFlag, SrvBackupFlag, \
-     SrvRestoreFlag, SrvNBackupFlag, \
+     SrvRestoreFlag, SrvNBackupFlag, SrvInfoCode, \
      apilevel, threadsafety, paramstyle, DESCRIPTION_NAME, DESCRIPTION_TYPE_CODE, \
      DESCRIPTION_DISPLAY_SIZE, DESCRIPTION_INTERNAL_SIZE, DESCRIPTION_PRECISION, \
      DESCRIPTION_SCALE, DESCRIPTION_NULL_OK, Date, Time, Timestamp, DateFromTicks, \

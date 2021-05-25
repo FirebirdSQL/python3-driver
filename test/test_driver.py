@@ -1579,7 +1579,13 @@ class TestServerServices(DriverTestBase):
             os.remove(self.fbk)
         if os.path.exists(self.fbk2):
             os.remove(self.fbk2)
-    def test_log(self):
+    def test_01_output_by_line(self):
+        self.svc.mode = SrvInfoCode.LINE
+        self.test_03_log()
+    def test_02_output_to_eof(self):
+        self.svc.mode = SrvInfoCode.TO_EOF
+        self.test_03_log()
+    def test_03_log(self):
         def fetchline(line):
             output.append(line)
 
@@ -1598,11 +1604,11 @@ class TestServerServices(DriverTestBase):
         self.svc.info.get_log(callback=fetchline)
         self.assertGreater(len(output), 0)
         self.assertEqual(output, log)
-    def test_get_limbo_transaction_ids(self):
+    def test_04_get_limbo_transaction_ids(self):
         self.skipTest('Not implemented yet')
         ids = self.svc.get_limbo_transaction_ids(database='employee')
         self.assertIsInstance(ids, type(list()))
-    def test_trace(self):
+    def test_05_trace(self):
         #self.skipTest('Not implemented yet')
         trace_config = """database = %s
         {
@@ -1648,12 +1654,12 @@ class TestServerServices(DriverTestBase):
             self.assertNotIn(trace2_id, svcx.trace.sessions)
             # Finalize
             svcx.trace.stop(session_id=trace1_id)
-    def test_get_users(self):
+    def test_06_get_users(self):
         users = self.svc.user.get_all()
         self.assertIsInstance(users, type(list()))
         self.assertIsInstance(users[0], driver.core.UserInfo)
         self.assertEqual(users[0].user_name, 'SYSDBA')
-    def test_manage_user(self):
+    def test_07_manage_user(self):
         USER_NAME = 'DRIVER_TEST'
         try:
             self.svc.user.delete(USER_NAME)

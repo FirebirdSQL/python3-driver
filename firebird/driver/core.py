@@ -4720,6 +4720,8 @@ class Server(LoggingIdMixin):
         self.spb: bytes = spb
         #: Server host
         self.host: str = host
+        #: Service output mode (line or eof)
+        self.mode: SrvInfoCode = SrvInfoCode.TO_EOF
         #: Response buffer used to comunicate with service
         self.response: CBuffer = CBuffer(USHRT_MAX)
         self._eof: bool = False
@@ -4778,13 +4780,19 @@ class Server(LoggingIdMixin):
     def _read_output(self, *, init: str='', timeout: int=-1) -> None:
         assert self._svc is not None
         self.response.clear()
-        self._svc.query(self._make_request(timeout), bytes([SrvInfoCode.TO_EOF]), self.response.raw)
+        self._svc.query(self._make_request(timeout), bytes([self.mode]), self.response.raw)
         tag = self.response.get_tag()
-        if tag != SrvInfoCode.TO_EOF:  # pragma: no cover
+        if tag != self.mode:  # pragma: no cover
             raise InterfaceError(f"Service responded with error code: {tag}")
-        init += self.response.read_sized_string()
+        data = self.response.read_sized_string()
+        init += data
+        if data and self.mode is SrvInfoCode.LINE:
+            init += '\n'
         self.__line_buffer = init.splitlines(keepends=True)
-        self._eof = self.response.get_tag() == isc_info_end
+        if self.mode is SrvInfoCode.TO_EOF:
+            self._eof = self.response.get_tag() == isc_info_end
+        else:
+            self._eof = not data
     def _read_all_binary_output(self, *, timeout: int=-1) -> bytes:
         assert self._svc is not None
         send = self._make_request(timeout)
@@ -4793,8 +4801,7 @@ class Server(LoggingIdMixin):
         while not eof:
             self.response.clear()
             self._svc.query(send, bytes([SrvInfoCode.TO_EOF]), self.response.raw)
-            tag = self.response.get_tag()
-            if tag != SrvInfoCode.TO_EOF:  # pragma: no cover
+            if (tag := self.response.get_tag()) != SrvInfoCode.TO_EOF:  # pragma: no cover
                 raise InterfaceError(f"Service responded with error code: {tag}")
             result.append(self.response.read_bytes())
             eof = self.response.get_tag() == isc_info_end
@@ -4806,12 +4813,10 @@ class Server(LoggingIdMixin):
             send = self._make_request(timeout)
             self.response.clear()
             self._svc.query(send, bytes([SrvInfoCode.TO_EOF]), self.response.raw)
-            tag = self.response.get_tag()
-            if tag != SrvInfoCode.TO_EOF:  # pragma: no cover
+            if (tag := self.response.get_tag()) != SrvInfoCode.TO_EOF:  # pragma: no cover
                 raise InterfaceError(f"Service responded with error code: {tag}")
             result = self.response.read_bytes()
-            tag = self.response.get_tag()
-            self._eof = tag == isc_info_end
+            self._eof = self.response.get_tag() == isc_info_end
         return result
     def is_running(self) -> bool:
         """Returns True if service is running.
