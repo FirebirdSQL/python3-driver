@@ -2,6 +2,14 @@
 Changelog
 #########
 
+Version 1.1.1
+=============
+
+* Fix unregistered bug: `sql_dialect` is used instead `db_sql_dialect` in `create_database`.
+* Fix (#2): error when handling input parameters with value None
+* Added `Server.mode` attribute to allow fetching service output using LINE or TO_EOF method.
+  Default mode is TO_EOF.
+
 Version 1.1.0
 =============
 

@@ -1916,7 +1916,7 @@ def create_database(database: str, *, user: str=None, password: str=None, role: 
     dsn = _connect_helper(db_config.dsn.value, srv_config.host.value, srv_config.port.value,
                           db_config.database.value, db_config.protocol.value)
     dpb = DPB(user=user, password=password, role=role, trusted_auth=db_config.trusted_auth.value,
-              sql_dialect=db_config.sql_dialect.value, timeout=db_config.timeout.value,
+              sql_dialect=db_config.db_sql_dialect.value, timeout=db_config.timeout.value,
               charset=charset, cache_size=db_config.cache_size.value,
               no_linger=db_config.no_linger.value, utf8filename=db_config.utf8filename.value,
               no_gc=no_gc, no_db_triggers=no_db_triggers, dbkey_scope=dbkey_scope,
