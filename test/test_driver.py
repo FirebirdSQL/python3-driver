@@ -348,7 +348,10 @@ class TestConnection(DriverTestBase):
     def test_properties(self):
         with connect(self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
             con._logging_id_ = self.__class__.__name__
-            self.assertIsInstance(con.info, driver.core.DatabaseInfoProvider)
+            if con.info.engine_version >= 3.0:
+                self.assertIsInstance(con.info, driver.core.DatabaseInfoProvider3)
+            if con.info.engine_version >= 4.0:
+                self.assertIsInstance(con.info, driver.core.DatabaseInfoProvider)
             self.assertIsNone(con.charset)
             self.assertEqual(con.sql_dialect, 3)
             self.assertIn(con.main_transaction, con.transactions)
@@ -1131,8 +1134,8 @@ class TestArrays(DriverTestBase):
         self.c2 = [[[1, 1], [2, 2], [3, 3], [4, 4]], [[5, 5], [6, 6], [7, 7], [8, 8]], [[9, 9], [10, 10], [11, 11], [12, 12]], [[13, 13], [14, 14], [15, 15], [16, 16]]]
         self.c3 = [['a', 'a'], ['bb', 'bb'], ['ccc', 'ccc'], ['dddd', 'dddd'], ['eeeee', 'eeeee'], ['fffffff78901234', 'fffffff78901234']]
         self.c4 = ['a    ', 'bb   ', 'ccc  ', 'dddd ', 'eeeee']
-        self.c5 = [datetime.datetime(2012, 11, 22, 12, 8, 24, 4748), datetime.datetime(2012, 11, 22, 12, 8, 24, 4748)]
-        self.c6 = [datetime.time(12, 8, 24, 4748), datetime.time(12, 8, 24, 4748)]
+        self.c5 = [datetime.datetime(2012, 11, 22, 12, 8, 24, 474800), datetime.datetime(2012, 11, 22, 12, 8, 24, 474800)]
+        self.c6 = [datetime.time(12, 8, 24, 474800), datetime.time(12, 8, 24, 474800)]
         self.c7 = [decimal.Decimal('10.22'), decimal.Decimal('100000.33')]
         self.c8 = [decimal.Decimal('10.22'), decimal.Decimal('100000.33')]
         self.c9 = [1, 0]
@@ -1381,22 +1384,22 @@ class TestInsertData(DriverTestBase):
                                       ('Dynamic SQL Error\n-SQL error code = -303\n-arithmetic exception, numeric overflow, or string truncation\n-string right truncation\n-expected length 10, actual 11',))
     def test_insert_datetime(self):
         with self.con.cursor() as cur:
-            now = datetime.datetime(2011, 11, 13, 15, 00, 1, 2000)
+            now = datetime.datetime(2011, 11, 13, 15, 00, 1, 200000)
             cur.execute('insert into T2 (C1,C6,C7,C8) values (?,?,?,?)', [3, now.date(), now.time(), now])
             self.con.commit()
             cur.execute('select C1,C6,C7,C8 from T2 where C1 = 3')
             rows = cur.fetchall()
             self.assertListEqual(rows,
-                                 [(3, datetime.date(2011, 11, 13), datetime.time(15, 0, 1, 2000),
-                                   datetime.datetime(2011, 11, 13, 15, 0, 1, 2000))])
+                                 [(3, datetime.date(2011, 11, 13), datetime.time(15, 0, 1, 200000),
+                                   datetime.datetime(2011, 11, 13, 15, 0, 1, 200000))])
 
             cur.execute('insert into T2 (C1,C6,C7,C8) values (?,?,?,?)', [4, '2011-11-13', '15:0:1:200', '2011-11-13 15:0:1:2000'])
             self.con.commit()
             cur.execute('select C1,C6,C7,C8 from T2 where C1 = 4')
             rows = cur.fetchall()
             self.assertListEqual(rows,
-                                 [(4, datetime.date(2011, 11, 13), datetime.time(15, 0, 1, 2000),
-                                   datetime.datetime(2011, 11, 13, 15, 0, 1, 2000))])
+                                 [(4, datetime.date(2011, 11, 13), datetime.time(15, 0, 1, 200000),
+                                   datetime.datetime(2011, 11, 13, 15, 0, 1, 200000))])
     def test_insert_blob(self):
         with self.con.cursor() as cur, self.con2.cursor() as cur2:
             cur.execute('insert into T2 (C1,C9) values (?,?)', [4, 'This is a BLOB!'])

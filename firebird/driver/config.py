@@ -41,8 +41,8 @@ from typing import Dict, Union, Iterable
 import os
 from configparser import ConfigParser, ExtendedInterpolation
 from firebird.base.config import Config, StrOption, IntOption, BoolOption, EnumOption, \
-     ConfigListOption
-from .types import NetProtocol
+     ConfigListOption, ListOption
+from .types import NetProtocol, DecfloatRound, DecfloatTraps
 
 class ServerConfig(Config):
     """Server configuration.
@@ -89,7 +89,7 @@ class DatabaseConfig(Config):
         #: Database filename should be passed in UTF8
         self.utf8filename: BoolOption = \
             BoolOption('utf8filename', "Database filename should be passed in UTF8")
-        #: Protocol to be used for database
+        #: Protocol to be used for databasem value is `.NetProtocol`
         self.protocol: EnumOption = \
             EnumOption('protocol', NetProtocol, "Protocol to be used for database")
         #: Defaul user name, default is envar ISC_USER or None if not specified
@@ -130,6 +130,19 @@ class DatabaseConfig(Config):
         #: List of authentication plugins override
         self.auth_plugin_list: StrOption = \
             StrOption('auth_plugin_list', "List of authentication plugins override")
+        #: Session time zone [Firebird 4]
+        self.session_time_zone: StrOption = \
+            StrOption('session_time_zone', "Session time zone")
+        #: Set BIND [Firebird 4]
+        self.set_bind: StrOption = \
+            StrOption('set_bind', "Set BIND - sets up columns coercion rules in session")
+        #: Set DECFLOAT ROUND [Firebird 4], value is `.DecfloatRound`
+        self.decfloat_round: EnumOption = \
+            EnumOption('decfloat_round', DecfloatRound, "DECFLOAT round mode")
+        #: Set DECFLOAT TRAPS [Firebird 4], values are `.DecfloatTraps`
+        self.decfloat_traps: ListOption = \
+            ListOption('decfloat_traps', DecfloatTraps,
+                       "Which DECFLOAT exceptional conditions cause a trap")
         # Create options
         #: Database create option. Page size to be used.
         self.page_size: IntOption = \

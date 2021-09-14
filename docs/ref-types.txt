@@ -167,6 +167,14 @@ DbInfoCode
 ----------
 .. autoclass:: DbInfoCode
 
+Features
+--------
+.. autoclass:: Features
+
+ReplicaMode
+-----------
+.. autoclass:: ReplicaMode
+
 StmtInfoCode
 ------------
 .. autoclass:: StmtInfoCode
@@ -343,6 +351,18 @@ ImpCompiler
 -----------
 .. autoclass:: ImpCompiler
 
+CancelType
+----------
+.. autoclass:: CancelType
+
+DecfloatRound
+-------------
+.. autoclass:: DecfloatRound
+
+DecfloatTraps
+-------------
+.. autoclass:: DecfloatTraps
+
 Flags
 =====
 
@@ -365,6 +385,10 @@ CursorFlag
 ConnectionFlag
 --------------
 .. autoclass:: ConnectionFlag
+
+EncryptionFlag
+--------------
+.. autoclass:: EncryptionFlag
 
 ServerCapability
 ----------------

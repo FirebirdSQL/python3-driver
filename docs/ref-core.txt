@@ -96,6 +96,10 @@ ServerServiceProvider
 ---------------------
 .. autoclass:: ServerServiceProvider
 
+ServerDbServices3
+-----------------
+.. autoclass:: ServerDbServices3
+
 ServerDbServices
 ----------------
 .. autoclass:: ServerDbServices

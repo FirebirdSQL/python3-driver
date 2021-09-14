@@ -46,15 +46,17 @@ Exceptions:
     and `NotSupportedError`
 
 Enums:
-    `NetProtocol`, `DirectoryCode`, `PageSize`, `DBKeyScope`, `DbInfoCode`, `TraInfoCode`,
-    `TraInfoIsolation`, `TraInfoReadCommitted`, `TraInfoAccess`, `TraIsolation`, `TraReadCommitted`,
+    `NetProtocol`, `DirectoryCode`, `PageSize`, `DBKeyScope`, `DbInfoCode`, `Features`,
+    `TraInfoCode`, `ReplicaMode`, `StmtInfoCode`, `TraInfoIsolation`,
+    `TraInfoReadCommitted`, `TraInfoAccess`, `TraIsolation`, `TraReadCommitted`,
     `TraLockResolution`, `TraAccessMode`, `TableShareMode`, `TableAccessMode`, `Isolation`,
     `DefaultAction`, `StatementType`, `BlobType`, `DbAccessMode`, `DbSpaceReservation`,
-    `DbWriteMode`, `ShutdownMode`, `OnlineMode` and `ShutdownMethod`
+    `DbWriteMode`, `ShutdownMode`, `OnlineMode`, `ShutdownMethod`, `CancelType`,
+    `DecfloatRound` and `DecfloatTraps`
 
 Flags:
     `ServerCapability`, `SrvRepairFlag`, `SrvStatFlag`, `SrvBackupFlag`,
-    `SrvRestoreFlag` and `SrvNBackupFlag`
+    `SrvRestoreFlag`, `SrvNBackupFlag`, `ConnectionFlag` and `EncryptionFlag`
 
 Globals and other objects required by Python DB API 2.0:
     `apilevel`, `threadsafety`, `paramstyle`, `Date`, `Time`, `Timestamp`,
@@ -67,7 +69,7 @@ Helper constants:
     and `DESCRIPTION_NULL_OK`
 
 Helper functions:
-    `get_timezone`
+    `get_timezone()`
 
 fbapi
 -----

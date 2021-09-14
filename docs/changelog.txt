@@ -2,6 +2,53 @@
 Changelog
 #########
 
+Version 1.3.0
+=============
+
+* Fix (#4): exeption returns non ascii-127 symbols.
+  The error message decode uses `.fbapi.err_encoding` value that is initialized to
+  `locale.getpreferredencoding`. Also, the decode is now done with `errors="replace"`.
+* Fix unregistered bug: wrong handling of milliseconds in TIME and TEMEPSTAMP datatype.
+* Sync _VERSION_ value with package version
+* Fix unregistered bug: Do not raise exception if accessed `.Statement.plan` is `None`.
+* Fix unregistered bug: `.get_statistics()` does not send `tables` correctly.
+* Fix annotations.
+* `.ServerTraceServices` methods now have return values.
+* User name added to `.TraceSession`.
+* Fix unregistered bug: `auth_plugin_list` configuration option is ignored
+* All methods of `.ServerDbServices3` except 3 related to limbo transactions have new
+  optional keyword-only parameter `role` that is passed to called utility.
+* Function `.connect_server()` has new optional keyword-only parameter `expected_db`,
+  to access services with non-default security database.
+
+* Improved Firebird 4 support.
+
+  - Version-specific classes introduced. Internal classes `.DatabaseInfoProvider`,
+    `.TransactionInfoProvider` and `.ServerDbServices` now implement only Firebird 4 features
+    and descend from Firebird 3 versions. The proper variant is returned according to
+    connected server.
+  - New `.DatabaseConfig` options `session_time_zone`, `set_bind`, `decfloat_round` and
+    `decfloat_traps`.
+  - New `.DPB` parameters `session_time_zone`, `set_db_replica`, `set_bind`, `decfloat_round`
+    and `decfloat_traps`.
+  - New `session_time_zone` keyword parameter for `.connect()`.
+  - Added explicit support for READ COMMITTED READ CONSISTENCY isolation (when disabled in
+    Firebird configuration).
+  - Support for transactions started at specified snapshot number.
+    New `.TransactionInfoProvider.snapshot_number` property.
+    The `.TPB` has new `at_snapshot_number` parameter.
+  - `.backup()` and `.local_backup()` have new optional keyword-only arguments
+    `include_data`, `keyhoder`, `keyname` and `crypt`, and `ZIP` value was added to `SrvBackupFlag`.
+  - `.restore()` and `.local_restore()` have new optional keyword-only
+    arguments `include_data`, `keyhoder`, `keyname`, `crypt` and `replica_mode`.
+  - `.nbackup()` has new optional keyword-only parameter `guid`.
+  - Support for new services.
+    New methods `.ServerDbServices.nfix_database()` and `.set_replica_mode()`.
+  - Support for `.Statement.timeout`, and `idle_timeout` and `statement_timeout` in `.Connection.info`.
+  - New types: `.Features`, `.ReplicaMode`, `.CancelType`, `.DecfloatRound`, `.DecfloatTraps`,
+    `.ConnectionFlag` and `.EncryptionFlag`. Firebird 4-related values added to some other
+    enum types.
+
 Version 1.2.1
 =============
 
@@ -10,9 +57,9 @@ Version 1.2.1
 Version 1.2.0
 =============
 
-* Fix unregistered bug: `sql_dialect` is used instead `db_sql_dialect` in `create_database`.
+* Fix unregistered bug: `sql_dialect` is used instead `db_sql_dialect` in `.create_database`.
 * Fix (#2): error when handling input parameters with value None
-* Added `Server.mode` attribute to allow fetching service output using LINE or TO_EOF method.
+* Added `.Server.mode` attribute to allow fetching service output using LINE or TO_EOF method.
   Default mode is TO_EOF.
 
 Version 1.1.0

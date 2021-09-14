@@ -40,7 +40,7 @@ import time
 import datetime
 import decimal
 from dateutil import tz
-from enum import IntEnum, IntFlag
+from enum import Enum, IntEnum, IntFlag
 from dataclasses import dataclass, field
 from firebird.base.types import Error
 
@@ -107,10 +107,7 @@ class ProgrammingError(DatabaseError):
 
 class NotSupportedError(DatabaseError):
     """Exception raised in case a method or database API was used which is not
-    supported by the database
-
-    Important:
-        This exceptions is never directly thrown by Firebird driver.
+    supported by the database.
     """
 
 # Enums
@@ -297,12 +294,40 @@ class DbInfoCode(IntEnum):
     SES_IDLE_TIMEOUT_ATT = 130  # Firebird 4
     SES_IDLE_TIMEOUT_RUN = 131  # Firebird 4
     CONN_FLAGS = 132
+    CRYPT_KEY = 133
+    CRYPT_STATE = 134
     # Firebird 4
     STMT_TIMEOUT_DB = 135
     STMT_TIMEOUT_ATT = 136
     PROTOCOL_VERSION = 137
     CRYPT_PLUGIN = 138
     CREATION_TIMESTAMP_TZ = 139
+    WIRE_CRYPT = 140
+    FEATURES = 141
+    NEXT_ATTACHMENT = 142
+    NEXT_STATEMENT = 143
+    DB_GUID = 144
+    DB_FILE_ID = 145
+    REPLICA_MODE = 146
+
+class Features(IntEnum):
+    """Firebird features (Response to DbInfoCode.FEATURES).
+    """
+    MULTI_STATEMENTS = 1    # Multiple prepared statements in single attachment
+    MULTI_TRANSACTIONS = 2  # Multiple concurrent transaction in single attachment
+    NAMED_PARAMETERS = 3    # Query parameters can be named
+    SESSION_RESET = 4       # ALTER SESSION RESET is supported
+    READ_CONSISTENCY = 5    # Read consistency TIL is supported
+    STATEMENT_TIMEOUT = 6   # Statement timeout is supported
+    STATEMENT_LONG_LIFE = 7 # Prepared statements are not dropped on transaction end
+
+class ReplicaMode(IntEnum):
+    """Replica modes. Response to DbInfoCode.REPLICA_MODE or as value for
+    DPBItem.SET_DB_REPLICA.
+    """
+    NONE = 0
+    READ_ONLY = 1
+    READ_WRITE = 2
 
 class StmtInfoCode(IntEnum):
     """Statement information (isc_info_sql_*) codes.
@@ -347,6 +372,7 @@ class TraInfoCode(IntEnum):
     ACCESS = 9
     LOCK_TIMEOUT = 10
     DBPATH = 11
+    SNAPSHOT_NUMBER = 12
 
 class TraInfoIsolation(IntEnum):
     """Transaction isolation response.
@@ -555,6 +581,7 @@ class SPBItem(IntEnum):
     AUTH_PLUGIN_LIST = 117
     UTF8_FILENAME = 118
     CONFIG = 123
+    EXPECTED_DB = 124
 
 class BPBItem(IntEnum):
     """isc_bpb_* items.
@@ -603,6 +630,7 @@ class ServerAction(IntEnum):
     DROP_MAPPING = 28
     DISPLAY_USER_ADM = 29
     VALIDATE = 30
+    NFIX = 31 # Firebird 4
 
 class SrvDbInfoOption(IntEnum):
     """Parameters for SvcInfoCode.SRV_DB_INFO.
@@ -668,6 +696,8 @@ class SrvRestoreOption(IntEnum):
     KEYHOLDER = 16
     KEYNAME = 17
     CRYPT = 18
+    INCLUDE_DATA = 19
+    REPLICA_MODE = 20
 
 class SrvNBackupOption(IntEnum):
     """Parameters for ServerAction.NBAK.
@@ -702,6 +732,7 @@ class SrvPropertiesOption(IntEnum):
     TRANSACTIONS_SHUTDOWN = 43
     SHUTDOWN_MODE = 44
     ONLINE_MODE = 45
+    REPLICA_MODE = 46 # Firebird 4
 
 class SrvValidateOption(IntEnum):
     """Parameters for ServerAction.VALIDATE.
@@ -746,6 +777,7 @@ class DbWriteMode(IntEnum):
 class ShutdownMode(IntEnum):
     """Values for isc_spb_prp_shutdown_mode.
     """
+    NORMAL = 0
     MULTI = 1
     SINGLE = 2
     FULL = 3
@@ -917,6 +949,35 @@ class ImpCompiler(IntEnum):
     SUN_STUDIO = 4
     ICC = 5
 
+class CancelType(IntEnum):
+    """Cancel types for `Connection.cancel_operation()`
+    """
+    DISABLE = 1
+    ENABLE = 2
+    RAISE = 3
+    ABORT = 4
+
+class DecfloatRound(Enum):
+    """DECFLOAT ROUND options.
+    """
+    CEILING = 'CEILING'
+    UP = 'UP'
+    HALF_UP = 'HALF_UP'
+    HALF_EVEN = 'HALF_EVEN'
+    HALF_DOWN = 'HALF_DOWN'
+    DOWN = 'DOWN'
+    FLOOR = 'FLOOR'
+    REROUND = 'REROUND'
+
+class DecfloatTraps(Enum):
+    """DECFLOAT TRAPS options.
+    """
+    DIVISION_BY_ZERO = 'Division_by_zero'
+    INEXACT = 'Inexact'
+    INVALID_OPERATION = 'Invalid_operation'
+    OVERFLOW = 'Overflow'
+    UNDERFLOW = 'Underflow'
+
 # Flags
 
 class StateFlag(IntFlag):
@@ -959,6 +1020,12 @@ class ConnectionFlag(IntFlag):
     NONE = 0
     COMPRESSED = 0x01
     ENCRYPTED = 0x02
+
+class EncryptionFlag(IntFlag):
+    """Crypto status (Response to DbInfoCode.CRYPT_STATE).
+    """
+    ENCRYPTED = 0x01
+    PROCESS = 0x02
 
 class ServerCapability(IntFlag):
     """Server capabilities (returned by isc_info_svc_capabilities).
@@ -1003,7 +1070,7 @@ class SrvStatFlag(IntFlag):
     SYS_RELATIONS = 0x10
     RECORD_VERSIONS = 0x20
     NOCREATION = 0x80
-    ENCRYPTION = 0x100  # Firebird 3.0
+    ENCRYPTION = 0x100
     DEFAULT = DATA_PAGES | DATA_PAGES | IDX_PAGES
 
 class SrvBackupFlag(IntFlag):
@@ -1019,8 +1086,7 @@ class SrvBackupFlag(IntFlag):
     CONVERT = 0x40
     EXPAND = 0x80
     NO_TRIGGERS = 0x8000
-    # Firebird 4
-    ZIP = 0x010000
+    ZIP = 0x010000 # Firebird 4
 
 class SrvRestoreFlag(IntFlag):
     """isc_spb_res_* flags for ServerAction.RESTORE.
@@ -1042,6 +1108,7 @@ class SrvNBackupFlag(IntFlag):
     NO_TRIGGERS = 0x01
     # Firebird 4
     IN_PLACE = 0x02
+    SEQUENCE = 0x04
 
 class SrvPropertiesFlag(IntFlag):
     """isc_spb_prp_* flags for ServerAction.PROPERTIES.
@@ -1166,6 +1233,7 @@ class TraceSession:
 
     Attributes:
         id (int): Session ID number
+        user (str): User name
         timestamp (datetime.datetime): Session start timestamp
         name (str): Session name (if defined)
         flags (list): List with session flag names

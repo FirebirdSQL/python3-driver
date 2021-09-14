@@ -1274,18 +1274,18 @@ handle does not work with interfaces."""
         fractions = a.Cardinal(0)
         self.vtable.decodeTime(self, atime, byref(hours), byref(minutes),
                                byref(seconds), byref(fractions))
-        return datetime.time(hours.value, minutes.value, seconds.value, fractions.value)
+        return datetime.time(hours.value, minutes.value, seconds.value, fractions.value * 100)
     def encode_date(self, date: datetime.date) -> a.ISC_DATE:
         "Replaces `isc_encode_sql_date()`"
         return self.vtable.encodeDate(self, date.year, date.month, date.day)
     def encode_time(self, atime: datetime.time) -> a.ISC_TIME:
         "Replaces isc_encode_sql_time()"
-        return self.vtable.encodeTime(self, atime.hour, atime.minute, atime.second, atime.microsecond)
-    def format_status(self, status: iStatus) -> str:
-        "Replaces `fb_interpret()`. Size of buffer, passed into this method, should not be less than 50 bytes."
+        return self.vtable.encodeTime(self, atime.hour, atime.minute, atime.second, int(atime.microsecond / 100))
+    def format_status(self, status: iStatus, encoding: str=a.err_encoding) -> str:
+        "Replaces `fb_interpret()`."
         buffer = create_string_buffer(1024)
         self.vtable.formatStatus(self, buffer, 1024, status)
-        return buffer.value.decode()
+        return buffer.value.decode(encoding, errors='replace')
     def get_client_version(self) -> int:
         "Returns integer, containing major version in byte 0 and minor version in byte 1"
         return self.vtable.getClientVersion(self)

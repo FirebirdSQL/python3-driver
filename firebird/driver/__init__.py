@@ -40,14 +40,15 @@ from .fbapi import load_api, get_api
 from .types import Error, InterfaceError, DatabaseError, DataError, \
      OperationalError, IntegrityError, InternalError, ProgrammingError, \
      NotSupportedError, \
-     NetProtocol, DirectoryCode, PageSize, DBKeyScope, DbInfoCode, \
-     TraInfoCode, TraInfoIsolation, TraInfoReadCommitted, \
+     NetProtocol, DirectoryCode, PageSize, DBKeyScope, DbInfoCode, Features, ReplicaMode, \
+     StmtInfoCode, TraInfoCode, TraInfoIsolation, TraInfoReadCommitted, \
      TraInfoAccess, TraIsolation, TraReadCommitted, TraLockResolution, TraAccessMode, \
      TableShareMode, TableAccessMode, Isolation, DefaultAction, StatementType, BlobType, \
      DbAccessMode, DbSpaceReservation, DbWriteMode, ShutdownMode, OnlineMode, \
      ShutdownMethod, \
+     CancelType, DecfloatRound, DecfloatTraps, \
      ServerCapability, SrvRepairFlag, SrvStatFlag, SrvBackupFlag, \
-     SrvRestoreFlag, SrvNBackupFlag, SrvInfoCode, \
+     SrvRestoreFlag, SrvNBackupFlag, SrvInfoCode, ConnectionFlag, EncryptionFlag, \
      apilevel, threadsafety, paramstyle, DESCRIPTION_NAME, DESCRIPTION_TYPE_CODE, \
      DESCRIPTION_DISPLAY_SIZE, DESCRIPTION_INTERNAL_SIZE, DESCRIPTION_PRECISION, \
      DESCRIPTION_SCALE, DESCRIPTION_NULL_OK, Date, Time, Timestamp, DateFromTicks, \
@@ -58,4 +59,4 @@ from .core import connect, create_database, connect_server, transaction, tpb, TP
      Server, Statement
 
 #: Current driver version, SEMVER string.
-__VERSION__ = '1.1.0'
+__VERSION__ = '1.3.0'

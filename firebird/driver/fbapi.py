@@ -1782,7 +1782,9 @@ IInt128_VTable._fields_ = [
     ('toString', IInt128_toString),
     ('fromString', IInt128_fromString)]
 
-sys_encoding = getpreferredencoding()
+
+#: Encoding used to decode error messages from Firebird.
+err_encoding = getpreferredencoding()
 
 def db_api_error(status: ISC_STATUS_ARRAY) -> bool:
     "Returns True if status_vector contains error"
@@ -1806,7 +1808,7 @@ def exception_from_status(error, status: ISC_STATUS_ARRAY, preamble: str = None)
     while True:
         result = api.fb_interpret(msg, 1024, pvector)
         if result != 0:
-            msglist.append('- ' + (msg.value).decode(sys_encoding))
+            msglist.append('- ' + (msg.value).decode(err_encoding, errors='replace'))
         else:
             break
     return error('\n'.join(msglist), sqlcode=sqlcode, sqlstate=sqlstate, gds_codes=[error_code])

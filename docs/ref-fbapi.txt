@@ -260,6 +260,12 @@ Basic types
     :no-show-inheritance:
     :no-inherited-members:
 
+Variables
+=========
+
+.. autodata:: err_encoding
+   :no-value:
+
 Functions
 =========
 
