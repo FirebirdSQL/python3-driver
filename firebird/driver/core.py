@@ -1060,9 +1060,9 @@ class DatabaseInfoProvider3(InfoProvider):
              DbInfoCode.DB_ID: self.__db_id,
              DbInfoCode.IMPLEMENTATION: self.__implementation,
              DbInfoCode.IMPLEMENTATION_OLD: self.__implementation_old,
-             DbInfoCode.VERSION: self.__info_string,
-             DbInfoCode.FIREBIRD_VERSION: self.__info_string,
-             DbInfoCode.CRYPT_KEY: self.__info_string,
+             DbInfoCode.VERSION: self._info_string,
+             DbInfoCode.FIREBIRD_VERSION: self._info_string,
+             DbInfoCode.CRYPT_KEY: self._info_string,
              DbInfoCode.USER_NAMES: self.__user_names,
              DbInfoCode.ACTIVE_TRANSACTIONS: self.__tra_active,
              DbInfoCode.LIMBO: self.__tra_limbo,
@@ -1102,7 +1102,7 @@ class DatabaseInfoProvider3(InfoProvider):
              DbInfoCode.DB_PROVIDER: self.response.read_sized_int,
              DbInfoCode.PAGES_USED: self.response.read_sized_int,
              DbInfoCode.PAGES_FREE: self.response.read_sized_int,
-             DbInfoCode.CRYPT_KEY: self.__info_string,
+             DbInfoCode.CRYPT_KEY: self._info_string,
              DbInfoCode.CRYPT_STATE: self.__crypt_state,
              DbInfoCode.CONN_FLAGS: self.__con_state,
              DbInfoCode.BACKOUT_COUNT: self.__tbl_perf_count,
@@ -1142,7 +1142,7 @@ class DatabaseInfoProvider3(InfoProvider):
         impl_number = self.response.read_byte()
         class_number = self.response.read_byte()
         return (impl_number, class_number)
-    def __info_string(self) -> str:
+    def _info_string(self) -> str:
         self.response.read_byte()  # Cluster length
         self.response.read_short()  # number of strings
         return self.response.read_pascal_string()
@@ -1507,14 +1507,14 @@ class DatabaseInfoProvider(DatabaseInfoProvider3):
             DbInfoCode.STMT_TIMEOUT_DB: self.response.read_sized_int,
             DbInfoCode.STMT_TIMEOUT_ATT: self.response.read_sized_int,
             DbInfoCode.PROTOCOL_VERSION: self.response.read_sized_int,
-            DbInfoCode.CRYPT_PLUGIN: self.__info_string,
+            DbInfoCode.CRYPT_PLUGIN: self._info_string,
             DbInfoCode.CREATION_TIMESTAMP_TZ: self.__creation_tstz,
-            DbInfoCode.WIRE_CRYPT: self.__info_string,
+            DbInfoCode.WIRE_CRYPT: self._info_string,
             DbInfoCode.FEATURES: self.__features,
             DbInfoCode.NEXT_ATTACHMENT: self.response.read_sized_int,
             DbInfoCode.NEXT_STATEMENT: self.response.read_sized_int,
-            DbInfoCode.DB_GUID: self.__info_string,
-            DbInfoCode.DB_FILE_ID: self.__info_string,
+            DbInfoCode.DB_GUID: self._info_string,
+            DbInfoCode.DB_FILE_ID: self._info_string,
             DbInfoCode.REPLICA_MODE: self.__replica_mode,
         })
     def __creation_tstz(self) -> datetime.datetime:

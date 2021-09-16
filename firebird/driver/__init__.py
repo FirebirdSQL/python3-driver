@@ -59,4 +59,4 @@ from .core import connect, create_database, connect_server, transaction, tpb, TP
      Server, Statement
 
 #: Current driver version, SEMVER string.
-__VERSION__ = '1.3.0'
+__VERSION__ = '1.3.1'
