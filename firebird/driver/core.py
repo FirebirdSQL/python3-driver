@@ -264,6 +264,22 @@ def transaction(transact_object: Transactional, *, tpb: bytes=None,
         else:
             transact_object.commit()
 
+@contextlib.contextmanager
+def temp_database(*args, **kwargs) -> Connection:
+    """Context manager for temporary databases. Creates new database when context
+    is entered, and drops it on exit. Exception raised in managed context is NOT suppressed.
+
+    All positional and keyword arguments are passed to `create_database`.
+    """
+    con = create_database(*args, **kwargs)
+    try:
+        yield con
+    except:
+        con.drop_database()
+        raise
+    else:
+        con.drop_database()
+
 _OP_DIE = object()
 _OP_RECORD_AND_REREGISTER = object()
 
@@ -3617,9 +3633,10 @@ class Cursor(LoggingIdMixin):
         .. note::
 
            If stored procedure does have output parameters, you must retrieve their values
-           saparatelly by `.Cursor.fetchone()` call. This method is not very convenient, but conforms
-           to Python DB API 2.0. If you don't require conformance to Python DB API, it's recommended
-           to use more convenient method `.Cursor.call_procedure()` instead.
+           saparatelly by `.Cursor.fetchone()` call. This method is not very convenient,
+           but conforms to Python DB API 2.0. If you don't require conformance to Python
+           DB API, it's recommended to use more convenient method `.Cursor.call_procedure()`
+           instead.
         """
         params = [] if parameters is None else parameters
         sql = ('EXECUTE PROCEDURE ' + proc_name + ' '

@@ -23,6 +23,10 @@ transaction
 -----------
 .. autofunction:: transaction
 
+temp_database
+-------------
+.. autofunction:: temp_database
+
 Functions
 =========
 

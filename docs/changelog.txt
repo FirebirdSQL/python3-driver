@@ -2,6 +2,12 @@
 Changelog
 #########
 
+Version 1.3.2
+=============
+
+* Fix unregistered bug: iUtil methods removed after FB 4 Beta 2 broke the Int128/TZ handling.
+* New context manager `.temp_database`.
+
 Version 1.3.1
 =============
 

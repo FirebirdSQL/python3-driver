@@ -1696,8 +1696,6 @@ IUtil_VTable._fields_ = [
     ('setOffsets', IUtil_setOffsets),
     ('getDecFloat16', IUtil_getDecFloat16),
     ('getDecFloat34', IUtil_getDecFloat34),
-    ('getTransactionByHandle', c_void_p), # FB 4 Beta 2
-    ('getStatementByHandle', c_void_p), # FB 4 Beta 2
     ('decodeTimeTz', IUtil_decodeTimeTz),
     ('decodeTimeStampTz', IUtil_decodeTimeStampTz),
     ('encodeTimeTz', IUtil_encodeTimeTz),

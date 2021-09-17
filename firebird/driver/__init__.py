@@ -35,7 +35,7 @@
 
 
 """
-from .config import driver_config
+from .config import driver_config, ServerConfig, DatabaseConfig, DriverConfig
 from .fbapi import load_api, get_api
 from .types import Error, InterfaceError, DatabaseError, DataError, \
      OperationalError, IntegrityError, InternalError, ProgrammingError, \
@@ -54,9 +54,9 @@ from .types import Error, InterfaceError, DatabaseError, DataError, \
      DESCRIPTION_SCALE, DESCRIPTION_NULL_OK, Date, Time, Timestamp, DateFromTicks, \
      TimeFromTicks, TimestampFromTicks, STRING, BINARY, NUMBER, DATETIME, ROWID, \
      get_timezone
-from .core import connect, create_database, connect_server, transaction, tpb, TPB, \
-     CHARSET_MAP, DistributedTransactionManager, Connection, Cursor, \
+from .core import connect, create_database, connect_server, transaction, temp_database, \
+     tpb, TPB, CHARSET_MAP, DistributedTransactionManager, Connection, Cursor, \
      Server, Statement
 
 #: Current driver version, SEMVER string.
-__VERSION__ = '1.3.1'
+__VERSION__ = '1.3.2'
