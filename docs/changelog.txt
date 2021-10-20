@@ -2,6 +2,15 @@
 Changelog
 #########
 
+Version 1.3.3
+=============
+
+* Fix unregistered bug: Newly extended interface breaks the driver (affects usability of
+  the driver with Firebird development versions).
+* New exception type `.FirebirdWarning`. From now on, warnings from engine are raised as
+  `.FirebirdWarning` instead `Warning`. In some future release, warnings will not be raised,
+  but reported via `warnings.warn` mechanism.
+
 Version 1.3.2
 =============
 

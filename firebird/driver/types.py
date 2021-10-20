@@ -110,6 +110,12 @@ class NotSupportedError(DatabaseError):
     supported by the database.
     """
 
+# Firebird engine warning via Python Warning mechanism
+
+class FirebirdWarning(Warning):
+    """Warning from Firebird engine.
+    """
+
 # Enums
 
 class NetProtocol(IntEnum):

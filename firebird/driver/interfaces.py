@@ -39,9 +39,10 @@ from typing import Union, Any, Optional, ByteString
 import sys
 import threading
 import datetime
+#from warnings import warn
 from ctypes import memmove, memset, create_string_buffer, cast, byref, string_at, sizeof, \
      c_char_p, c_void_p, c_byte, c_ulong
-from .types import Error, DatabaseError, InterfaceError, BCD, \
+from .types import Error, DatabaseError, InterfaceError, FirebirdWarning, BCD, \
      StateResult, DirectoryCode, BlobInfoCode, SQLDataType, XpbKind, \
      StatementType, StateFlag, CursorFlag, StatementFlag, PreparePrefetchFlag, get_timezone
 from . import fbapi as a
@@ -67,7 +68,7 @@ of wrapped interface.
     def __call__(cls: iVersioned, intf):
         v = intf.contents.vtable.contents.version
         for c in cls.__mro__:
-            if getattr(c, 'VERSION', 0) == v:
+            if getattr(c, 'VERSION', 0) <= v:
                 return super(iVersionedMeta, iVersionedMeta).__call__(c, intf)
 
 # IVersioned(1)
@@ -76,9 +77,9 @@ class iVersioned(metaclass=iVersionedMeta):
     VERSION = 1
     def __init__(self, intf):
         self._as_parameter_ = intf
-        if intf and self.vtable.version != self.VERSION:  # pragma: no cover
+        if intf and self.vtable.version < self.VERSION:  # pragma: no cover
             raise InterfaceError(f"Wrong interface version {self.vtable.version}, expected {self.VERSION}")
-    def __report(self, cls: Union[Error, Warning], vector_ptr: a.ISC_STATUS_ARRAY_PTR) -> None:
+    def __report(self, cls: Union[Error, FirebirdWarning], vector_ptr: a.ISC_STATUS_ARRAY_PTR) -> None:
         msg = _util.format_status(self.status)
         sqlstate = create_string_buffer(6)
         a.api.fb_sqlstate(sqlstate, vector_ptr)
@@ -103,7 +104,9 @@ class iVersioned(metaclass=iVersionedMeta):
         if StateFlag.ERRORS in state:
             raise self.__report(DatabaseError, self.status.get_errors())
         if StateFlag.WARNINGS in state:  # pragma: no cover
-            raise self.__report(Warning, self.status.get_warning())
+            raise self.__report(FirebirdWarning, self.status.get_warning())
+            #warn(self.__report(FirebirdWarning, self.status.get_warning()).args[0],
+                 #FirebirdWarning, 2)
     @property
     def status(self) -> iStatus:
         "iStatus for interface"

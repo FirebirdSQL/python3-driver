@@ -414,7 +414,7 @@ class DPB:
         # Available options:
         # AuthClient, WireCryptPlugin, Providers, ConnectionTimeout, WireCrypt,
         # WireConpression, DummyPacketInterval, RemoteServiceName, RemoteServicePort,
-        # RemoteAuxPort, TcpNoNagle, IpcName, RemotePipeName
+        # RemoteAuxPort, TcpNoNagle, IpcName, RemotePipeName, ClientBatchBuffer [FB4+]
         #: Configuration override
         self.config: Optional[str] = config
         #: List of authentication plugins override

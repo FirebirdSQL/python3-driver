@@ -39,7 +39,7 @@ from .config import driver_config, ServerConfig, DatabaseConfig, DriverConfig
 from .fbapi import load_api, get_api
 from .types import Error, InterfaceError, DatabaseError, DataError, \
      OperationalError, IntegrityError, InternalError, ProgrammingError, \
-     NotSupportedError, \
+     NotSupportedError, FirebirdWarning, \
      NetProtocol, DirectoryCode, PageSize, DBKeyScope, DbInfoCode, Features, ReplicaMode, \
      StmtInfoCode, TraInfoCode, TraInfoIsolation, TraInfoReadCommitted, \
      TraInfoAccess, TraIsolation, TraReadCommitted, TraLockResolution, TraAccessMode, \

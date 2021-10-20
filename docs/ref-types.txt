@@ -48,10 +48,15 @@ NotSupportedError
 -----------------
 .. autoexception:: NotSupportedError
 
+FirebirdWarning
+---------------
+.. autoexception:: FirebirdWarning
+
 This is the exception inheritance layout::
 
     StandardError
     |__Warning
+        |__FirebirdWarning
     |__Error
         |__InterfaceError
         |__DatabaseError
