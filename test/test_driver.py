@@ -53,6 +53,11 @@ FBTEST_PASSWORD = 'masterkey'
 
 trace = False
 
+if not sys.warnoptions:
+    import warnings
+    warnings.simplefilter("always") # Change the filter in this process
+    #os.environ["PYTHONWARNINGS"] = "default" # Also affect subprocesses
+
 def os_environ_get_mock(key, default):
     return f'MOCK_{key}'
 
@@ -441,7 +446,10 @@ class TestConnection(DriverTestBase):
             self.assertGreaterEqual(con.info.ods_version, 11)
             self.assertGreaterEqual(con.info.ods_minor_version, 0)
             self.assertGreaterEqual(con.info.page_cache_size, 75)
-            self.assertEqual(con.info.pages_allocated, 367)
+            if self.version == FB30:
+                self.assertEqual(con.info.pages_allocated, 367)
+            else:
+                self.assertEqual(con.info.pages_allocated, 389)
             self.assertGreater(con.info.pages_used, 300)
             self.assertGreaterEqual(con.info.pages_free, 0)
             self.assertEqual(con.info.sweep_interval, 20000)
@@ -608,7 +616,8 @@ class TestTransaction(DriverTestBase):
         with self.con.transaction_manager(tpb_buffer) as tr:
             info = tr.info.get_info(TraInfoCode.ISOLATION)
             if self.version == FB40:
-                self.assertEqual(info, Isolation.READ_COMMITTED_READ_CONSISTENCY)
+                self.assertIn(info, [Isolation.READ_COMMITTED_READ_CONSISTENCY,
+                                     Isolation.READ_COMMITTED_RECORD_VERSION])
             else:
                 self.assertEqual(info, Isolation.READ_COMMITTED_RECORD_VERSION)
             self.assertEqual(tr.info.get_info(TraInfoCode.ACCESS), TraInfoAccess.READ_WRITE)
@@ -994,10 +1003,7 @@ class TestCursor(DriverTestBase):
         with self.con.cursor() as cur:
             self.assertEqual(cur.affected_rows, -1)
             cur.execute('select * from project')
-            if self.version == FB40:
-                self.assertEqual(cur.affected_rows, 1)
-            else:
-                self.assertEqual(cur.affected_rows, 0)
+            self.assertEqual(cur.affected_rows, 0)
             cur.fetchone()
             if sys.platform == 'win32':
                 rcount = 6

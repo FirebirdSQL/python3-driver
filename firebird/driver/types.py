@@ -112,9 +112,36 @@ class NotSupportedError(DatabaseError):
 
 # Firebird engine warning via Python Warning mechanism
 
-class FirebirdWarning(Warning):
+class FirebirdWarning(UserWarning):
     """Warning from Firebird engine.
+
+    The important difference from `Warning` class is that `FirebirdWarning` accepts keyword
+    arguments, that are stored into instance attributes with the same name.
+
+    Important:
+        Attribute lookup on this class never fails, as all attributes that are not actually
+        set, have `None` value.
+
+    Example::
+
+        try:
+            if condition:
+                raise FirebirdWarning("Error message", err_code=1)
+            else:
+                raise FirebirdWarning("Unknown error")
+        except FirebirdWarning as e:
+            if e.err_code is None:
+                ...
+            elif e.err_code == 1:
+                ...
+
     """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args)
+        for name, value in kwargs.items():
+            setattr(self, name, value)
+    def __getattr__(self, name):
+        return None
 
 # Enums
 
@@ -1077,7 +1104,7 @@ class SrvStatFlag(IntFlag):
     RECORD_VERSIONS = 0x20
     NOCREATION = 0x80
     ENCRYPTION = 0x100
-    DEFAULT = DATA_PAGES | DATA_PAGES | IDX_PAGES
+    DEFAULT = DATA_PAGES | IDX_PAGES
 
 class SrvBackupFlag(IntFlag):
     """isc_spb_bkp_* flags for ServerAction.BACKUP.

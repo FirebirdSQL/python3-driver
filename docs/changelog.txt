@@ -2,6 +2,21 @@
 Changelog
 #########
 
+Version 1.3.4
+=============
+
+* `.FirebirdWarning` is not raised as exception, but reported via `warnings.warn`  mechanism.
+* User-defined encoding for string parameter and response values exchanged between driver
+  and Firebird engine. This includes TPB, DPB, SPB and various service values:
+
+  - `.TPB`: New `encoding` constructor parameter & attribute. Used for `table names` in table reservation.
+  - `.DPB`: Encoding based on connection charset for `config`, `user name`, `password` and `role`.
+  - `.SPB`: New `encoding` constructor parameter & attribute. Used for `config`, `user name`, `password` and `expected database`.
+  - Connection-related providers: Encoding based on connection charset.
+  - Server and Service providers: New `.Server.encoding` attribute.
+* Fixed bug in `.ServerDbServices3.get_statistics` when `tables` are specified.
+
+
 Version 1.3.3
 =============
 

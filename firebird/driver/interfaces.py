@@ -39,7 +39,7 @@ from typing import Union, Any, Optional, ByteString
 import sys
 import threading
 import datetime
-#from warnings import warn
+from warnings import warn
 from ctypes import memmove, memset, create_string_buffer, cast, byref, string_at, sizeof, \
      c_char_p, c_void_p, c_byte, c_ulong
 from .types import Error, DatabaseError, InterfaceError, FirebirdWarning, BCD, \
@@ -104,9 +104,9 @@ class iVersioned(metaclass=iVersionedMeta):
         if StateFlag.ERRORS in state:
             raise self.__report(DatabaseError, self.status.get_errors())
         if StateFlag.WARNINGS in state:  # pragma: no cover
-            raise self.__report(FirebirdWarning, self.status.get_warning())
-            #warn(self.__report(FirebirdWarning, self.status.get_warning()).args[0],
-                 #FirebirdWarning, 2)
+            #raise self.__report(FirebirdWarning, self.status.get_warning())
+            warn(self.__report(FirebirdWarning, self.status.get_warning()),
+                 stacklevel=2)
     @property
     def status(self) -> iStatus:
         "iStatus for interface"
@@ -868,7 +868,7 @@ class iAttachment_v3(iReferenceCounted):
     VERSION = 3
     def __init__(self, intf):
         super().__init__(intf)
-        self.charset: str = 'ascii'
+        self.encoding: str = 'ascii'
     def get_info(self, items: bytes, buffer: bytes) -> None:
         "Replaces `isc_database_info()`"
         self.vtable.getInfo(self, self.status, len(items), items, len(buffer), buffer)
@@ -930,7 +930,7 @@ contains transaction number in network format of given length."""
         """Replaces `isc_dsql_prepare()`. Additional parameter flags makes it
 possible to control what information will be preloaded from engine at once
 (i.e. in single network packet for remote operation)."""
-        b_stmt: bytes = stmt.encode(self.charset)
+        b_stmt: bytes = stmt.encode(self.encoding)
         result = self.vtable.prepare(self, self.status, transaction, len(b_stmt), b_stmt,
                                      dialect, flags)
         self._check()
@@ -941,7 +941,7 @@ possible to control what information will be preloaded from engine at once
         """Executes any SQL statement except returning multiple rows of data.
 Partial analogue of `isc_dsql_execute2()` - in and out XSLQDAs replaced with
 input and output messages with appropriate buffers."""
-        b_stmt: bytes = stmt.encode(self.charset)
+        b_stmt: bytes = stmt.encode(self.encoding)
         result = self.vtable.execute(self, self.status, transaction, len(b_stmt), b_stmt,
                                      dialect, in_metadata, in_buffer, out_metadata, out_buffer)
         self._check()
@@ -955,10 +955,10 @@ output data is defined by out_metadata parameter, leaving it NULL default format
 may be used. Parameter cursor_name specifies name of opened cursor (analogue of
 `isc_dsql_set_cursor_name()`). Parameter cursor_flags is needed to open
 bidirectional cursor setting it's value to Istatement::CURSOR_TYPE_SCROLLABLE."""
-        b_stmt: bytes = stmt.encode(self.charset)
+        b_stmt: bytes = stmt.encode(self.encoding)
         result = self.vtable.openCursor(self, self.status, transaction, len(b_stmt), b_stmt,
                                         dialect, in_metadata, in_buffer, out_metadata,
-                                        cursor_name.encode(self.charset), cursor_flags)
+                                        cursor_name.encode(self.encoding), cursor_flags)
         self._check()
         return iResultSet(result)
     def que_events(self, callback: iEventCallbackImpl, events: bytes) -> iEvents:
@@ -1011,7 +1011,7 @@ class iAttachment(iAttachment_v3):
     def create_batch(self, transaction: iTransaction, stmt: str, dialect: int,
                      in_metadata: iMessageMetadata, params: bytes) -> iBatch:
         "TODO"
-        b_stmt: bytes = stmt.encode(self.charset)
+        b_stmt: bytes = stmt.encode(self.encoding)
         result = self.vtable.createBatch(self, self.status, transaction, len(b_stmt), b_stmt,
                                          dialect, in_metadata, len(params), params)
         self._check()
@@ -1146,7 +1146,7 @@ class iXpbBuilder(iDisposable):
         "Inserts a clumplet with value containing passed bytes."
         self.vtable.insertBytes(self, self.status, tag, value, len(value))
         self._check()
-    def insert_string(self, tag: int, value: str, encoding='ascii') -> None:
+    def insert_string(self, tag: int, value: str, *, encoding='ascii') -> None:
         "Inserts a clumplet with value containing passed string."
         self.vtable.insertString(self, self.status, tag, value.encode(encoding))
         self._check()
@@ -1197,11 +1197,11 @@ class iXpbBuilder(iDisposable):
         result = self.vtable.getBigInt(self, self.status)
         self._check()
         return result
-    def get_string(self) -> str:
+    def get_string(self, *, encoding='ascii') -> str:
         "Returns value of current clumplet as string."
         result = self.vtable.getString(self, self.status)
         self._check()
-        return string_at(result).decode()
+        return string_at(result).decode(encoding)
     def get_bytes(self) -> bytes:
         "Returns value of current clumplet as bytes."
         buffer = self.vtable.getBytes(self, self.status)

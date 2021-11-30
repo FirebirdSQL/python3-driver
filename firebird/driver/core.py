@@ -101,9 +101,9 @@ _thns = threading.local()
 
 _tenTo = [10 ** x for x in range(20)]
 _i2name = {DbInfoCode.READ_SEQ_COUNT: 'sequential', DbInfoCode.READ_IDX_COUNT: 'indexed',
-            DbInfoCode.INSERT_COUNT: 'inserts', DbInfoCode.UPDATE_COUNT: 'updates',
-            DbInfoCode.DELETE_COUNT: 'deletes', DbInfoCode.BACKOUT_COUNT: 'backouts',
-            DbInfoCode.PURGE_COUNT: 'purges', DbInfoCode.EXPUNGE_COUNT: 'expunges'}
+           DbInfoCode.INSERT_COUNT: 'inserts', DbInfoCode.UPDATE_COUNT: 'updates',
+           DbInfoCode.DELETE_COUNT: 'deletes', DbInfoCode.BACKOUT_COUNT: 'backouts',
+           DbInfoCode.PURGE_COUNT: 'purges', DbInfoCode.EXPUNGE_COUNT: 'expunges'}
 
 _bpb_stream = bytes([1, BPBItem.TYPE, 1, BlobType.STREAM])
 
@@ -291,7 +291,8 @@ class TPB:
                  isolation: Isolation = Isolation.SNAPSHOT,
                  lock_timeout: int = -1, no_auto_undo: bool = False,
                  auto_commit: bool = False, ignore_limbo: bool = False,
-                 at_snapshot_number: int=None):
+                 at_snapshot_number: int=None, encoding: str='ascii'):
+        self.encoding: str = encoding
         self.access_mode: TraAccessMode = access_mode
         self.isolation: Isolation = isolation
         self.lock_timeout: int = lock_timeout
@@ -346,7 +347,7 @@ class TPB:
                     self.at_snapshot_number = tpb.get_bigint()
                 elif tag in TableAccessMode._value2member_map_:
                     tbl_access = TableAccessMode(tag)
-                    tbl_name = tpb.get_string()
+                    tbl_name = tpb.get_string(encoding=self.encoding)
                     tpb.move_next()
                     if tpb.is_eof():
                         raise ValueError(f"Missing share mode value in table {tbl_name} reservation")
@@ -385,7 +386,7 @@ class TPB:
                 tpb.insert_bigint(TPBItem.AT_SNAPSHOT_NUMBER, self.at_snapshot_number)
             for table in self._table_reservation:
                 # Access mode + table name
-                tpb.insert_string(table[2], table[0])
+                tpb.insert_string(table[2], table[0], encoding=self.encoding)
                 tpb.insert_tag(table[1])  # Share mode
             result = tpb.get_buffer()
         return result
@@ -518,26 +519,27 @@ class DPB:
     def parse_buffer(self, buffer: bytes) -> None:
         """Load information from DPB.
         """
+        _py_charset: str = CHARSET_MAP.get(self.charset, 'ascii')
         self.clear()
         with a.get_api().util.get_xpb_builder(XpbKind.DPB, buffer) as dpb:
             while not dpb.is_eof():
                 tag = dpb.get_tag()
                 if tag == DPBItem.CONFIG:
-                    self.config = dpb.get_string()
+                    self.config = dpb.get_string(encoding=_py_charset)
                 elif tag == DPBItem.AUTH_PLUGIN_LIST:
                     self.auth_plugin_list = dpb.get_string()
                 elif tag == DPBItem.TRUSTED_AUTH:
                     self.trusted_auth = True
                 elif tag == DPBItem.USER_NAME:
-                    self.user = dpb.get_string()
+                    self.user = dpb.get_string(encoding=_py_charset)
                 elif tag == DPBItem.PASSWORD:
-                    self.password = dpb.get_string()
+                    self.password = dpb.get_string(encoding=_py_charset)
                 elif tag == DPBItem.CONNECT_TIMEOUT:
                     self.timeout = dpb.get_int()
                 elif tag == DPBItem.DUMMY_PACKET_INTERVAL:
                     self.dummy_packet_interval = dpb.get_int()
                 elif tag == DPBItem.SQL_ROLE_NAME:
-                    self.role = dpb.get_string()
+                    self.role = dpb.get_string(encoding=_py_charset)
                 elif tag == DPBItem.SQL_DIALECT:
                     self.sql_dialect = dpb.get_int()
                 elif tag == DPBItem.LC_CTYPE:
@@ -586,16 +588,17 @@ class DPB:
     def get_buffer(self, *, for_create: bool = False) -> bytes:
         """Create DPB from stored information.
         """
+        _py_charset: str = CHARSET_MAP.get(self.charset, 'ascii')
         with a.get_api().util.get_xpb_builder(XpbKind.DPB) as dpb:
             if self.config is not None:
-                dpb.insert_string(DPBItem.CONFIG, self.config)
+                dpb.insert_string(DPBItem.CONFIG, self.config, encoding=_py_charset)
             if self.trusted_auth:
                 dpb.insert_tag(DPBItem.TRUSTED_AUTH)
             else:
                 if self.user:
-                    dpb.insert_string(DPBItem.USER_NAME, self.user)
+                    dpb.insert_string(DPBItem.USER_NAME, self.user, encoding=_py_charset)
                 if self.password:
-                    dpb.insert_string(DPBItem.PASSWORD, self.password)
+                    dpb.insert_string(DPBItem.PASSWORD, self.password, encoding=_py_charset)
             if self.auth_plugin_list is not None:
                 dpb.insert_string(DPBItem.AUTH_PLUGIN_LIST, self.auth_plugin_list)
             if self.timeout is not None:
@@ -603,7 +606,7 @@ class DPB:
             if self.dummy_packet_interval is not None:
                 dpb.insert_int(DPBItem.DUMMY_PACKET_INTERVAL, self.dummy_packet_interval)
             if self.role:
-                dpb.insert_string(DPBItem.SQL_ROLE_NAME, self.role)
+                dpb.insert_string(DPBItem.SQL_ROLE_NAME, self.role, encoding=_py_charset)
             if self.sql_dialect:
                 dpb.insert_int(DPBItem.SQL_DIALECT, self.sql_dialect)
             if self.charset:
@@ -660,7 +663,9 @@ class SPB_ATTACH:
     """Service Parameter Buffer.
     """
     def __init__(self, *, user: str = None, password: str = None, trusted_auth: bool = False,
-                 config: str = None, auth_plugin_list: str = None, expected_db: str=None):
+                 config: str = None, auth_plugin_list: str = None, expected_db: str=None,
+                 encoding: str='ascii'):
+        self.encoding: str = encoding
         self.user: str = user
         self.password: str = password
         self.trusted_auth: bool = trusted_auth
@@ -683,34 +688,34 @@ class SPB_ATTACH:
             while not spb.is_eof():
                 tag = spb.get_tag()
                 if tag == SPBItem.CONFIG:
-                    self.config = spb.get_string()
+                    self.config = spb.get_string(encoding=self.encoding)
                 elif tag == SPBItem.AUTH_PLUGIN_LIST:
                     self.auth_plugin_list = spb.get_string()
                 elif tag == SPBItem.TRUSTED_AUTH:
                     self.trusted_auth = True
                 elif tag == SPBItem.USER_NAME:
-                    self.user = spb.get_string()
+                    self.user = spb.get_string(encoding=self.encoding)
                 elif tag == SPBItem.PASSWORD:
-                    self.password = spb.get_string()
+                    self.password = spb.get_string(encoding=self.encoding)
                 elif tag == SPBItem.EXPECTED_DB:
-                    self.expected_db = spb.get_string()
+                    self.expected_db = spb.get_string(encoding=self.encoding)
     def get_buffer(self) -> bytes:
         """Create SPB_ATTACH from stored information.
         """
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_ATTACH) as spb:
             if self.config is not None:
-                spb.insert_string(SPBItem.CONFIG, self.config)
+                spb.insert_string(SPBItem.CONFIG, self.config, encoding=self.encoding)
             if self.trusted_auth:
                 spb.insert_tag(SPBItem.TRUSTED_AUTH)
             else:
                 if self.user is not None:
-                    spb.insert_string(SPBItem.USER_NAME, self.user)
+                    spb.insert_string(SPBItem.USER_NAME, self.user, encoding=self.encoding)
                 if self.password is not None:
-                    spb.insert_string(SPBItem.PASSWORD, self.password)
+                    spb.insert_string(SPBItem.PASSWORD, self.password, encoding=self.encoding)
             if self.auth_plugin_list is not None:
                 spb.insert_string(SPBItem.AUTH_PLUGIN_LIST, self.auth_plugin_list)
             if self.expected_db is not None:
-                spb.insert_string(SPBItem.EXPECTED_DB, self.expected_db)
+                spb.insert_string(SPBItem.EXPECTED_DB, self.expected_db, encoding=self.encoding)
             result = spb.get_buffer()
         return result
 
@@ -1053,9 +1058,10 @@ class EngineVersionProvider(InfoProvider):
         else: # pragma: no cover
             # Unknown version
             result = '0.0.0.0'
+        self.con = None
         return result
     def get_engine_version(self, con: Union[Connection, Server]) -> float:
-        x = _engine_version_provider.get_server_version(con).split('.')
+        x = self.get_server_version(con).split('.')
         return float(f'{x[0]}.{x[1]}')
 
 _engine_version_provider: EngineVersionProvider = EngineVersionProvider('utf8')
@@ -1069,7 +1075,7 @@ class DatabaseInfoProvider3(InfoProvider):
 
     """
     def __init__(self, connection: Connection):
-        super().__init__(connection._py_charset)
+        super().__init__(connection._encoding)
         self._con: Connection = weakref.ref(connection)
         self._handlers: Dict[DbInfoCode, Callable] = \
             {DbInfoCode.BASE_LEVEL: self.response.get_tag,
@@ -1589,8 +1595,8 @@ class Connection(LoggingIdMixin):
         self.__ecollectors: List[EventCollector] = []
         self.__dsn: str = dsn
         self.__sql_dialect: int = sql_dialect
-        self._py_charset: str = CHARSET_MAP.get(charset, 'ascii')
-        self._att.charset = self._py_charset
+        self._encoding: str = CHARSET_MAP.get(charset, 'ascii')
+        self._att.encoding = self._encoding
         self._dpb: bytes = dpb
         #: Default TPB for newly created transaction managers
         self.default_tpb: bytes = tpb(Isolation.SNAPSHOT)
@@ -2453,7 +2459,7 @@ class TransactionManager(LoggingIdMixin):
         if self.__info is None:
             cls = TransactionInfoProvider if self._connection()._engine_version() >= 4.0 \
                 else TransactionInfoProvider3
-            self.__info = cls(self._connection()._py_charset, self)
+            self.__info = cls(self._connection()._encoding, self)
         return self.__info
     @property
     def log_context(self) -> Connection:
@@ -2965,7 +2971,7 @@ class Cursor(LoggingIdMixin):
         self._dialect: int = connection.sql_dialect
         self._transaction: TransactionManager = transaction
         self._stmt: Statement = None
-        self._py_charset: str = connection._py_charset
+        self._encoding: str = connection._encoding
         self._result: iResultSet = None
         self._last_fetch_status: StateResult = None
         self._name: str = None
@@ -3005,7 +3011,7 @@ class Cursor(LoggingIdMixin):
                     val = string_at(buf[bufpos:bufpos+esize], esize)
                     ### Todo: verify handling of P version differences
                     if subtype != 1:   # non OCTETS
-                        val = val.decode(self._py_charset)
+                        val = val.decode(self._encoding)
                     # CHAR with multibyte encoding requires special handling
                     if subtype in (4, 69):  # UTF8 and GB18030
                         reallength = esize // 4
@@ -3017,7 +3023,7 @@ class Cursor(LoggingIdMixin):
                 elif dtype in (a.blr_varying, a.blr_varying2):
                     val = string_at(buf[bufpos:bufpos+esize])
                     if subtype != a.OCTETS:
-                        val = val.decode(self._py_charset)
+                        val = val.decode(self._encoding)
                 elif dtype in (a.blr_short, a.blr_long, a.blr_int64):
                     val = (0).from_bytes(buf[bufpos:bufpos + esize], 'little', signed=True)
                     if subtype or scale:
@@ -3102,7 +3108,7 @@ class Cursor(LoggingIdMixin):
                              a.blr_varying, a.blr_varying2):
                     val = value[i]
                     if isinstance(val, str):
-                        val = val.encode(self._py_charset)
+                        val = val.encode(self._encoding)
                     if len(val) > esize:
                         raise ValueError(f"ARRAY value of parameter is too long,"
                                          f" expected {esize}, found {len(val)}")
@@ -3236,7 +3242,7 @@ class Cursor(LoggingIdMixin):
                     builder.set_type(i, SQLDataType.TEXT)
                     if not isinstance(value, (str, bytes, bytearray)):
                         value = str(value)
-                    builder.set_length(i, len(value.encode(self._py_charset)) if isinstance(value, str) else len(value))
+                    builder.set_length(i, len(value.encode(self._encoding)) if isinstance(value, str) else len(value))
             in_meta = builder.get_metadata()
             new_size = in_meta.get_message_length()
             in_buffer = create_string_buffer(new_size) if buf_size < new_size else buffer
@@ -3256,8 +3262,8 @@ class Cursor(LoggingIdMixin):
                     # Implicit conversion to string
                     if not isinstance(value, (str, bytes, bytearray)):
                         value = str(value)
-                    if isinstance(value, str) and self._py_charset:
-                        value = value.encode(self._py_charset)
+                    if isinstance(value, str) and self._encoding:
+                        value = value.encode(self._encoding)
                     if (datatype in [SQLDataType.TEXT, SQLDataType.VARYING]
                         and len(value) > length):
                         raise ValueError(f"Value of parameter ({i}) is too long,"
@@ -3310,7 +3316,7 @@ class Cursor(LoggingIdMixin):
                         try:
                             memmove(buf_addr + offset, addressof(blobid), length)
                             while value_chunk := value.read(MAX_BLOB_SEGMENT_SIZE):
-                                blob_buf.raw = value_chunk.encode(self._py_charset) if isinstance(value_chunk, str) else value_chunk
+                                blob_buf.raw = value_chunk.encode(self._encoding) if isinstance(value_chunk, str) else value_chunk
                                 blob.put_segment(len(value_chunk), blob_buf)
                                 memset(blob_buf, 0, MAX_BLOB_SEGMENT_SIZE)
                         finally:
@@ -3320,7 +3326,7 @@ class Cursor(LoggingIdMixin):
                         # Non-stream BLOB
                         if isinstance(value, str):
                             if in_meta.get_subtype(i) == 1:
-                                value = value.encode(self._py_charset)
+                                value = value.encode(self._encoding)
                             else:
                                 raise TypeError('String value is not'
                                                 ' acceptable type for'
@@ -3349,8 +3355,8 @@ class Cursor(LoggingIdMixin):
                     isc_status = a.ISC_STATUS_ARRAY()
                     db_handle = a.FB_API_HANDLE(0)
                     tr_handle = a.FB_API_HANDLE(0)
-                    relname = in_meta.get_relation(i).encode(self._py_charset)
-                    sqlname = in_meta.get_field(i).encode(self._py_charset)
+                    relname = in_meta.get_relation(i).encode(self._encoding)
+                    sqlname = in_meta.get_field(i).encode(self._encoding)
                     api = a.get_api()
                     api.fb_get_database_handle(isc_status, db_handle, self._connection._att)
                     if a.db_api_error(isc_status):  # pragma: no cover
@@ -3417,7 +3423,7 @@ class Cursor(LoggingIdMixin):
                 if datatype == SQLDataType.TEXT:
                     value = string_at(buf_addr + offset, length)
                     if desc.charset != a.OCTETS:
-                        value = value.decode(self._py_charset)
+                        value = value.decode(self._encoding)
                     # CHAR with multibyte encoding requires special handling
                     if desc.charset in (4, 69):  # UTF8 and GB18030
                         reallength = length // 4
@@ -3430,7 +3436,7 @@ class Cursor(LoggingIdMixin):
                     size = (0).from_bytes(string_at(buf_addr + offset, 2), 'little')
                     value = string_at(buf_addr + offset + 2, size)
                     if desc.charset != 1:
-                        value = value.decode(self._py_charset)
+                        value = value.decode(self._encoding)
                 elif datatype == SQLDataType.BOOLEAN:
                     value = bool((0).from_bytes(buffer[offset], 'little'))
                 elif datatype in [SQLDataType.SHORT, SQLDataType.LONG, SQLDataType.INT64]:
@@ -3472,7 +3478,7 @@ class Cursor(LoggingIdMixin):
                         or (blob_length > self.stream_blob_threshold)):
                         # Stream BLOB
                         value = BlobReader(blob, blobid, desc.subtype, blob_length,
-                                           segment_size, self._py_charset, self)
+                                           segment_size, self._encoding, self)
                         self.__blob_readers.add(value)
                     else:
                         # Materialized BLOB
@@ -3489,7 +3495,7 @@ class Cursor(LoggingIdMixin):
                             # Finalize value
                             value = blob_value.raw
                             if desc.subtype == 1:
-                                value = value.decode(self._py_charset)
+                                value = value.decode(self._encoding)
                         finally:
                             blob.close()
                             del blob_value
@@ -3502,8 +3508,8 @@ class Cursor(LoggingIdMixin):
                     isc_status = a.ISC_STATUS_ARRAY()
                     db_handle = a.FB_API_HANDLE(0)
                     tr_handle = a.FB_API_HANDLE(0)
-                    relname = desc.relation.encode(self._py_charset)
-                    sqlname = desc.field.encode(self._py_charset)
+                    relname = desc.relation.encode(self._encoding)
+                    sqlname = desc.field.encode(self._encoding)
                     api = a.get_api()
                     api.fb_get_database_handle(isc_status, db_handle, self._connection._att)
                     if a.db_api_error(isc_status):  # pragma: no cover
@@ -4072,7 +4078,7 @@ class ServerInfoProvider(InfoProvider):
         elif info_code in (SrvInfoCode.SERVER_VERSION, SrvInfoCode.IMPLEMENTATION,
                            SrvInfoCode.GET_ENV, SrvInfoCode.GET_ENV_MSG,
                            SrvInfoCode.GET_ENV_LOCK, SrvInfoCode.USER_DBPATH):
-            result = self.response.read_sized_string()
+            result = self.response.read_sized_string(encoding=self._srv().encoding)
         elif info_code == SrvInfoCode.SRV_DB_INFO:
             num_attachments = -1
             databases = []
@@ -4083,7 +4089,7 @@ class ServerInfoProvider(InfoProvider):
                 elif tag == SrvDbInfoOption.ATT:
                     num_attachments = self.response.read_short()
                 elif tag == SPBItem.DBNAME:
-                    databases.append(self.response.read_sized_string())
+                    databases.append(self.response.read_sized_string(encoding=self._srv().encoding))
                 elif tag == SrvDbInfoOption.DB:
                     self.response.read_short()
             result = (num_attachments, databases)
@@ -4190,15 +4196,13 @@ class ServerDbServices3(ServerServiceProvider):
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.DB_STATS)
-            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_string(SPBItem.DBNAME, database, encoding=self._srv().encoding)
             spb.insert_int(SPBItem.OPTIONS, flags)
             if role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, role)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             if tables is not None:
-                cmdline = ['-t']
-                cmdline.extend(tables)
-                for item in cmdline:
-                    spb.insert_string(SPBItem.COMMAND_LINE, item)
+                for table in tables:
+                    spb.insert_string(64, table, encoding=self._srv().encoding) # isc_spb_sts_table = 64
             self._srv()._svc.start(spb.get_buffer())
         if callback:
             for line in self._srv():
@@ -4235,13 +4239,13 @@ class ServerDbServices3(ServerServiceProvider):
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.BACKUP)
-            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_string(SPBItem.DBNAME, database, encoding=self._srv().encoding)
             for filename, size in itertools.zip_longest(backup, backup_file_sizes):
-                spb.insert_string(SrvBackupOption.FILE, filename)
+                spb.insert_string(SrvBackupOption.FILE, filename, encoding=self._srv().encoding)
                 if size is not None:
                     spb.insert_int(SrvBackupOption.LENGTH, size)
             if role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, role)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             if skip_data is not None:
                 spb.insert_string(SrvBackupOption.SKIP_DATA, skip_data)
             if include_data is not None:
@@ -4303,22 +4307,22 @@ class ServerDbServices3(ServerServiceProvider):
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.RESTORE)
             for filename in backup:
-                spb.insert_string(SrvRestoreOption.FILE, filename)
+                spb.insert_string(SrvRestoreOption.FILE, filename, encoding=self._srv().encoding)
             for filename, size in itertools.zip_longest(database, db_file_pages):
-                spb.insert_string(SPBItem.DBNAME, filename)
+                spb.insert_string(SPBItem.DBNAME, filename, encoding=self._srv().encoding)
                 if size is not None:
                     spb.insert_int(SrvRestoreOption.LENGTH, size)
             if role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, role)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             if page_size is not None:
                 spb.insert_int(SrvRestoreOption.PAGE_SIZE, page_size)
             if buffers is not None:
                 spb.insert_int(SrvRestoreOption.BUFFERS, buffers)
             spb.insert_bytes(SrvRestoreOption.ACCESS_MODE, bytes([access_mode]))
             if skip_data is not None:
-                spb.insert_string(SrvRestoreOption.SKIP_DATA, skip_data)
+                spb.insert_string(SrvRestoreOption.SKIP_DATA, skip_data, encoding=self._srv().encoding)
             if include_data is not None:
-                spb.insert_string(SrvRestoreOption.INCLUDE_DATA, include_data)
+                spb.insert_string(SrvRestoreOption.INCLUDE_DATA, include_data, encoding=self._srv().encoding)
             if keyhoder is not None:
                 spb.insert_string(SrvRestoreOption.KEYHOLDER, keyhoder)
             if keyname is not None:
@@ -4356,15 +4360,17 @@ class ServerDbServices3(ServerServiceProvider):
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.BACKUP)
-            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_string(SPBItem.DBNAME, database, encoding=self._srv().encoding)
             spb.insert_string(SrvBackupOption.FILE, 'stdout')
             spb.insert_int(SPBItem.OPTIONS, flags)
             if role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, role)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             if skip_data is not None:
-                spb.insert_string(SrvBackupOption.SKIP_DATA, skip_data)
+                spb.insert_string(SrvBackupOption.SKIP_DATA, skip_data,
+                                  encoding=self._srv().encoding)
             if include_data is not None:
-                spb.insert_string(SrvBackupOption.INCLUDE_DATA, include_data)
+                spb.insert_string(SrvBackupOption.INCLUDE_DATA, include_data,
+                                  encoding=self._srv().encoding)
             if keyhoder is not None:
                 spb.insert_string(SrvBackupOption.KEYHOLDER, keyhoder)
             if keyname is not None:
@@ -4412,7 +4418,7 @@ class ServerDbServices3(ServerServiceProvider):
             spb.insert_tag(ServerAction.RESTORE)
             spb.insert_string(SrvRestoreOption.FILE, 'stdin')
             for filename, size in itertools.zip_longest(database, db_file_pages):
-                spb.insert_string(SPBItem.DBNAME, filename)
+                spb.insert_string(SPBItem.DBNAME, filename, encoding=self._srv().encoding)
                 if size is not None:
                     spb.insert_int(SrvRestoreOption.LENGTH, size)
             if page_size is not None:
@@ -4421,9 +4427,11 @@ class ServerDbServices3(ServerServiceProvider):
                 spb.insert_int(SrvRestoreOption.BUFFERS, buffers)
             spb.insert_bytes(SrvRestoreOption.ACCESS_MODE, bytes([access_mode]))
             if skip_data is not None:
-                spb.insert_string(SrvRestoreOption.SKIP_DATA, skip_data)
+                spb.insert_string(SrvRestoreOption.SKIP_DATA, skip_data,
+                                  encoding=self._srv().encoding)
             if include_data is not None:
-                spb.insert_string(SrvRestoreOption.INCLUDE_DATA, include_data)
+                spb.insert_string(SrvRestoreOption.INCLUDE_DATA, include_data,
+                                  encoding=self._srv().encoding)
             if keyhoder is not None:
                 spb.insert_string(SrvRestoreOption.KEYHOLDER, keyhoder)
             if keyname is not None:
@@ -4434,7 +4442,7 @@ class ServerDbServices3(ServerServiceProvider):
                 spb.insert_int(SrvRestoreOption.REPLICA_MODE, replica_mode.value)
             spb.insert_int(SPBItem.OPTIONS, flags)
             if role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, role)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             self._srv()._svc.start(spb.get_buffer())
         #
         request_length = 0
@@ -4458,7 +4466,7 @@ class ServerDbServices3(ServerServiceProvider):
                 if tag == SrvInfoCode.STDIN:
                     request_length = self._srv().response.read_int()
                 elif tag == SrvInfoCode.LINE:
-                    line = self._srv().response.read_sized_string()
+                    line = self._srv().response.read_sized_string(encoding=self._srv().encoding)
                 elif tag == isc_info_data_not_ready:
                     no_data = True
                 else:  # pragma: no cover
@@ -4486,8 +4494,8 @@ class ServerDbServices3(ServerServiceProvider):
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.NBAK)
-            spb.insert_string(SPBItem.DBNAME, database)
-            spb.insert_string(SrvNBackupOption.FILE, backup)
+            spb.insert_string(SPBItem.DBNAME, database, encoding=self._srv().encoding)
+            spb.insert_string(SrvNBackupOption.FILE, backup, encoding=self._srv().encoding)
             if guid is not None:
                 spb.insert_string(SrvNBackupOption.GUID, guid)
             else:
@@ -4495,7 +4503,7 @@ class ServerDbServices3(ServerServiceProvider):
             if direct is not None:
                 spb.insert_string(SrvNBackupOption.DIRECT, 'ON' if direct else 'OFF')
             if role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, role)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             spb.insert_int(SPBItem.OPTIONS, flags)
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
@@ -4514,13 +4522,13 @@ class ServerDbServices3(ServerServiceProvider):
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.NREST)
-            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_string(SPBItem.DBNAME, database, encoding=self._srv().encoding)
             for backup in backups:
-                spb.insert_string(SrvNBackupOption.FILE, backup)
+                spb.insert_string(SrvNBackupOption.FILE, backup, encoding=self._srv().encoding)
             if direct is not None:
                 spb.insert_string(SrvNBackupOption.DIRECT, 'ON' if direct else 'OFF')
             if role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, role)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             spb.insert_int(SPBItem.OPTIONS, flags)
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
@@ -4535,9 +4543,9 @@ class ServerDbServices3(ServerServiceProvider):
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
-            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_string(SPBItem.DBNAME, database, encoding=self._srv().encoding)
             if role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, role)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             spb.insert_int(SrvPropertiesOption.PAGE_BUFFERS, size)
             self._srv()._svc.start(spb.get_buffer())
     def set_sweep_interval(self, *, database: str, interval: int, role: str=None) -> None:
@@ -4551,9 +4559,9 @@ class ServerDbServices3(ServerServiceProvider):
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
-            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_string(SPBItem.DBNAME, database, encoding=self._srv().encoding)
             if role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, role)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             spb.insert_int(SrvPropertiesOption.SWEEP_INTERVAL, interval)
             self._srv()._svc.start(spb.get_buffer())
     def set_space_reservation(self, *, database: str, mode: DbSpaceReservation,
@@ -4568,9 +4576,9 @@ class ServerDbServices3(ServerServiceProvider):
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
-            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_string(SPBItem.DBNAME, database, encoding=self._srv().encoding)
             if role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, role)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             spb.insert_bytes(SrvPropertiesOption.RESERVE_SPACE,
                              bytes([mode]))
             self._srv()._svc.start(spb.get_buffer())
@@ -4585,9 +4593,9 @@ class ServerDbServices3(ServerServiceProvider):
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
-            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_string(SPBItem.DBNAME, database, encoding=self._srv().encoding)
             if role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, role)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             spb.insert_bytes(SrvPropertiesOption.WRITE_MODE,
                              bytes([mode]))
             self._srv()._svc.start(spb.get_buffer())
@@ -4602,9 +4610,9 @@ class ServerDbServices3(ServerServiceProvider):
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
-            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_string(SPBItem.DBNAME, database, encoding=self._srv().encoding)
             if role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, role)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             spb.insert_bytes(SrvPropertiesOption.ACCESS_MODE,
                              bytes([mode]))
             self._srv()._svc.start(spb.get_buffer())
@@ -4619,9 +4627,9 @@ class ServerDbServices3(ServerServiceProvider):
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
-            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_string(SPBItem.DBNAME, database, encoding=self._srv().encoding)
             if role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, role)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             spb.insert_int(SrvPropertiesOption.SET_SQL_DIALECT, dialect)
             self._srv()._svc.start(spb.get_buffer())
     def activate_shadow(self, *, database: str, role: str=None) -> None:
@@ -4634,9 +4642,9 @@ class ServerDbServices3(ServerServiceProvider):
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
-            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_string(SPBItem.DBNAME, database, encoding=self._srv().encoding)
             if role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, role)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             spb.insert_int(SPBItem.OPTIONS, SrvPropertiesFlag.ACTIVATE)
             self._srv()._svc.start(spb.get_buffer())
     def no_linger(self, *, database: str, role: str=None) -> None:
@@ -4649,9 +4657,9 @@ class ServerDbServices3(ServerServiceProvider):
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
-            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_string(SPBItem.DBNAME, database, encoding=self._srv().encoding)
             if role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, role)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             spb.insert_int(SPBItem.OPTIONS, SrvPropertiesFlag.NOLINGER)
             self._srv()._svc.start(spb.get_buffer())
     def shutdown(self, *, database: str, mode: ShutdownMode,
@@ -4668,9 +4676,9 @@ class ServerDbServices3(ServerServiceProvider):
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
-            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_string(SPBItem.DBNAME, database, encoding=self._srv().encoding)
             if role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, role)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             spb.insert_bytes(SrvPropertiesOption.SHUTDOWN_MODE, bytes([mode]))
             spb.insert_int(method, timeout)
             self._srv()._svc.start(spb.get_buffer())
@@ -4686,9 +4694,9 @@ class ServerDbServices3(ServerServiceProvider):
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.PROPERTIES)
-            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_string(SPBItem.DBNAME, database, encoding=self._srv().encoding)
             if role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, role)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             spb.insert_bytes(SrvPropertiesOption.ONLINE_MODE, bytes([mode]))
             self._srv()._svc.start(spb.get_buffer())
     def sweep(self, *, database: str, role: str=None) -> None:
@@ -4701,9 +4709,9 @@ class ServerDbServices3(ServerServiceProvider):
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.REPAIR)
-            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_string(SPBItem.DBNAME, database, encoding=self._srv().encoding)
             if role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, role)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             spb.insert_int(SPBItem.OPTIONS, SrvRepairFlag.SWEEP_DB)
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
@@ -4719,9 +4727,9 @@ class ServerDbServices3(ServerServiceProvider):
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.REPAIR)
-            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_string(SPBItem.DBNAME, database, encoding=self._srv().encoding)
             if role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, role)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             spb.insert_int(SPBItem.OPTIONS, flags)
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
@@ -4746,19 +4754,23 @@ class ServerDbServices3(ServerServiceProvider):
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.VALIDATE)
-            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_string(SPBItem.DBNAME, database, encoding=self._srv().encoding)
             if include_table is not None:
-                spb.insert_string(SrvValidateOption.INCLUDE_TABLE, include_table)
+                spb.insert_string(SrvValidateOption.INCLUDE_TABLE, include_table,
+                                  encoding=self._srv().encoding)
             if exclude_table is not None:
-                spb.insert_string(SrvValidateOption.EXCLUDE_TABLE, exclude_table)
+                spb.insert_string(SrvValidateOption.EXCLUDE_TABLE, exclude_table,
+                                  encoding=self._srv().encoding)
             if include_index is not None:
-                spb.insert_string(SrvValidateOption.INCLUDE_INDEX, include_index)
+                spb.insert_string(SrvValidateOption.INCLUDE_INDEX, include_index,
+                                  encoding=self._srv().encoding)
             if exclude_index is not None:
-                spb.insert_string(SrvValidateOption.EXCLUDE_INDEX, exclude_index)
+                spb.insert_string(SrvValidateOption.EXCLUDE_INDEX, exclude_index,
+                                  encoding=self._srv().encoding)
             if lock_timeout is not None:
                 spb.insert_int(SrvValidateOption.LOCK_TIMEOUT, lock_timeout)
             if role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, role)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             self._srv()._svc.start(spb.get_buffer())
         if callback:
             for line in self._srv():
@@ -4841,7 +4853,7 @@ class ServerDbServices3(ServerServiceProvider):
         """
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.REPAIR)
-            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_string(SPBItem.DBNAME, database, encoding=self._srv().encoding)
             if transaction_id <= USHRT_MAX:
                 spb.insert_int(SrvRepairOption.COMMIT_TRANS, transaction_id)
             else:
@@ -4857,7 +4869,7 @@ class ServerDbServices3(ServerServiceProvider):
         """
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.REPAIR)
-            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_string(SPBItem.DBNAME, database, encoding=self._srv().encoding)
             if transaction_id <= USHRT_MAX:
                 spb.insert_int(SrvRepairOption.ROLLBACK_TRANS, transaction_id)
             else:
@@ -4879,9 +4891,9 @@ class ServerDbServices(ServerDbServices3):
         """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_string(SPBItem.DBNAME, database, encoding=self._srv().encoding)
             if role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, role)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             spb.insert_tag(ServerAction.NFIX)
             spb.insert_int(SPBItem.OPTIONS, flags)
             self._srv()._svc.start(spb.get_buffer())
@@ -4896,9 +4908,9 @@ class ServerDbServices(ServerDbServices3):
         """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_string(SPBItem.DBNAME, database)
+            spb.insert_string(SPBItem.DBNAME, database, encoding=self._srv().encoding)
             if role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, role)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             spb.insert_int(SrvPropertiesOption.REPLICA_MODE, mode.value)
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
@@ -4915,7 +4927,7 @@ class ServerUserServices(ServerServiceProvider):
                 if user:
                     users.append(UserInfo(**user))
                     user.clear()
-                user['user_name'] = data.read_sized_string()
+                user['user_name'] = data.read_sized_string(encoding=self._srv().encoding)
             elif tag == SrvUserOption.USER_ID:
                 user['user_id'] = data.read_int()
             elif tag == SrvUserOption.GROUP_ID:
@@ -4923,13 +4935,13 @@ class ServerUserServices(ServerServiceProvider):
             elif tag == SrvUserOption.PASSWORD:  # pragma: no cover
                 user['password'] = data.read_bytes()
             elif tag == SrvUserOption.GROUP_NAME:  # pragma: no cover
-                user['group_name'] = data.read_sized_string()
+                user['group_name'] = data.read_sized_string(encoding=self._srv().encoding)
             elif tag == SrvUserOption.FIRST_NAME:
-                user['first_name'] = data.read_sized_string()
+                user['first_name'] = data.read_sized_string(encoding=self._srv().encoding)
             elif tag == SrvUserOption.MIDDLE_NAME:
-                user['middle_name'] = data.read_sized_string()
+                user['middle_name'] = data.read_sized_string(encoding=self._srv().encoding)
             elif tag == SrvUserOption.LAST_NAME:
-                user['last_name'] = data.read_sized_string()
+                user['last_name'] = data.read_sized_string(encoding=self._srv().encoding)
             elif tag == SrvUserOption.ADMIN:
                 user['admin'] = bool(data.read_int())
             else:  # pragma: no cover
@@ -4948,9 +4960,10 @@ class ServerUserServices(ServerServiceProvider):
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.DISPLAY_USER_ADM)
             if database is not None:
-                spb.insert_string(SPBItem.DBNAME, database)
+                spb.insert_string(SPBItem.DBNAME, database, encoding=self._srv().encoding)
             if sql_role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, sql_role)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, sql_role,
+                                  encoding=self._srv().encoding)
             self._srv()._svc.start(spb.get_buffer())
         return self.__fetch_users(Buffer(self._srv()._read_all_binary_output()))
     def get(self, user_name: str, *, database: str=None, sql_role: str=None) -> Optional[UserInfo]:
@@ -4965,10 +4978,10 @@ class ServerUserServices(ServerServiceProvider):
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.DISPLAY_USER_ADM)
             if database is not None:
-                spb.insert_string(SPBItem.DBNAME, database)
-            spb.insert_string(SrvUserOption.USER_NAME, user_name)
+                spb.insert_string(SPBItem.DBNAME, database, encoding=self._srv().encoding)
+            spb.insert_string(SrvUserOption.USER_NAME, user_name, encoding=self._srv().encoding)
             if sql_role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, sql_role)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, sql_role, encoding=self._srv().encoding)
             self._srv()._svc.start(spb.get_buffer())
         users = self.__fetch_users(Buffer(self._srv()._read_all_binary_output()))
         return users[0] if users else None
@@ -4994,21 +5007,25 @@ class ServerUserServices(ServerServiceProvider):
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.ADD_USER)
             if database is not None:
-                spb.insert_string(SPBItem.DBNAME, database)
-            spb.insert_string(SrvUserOption.USER_NAME, user_name)
+                spb.insert_string(SPBItem.DBNAME, database, encoding=self._srv().encoding)
+            spb.insert_string(SrvUserOption.USER_NAME, user_name, encoding=self._srv().encoding)
             if sql_role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, sql_role)
-            spb.insert_string(SrvUserOption.PASSWORD, password)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, sql_role, encoding=self._srv().encoding)
+            spb.insert_string(SrvUserOption.PASSWORD, password,
+                              encoding=self._srv().encoding)
             if user_id is not None:
                 spb.insert_int(SrvUserOption.USER_ID, user_id)
             if group_id is not None:
                 spb.insert_int(SrvUserOption.GROUP_ID, group_id)
             if first_name is not None:
-                spb.insert_string(SrvUserOption.FIRST_NAME, first_name)
+                spb.insert_string(SrvUserOption.FIRST_NAME, first_name,
+                                  encoding=self._srv().encoding)
             if middle_name is not None:
-                spb.insert_string(SrvUserOption.MIDDLE_NAME, middle_name)
+                spb.insert_string(SrvUserOption.MIDDLE_NAME, middle_name,
+                                  encoding=self._srv().encoding)
             if last_name is not None:
-                spb.insert_string(SrvUserOption.LAST_NAME, last_name)
+                spb.insert_string(SrvUserOption.LAST_NAME, last_name,
+                                  encoding=self._srv().encoding)
             if admin is not None:
                 spb.insert_int(SrvUserOption.ADMIN, 1 if admin else 0)
             self._srv()._svc.start(spb.get_buffer())
@@ -5032,19 +5049,24 @@ class ServerUserServices(ServerServiceProvider):
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.MODIFY_USER)
-            spb.insert_string(SrvUserOption.USER_NAME, user_name)
+            spb.insert_string(SrvUserOption.USER_NAME, user_name,
+                              encoding=self._srv().encoding)
             if password is not None:
-                spb.insert_string(SrvUserOption.PASSWORD, password)
+                spb.insert_string(SrvUserOption.PASSWORD, password,
+                                  encoding=self._srv().encoding)
             if user_id is not None:
                 spb.insert_int(SrvUserOption.USER_ID, user_id)
             if group_id is not None:
                 spb.insert_int(SrvUserOption.GROUP_ID, group_id)
             if first_name is not None:
-                spb.insert_string(SrvUserOption.FIRST_NAME, first_name)
+                spb.insert_string(SrvUserOption.FIRST_NAME, first_name,
+                                  encoding=self._srv().encoding)
             if middle_name is not None:
-                spb.insert_string(SrvUserOption.MIDDLE_NAME, middle_name)
+                spb.insert_string(SrvUserOption.MIDDLE_NAME, middle_name,
+                                  encoding=self._srv().encoding)
             if last_name is not None:
-                spb.insert_string(SrvUserOption.LAST_NAME, last_name)
+                spb.insert_string(SrvUserOption.LAST_NAME, last_name,
+                                  encoding=self._srv().encoding)
             if admin is not None:
                 spb.insert_int(SrvUserOption.ADMIN, 1 if admin else 0)
             self._srv()._svc.start(spb.get_buffer())
@@ -5060,11 +5082,11 @@ class ServerUserServices(ServerServiceProvider):
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.DELETE_USER)
-            spb.insert_string(SrvUserOption.USER_NAME, user_name)
+            spb.insert_string(SrvUserOption.USER_NAME, user_name, encoding=self._srv().encoding)
             if database is not None:
-                spb.insert_string(SPBItem.DBNAME, database)
+                spb.insert_string(SPBItem.DBNAME, database, encoding=self._srv().encoding)
             if sql_role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, sql_role)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, sql_role, encoding=self._srv().encoding)
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
     def exists(self, user_name: str, *, database: str=None, sql_role: str=None) -> bool:
@@ -5106,7 +5128,7 @@ class ServerTraceServices(ServerServiceProvider):
             spb.insert_tag(ServerAction.TRACE_START)
             if name is not None:
                 spb.insert_string(SrvTraceOption.NAME, name)
-            spb.insert_string(SrvTraceOption.CONFIG, config)
+            spb.insert_string(SrvTraceOption.CONFIG, config, encoding=self._srv().encoding)
             self._srv()._svc.start(spb.get_buffer())
         response = self._srv()._fetch_line()
         if response.startswith('Trace session ID'):
@@ -5199,7 +5221,8 @@ class Server(LoggingIdMixin):
         self.response: CBuffer = CBuffer(USHRT_MAX)
         self._eof: bool = False
         self.__line_buffer: List[str] = []
-        self.charset: str = 'ascii'
+        #: Encoding for string values
+        self.encoding: str = 'ascii'
         #
         self.__ev: float = None
         self.__info: ServerInfoProvider = None
@@ -5251,7 +5274,7 @@ class Server(LoggingIdMixin):
             if tag == SrvInfoCode.TIMEOUT:
                 return None
             elif tag == SrvInfoCode.LINE:
-                result = self.response.read_sized_string()
+                result = self.response.read_sized_string(encoding=self.encoding)
         if self.response.get_tag() != isc_info_end:  # pragma: no cover
             raise InterfaceError("Malformed result buffer (missing isc_info_end item)")
         return result
@@ -5262,7 +5285,7 @@ class Server(LoggingIdMixin):
         tag = self.response.get_tag()
         if tag != self.mode:  # pragma: no cover
             raise InterfaceError(f"Service responded with error code: {tag}")
-        data = self.response.read_sized_string()
+        data = self.response.read_sized_string(encoding=self.encoding)
         init += data
         if data and self.mode is SrvInfoCode.LINE:
             init += '\n'
@@ -5360,7 +5383,7 @@ class Server(LoggingIdMixin):
         """Access to various information about attached server.
         """
         if self.__info is None:
-            self.__info = ServerInfoProvider(self.charset, self)
+            self.__info = ServerInfoProvider(self.encoding, self)
         return self.__info
     @property
     def database(self) -> Union[ServerDbServices3, ServerDbServices]:
