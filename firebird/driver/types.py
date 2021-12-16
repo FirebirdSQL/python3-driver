@@ -35,11 +35,12 @@
 """
 
 from __future__ import annotations
-from typing import Tuple, List, Callable, Protocol
+from typing import Tuple, List, Callable, Protocol, Union
 import time
 import datetime
 import decimal
 from dateutil import tz
+from pathlib import Path
 from enum import Enum, IntEnum, IntFlag
 from dataclasses import dataclass, field
 from firebird.base.types import Error
@@ -1358,6 +1359,8 @@ ROWID = DBAPITypeObject()
 DESCRIPTION = Tuple[str, type, int, int, int, int, bool]
 #: Callback that accepts line of text output
 CB_OUTPUT_LINE = Callable[[str], None]
+#: File name (incl. path) specification
+FILESPEC = Union[str, Path]
 
 class Transactional(Protocol):  # pragma: no cover
     """Protocol type for object that supports transactional processing."""

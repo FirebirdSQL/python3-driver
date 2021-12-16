@@ -55,7 +55,7 @@ FirebirdWarning
 This is the exception inheritance layout::
 
     StandardError
-    |__Warning
+    |__UserWarning
         |__FirebirdWarning
     |__Error
         |__InterfaceError

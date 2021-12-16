@@ -51,6 +51,11 @@ FBTEST_USER = 'SYSDBA'
 # Default user password
 FBTEST_PASSWORD = 'masterkey'
 
+cfg = driver_config.register_server('FBTEST_HOST')
+cfg.host.value = FBTEST_HOST
+cfg.user.value = FBTEST_USER
+cfg.password.value = FBTEST_PASSWORD
+
 trace = False
 
 if not sys.warnoptions:
@@ -653,12 +658,21 @@ class TestDistributedTransaction(DriverTestBase):
         super().setUp()
         self.dbfile = os.path.join(self.dbpath, self.FBTEST_DB)
         self.db1 = os.path.join(self.dbpath, 'fbtest-1.fdb')
-        self.db2 = os.path.join(self.dbpath, 'fbtest-2.fdb')
-        self.con1 = create_database(self.db1, user=FBTEST_USER, password=FBTEST_PASSWORD, overwrite=True)
+        cfg = driver_config.register_database('dts-1')
+        cfg.server.value = 'FBTEST_HOST'
+        cfg.database.value = self.db1
+        cfg.no_linger.value = True
+        self.con1 = create_database('dts-1', user=FBTEST_USER, password=FBTEST_PASSWORD, overwrite=True)
         self.con1._logging_id_ = self.__class__.__name__
         self.con1.execute_immediate("recreate table T (PK integer, C1 integer)")
         self.con1.commit()
-        self.con2 = create_database(self.db2, user=FBTEST_USER, password=FBTEST_PASSWORD, overwrite=True)
+
+        self.db2 = os.path.join(self.dbpath, 'fbtest-2.fdb')
+        cfg = driver_config.register_database('dts-2')
+        cfg.server.value = 'FBTEST_HOST'
+        cfg.database.value = self.db2
+        cfg.no_linger.value = True
+        self.con2 = create_database('dts-2', user=FBTEST_USER, password=FBTEST_PASSWORD, overwrite=True)
         self.con2._logging_id_ = self.__class__.__name__
         self.con2.execute_immediate("recreate table T (PK integer, C1 integer)")
         self.con2.commit()
@@ -666,16 +680,24 @@ class TestDistributedTransaction(DriverTestBase):
         #if self.con1 and self.con1.group:
             ## We can't drop database via connection in group
             #self.con1.group.disband()
-        if not self.con1:
-            self.con1 = connect(host=FBTEST_HOST, database=self.db1,
-                                user=FBTEST_USER, password=FBTEST_PASSWORD, no_linger=True)
-        self.con1.drop_database()
-        self.con1.close()
-        if not self.con2:
-            self.con2 = connect(host=FBTEST_HOST, database=self.db2,
-                                user=FBTEST_USER, password=FBTEST_PASSWORD, no_linger=True)
-        self.con2.drop_database()
-        self.con2.close()
+        if self.con1 is not None:
+            self.con1.close()
+        if self.con2 is not None:
+            self.con2.close()
+        #
+        with connect_server('FBTEST_HOST') as srv:
+            srv.database.shutdown(database=self.db1, mode=ShutdownMode.FULL,
+                                  method=ShutdownMethod.FORCED, timeout=0)
+            srv.database.bring_online(database=self.db1)
+        with connect('dts-1') as con:
+            con.drop_database()
+        #
+        with connect_server('FBTEST_HOST') as srv:
+            srv.database.shutdown(database=self.db2, mode=ShutdownMode.FULL,
+                                  method=ShutdownMethod.FORCED, timeout=0)
+            srv.database.bring_online(database=self.db2)
+        with connect('dts-2') as con:
+            con.drop_database()
     def test_context_manager(self):
         with DistributedTransactionManager((self.con1, self.con2)) as dt:
             q = 'select * from T order by pk'
@@ -785,62 +807,54 @@ class TestDistributedTransaction(DriverTestBase):
     def test_limbo_transactions(self):
         self.skipTest('Not implemented yet')
         #return
-        with connect_server(host=FBTEST_HOST, user=FBTEST_USER, password=FBTEST_PASSWORD) as svc:
-            dt = DistributedTransactionManager((self.con1, self.con2))
-            ids1 = svc.get_limbo_transaction_ids(database=self.db1)
-            self.assertEqual(ids1, [])
-            ids2 = svc.get_limbo_transaction_ids(database=self.db2)
-            self.assertEqual(ids2, [])
-            dt.execute_immediate('insert into t (pk) values (3)')
-            dt.prepare()
-            # Force out both connections
-            dt._tra.release()
-            dt._tra = None
-            dt.close()
-            self.con1.close()
-            self.con1 = None
-            self.con2.close()
-            self.con2 = None
-            #
-            ids1 = svc.get_limbo_transaction_ids(database=self.db1)
-            id1 = ids1[0]
-            ids2 = svc.get_limbo_transaction_ids(database=self.db2)
-            id2 = ids2[0]
-            # Data chould be blocked by limbo transaction
-            if not self.con1:
-                self.con1 = connect(host=FBTEST_HOST, database=self.db1, user=FBTEST_USER,
-                                    password=FBTEST_PASSWORD, no_linger=True)
-                self.con1._logging_id_ = self.__class__.__name__
-            if not self.con2:
-                self.con2 = connect(host=FBTEST_HOST, database=self.db2, user=FBTEST_USER,
-                                    password=FBTEST_PASSWORD, no_linger=True)
-                self.con2._logging_id_ = self.__class__.__name__
-            c1 = self.con1.cursor()
-            c1.execute('select * from t')
-            with self.assertRaises(DatabaseError) as cm:
-                row = c1.fetchall()
-            self.assertTupleEqual(cm.exception.args,
-                                  ('Cursor.fetchone:\n- SQLCODE: -911\n- record from transaction %i is stuck in limbo' % id1, -911, 335544459))
-            c2 = self.con2.cursor()
-            c2.execute('select * from t')
-            with self.assertRaises(DatabaseError) as cm:
-                row = c2.fetchall()
-            self.assertTupleEqual(cm.exception.args,
-                                  ('Cursor.fetchone:\n- SQLCODE: -911\n- record from transaction %i is stuck in limbo' % id2, -911, 335544459))
-            # resolve via service
-            svc = connect_server(host=FBTEST_HOST, password=FBTEST_PASSWORD)
-            svc.commit_limbo_transaction(database=self.db1, transaction_id=id1)
-            svc.rollback_limbo_transaction(database=self.db2, transaction_id=id2)
+        #with connect_server('FBTEST_HOST') as svc:
+            #dt = DistributedTransactionManager([self.con1, self.con2])
+            #ids1 = svc.database.get_limbo_transaction_ids(database=self.db1)
+            #self.assertEqual(ids1, [])
+            #ids2 = svc.database.get_limbo_transaction_ids(database=self.db2)
+            #self.assertEqual(ids2, [])
+            #dt.execute_immediate('insert into t (pk) values (3)')
+            #dt.prepare()
+            ## Force out both connections
+            #dt._tra.release()
+            #dt._tra = None
+            #dt.close()
+            #self.con1.close()
+            #self.con2.close()
+            ##
+            #self.con1 = connect('dts-1')
+            #self.con2 = connect('dts-2')
+            #ids1 = svc.database.get_limbo_transaction_ids(database=self.db1)
+            #id1 = ids1[0]
+            #ids2 = svc.database.get_limbo_transaction_ids(database=self.db2)
+            #id2 = ids2[0]
+            ## Data should be blocked by limbo transaction
+            #c1 = self.con1.cursor()
+            #c1.execute('select * from t')
+            #with self.assertRaises(DatabaseError) as cm:
+                #row = c1.fetchall()
+            #self.assertTupleEqual(cm.exception.args,
+                                  #('Cursor.fetchone:\n- SQLCODE: -911\n- record from transaction %i is stuck in limbo' % id1, -911, 335544459))
+            #c2 = self.con2.cursor()
+            #c2.execute('select * from t')
+            #with self.assertRaises(DatabaseError) as cm:
+                #row = c2.fetchall()
+            #self.assertTupleEqual(cm.exception.args,
+                                  #('Cursor.fetchone:\n- SQLCODE: -911\n- record from transaction %i is stuck in limbo' % id2, -911, 335544459))
+            ## resolve via service
+            #svc = connect_server(host=FBTEST_HOST, password=FBTEST_PASSWORD)
+            #svc.database.commit_limbo_transaction(database=self.db1, transaction_id=id1)
+            #svc.database.rollback_limbo_transaction(database=self.db2, transaction_id=id2)
 
-            # check the resolution
-            c1 = self.con1.cursor()
-            c1.execute('select * from t')
-            row = c1.fetchall()
-            self.assertListEqual(row, [(3, None)])
-            c2 = self.con2.cursor()
-            c2.execute('select * from t')
-            row = c2.fetchall()
-            self.assertListEqual(row, [])
+            ## check the resolution
+            #c1 = self.con1.cursor()
+            #c1.execute('select * from t')
+            #row = c1.fetchall()
+            #self.assertListEqual(row, [(3, None)])
+            #c2 = self.con2.cursor()
+            #c2.execute('select * from t')
+            #row = c2.fetchall()
+            #self.assertListEqual(row, [])
 
 class TestCursor(DriverTestBase):
     def setUp(self):
@@ -1614,8 +1628,8 @@ class TestServerServices(DriverTestBase):
         self.assertGreater(len(output), 0)
         self.assertEqual(output, log)
     def test_04_get_limbo_transaction_ids(self):
-        self.skipTest('Not implemented yet')
-        ids = self.svc.get_limbo_transaction_ids(database='employee')
+        #self.skipTest('Not implemented yet')
+        ids = self.svc.database.get_limbo_transaction_ids(database='employee')
         self.assertIsInstance(ids, type(list()))
     def test_05_trace(self):
         #self.skipTest('Not implemented yet')

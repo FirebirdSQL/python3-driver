@@ -868,6 +868,7 @@ class iAttachment_v3(iReferenceCounted):
     VERSION = 3
     def __init__(self, intf):
         super().__init__(intf)
+        #: Encoding used for string values
         self.encoding: str = 'ascii'
     def get_info(self, items: bytes, buffer: bytes) -> None:
         "Replaces `isc_database_info()`"

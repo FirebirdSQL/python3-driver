@@ -2,6 +2,43 @@
 Changelog
 #########
 
+Version 1.4.0
+=============
+
+Improvements:
+-------------
+
+* Added `role` parameter to `.connect_server` and `.SPB_ATTACH`.
+* Added `encoding` parameter to `.SPB_ATTACH` with default value `ascii` - used to encode
+  `config`, `user`, `password` and `expected_db` values.
+* Added `encoding` parameter to `.TPB` with default value `ascii` - used to encode table names.
+* `.DPB` parameter `charset` is now used to determine encoding for `config`, `user`,
+  `password` and `role` values.
+* `.connect_server` has new `encoding` parameter with default value `ascii` that is passed
+  to new `.Server.encoding` attribute. `.Server.encoding` is used to encode/decode various
+  string values passed between client and server in parameter buffers (see below), and text
+  output from services.
+* `.ServerInfoProvider` now uses `.Server.encoding` for returned SERVER_VERSION, IMPLEMENTATION,
+  GET_ENV, GET_ENV_MSG, GET_ENV_LOCK, USER_DBPATH and DBNAME values.
+* `.ServerDbServices` now uses `.Server.encoding` for DBNAME, SQL_ROLE_NAME, FILE, SKIP_DATA,
+  INCLUDE_DATA, INCLUDE_TABLE, EXCLUDE_TABLE, INCLUDE_INDEX, EXCLUDE_INDEX, LINE and
+  isc_spb_sts_table SPB values.
+* `.ServerUserServices` now uses `.Server.encoding` for DBNAME, SQL_ROLE_NAME, USER_NAME,
+  GROUP_NAME, FIRST_NAME, MIDDLE_NAME, LAST_NAME and PASSWORD (on storage only) SPB values.
+* `.ServerTraceServices` now uses `.Server.encoding` for CONFIG SPB value.
+* Failed `.Connection.close` should not cause problems on object destruction anymore.
+* Failed `.Server.close` should not cause problems on object destruction anymore.
+
+Backward incompatible changes:
+------------------------------
+
+* `.tpb` parameter `access` renamed to `access_mode`.
+* `.FirebirdWarning` now descends from `UserWarning` instead `Warning`, and is reported
+  to application via `.warnings.warn` instead raised as exception.
+* `.iAttachment_v3` attribute `charset` was renamed to `encoding`.
+* `.iXpbBuilder.insert_string` optional parameter `encoding` is now  keyword-only.
+  Parameter also added to `.iXpbBuilder.get_string` method.
+
 Version 1.3.4
 =============
 
