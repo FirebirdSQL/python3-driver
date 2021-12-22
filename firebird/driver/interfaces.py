@@ -981,10 +981,12 @@ with attachment is to close it."""
         "Replaces `isc_detach_database()`. On success releases interface."
         self.vtable.detach(self, self.status)
         self._check()
+        self._refcnt -= 1
     def drop_database(self) -> None:
         "Replaces `isc_drop_database()`. On success releases interface."
         self.vtable.dropDatabase(self, self.status)
         self._check()
+        self._refcnt -= 1
 
 # >>> Firebird 4
 # IAttachment(4) : IAttachment(3)

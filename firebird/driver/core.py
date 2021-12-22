@@ -1762,10 +1762,12 @@ class Connection(LoggingIdMixin):
         """
         self._close()
         self._close_internals()
-        self._att.drop_database()
-        self._att = None
-        for hook in get_callbacks(ConnectionHook.DROPPED, self):
-            hook(self)
+        try:
+            self._att.drop_database()
+        finally:
+            self._att = None
+            for hook in get_callbacks(ConnectionHook.DROPPED, self):
+                hook(self)
     def execute_immediate(self, sql: str) -> None:
         """Executes SQL statement.
 

@@ -2,6 +2,11 @@
 Changelog
 #########
 
+Version 1.4.1
+=============
+
+* Fixed important bug when iAttachment was not properly released.
+
 Version 1.4.0
 =============
 
