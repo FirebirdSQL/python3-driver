@@ -664,8 +664,9 @@ class SPB_ATTACH:
     """
     def __init__(self, *, user: str = None, password: str = None, trusted_auth: bool = False,
                  config: str = None, auth_plugin_list: str = None, expected_db: str=None,
-                 encoding: str='ascii', role: str=None):
+                 encoding: str='ascii', errors: str='strict', role: str=None):
         self.encoding: str = encoding
+        self.errors: str = errors
         self.user: str = user
         self.password: str = password
         self.trusted_auth: bool = trusted_auth
@@ -689,38 +690,43 @@ class SPB_ATTACH:
             while not spb.is_eof():
                 tag = spb.get_tag()
                 if tag == SPBItem.CONFIG:
-                    self.config = spb.get_string(encoding=self.encoding)
+                    self.config = spb.get_string(encoding=self.encoding, errors=self.errors)
                 elif tag == SPBItem.AUTH_PLUGIN_LIST:
                     self.auth_plugin_list = spb.get_string()
                 elif tag == SPBItem.TRUSTED_AUTH:
                     self.trusted_auth = True
                 elif tag == SPBItem.USER_NAME:
-                    self.user = spb.get_string(encoding=self.encoding)
+                    self.user = spb.get_string(encoding=self.encoding, errors=self.errors)
                 elif tag == SPBItem.PASSWORD:
-                    self.password = spb.get_string(encoding=self.encoding)
+                    self.password = spb.get_string(encoding=self.encoding, errors=self.errors)
                 elif tag == SPBItem.SQL_ROLE_NAME:
-                    self.role = spb.get_string(encoding=self.encoding)
+                    self.role = spb.get_string(encoding=self.encoding, errors=self.errors)
                 elif tag == SPBItem.EXPECTED_DB:
-                    self.expected_db = spb.get_string(encoding=self.encoding)
+                    self.expected_db = spb.get_string(encoding=self.encoding, errors=self.errors)
     def get_buffer(self) -> bytes:
         """Create SPB_ATTACH from stored information.
         """
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_ATTACH) as spb:
             if self.config is not None:
-                spb.insert_string(SPBItem.CONFIG, self.config, encoding=self.encoding)
+                spb.insert_string(SPBItem.CONFIG, self.config, encoding=self.encoding,
+                                  errors=self.errors)
             if self.trusted_auth:
                 spb.insert_tag(SPBItem.TRUSTED_AUTH)
             else:
                 if self.user is not None:
-                    spb.insert_string(SPBItem.USER_NAME, self.user, encoding=self.encoding)
+                    spb.insert_string(SPBItem.USER_NAME, self.user, encoding=self.encoding,
+                                      errors=self.errors)
                 if self.password is not None:
-                    spb.insert_string(SPBItem.PASSWORD, self.password, encoding=self.encoding)
+                    spb.insert_string(SPBItem.PASSWORD, self.password,
+                                      encoding=self.encoding, errors=self.errors)
             if self.role is not None:
-                spb.insert_string(SPBItem.SQL_ROLE_NAME, self.role, encoding=self.encoding)
+                spb.insert_string(SPBItem.SQL_ROLE_NAME, self.role, encoding=self.encoding,
+                                  errors=self.errors)
             if self.auth_plugin_list is not None:
                 spb.insert_string(SPBItem.AUTH_PLUGIN_LIST, self.auth_plugin_list)
             if self.expected_db is not None:
-                spb.insert_string(SPBItem.EXPECTED_DB, self.expected_db, encoding=self.encoding)
+                spb.insert_string(SPBItem.EXPECTED_DB, self.expected_db,
+                                  encoding=self.encoding, errors=self.errors)
             result = spb.get_buffer()
         return result
 
@@ -5232,7 +5238,8 @@ class Server(LoggingIdMixin):
     Note:
         Implements context manager protocol to call `.close()` automatically.
     """
-    def __init__(self, svc: iService, spb: bytes, host: str, encoding: str):
+    def __init__(self, svc: iService, spb: bytes, host: str, encoding: str,
+                 encoding_errors: str):
         self._svc: iService = svc
         #: Service Parameter Buffer (SPB) used to connect the service manager
         self.spb: bytes = spb
@@ -5244,8 +5251,10 @@ class Server(LoggingIdMixin):
         self.response: CBuffer = CBuffer(USHRT_MAX)
         self._eof: bool = False
         self.__line_buffer: List[str] = []
-        #: Encoding for string values
+        #: Encoding used for text data exchange with server
         self.encoding: str = encoding
+        #: Handler used for encoding errors. See: `codecs#error-handlers`
+        self.encoding_errors: str = encoding_errors
         #
         self.__ev: float = None
         self.__info: ServerInfoProvider = None
@@ -5308,7 +5317,7 @@ class Server(LoggingIdMixin):
         tag = self.response.get_tag()
         if tag != self.mode:  # pragma: no cover
             raise InterfaceError(f"Service responded with error code: {tag}")
-        data = self.response.read_sized_string(encoding=self.encoding)
+        data = self.response.read_sized_string(encoding=self.encoding, errors=self.encoding_errors)
         init += data
         if data and self.mode is SrvInfoCode.LINE:
             init += '\n'
@@ -5438,7 +5447,8 @@ class Server(LoggingIdMixin):
 
 def connect_server(server: str, *, user: str=None, password: str=None,
                    crypt_callback: iCryptKeyCallbackImpl=None,
-                   expected_db: str=None, role: str=None, encoding: str='ascii') -> Server:
+                   expected_db: str=None, role: str=None, encoding: str=None,
+                   encoding_errors: str=None) -> Server:
     """Establishes a connection to server's service manager.
 
     Arguments:
@@ -5449,7 +5459,10 @@ def connect_server(server: str, *, user: str=None, password: str=None,
         expected_db: Database that would be accessed (for using services with non-default
                      security database)
         role: SQL role used for connection.
-        encoding: Encoding for string values passed in parameter buffer.
+        encoding: Encoding for string values passed in parameter buffer. Default is
+           `.ServerConfig.encoding`.
+        encoding_errors: Error handler used for encoding errors. Default is
+           `.ServerConfig.encoding_errors`.
 
     Hooks:
         Event `.ServerHook.ATTACHED`: Executed before `Service` instance is
@@ -5484,7 +5497,8 @@ def connect_server(server: str, *, user: str=None, password: str=None,
         if crypt_callback is not None:
             provider.set_dbcrypt_callback(crypt_callback)
         svc = provider.attach_service_manager(host, spb_buf)
-    con = Server(svc, spb_buf, host, encoding)
+    con = Server(svc, spb_buf, host, srv_config.encoding.value if encoding is None else encoding,
+                 srv_config.encoding_errors.value if encoding_errors is None else encoding_errors)
     for hook in get_callbacks(ServerHook.ATTACHED, con):
         hook(con)
     return con

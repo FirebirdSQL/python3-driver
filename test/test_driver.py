@@ -658,7 +658,9 @@ class TestDistributedTransaction(DriverTestBase):
         super().setUp()
         self.dbfile = os.path.join(self.dbpath, self.FBTEST_DB)
         self.db1 = os.path.join(self.dbpath, 'fbtest-1.fdb')
-        cfg = driver_config.register_database('dts-1')
+        cfg = driver_config.get_database('dts-1')
+        if cfg is None:
+            cfg = driver_config.register_database('dts-1')
         cfg.server.value = 'FBTEST_HOST'
         cfg.database.value = self.db1
         cfg.no_linger.value = True
@@ -668,7 +670,9 @@ class TestDistributedTransaction(DriverTestBase):
         self.con1.commit()
 
         self.db2 = os.path.join(self.dbpath, 'fbtest-2.fdb')
-        cfg = driver_config.register_database('dts-2')
+        cfg = driver_config.get_database('dts-2')
+        if cfg is None:
+            cfg = driver_config.register_database('dts-2')
         cfg.server.value = 'FBTEST_HOST'
         cfg.database.value = self.db2
         cfg.no_linger.value = True
@@ -1567,7 +1571,7 @@ class TestServerStandard(DriverTestBase):
             svc.info.get_log()
             self.assertTrue(svc.is_running())
             # fetch materialized
-            svc.readlines()
+            print(''.join(svc.readlines()))
             self.assertFalse(svc.is_running())
     def test_wait(self):
         with connect_server(FBTEST_HOST, user='SYSDBA', password=FBTEST_PASSWORD) as svc:

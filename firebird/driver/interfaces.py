@@ -1149,9 +1149,9 @@ class iXpbBuilder(iDisposable):
         "Inserts a clumplet with value containing passed bytes."
         self.vtable.insertBytes(self, self.status, tag, value, len(value))
         self._check()
-    def insert_string(self, tag: int, value: str, *, encoding='ascii') -> None:
+    def insert_string(self, tag: int, value: str, *, encoding: str='ascii', errors: str='strict') -> None:
         "Inserts a clumplet with value containing passed string."
-        self.vtable.insertString(self, self.status, tag, value.encode(encoding))
+        self.vtable.insertString(self, self.status, tag, value.encode(encoding, errors))
         self._check()
     def insert_tag(self, tag: int) -> None:
         "Inserts a clumplet without a value."
@@ -1200,11 +1200,11 @@ class iXpbBuilder(iDisposable):
         result = self.vtable.getBigInt(self, self.status)
         self._check()
         return result
-    def get_string(self, *, encoding='ascii') -> str:
+    def get_string(self, *, encoding: str='ascii', errors: str='strict') -> str:
         "Returns value of current clumplet as string."
         result = self.vtable.getString(self, self.status)
         self._check()
-        return string_at(result).decode(encoding)
+        return string_at(result).decode(encoding, errors)
     def get_bytes(self) -> bytes:
         "Returns value of current clumplet as bytes."
         buffer = self.vtable.getBytes(self, self.status)

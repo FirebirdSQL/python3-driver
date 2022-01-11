@@ -71,6 +71,13 @@ class ServerConfig(Config):
         #: Use trusted authentication, default: False
         self.trusted_auth: BoolOption = \
             BoolOption('trusted_auth', "Use trusted authentication", default=False)
+        #: Encoding used for text data exchange with server
+        self.encoding: StrOption = \
+            StrOption('encoding', "Encoding used for text data exchange with server",
+                      default='ascii')
+        #: Handler used for encoding errors. See `codecs error handlers <codecs>` for details.
+        self.encoding_errors: StrOption = \
+            StrOption('encoding_errors', "Handler used for encoding errors", default='strict')
 
 class DatabaseConfig(Config):
     """Database configuration.
