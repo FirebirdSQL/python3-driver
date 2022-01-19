@@ -1469,10 +1469,10 @@ class DatabaseInfoProvider3(InfoProvider):
         """
         return self.get_info(DbInfoCode.FETCHES)
     @property
-    def cache_hit_ratio(self) -> int:
+    def cache_hit_ratio(self) -> float:
         """Cache hit ratio = 1 - (reads / fetches).
         """
-        return 1 - (self.reads / self.fetches)
+        return (1 - (self.reads / self.fetches)) if self.fetches else 1.0
     @property
     def writes(self) -> int:
         """Current I/O statistics - Writes from page cache to disk.
