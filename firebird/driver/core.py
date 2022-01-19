@@ -1069,6 +1069,7 @@ class EngineVersionProvider(InfoProvider):
         else: # pragma: no cover
             # Unknown version
             result = '0.0.0.0'
+        self.response.rewind()
         self.con = None
         return result
     def get_engine_version(self, con: Union[Connection, Server]) -> float:
