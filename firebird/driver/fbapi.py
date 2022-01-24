@@ -123,6 +123,22 @@ blr_timestamp_tz = 29
 blr_ex_time_tz = 30
 blr_ex_timestamp_tz = 31
 
+# Masks for fb_shutdown_callback
+fb_shut_confirmation = 1
+fb_shut_preproviders = 2
+fb_shut_postproviders = 4
+fb_shut_finish = 8
+fb_shut_exit = 16
+
+# Shutdown reasons, used by engine
+fb_shutrsn_svc_stopped = -1
+fb_shutrsn_no_connection = -2
+fb_shutrsn_app_stopped = -3
+fb_shutrsn_signal = -5
+fb_shutrsn_services = -6
+fb_shutrsn_exit_called = -7
+fb_shutrsn_emergency = -8
+
 if platform.architecture() == ('64bit', 'WindowsPE'):  # pragma: no cover
     intptr_t = c_longlong
     uintptr_t = c_ulonglong
@@ -238,6 +254,7 @@ FB_API_HANDLE_PTR = POINTER(FB_API_HANDLE)
 
 RESULT_VECTOR = ISC_ULONG * 15
 ISC_EVENT_CALLBACK = CFUNCTYPE(None, POINTER(ISC_UCHAR), c_ushort, POINTER(ISC_UCHAR))
+FB_SHUTDOWN_CALLBACK = CFUNCTYPE(c_int, c_int, c_int, c_void_p)
 
 # >>> Firebird 4
 class ISC_TIME_TZ(Structure):
@@ -1950,6 +1967,13 @@ class FirebirdAPI:
         self.fb_sqlstate = self.client_library.fb_sqlstate
         self.fb_sqlstate.restype = None
         self.fb_sqlstate.argtypes = [STRING, ISC_STATUS_PTR]
+        #
+        self.fb_shutdown_callback = self.client_library.fb_shutdown_callback
+        self.fb_shutdown_callback.restype = ISC_STATUS
+        self.fb_shutdown_callback.argtypes = [ISC_STATUS_PTR,
+                                              FB_SHUTDOWN_CALLBACK,
+                                              c_int,
+                                              c_void_p]
         #
         self.isc_sqlcode = self.client_library.isc_sqlcode
         self.isc_sqlcode.restype = ISC_LONG
