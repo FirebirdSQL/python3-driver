@@ -6,7 +6,10 @@ Version 1.4.3
 =============
 
 * Fix: Load driver configuration only when it's successfully read from file(s)
-* Fix: Reading service output will fail if line is greater than 64K.
+* Fix: Reading service output will fail if line is greater than 64K
+* Fix: Avoid division by zero if fetches stats is zero in DatabaseInfoProvider.cache_hit_ratio
+* Fix: Rewind buffer with version string after using in EngineVersionProvider
+* Fix: Add low-level access to fb_shutdown_callback API function
 
 Version 1.4.2
 =============
