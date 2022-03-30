@@ -2,6 +2,12 @@
 Changelog
 #########
 
+Version 1.4.3
+=============
+
+* Fix: Load driver configuration only when it's successfully read from file(s)
+* Fix: Reading service output will fail if line is greater than 64K.
+
 Version 1.4.2
 =============
 

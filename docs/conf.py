@@ -19,14 +19,14 @@ import sphinx_bootstrap_theme
 # -- Project information -----------------------------------------------------
 
 project = 'firebird-driver'
-copyright = '2020-2021, The Firebird Project'
+copyright = '2020-2022, The Firebird Project'
 author = 'Pavel Císař'
 
 # The short X.Y version
-version = '1.4.2'
+version = '1.4.3'
 
 # The full version, including alpha/beta/rc tags
-release = '1.4.2'
+release = '1.4.3'
 
 
 # -- General configuration ---------------------------------------------------
