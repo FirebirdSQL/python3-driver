@@ -5310,24 +5310,28 @@ class Server(LoggingIdMixin):
         if self.response.get_tag() != isc_info_end:  # pragma: no cover
             raise InterfaceError("Malformed result buffer (missing isc_info_end item)")
         return result
-    def _read_output(self, *, init: str='', timeout: int=-1) -> None:
+    def _query_output(self, timeout: int) -> None:
         assert self._svc is not None
         self.response.clear()
         self._svc.query(self._make_request(timeout), bytes([self.mode]), self.response.raw)
         tag = self.response.get_tag()
         if tag != self.mode:  # pragma: no cover
             raise InterfaceError(f"Service responded with error code: {tag}")
-        data = self.response.read_sized_string(encoding=self.encoding, errors=self.encoding_errors)
+        return self.response.read_sized_string(encoding=self.encoding, errors=self.encoding_errors)
+    def _read_output(self, *, init: str='', timeout: int=-1) -> None:
+        data = self._query_output(timeout)
+        if self.mode is SrvInfoCode.TO_EOF:
+            self._eof = self.response.get_tag() == isc_info_end
+        else: # LINE mode
+            self._eof = not data
+            while self.response.get_tag() == isc_info_truncated:
+                data += self._query_output(timeout)
+            if self.response.get_tag() != isc_info_end:  # pragma: no cover
+                raise InterfaceError("Malformed result buffer (missing isc_info_end item)")
         init += data
         if data and self.mode is SrvInfoCode.LINE:
             init += '\n'
         self.__line_buffer = init.splitlines(keepends=True)
-        if self.mode is SrvInfoCode.TO_EOF:
-            self._eof = self.response.get_tag() == isc_info_end
-        else:
-            if self.response.get_tag() != isc_info_end:  # pragma: no cover
-                raise InterfaceError("Malformed result buffer (missing isc_info_end item)")
-            self._eof = not data
     def _read_all_binary_output(self, *, timeout: int=-1) -> bytes:
         assert self._svc is not None
         send = self._make_request(timeout)
@@ -5375,6 +5379,8 @@ class Server(LoggingIdMixin):
             if self._eof:
                 return line
             self._read_output(init=line)
+            while not self.__line_buffer[0].endswith('\n'):
+                self._read_output(init=self.__line_buffer.pop(0))
         if self.__line_buffer:
             return self.__line_buffer.pop(0)
         return None
@@ -5475,7 +5481,7 @@ def connect_server(server: str, *, user: str=None, password: str=None,
     srv_config = driver_config.get_server(server)
     if srv_config is None:
         srv_config = driver_config.server_defaults
-        host = server
+        host = server if server else None
     else:
         host = srv_config.host.value
     if host is None:
