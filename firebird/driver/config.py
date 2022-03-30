@@ -215,7 +215,8 @@ class DriverConfig(Config):
         """
         parser = ConfigParser(interpolation=ExtendedInterpolation())
         read_ok = parser.read(filenames, encoding)
-        self.load_config(parser)
+        if read_ok:
+            self.load_config(parser)
         return read_ok
     def read_file(self, f):
         """Read configuration from a file-like object.
