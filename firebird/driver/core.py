@@ -5368,20 +5368,20 @@ class Server(LoggingIdMixin):
         """
         assert self._svc is not None
         return self.info.get_info(SrvInfoCode.RUNNING) > 0
-    def readline(self) -> Optional[str]:
+    def readline(self, timeout: int=-1) -> Optional[str]:
         """Get next line of textual output from last service query.
         """
         if self._eof and not self.__line_buffer:
             return None
         if not self.__line_buffer:
-            self._read_output()
+            self._read_output(timeout=timeout)
         elif len(self.__line_buffer) == 1:
             line = self.__line_buffer.pop(0)
             if self._eof:
                 return line
-            self._read_output(init=line)
+            self._read_output(init=line, timeout=timeout)
             while not self.__line_buffer[0].endswith('\n'):
-                self._read_output(init=self.__line_buffer.pop(0))
+                self._read_output(init=self.__line_buffer.pop(0), timeout=timeout)
         if self.__line_buffer:
             return self.__line_buffer.pop(0)
         return None
