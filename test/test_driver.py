@@ -1845,14 +1845,14 @@ class TestServerDatabaseServices(DriverTestBase):
             self.assertIsInstance(line, str)
         # callback
         output = []
-        self.svc.database.restore(backup=self.fbk, database=self.rfdb,
+        self.svc.database.restore(backup=self.fbk, database=self.rfdb, verbose=True,
                                   flags=SrvRestoreFlag.REPLACE, callback=fetchline)
         self.assertGreater(len(output), 0)
         # Firebird 3.0 stats
         output = []
         self.svc.database.restore(backup=self.fbk, database=self.rfdb,
                                   flags=SrvRestoreFlag.REPLACE, callback=fetchline,
-                                  stats='TDRW')
+                                  stats='TDRW', verbose=True)
         self.assertGreater(len(output), 0)
         self.assertIn('gbak: time     delta  reads  writes \n', output)
         # Skip data option
@@ -1939,7 +1939,7 @@ class TestServerDatabaseServices(DriverTestBase):
         self.assertIn('multi-user maintenance', ''.join(self.svc.readlines()))
         # Go to full shutdown mode, disabling new attachments during 5 seconds
         self.svc.database.shutdown(database=self.rfdb, mode=ShutdownMode.FULL,
-                                   method=ShutdownMethod.DENNY_ATTACHMENTS, timeout=5)
+                                   method=ShutdownMethod.DENY_ATTACHMENTS, timeout=5)
         self.svc.database.get_statistics(database=self.rfdb, flags=SrvStatFlag.HDR_PAGES)
         self.assertIn('full shutdown', ''.join(self.svc.readlines()))
         # Enable single-user maintenance

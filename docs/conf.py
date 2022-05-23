@@ -23,10 +23,10 @@ copyright = '2020-2022, The Firebird Project'
 author = 'Pavel Císař'
 
 # The short X.Y version
-version = '1.4.3'
+version = '1.5.0'
 
 # The full version, including alpha/beta/rc tags
-release = '1.4.3'
+release = '1.5.0'
 
 
 # -- General configuration ---------------------------------------------------

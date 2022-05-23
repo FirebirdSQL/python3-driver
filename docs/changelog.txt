@@ -2,6 +2,25 @@
 Changelog
 #########
 
+Version 1.5.0
+=============
+
+* Fix: `.create_database()` now use server configuration user/password if either is not
+  specified in database configuration (like `.connect()`)
+* Fix: Problem in `.Server` processing incomplete LINE responses.
+* New: `verbint` parameter for `.ServerDbServices3.backup()` and `.ServerDbServices3.restore()`
+
+  This is undocumented Firebird v3 gbak feature. See https://github.com/FirebirdSQL/firebird/issues/808
+  for details. It's mutually exclusive with `verbose`, and minimal value is 100.
+
+Potentially breaking changes
+----------------------------
+
+* Change in `.ServerDbServices3.restore()`: The `verbose` parameter default value was changed
+  to `False` to be consistent with `.ServerDbServices3.backup()`
+* Change in `.ShutdownMethod`: DENNY_ATTACHMENTS/DENNY_TRANSACTIONS renamed to
+  DENY_ATTACHMENTS/DENY_TRANSACTIONS.
+
 Version 1.4.3
 =============
 

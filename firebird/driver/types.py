@@ -827,8 +827,8 @@ class ShutdownMethod(IntEnum):
     """Database shutdown method options.
     """
     FORCED = 41
-    DENNY_ATTACHMENTS = 42
-    DENNY_TRANSACTIONS = 43
+    DENY_ATTACHMENTS = 42
+    DENY_TRANSACTIONS = 43
 
 class TransactionState(IntEnum):
     """Transaction state.
