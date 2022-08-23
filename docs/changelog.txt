@@ -2,6 +2,11 @@
 Changelog
 #########
 
+Version 1.5.1
+=============
+
+* Fix: `.ServerDbServices.set_replica_mode()` now works correctly.
+
 Version 1.5.0
 =============
 

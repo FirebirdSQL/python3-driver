@@ -4653,8 +4653,7 @@ class ServerDbServices3(ServerServiceProvider):
             spb.insert_string(SPBItem.DBNAME, str(database), encoding=self._srv().encoding)
             if role is not None:
                 spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
-            spb.insert_bytes(SrvPropertiesOption.ACCESS_MODE,
-                             bytes([mode]))
+            spb.insert_bytes(SrvPropertiesOption.ACCESS_MODE, bytes([mode]))
             self._srv()._svc.start(spb.get_buffer())
     def set_sql_dialect(self, *, database: FILESPEC, dialect: int, role: str=None) -> None:
         """Set database SQL dialect.
@@ -4948,10 +4947,11 @@ class ServerDbServices(ServerDbServices3):
         """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
+            spb.insert_tag(ServerAction.PROPERTIES)
             spb.insert_string(SPBItem.DBNAME, str(database), encoding=self._srv().encoding)
             if role is not None:
                 spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
-            spb.insert_int(SrvPropertiesOption.REPLICA_MODE, mode.value)
+            spb.insert_bytes(SrvPropertiesOption.REPLICA_MODE, bytes([mode]))
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
 
