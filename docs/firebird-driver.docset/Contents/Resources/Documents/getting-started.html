@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+    <title>Getting Started &#8212; firebird-driver 1.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Usage Guide" href="usage-guide.html" />
+    <link rel="prev" title="The Python driver for Firebird" href="index.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="_static/bootstrap-2.3.2/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+
+        <a class="brand" href="index.html">
+          firebird-driver</a>
+        <span class="navbar-text pull-left"><b>1.5.2</b></span>
+
+        <div class="nav-collapse">
+          <ul class="nav">
+            <li class="divider-vertical"></li>
+            
+                <li><a href="usage-guide.html">Usage Guide</a></li>
+                <li><a href="reference.html">Reference</a></li>
+                <li><a href="genindex.html">Index</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Content <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#installation-from-pypi">Installation from PYPI</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#quick-start-guide">Quick-start Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#driver-configuration">Driver configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#connecting-to-a-database">Connecting to a Database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#creating-a-database">Creating a Database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#executing-sql-statements">Executing SQL Statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#calling-stored-procedures">Calling Stored Procedures</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage-guide.html">Usage Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#driver-structure">Driver structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#configuration">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#the-driver-config-object">The ‘driver_config’ object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#server-and-database-configuration">Server and database configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#databases">Databases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#using-connect">Using connect()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#using-create-database">Using create_database()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#deleting-databases">Deleting databases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#connection-object">Connection object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#closing-the-connection">Closing the connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#getting-information-about-connection">Getting information about connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#getting-information-about-database">Getting information about database</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#executing-sql-statements">Executing SQL Statements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#cursor-object">Cursor object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#sql-execution-basics">SQL Execution Basics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#fetching-data-from-server">Fetching data from server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#index-13">Scrollable cursors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#id3">Parameterized statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#id5">Prepared Statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#named-cursors">Named Cursors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#working-with-stored-procedures">Working with stored procedures</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#data-handling-and-conversions">Data handling and conversions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#implicit-conversion-of-input-parameters-from-strings">Implicit Conversion of Input Parameters from Strings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#automatic-conversion-from-to-unicode">Automatic conversion from/to Unicode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#working-with-blobs">Working with BLOBs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#firebird-array-type">Firebird ARRAY type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#transanction-management">Transanction management</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#basics">Basics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#auto-commit">Auto-commit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#transaction-parameters">Transaction parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#getting-information-about-transaction">Getting information about transaction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#retaining-transactions">Retaining transactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#savepoints">Savepoints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#using-multiple-transactions-with-the-same-connection">Using multiple transactions with the same connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#distributed-transactions">Distributed Transactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#transaction-context-manager">Transaction Context Manager</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#database-events">Database Events</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#what-they-are">What they are</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#why-use-them">Why use them</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#how-events-are-exposed">How events are exposed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#api-for-python-developers">API for Python developers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#working-with-services">Working with Services</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#services-api-connections">Services API Connections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#text-output-from-services">Text output from Services</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#server-configuration-and-state-information">Server Configuration and State information</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#database-options">Database options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#database-maintenance">Database maintenance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#user-maintenance">User maintenance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#trace-sessions">Trace sessions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#logging-driver-activities">Logging driver activities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#index-43">Driver hooks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#apihook">APIHook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#connectionhook">ConnectionHook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#serverhook">ServerHook</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="python-db-api-compliance.html">Compliance to PyDB API 2.0</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="python-db-api-compliance.html#unsupported-optional-features">Unsupported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python-db-api-compliance.html#supported-optional-features">Supported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python-db-api-compliance.html#nominally-supported-optional-features">Nominally Supported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python-db-api-compliance.html#extensions-and-caveats">Extensions and Caveats</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">Firebird-driver Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="reference.html#driver-modules">Driver modules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ref-main.html">Main driver namespace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-types.html">firebird.driver.types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-config.html">firebird.driver.config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-core.html">firebird.driver.core</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-hooks.html">firebird.driver.hooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-intf.html">firebird.driver.interfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-fbapi.html">firebird.driver.fbapi</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-2">Version 1.5.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-1">Version 1.5.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-0">Version 1.5.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#potentially-breaking-changes">Potentially breaking changes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-4-3">Version 1.4.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-4-2">Version 1.4.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-4-1">Version 1.4.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-4-0">Version 1.4.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#improvements">Improvements:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#backward-incompatible-changes">Backward incompatible changes:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-3-4">Version 1.3.4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-3-3">Version 1.3.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-3-2">Version 1.3.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-3-1">Version 1.3.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-3-0">Version 1.3.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-2-1">Version 1.2.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-2-0">Version 1.2.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-1-0">Version 1.1.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-0-0">Version 1.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-0-8-0">Version 0.8.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-0-7-0">Version 0.7.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-0-6-0">Version 0.6.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-0-5-0">Version 0.5.0</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">Getting Started</a><ul>
+<li><a class="reference internal" href="#installation">Installation</a><ul>
+<li><a class="reference internal" href="#installation-from-pypi">Installation from PYPI</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#quick-start-guide">Quick-start Guide</a><ul>
+<li><a class="reference internal" href="#driver-configuration">Driver configuration</a></li>
+<li><a class="reference internal" href="#connecting-to-a-database">Connecting to a Database</a></li>
+<li><a class="reference internal" href="#creating-a-database">Creating a Database</a></li>
+<li><a class="reference internal" href="#executing-sql-statements">Executing SQL Statements</a></li>
+<li><a class="reference internal" href="#calling-stored-procedures">Calling Stored Procedures</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body span12 content" role="main">
+      
+  <section id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this heading">¶</a></h1>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">¶</a></h2>
+<p>Firebird-driver is written as pure-Python module (requires Python 3.8+) on top of
+Firebird client library (fbclient.so/dll) using <a class="reference external" href="http://docs.python.org/library/ctypes.html">ctypes</a>. Driver supports Firebird version
+3.0 and higher.</p>
+<p>Firebird-driver is distributed as <a class="reference external" href="https://pypi.org/project/setuptools/">setuptools</a> package and the preferred installation
+method is via <a class="reference external" href="https://pypi.org/project/pip/">pip</a> tool.</p>
+<section id="installation-from-pypi">
+<h3>Installation from <a class="reference external" href="https://pypi.org/">PYPI</a><a class="headerlink" href="#installation-from-pypi" title="Permalink to this heading">¶</a></h3>
+<p>Run pip:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install firebird-driver
+</pre></div>
+</div>
+</section>
+</section>
+<section id="quick-start-guide">
+<h2>Quick-start Guide<a class="headerlink" href="#quick-start-guide" title="Permalink to this heading">¶</a></h2>
+<p>This brief tutorial aims to get the reader started by demonstrating elementary usage of
+Firebird-driver. It is not a comprehensive Python Database API tutorial, nor is it
+comprehensive in its coverage of anything else.</p>
+<p>The numerous advanced features of Firebird-driver are covered in another section of this
+documentation, which is not in a tutorial format, though it is replete with examples.</p>
+<section id="driver-configuration">
+<h3>Driver configuration<a class="headerlink" href="#driver-configuration" title="Permalink to this heading">¶</a></h3>
+<p>The driver uses configuration built on top of <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#module-firebird.base.config" title="(in Firebird-base v1.4.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration</span> <span class="pre">system</span></code></a>
+provided by <a class="reference external" href="https://firebird-base.rtfd.io">firebird-base</a> package. In addition to global settings, the configuration
+also includes the definition of connection parameters to Firebird servers and databases.</p>
+<p>The default configuration connects to embedded server using direct/local connection method.
+To access remote servers and databases (or local ones through remote protocols), it’s
+necessary to adjust default configuration, or <code class="xref py py-obj docutils literal notranslate"><span class="pre">register</span></code> them in configuration manager.</p>
+<p>You can manipulate the configuration objects directly, or load configuration from files or
+strings (in <code class="xref py py-obj docutils literal notranslate"><span class="pre">ini-style</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">ConfigParser</span></code> format).</p>
+</section>
+<section id="connecting-to-a-database">
+<h3>Connecting to a Database<a class="headerlink" href="#connecting-to-a-database" title="Permalink to this heading">¶</a></h3>
+<p><strong>Example 1:</strong></p>
+<p>A simple database connection is typically established with code such as this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect</span>
+
+<span class="c1"># Attach to &#39;employee&#39; database/alias using embedded server connection</span>
+<span class="n">con</span> <span class="o">=</span> <span class="n">connect</span><span class="p">(</span><span class="s1">&#39;employee&#39;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">&#39;sysdba&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;masterkey&#39;</span><span class="p">)</span>
+
+<span class="c1"># Attach to &#39;employee&#39; database/alias using local server connection</span>
+<span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">driver_config</span>
+<span class="n">driver_config</span><span class="o">.</span><span class="n">server_defaults</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;localhost&#39;</span>
+<span class="n">con</span> <span class="o">=</span> <span class="n">connect</span><span class="p">(</span><span class="s1">&#39;employee&#39;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">&#39;sysdba&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;masterkey&#39;</span><span class="p">)</span>
+
+<span class="c1"># Set &#39;user&#39; and &#39;password&#39; via configuration</span>
+<span class="n">driver_config</span><span class="o">.</span><span class="n">server_defaults</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;SYSDBA&#39;</span>
+<span class="n">driver_config</span><span class="o">.</span><span class="n">server_defaults</span><span class="o">.</span><span class="n">password</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;masterkey&#39;</span>
+<span class="n">con</span> <span class="o">=</span> <span class="n">connect</span><span class="p">(</span><span class="s1">&#39;employee&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Example 2:</strong></p>
+<p>A database connection typically uses specific configuration, and is established with code
+such as this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect</span><span class="p">,</span> <span class="n">driver_config</span>
+
+<span class="c1"># Register Firebird server</span>
+<span class="n">srv_cfg</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;[local]</span>
+<span class="s2">host = localhost</span>
+<span class="s2">user = SYSDBA</span>
+<span class="s2">password = masterkey</span>
+<span class="s2">&quot;&quot;&quot;</span>
+<span class="n">driver_config</span><span class="o">.</span><span class="n">register_server</span><span class="p">(</span><span class="s1">&#39;local&#39;</span><span class="p">,</span> <span class="n">srv_cfg</span><span class="p">)</span>
+
+<span class="c1"># Register database</span>
+<span class="n">db_cfg</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;[employee]</span>
+<span class="s2">server = local</span>
+<span class="s2">database = employee.fdb</span>
+<span class="s2">protocol = inet</span>
+<span class="s2">charset = utf8</span>
+<span class="s2">&quot;&quot;&quot;</span>
+<span class="n">driver_config</span><span class="o">.</span><span class="n">register_database</span><span class="p">(</span><span class="s1">&#39;employee&#39;</span><span class="p">,</span> <span class="n">db_cfg</span><span class="p">)</span>
+
+<span class="c1"># Attach to &#39;employee&#39; database</span>
+<span class="n">con</span> <span class="o">=</span> <span class="n">connect</span><span class="p">(</span><span class="s1">&#39;employee&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Some parameters like ‘user’ and ‘password’ could be overridden with keyword parameters.
+Few parameters like ‘crypt_callback’ or ‘no_db_triggers’ could be specified <strong>ONLY</strong>
+as keyword arguments.</p>
+</div>
+</section>
+<section id="creating-a-database">
+<h3>Creating a Database<a class="headerlink" href="#creating-a-database" title="Permalink to this heading">¶</a></h3>
+<p>A database is created using <a class="reference internal" href="ref-core.html#firebird.driver.core.create_database" title="firebird.driver.core.create_database"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_database()</span></code></a> function.
+Like <a class="reference internal" href="ref-core.html#firebird.driver.core.connect" title="firebird.driver.core.connect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect()</span></code></a>, this function uses configuration for specification of
+database parameters like page size, sweep interval etc.</p>
+</section>
+<section id="executing-sql-statements">
+<h3>Executing SQL Statements<a class="headerlink" href="#executing-sql-statements" title="Permalink to this heading">¶</a></h3>
+<p>For this section, suppose we have a table defined and populated by the following SQL code:</p>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">create</span><span class="w"> </span><span class="k">table</span><span class="w"> </span><span class="n">languages</span><span class="w"></span>
+<span class="p">(</span><span class="w"></span>
+<span class="w">  </span><span class="n">name</span><span class="w">               </span><span class="nb">varchar</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span><span class="w"></span>
+<span class="w">  </span><span class="n">year_released</span><span class="w">      </span><span class="nb">integer</span><span class="w"></span>
+<span class="p">);</span><span class="w"></span>
+
+<span class="k">insert</span><span class="w"> </span><span class="k">into</span><span class="w"> </span><span class="n">languages</span><span class="w"> </span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">year_released</span><span class="p">)</span><span class="w"> </span><span class="k">values</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span><span class="w">        </span><span class="mi">1972</span><span class="p">);</span><span class="w"></span>
+<span class="k">insert</span><span class="w"> </span><span class="k">into</span><span class="w"> </span><span class="n">languages</span><span class="w"> </span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">year_released</span><span class="p">)</span><span class="w"> </span><span class="k">values</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;Python&#39;</span><span class="p">,</span><span class="w">   </span><span class="mi">1991</span><span class="p">);</span><span class="w"></span>
+</pre></div>
+</div>
+<p><strong>Example 1</strong></p>
+<p>This example shows the <em>simplest</em> way to print the entire contents of
+the <code class="xref py py-obj docutils literal notranslate"><span class="pre">languages</span></code> table:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect</span>
+
+<span class="n">con</span> <span class="o">=</span> <span class="n">connect</span><span class="p">(</span><span class="s1">&#39;test.fdb&#39;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">&#39;sysdba&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;masterkey&#39;</span><span class="p">)</span>
+
+<span class="c1"># Create a Cursor object that operates in the context of Connection con:</span>
+<span class="n">cur</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+
+<span class="c1"># Execute the SELECT statement:</span>
+<span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;select * from languages order by year_released&quot;</span><span class="p">)</span>
+
+<span class="c1"># Retrieve all rows as a sequence and print that sequence:</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">cur</span><span class="o">.</span><span class="n">fetchall</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>Sample output:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="mi">1972</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Python&#39;</span><span class="p">,</span> <span class="mi">1991</span><span class="p">)]</span>
+</pre></div>
+</div>
+<p><strong>Example 2</strong></p>
+<p>Here’s another trivial example that demonstrates various ways of fetching a single row at a time from a <code class="xref py py-obj docutils literal notranslate"><span class="pre">SELECT</span></code>-cursor:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect</span>
+
+<span class="n">con</span> <span class="o">=</span> <span class="n">connect</span><span class="p">(</span><span class="s1">&#39;test.fdb&#39;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">&#39;sysdba&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;masterkey&#39;</span><span class="p">)</span>
+
+<span class="n">cur</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+<span class="n">SELECT</span> <span class="o">=</span> <span class="s2">&quot;select name, year_released from languages order by year_released&quot;</span>
+
+<span class="c1"># 1. Iterate over the rows available from the cursor, unpacking the</span>
+<span class="c1"># resulting sequences to yield their elements (name, year_released):</span>
+<span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">SELECT</span><span class="p">)</span>
+<span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">year_released</span><span class="p">)</span> <span class="ow">in</span> <span class="n">cur</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> has been publicly available since </span><span class="si">{</span><span class="n">year_released</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+
+<span class="c1"># 2. Equivalently:</span>
+<span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">SELECT</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">cur</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> has been publicly available since </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Sample output:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">C</span> <span class="n">has</span> <span class="n">been</span> <span class="n">publicly</span> <span class="n">available</span> <span class="n">since</span> <span class="mf">1972.</span>
+<span class="n">Python</span> <span class="n">has</span> <span class="n">been</span> <span class="n">publicly</span> <span class="n">available</span> <span class="n">since</span> <span class="mf">1991.</span>
+<span class="n">C</span> <span class="n">has</span> <span class="n">been</span> <span class="n">publicly</span> <span class="n">available</span> <span class="n">since</span> <span class="mf">1972.</span>
+<span class="n">Python</span> <span class="n">has</span> <span class="n">been</span> <span class="n">publicly</span> <span class="n">available</span> <span class="n">since</span> <span class="mf">1991.</span>
+<span class="n">C</span> <span class="n">has</span> <span class="n">been</span> <span class="n">publicly</span> <span class="n">available</span> <span class="n">since</span> <span class="mf">1972.</span>
+<span class="n">Python</span> <span class="n">has</span> <span class="n">been</span> <span class="n">publicly</span> <span class="n">available</span> <span class="n">since</span> <span class="mf">1991.</span>
+</pre></div>
+</div>
+<p><strong>Example 3</strong></p>
+<p>The following program is a simplistic table printer (applied in this example to <code class="xref py py-obj docutils literal notranslate"><span class="pre">languages</span></code>):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect</span><span class="p">,</span> <span class="n">DESCRIPTION_NAME</span><span class="p">,</span> <span class="n">DESCRIPTION_DISPLAY_SIZE</span>
+
+<span class="n">TABLE_NAME</span> <span class="o">=</span> <span class="s1">&#39;languages&#39;</span>
+<span class="n">SELECT</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;select * from </span><span class="si">{</span><span class="n">TABLE_NAME</span><span class="si">}</span><span class="s1"> order by year_released&#39;</span>
+
+<span class="n">con</span> <span class="o">=</span> <span class="n">connect</span><span class="p">(</span><span class="s1">&#39;test.fdb&#39;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">&#39;sysdba&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;masterkey&#39;</span><span class="p">)</span>
+
+<span class="n">cur</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+<span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">SELECT</span><span class="p">)</span>
+
+<span class="c1"># Print a header.</span>
+<span class="k">for</span> <span class="n">fieldDesc</span> <span class="ow">in</span> <span class="n">cur</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">fieldDesc</span><span class="p">[</span><span class="n">DESCRIPTION_NAME</span><span class="p">]</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">fieldDesc</span><span class="p">[</span><span class="n">DESCRIPTION_DISPLAY_SIZE</span><span class="p">]),</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">()</span> <span class="c1"># Finish the header with a newline.</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-&#39;</span> <span class="o">*</span> <span class="mi">78</span><span class="p">)</span>
+
+<span class="c1"># For each row, print the value of each field left-justified within</span>
+<span class="c1"># the maximum possible width of that field.</span>
+<span class="n">fieldIndices</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cur</span><span class="o">.</span><span class="n">description</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">cur</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">fieldIndex</span> <span class="ow">in</span> <span class="n">fieldIndices</span><span class="p">:</span>
+        <span class="n">fieldValue</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">fieldIndex</span><span class="p">])</span>
+        <span class="n">fieldMaxWidth</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">description</span><span class="p">[</span><span class="n">fieldIndex</span><span class="p">][</span><span class="n">DESCRIPTION_DISPLAY_SIZE</span><span class="p">]</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">fieldValue</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">fieldMaxWidth</span><span class="p">),</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">()</span> <span class="c1"># Finish the row with a newline.</span>
+</pre></div>
+</div>
+<p>Sample output:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>                 <span class="n">YEAR_RELEASED</span>
+<span class="o">------------------------------------------------------------------------------</span>
+<span class="n">C</span>                    <span class="mi">1972</span>
+<span class="n">Python</span>               <span class="mi">1991</span>
+</pre></div>
+</div>
+<p><strong>Example 4</strong></p>
+<p>Let’s insert more languages:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect</span>
+
+<span class="n">con</span> <span class="o">=</span> <span class="n">connect</span><span class="p">(</span><span class="s1">&#39;test.fdb&#39;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">&#39;sysdba&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;masterkey&#39;</span><span class="p">)</span>
+
+<span class="n">cur</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+
+<span class="n">newLanguages</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s1">&#39;Lisp&#39;</span><span class="p">,</span>  <span class="mi">1958</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;Dylan&#39;</span><span class="p">,</span> <span class="mi">1995</span><span class="p">),</span>
+  <span class="p">]</span>
+
+<span class="n">cur</span><span class="o">.</span><span class="n">executemany</span><span class="p">(</span><span class="s2">&quot;insert into languages (name, year_released) values (?, ?)&quot;</span><span class="p">,</span>
+    <span class="n">newLanguages</span>
+  <span class="p">)</span>
+
+<span class="c1"># The changes will not be saved unless the transaction is committed explicitly:</span>
+<span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Note the use of a <em>parameterized</em> SQL statement above. When dealing with repetitive
+statements, this is much faster and less error-prone than assembling each SQL statement
+manually. (You can read more about parameterized SQL statements in the section on
+<a class="reference internal" href="usage-guide.html#id5"><span class="std std-ref">Prepared Statements</span></a>.)</p>
+<p>After running Example 4, the table printer from Example 3 would print:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">NAME</span>                 <span class="n">YEAR_RELEASED</span>
+<span class="o">------------------------------------------------------------------------------</span>
+<span class="n">Lisp</span>                 <span class="mi">1958</span>
+<span class="n">C</span>                    <span class="mi">1972</span>
+<span class="n">Python</span>               <span class="mi">1991</span>
+<span class="n">Dylan</span>                <span class="mi">1995</span>
+</pre></div>
+</div>
+</section>
+<section id="calling-stored-procedures">
+<h3>Calling Stored Procedures<a class="headerlink" href="#calling-stored-procedures" title="Permalink to this heading">¶</a></h3>
+<p>Firebird supports stored procedures written in a proprietary procedural SQL language.
+Firebird stored procedures can have <em>input</em> parameters and/or <em>output</em> parameters. Some
+databases support <em>input/output</em> parameters, where the same parameter is used for both
+input and output; Firebird does not support this.</p>
+<p>It is important to distinguish between procedures that <em>return a result set</em> and procedures
+that <em>populate and return their output parameters exactly once</em>. Conceptually, the latter
+“return their output parameters” like a Python function, whereas the former “yield result
+rows” like a Python generator.</p>
+<p>Firebird’s <em>server-side</em> procedural SQL syntax makes no such distinction, but <em>client-side</em>
+SQL code (and C API code) must. A result set is retrieved from a stored procedure by
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">SELECT</span></code>-ing from the procedure, whereas output parameters are retrieved with an
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">EXECUTE</span> <span class="pre">PROCEDURE</span></code> statement.</p>
+<p>To <em>retrieve a result set</em> from a stored procedure with Firebird-driver, use code such as this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;select output1, output2 from the_proc(?, ?)&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">input1</span><span class="p">,</span> <span class="n">input2</span><span class="p">))</span>
+
+<span class="c1"># Ordinary fetch code here, such as:</span>
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">cur</span><span class="p">:</span>
+    <span class="o">...</span> <span class="c1"># process row</span>
+
+<span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span> <span class="c1"># If the procedure had any side effects, commit them.</span>
+</pre></div>
+</div>
+<p>To <em>execute</em> a stored procedure and <em>access its output parameters</em>, use code such as this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cur</span><span class="o">.</span><span class="n">callproc</span><span class="p">(</span><span class="s2">&quot;the_proc&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">input1</span><span class="p">,</span> <span class="n">input2</span><span class="p">))</span>
+
+<span class="c1"># If there are output parameters, retrieve them as though they were the</span>
+<span class="c1"># first row of a result set.  For example:</span>
+<span class="n">outputParams</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+
+<span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span> <span class="c1"># If the procedure had any side effects, commit them.</span>
+</pre></div>
+</div>
+<p>This latter is not very elegant; it would be preferable to access the procedure’s output
+parameters as the return value of <code class="xref py py-obj docutils literal notranslate"><span class="pre">Cursor.callproc()</span></code>. The Python DB API specification
+requires the current behavior, however.</p>
+</section>
+</section>
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2020-2022, The Firebird Project.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.2.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

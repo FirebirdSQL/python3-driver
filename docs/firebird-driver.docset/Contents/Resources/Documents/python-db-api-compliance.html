@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+    <title>Compliance to PyDB API 2.0 &#8212; firebird-driver 1.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Firebird-driver Reference" href="reference.html" />
+    <link rel="prev" title="Usage Guide" href="usage-guide.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="_static/bootstrap-2.3.2/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+
+        <a class="brand" href="index.html">
+          firebird-driver</a>
+        <span class="navbar-text pull-left"><b>1.5.2</b></span>
+
+        <div class="nav-collapse">
+          <ul class="nav">
+            <li class="divider-vertical"></li>
+            
+                <li><a href="usage-guide.html">Usage Guide</a></li>
+                <li><a href="reference.html">Reference</a></li>
+                <li><a href="genindex.html">Index</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Content <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#installation-from-pypi">Installation from PYPI</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#quick-start-guide">Quick-start Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#driver-configuration">Driver configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#connecting-to-a-database">Connecting to a Database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#creating-a-database">Creating a Database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#executing-sql-statements">Executing SQL Statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#calling-stored-procedures">Calling Stored Procedures</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage-guide.html">Usage Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#driver-structure">Driver structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#configuration">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#the-driver-config-object">The ‘driver_config’ object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#server-and-database-configuration">Server and database configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#databases">Databases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#using-connect">Using connect()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#using-create-database">Using create_database()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#deleting-databases">Deleting databases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#connection-object">Connection object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#closing-the-connection">Closing the connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#getting-information-about-connection">Getting information about connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#getting-information-about-database">Getting information about database</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#executing-sql-statements">Executing SQL Statements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#cursor-object">Cursor object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#sql-execution-basics">SQL Execution Basics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#fetching-data-from-server">Fetching data from server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#index-13">Scrollable cursors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#id3">Parameterized statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#id5">Prepared Statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#named-cursors">Named Cursors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#working-with-stored-procedures">Working with stored procedures</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#data-handling-and-conversions">Data handling and conversions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#implicit-conversion-of-input-parameters-from-strings">Implicit Conversion of Input Parameters from Strings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#automatic-conversion-from-to-unicode">Automatic conversion from/to Unicode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#working-with-blobs">Working with BLOBs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#firebird-array-type">Firebird ARRAY type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#transanction-management">Transanction management</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#basics">Basics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#auto-commit">Auto-commit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#transaction-parameters">Transaction parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#getting-information-about-transaction">Getting information about transaction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#retaining-transactions">Retaining transactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#savepoints">Savepoints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#using-multiple-transactions-with-the-same-connection">Using multiple transactions with the same connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#distributed-transactions">Distributed Transactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#transaction-context-manager">Transaction Context Manager</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#database-events">Database Events</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#what-they-are">What they are</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#why-use-them">Why use them</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#how-events-are-exposed">How events are exposed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#api-for-python-developers">API for Python developers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#working-with-services">Working with Services</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#services-api-connections">Services API Connections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#text-output-from-services">Text output from Services</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#server-configuration-and-state-information">Server Configuration and State information</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#database-options">Database options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#database-maintenance">Database maintenance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#user-maintenance">User maintenance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#trace-sessions">Trace sessions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#logging-driver-activities">Logging driver activities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#index-43">Driver hooks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#apihook">APIHook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#connectionhook">ConnectionHook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#serverhook">ServerHook</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Compliance to PyDB API 2.0</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#unsupported-optional-features">Unsupported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#supported-optional-features">Supported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#nominally-supported-optional-features">Nominally Supported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#extensions-and-caveats">Extensions and Caveats</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">Firebird-driver Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="reference.html#driver-modules">Driver modules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ref-main.html">Main driver namespace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-types.html">firebird.driver.types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-config.html">firebird.driver.config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-core.html">firebird.driver.core</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-hooks.html">firebird.driver.hooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-intf.html">firebird.driver.interfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-fbapi.html">firebird.driver.fbapi</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-2">Version 1.5.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-1">Version 1.5.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-0">Version 1.5.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#potentially-breaking-changes">Potentially breaking changes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-4-3">Version 1.4.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-4-2">Version 1.4.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-4-1">Version 1.4.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-4-0">Version 1.4.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#improvements">Improvements:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#backward-incompatible-changes">Backward incompatible changes:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-3-4">Version 1.3.4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-3-3">Version 1.3.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-3-2">Version 1.3.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-3-1">Version 1.3.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-3-0">Version 1.3.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-2-1">Version 1.2.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-2-0">Version 1.2.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-1-0">Version 1.1.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-0-0">Version 1.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-0-8-0">Version 0.8.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-0-7-0">Version 0.7.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-0-6-0">Version 0.6.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-0-5-0">Version 0.5.0</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">Compliance to PyDB API 2.0</a><ul>
+<li><a class="reference internal" href="#unsupported-optional-features">Unsupported Optional Features</a></li>
+<li><a class="reference internal" href="#supported-optional-features">Supported Optional Features</a></li>
+<li><a class="reference internal" href="#nominally-supported-optional-features">Nominally Supported Optional Features</a></li>
+<li><a class="reference internal" href="#extensions-and-caveats">Extensions and Caveats</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body span12 content" role="main">
+      
+  <section id="compliance-to-pydb-api-2-0">
+<h1>Compliance to PyDB API 2.0<a class="headerlink" href="#compliance-to-pydb-api-2-0" title="Permalink to this heading">¶</a></h1>
+<p>Full text of Python Database API 2.0 (PEP 249) is available at
+<a class="reference external" href="http://www.python.org/dev/peps/pep-0249/">http://www.python.org/dev/peps/pep-0249/</a></p>
+<section id="unsupported-optional-features">
+<h2>Unsupported Optional Features<a class="headerlink" href="#unsupported-optional-features" title="Permalink to this heading">¶</a></h2>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Cursor.nextset</span></code></p>
+<blockquote>
+<div><p>This method is not implemented because the database engine does not support
+opening multiple result sets simultaneously with a single cursor.</p>
+</div></blockquote>
+</section>
+<section id="supported-optional-features">
+<h2>Supported Optional Features<a class="headerlink" href="#supported-optional-features" title="Permalink to this heading">¶</a></h2>
+<blockquote>
+<div><ul>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection.Error</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection.ProgrammingError</span></code>, etc.</p>
+<p>All exception classes defined by the DB API standard are exposed on the Connection objects
+as attributes (in addition to being available at module scope).</p>
+</li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Cursor.connection</span></code></p>
+<p>This read-only attribute return a reference to the Connection object on which the cursor was created.</p>
+</li>
+</ul>
+</div></blockquote>
+</section>
+<section id="nominally-supported-optional-features">
+<h2>Nominally Supported Optional Features<a class="headerlink" href="#nominally-supported-optional-features" title="Permalink to this heading">¶</a></h2>
+<p><a class="reference internal" href="ref-core.html#firebird.driver.core.Cursor" title="firebird.driver.core.Cursor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Cursor</span></code></a></p>
+<blockquote>
+<div><p><a class="reference internal" href="ref-core.html#firebird.driver.core.Cursor.arraysize" title="firebird.driver.core.Cursor.arraysize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">arraysize</span></code></a></p>
+<blockquote>
+<div><p>As required by the spec, the value of this attribute is observed with
+respect to the <code class="xref py py-obj docutils literal notranslate"><span class="pre">fetchmany</span></code> method. However, changing the value of this
+attribute does not make any difference in fetch efficiency because
+the database engine only supports fetching a single row at a time.</p>
+</div></blockquote>
+<p><a class="reference internal" href="ref-core.html#firebird.driver.core.Cursor.setinputsizes" title="firebird.driver.core.Cursor.setinputsizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setinputsizes</span></code></a></p>
+<blockquote>
+<div><p>Although this method is present, it does nothing, as allowed by the spec.</p>
+</div></blockquote>
+<p><a class="reference internal" href="ref-core.html#firebird.driver.core.Cursor.setoutputsize" title="firebird.driver.core.Cursor.setoutputsize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setoutputsize</span></code></a></p>
+<blockquote>
+<div><p>Although this method is present, it does nothing, as allowed by the spec.</p>
+</div></blockquote>
+</div></blockquote>
+</section>
+<section id="extensions-and-caveats">
+<h2>Extensions and Caveats<a class="headerlink" href="#extensions-and-caveats" title="Permalink to this heading">¶</a></h2>
+<p>Firebird-driver offers a large feature set beyond the minimal requirements
+of the Python DB API. This section attempts to document only those
+features that overlap with the DB API, or are too insignificant
+to warrant their own subsection elsewhere.</p>
+<p><a class="reference internal" href="ref-core.html#firebird.driver.core.connect" title="firebird.driver.core.connect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect</span></code></a></p>
+<blockquote>
+<div><p>This function supports the following optional keyword arguments in addition
+to those required by the spec:</p>
+<dl class="field-list simple">
+<dt class="field-odd">role</dt>
+<dd class="field-odd"><p>For connecting to a database with a specific SQL role.</p>
+</dd>
+</dl>
+<p><em>Example:</em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">firebird</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">dsn</span><span class="o">=</span><span class="s1">&#39;host:/path/database.db&#39;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">&#39;limited_user&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;pass&#39;</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="s1">&#39;MORE_POWERFUL_ROLE&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">charset</dt>
+<dd class="field-odd"><p>For explicitly specifying the character set of the connection.
+See Firebird Documentation for a list of available character sets, and
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">Unicode</span> <span class="pre">Fields</span> <span class="pre">and</span> <span class="pre">Firebird-driver</span></code> section for information on handling
+extended character sets with Firebird-driver.</p>
+</dd>
+</dl>
+<p><em>Example:</em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">firebird</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">dsn</span><span class="o">=</span><span class="s1">&#39;host:/path/database.db&#39;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">&#39;sysdba&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;pass&#39;</span><span class="p">,</span> <span class="n">charset</span><span class="o">=</span><span class="s1">&#39;UTF8&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">sql_dialect</dt>
+<dd class="field-odd"><p>The SQL dialect is feature for backward compatibility with Interbase® 5.5
+or earlier. The default dialect is <code class="xref py py-obj docutils literal notranslate"><span class="pre">3</span></code> (the most featureful dialect, default
+for Firebird). If you want to connect to <code class="xref py py-obj docutils literal notranslate"><span class="pre">legacy</span></code> databases, you must
+explicitly set this argument’s value to <code class="xref py py-obj docutils literal notranslate"><span class="pre">1</span></code>. Dialect <code class="xref py py-obj docutils literal notranslate"><span class="pre">2</span></code> is a transitional
+dialect that is normally used only during ports from IB &lt; 6 to IB &gt;= 6
+or Firebird. See Firebird documentation for more information about
+SQL Dialects.</p>
+</dd>
+</dl>
+<p><em>Example:</em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">firebird</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">dsn</span><span class="o">=</span><span class="s1">&#39;host:/path/database.db&#39;</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">&#39;sysdba&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;pass&#39;</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p><a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a></p>
+<blockquote>
+<div><p><a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.charset" title="firebird.driver.core.Connection.charset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">charset</span></code></a></p>
+<blockquote>
+<div><p><em>(read-only)</em> The character set of the connection (set via the <code class="xref py py-obj docutils literal notranslate"><span class="pre">charset</span></code>
+parameter of <a class="reference internal" href="ref-core.html#firebird.driver.core.connect" title="firebird.driver.core.connect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect()</span></code></a>). See Firebird Documentation for a list
+of available character sets, and <code class="xref py py-obj docutils literal notranslate"><span class="pre">Unicode</span> <span class="pre">Fields</span> <span class="pre">and</span> <span class="pre">Firebird-driver</span></code> section
+for information on handling extended character sets with Firebird-driver.</p>
+</div></blockquote>
+<p><a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.sql_dialect" title="firebird.driver.core.Connection.sql_dialect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sql_dialect</span></code></a></p>
+<blockquote>
+<div><p>This integer attribute indicates which SQL dialect the connection is using.
+You should not change a connection’s dialect; instead, discard the connection
+and establish a new one with the desired dialect. For more information, see
+the documentation of the <code class="xref py py-obj docutils literal notranslate"><span class="pre">sql_dialect</span></code> argument of the <code class="xref py py-obj docutils literal notranslate"><span class="pre">connect</span></code> function.</p>
+</div></blockquote>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">server_version</span></code></p>
+<blockquote>
+<div><p><em>(read-only)</em> The version string of the database server to which this connection
+is connected.</p>
+</div></blockquote>
+<p><a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.execute_immediate" title="firebird.driver.core.Connection.execute_immediate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">execute_immediate</span></code></a></p>
+<blockquote>
+<div><p>Executes a statement without caching its prepared form. The statement must <em>not</em> be
+of a type that returns a result set. In most cases (especially cases in which the same
+statement – perhaps a parameterized statement – is executed repeatedly),
+it is better to create a cursor using the connection’s <code class="xref py py-obj docutils literal notranslate"><span class="pre">cursor</span></code> method, then execute
+the statement using one of the cursor’s execute methods.</p>
+<p>Arguments:</p>
+<dl class="field-list simple">
+<dt class="field-odd">sql</dt>
+<dd class="field-odd"><p>String containing the SQL statement to execute.</p>
+</dd>
+</dl>
+</div></blockquote>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">commit(retaining=False)</span></code>
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">rollback(retaining=False,</span> <span class="pre">savepoint=None)</span></code></p>
+<blockquote>
+<div><p>The <code class="xref py py-obj docutils literal notranslate"><span class="pre">commit</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">rollback</span></code> methods accept an optional boolean parameter <code class="xref py py-obj docutils literal notranslate"><span class="pre">retaining</span></code>
+(default <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>) that indicates whether the transactional context of the transaction
+being resolved should be recycled. For details, see the Advanced
+Transaction Control: Retaining Operations section of this document.
+The <code class="xref py py-obj docutils literal notranslate"><span class="pre">rollback</span></code> method accepts an optional string parameter <code class="xref py py-obj docutils literal notranslate"><span class="pre">savepoint</span></code>
+that causes the transaction to roll back only as far as the designated
+savepoint, rather than rolling back entirely. For details, see the
+Advanced Transaction Control: Savepoints section of this document.</p>
+</div></blockquote>
+</div></blockquote>
+<p><a class="reference internal" href="ref-core.html#firebird.driver.core.Cursor" title="firebird.driver.core.Cursor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Cursor</span></code></a></p>
+<blockquote>
+<div><p><a class="reference internal" href="ref-core.html#firebird.driver.core.Cursor.description" title="firebird.driver.core.Cursor.description"><code class="xref py py-obj docutils literal notranslate"><span class="pre">description</span></code></a></p>
+<blockquote>
+<div><p>Firebird-driver makes absolutely no guarantees about <code class="xref py py-obj docutils literal notranslate"><span class="pre">description</span></code> except those
+required by the Python Database API Specification 2.0 (that is, <code class="xref py py-obj docutils literal notranslate"><span class="pre">description</span></code>
+is either <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> or a sequence of 7-element sequences). Therefore, client
+programmers should <em>not</em> rely on <code class="xref py py-obj docutils literal notranslate"><span class="pre">description</span></code> being an instance of a particular
+class or type. Firebird-driver provides several named positional constants to be
+used as indices into a given element of <code class="xref py py-obj docutils literal notranslate"><span class="pre">description</span></code> . The contents
+of all <code class="xref py py-obj docutils literal notranslate"><span class="pre">description</span></code> elements are defined by the DB API spec; these
+constants are provided merely for convenience.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">DESCRIPTION_NAME</span>
+<span class="n">DESCRIPTION_TYPE_CODE</span>
+<span class="n">DESCRIPTION_DISPLAY_SIZE</span>
+<span class="n">DESCRIPTION_INTERNAL_SIZE</span>
+<span class="n">DESCRIPTION_PRECISION</span>
+<span class="n">DESCRIPTION_SCALE</span>
+<span class="n">DESCRIPTION_NULL_OK</span>
+</pre></div>
+</div>
+<p>Here is an example of accessing the <em>name</em> of the first field in the
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">description</span></code> of cursor <code class="xref py py-obj docutils literal notranslate"><span class="pre">cur</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nameOfFirstField</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">description</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">firebird</span><span class="o">.</span><span class="n">driver</span><span class="o">.</span><span class="n">DESCRIPTION_NAME</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>For more information, see the documentation of Cursor.description in
+the <a class="reference external" href="Python-DB-API-2.0.html">DB API Specification</a>.</p>
+</div></blockquote>
+<p><a class="reference internal" href="ref-core.html#firebird.driver.core.Cursor.rowcount" title="firebird.driver.core.Cursor.rowcount"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rowcount</span></code></a></p>
+<blockquote>
+<div><p>Although <code class="xref py py-obj docutils literal notranslate"><span class="pre">Cursor</span></code> in Firebird-driver implement this attribute,
+the database engine’s own support for the determination of
+“rows affected”/”rows selected” is quirky. The database engine only
+supports the determination of rowcount for <code class="xref py py-obj docutils literal notranslate"><span class="pre">INSERT</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">UPDATE</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">DELETE</span></code>, and <code class="xref py py-obj docutils literal notranslate"><span class="pre">SELECT</span></code> statements. When stored procedures become
+involved, row count figures are usually not available to the client.
+Determining rowcount for <code class="xref py py-obj docutils literal notranslate"><span class="pre">SELECT</span></code> statements is problematic: the
+rowcount is reported as zero until at least one row has been fetched
+from the result set, and the rowcount is misreported if the result set
+is larger than 1302 rows. The server apparently marshals result sets
+internally in batches of 1302, and will misreport the rowcount for
+result sets larger than 1302 rows until the 1303rd row is fetched,
+result sets larger than 2604 rows until the 2605th row is fetched, and
+so on, in increments of 1302. As required by the Python DB API Spec,
+the rowcount attribute “is -1 in case no executeXX() has been
+performed on the cursor or the rowcount of the last operation is not
+determinable by the interface”.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This attribute is just an alias for <a class="reference internal" href="ref-core.html#firebird.driver.core.Cursor.affected_rows" title="firebird.driver.core.Cursor.affected_rows"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Cursor.affected_rows</span></code></a> property.</p>
+</div>
+</div></blockquote>
+<p><a class="reference internal" href="ref-core.html#firebird.driver.core.Cursor.fetchone" title="firebird.driver.core.Cursor.fetchone"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fetchone</span></code></a></p>
+<p><a class="reference internal" href="ref-core.html#firebird.driver.core.Cursor.fetchmany" title="firebird.driver.core.Cursor.fetchmany"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fetchmany</span></code></a></p>
+<p><a class="reference internal" href="ref-core.html#firebird.driver.core.Cursor.fetchall" title="firebird.driver.core.Cursor.fetchall"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fetchall</span></code></a></p>
+<blockquote>
+<div><p>Firebird-driver makes absolutely no guarantees about
+the return value of the <code class="xref py py-obj docutils literal notranslate"><span class="pre">fetchone</span></code> / <code class="xref py py-obj docutils literal notranslate"><span class="pre">fetchmany</span></code> / <code class="xref py py-obj docutils literal notranslate"><span class="pre">fetchall</span></code> methods
+except that it is a sequence indexed by field position.</p>
+</div></blockquote>
+</div></blockquote>
+</section>
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2020-2022, The Firebird Project.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.2.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

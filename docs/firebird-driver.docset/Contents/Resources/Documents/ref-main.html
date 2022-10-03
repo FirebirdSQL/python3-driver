@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
+<title>Main driver namespace — firebird-driver 1.5.2 documentation</title>
+<link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
+<link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
+<script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+<script src="_static/jquery.js"></script>
+<script src="_static/underscore.js"></script>
+<script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+<script src="_static/doctools.js"></script>
+<script src="_static/sphinx_highlight.js"></script>
+<link href="genindex.html" rel="index" title="Index"/>
+<link href="search.html" rel="search" title="Search"/>
+<link href="ref-types.html" rel="next" title="firebird.driver.types"/>
+<link href="reference.html" rel="prev" title="Firebird-driver Reference"/>
+<meta charset="utf-8"/>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1" name="viewport"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<script src="_static/js/jquery-1.12.4.min.js" type="text/javascript"></script>
+<script src="_static/js/jquery-fix.js" type="text/javascript"></script>
+<script src="_static/bootstrap-2.3.2/js/bootstrap.min.js" type="text/javascript"></script>
+<script src="_static/bootstrap-sphinx.js" type="text/javascript"></script>
+</head><body>
+<div class="navbar navbar-inverse navbar-fixed-top" id="navbar">
+<div class="navbar-inner">
+<div class="container">
+<!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+<button class="btn btn-navbar" data-target=".nav-collapse" data-toggle="collapse">
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<a class="brand" href="index.html">
+          firebird-driver</a>
+<span class="navbar-text pull-left"><b>1.5.2</b></span>
+<div class="nav-collapse">
+<ul class="nav">
+<li class="divider-vertical"></li>
+<li><a href="usage-guide.html">Usage Guide</a></li>
+<li><a href="reference.html">Reference</a></li>
+<li><a href="genindex.html">Index</a></li>
+<li class="dropdown globaltoc-container">
+<a data-target="#" data-toggle="dropdown" href="index.html" id="dLabelGlobalToc" role="button">Content <b class="caret"></b></a>
+<ul aria-labelledby="dLabelGlobalToc" class="dropdown-menu globaltoc" role="menu"><p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#installation-from-pypi">Installation from PYPI</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#quick-start-guide">Quick-start Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#driver-configuration">Driver configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#connecting-to-a-database">Connecting to a Database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#creating-a-database">Creating a Database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#executing-sql-statements">Executing SQL Statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#calling-stored-procedures">Calling Stored Procedures</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage-guide.html">Usage Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#driver-structure">Driver structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#configuration">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#the-driver-config-object">The ‘driver_config’ object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#server-and-database-configuration">Server and database configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#databases">Databases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#using-connect">Using connect()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#using-create-database">Using create_database()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#deleting-databases">Deleting databases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#connection-object">Connection object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#closing-the-connection">Closing the connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#getting-information-about-connection">Getting information about connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#getting-information-about-database">Getting information about database</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#executing-sql-statements">Executing SQL Statements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#cursor-object">Cursor object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#sql-execution-basics">SQL Execution Basics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#fetching-data-from-server">Fetching data from server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#index-13">Scrollable cursors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#id3">Parameterized statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#id5">Prepared Statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#named-cursors">Named Cursors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#working-with-stored-procedures">Working with stored procedures</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#data-handling-and-conversions">Data handling and conversions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#implicit-conversion-of-input-parameters-from-strings">Implicit Conversion of Input Parameters from Strings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#automatic-conversion-from-to-unicode">Automatic conversion from/to Unicode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#working-with-blobs">Working with BLOBs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#firebird-array-type">Firebird ARRAY type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#transanction-management">Transanction management</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#basics">Basics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#auto-commit">Auto-commit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#transaction-parameters">Transaction parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#getting-information-about-transaction">Getting information about transaction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#retaining-transactions">Retaining transactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#savepoints">Savepoints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#using-multiple-transactions-with-the-same-connection">Using multiple transactions with the same connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#distributed-transactions">Distributed Transactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#transaction-context-manager">Transaction Context Manager</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#database-events">Database Events</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#what-they-are">What they are</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#why-use-them">Why use them</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#how-events-are-exposed">How events are exposed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#api-for-python-developers">API for Python developers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#working-with-services">Working with Services</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#services-api-connections">Services API Connections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#text-output-from-services">Text output from Services</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#server-configuration-and-state-information">Server Configuration and State information</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#database-options">Database options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#database-maintenance">Database maintenance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#user-maintenance">User maintenance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#trace-sessions">Trace sessions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#logging-driver-activities">Logging driver activities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#index-43">Driver hooks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#apihook">APIHook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#connectionhook">ConnectionHook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#serverhook">ServerHook</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="python-db-api-compliance.html">Compliance to PyDB API 2.0</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="python-db-api-compliance.html#unsupported-optional-features">Unsupported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python-db-api-compliance.html#supported-optional-features">Supported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python-db-api-compliance.html#nominally-supported-optional-features">Nominally Supported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python-db-api-compliance.html#extensions-and-caveats">Extensions and Caveats</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="reference.html">Firebird-driver Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="reference.html#driver-modules">Driver modules</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Main driver namespace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-types.html">firebird.driver.types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-config.html">firebird.driver.config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-core.html">firebird.driver.core</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-hooks.html">firebird.driver.hooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-intf.html">firebird.driver.interfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-fbapi.html">firebird.driver.fbapi</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-2">Version 1.5.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-1">Version 1.5.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-0">Version 1.5.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#potentially-breaking-changes">Potentially breaking changes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-4-3">Version 1.4.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-4-2">Version 1.4.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-4-1">Version 1.4.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-4-0">Version 1.4.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#improvements">Improvements:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#backward-incompatible-changes">Backward incompatible changes:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-3-4">Version 1.3.4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-3-3">Version 1.3.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-3-2">Version 1.3.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-3-1">Version 1.3.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-3-0">Version 1.3.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-2-1">Version 1.2.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-2-0">Version 1.2.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-1-0">Version 1.1.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-0-0">Version 1.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-0-8-0">Version 0.8.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-0-7-0">Version 0.7.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-0-6-0">Version 0.6.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-0-5-0">Version 0.5.0</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+</ul>
+</li>
+<li class="dropdown">
+<a data-target="#" data-toggle="dropdown" href="#" id="dLabelLocalToc" role="button">Page <b class="caret"></b></a>
+<ul aria-labelledby="dLabelLocalToc" class="dropdown-menu localtoc" role="menu"><ul>
+<li><a class="reference internal" href="#">Main driver namespace</a><ul>
+<li><a class="reference internal" href="#constants">Constants</a><ul>
+<li><a class="reference internal" href="#firebird.driver.__VERSION__"><code class="docutils literal notranslate"><span class="pre">__VERSION__</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#imports-from-sub-modules">Imports from sub-modules</a><ul>
+<li><a class="reference internal" href="#config">config</a></li>
+<li><a class="reference internal" href="#core">core</a></li>
+<li><a class="reference internal" href="#types">types</a></li>
+<li><a class="reference internal" href="#fbapi">fbapi</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+</ul>
+<form action="search.html" class="navbar-form navbar-right" method="get">
+<div class="form-group">
+<input class="form-control" name="q" placeholder="Search" type="text"/>
+</div>
+<input name="check_keywords" type="hidden" value="yes"/>
+<input name="area" type="hidden" value="default"/>
+</form>
+</div>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="row">
+<div class="body span12 content" role="main">
+<section id="module-firebird.driver">
+<span id="main-driver-namespace"></span><a class="dashAnchor" name="//apple_ref/cpp/Module/firebird.driver"></a><h1>Main driver namespace<a class="headerlink" href="#module-firebird.driver" title="Permalink to this heading">¶</a></h1>
+<section id="constants">
+<h2>Constants<a class="headerlink" href="#constants" title="Permalink to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="firebird.driver.__VERSION__">
+<span class="sig-prename descclassname"><span class="pre">firebird.driver.</span></span><span class="sig-name descname"><span class="pre">__VERSION__</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'1.5.2'</span></em><a class="dashAnchor" name="//apple_ref/cpp/Value/firebird.driver.__VERSION__"></a><a class="headerlink" href="#firebird.driver.__VERSION__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current driver version, SEMVER string.</p>
+</dd></dl>
+</section>
+<section id="imports-from-sub-modules">
+<h2>Imports from sub-modules<a class="headerlink" href="#imports-from-sub-modules" title="Permalink to this heading">¶</a></h2>
+<section id="config">
+<h3>config<a class="headerlink" href="#config" title="Permalink to this heading">¶</a></h3>
+<p>Globals: <a class="reference internal" href="ref-config.html#firebird.driver.config.driver_config" title="firebird.driver.config.driver_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">driver_config</span></code></a></p>
+</section>
+<section id="core">
+<h3>core<a class="headerlink" href="#core" title="Permalink to this heading">¶</a></h3>
+<dl class="simple">
+<dt>Functions:</dt><dd><p><a class="reference internal" href="ref-core.html#firebird.driver.core.connect" title="firebird.driver.core.connect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect()</span></code></a>, <a class="reference internal" href="ref-core.html#firebird.driver.core.create_database" title="firebird.driver.core.create_database"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_database()</span></code></a>, <a class="reference internal" href="ref-core.html#firebird.driver.core.connect_server" title="firebird.driver.core.connect_server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect_server()</span></code></a>, <a class="reference internal" href="ref-core.html#firebird.driver.core.transaction" title="firebird.driver.core.transaction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transaction()</span></code></a> and <a class="reference internal" href="ref-core.html#firebird.driver.core.tpb" title="firebird.driver.core.tpb"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tpb()</span></code></a></p>
+</dd>
+<dt>Translation dictionaries:</dt><dd><p><a class="reference internal" href="ref-core.html#firebird.driver.core.CHARSET_MAP" title="firebird.driver.core.CHARSET_MAP"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CHARSET_MAP</span></code></a></p>
+</dd>
+<dt>Classes:</dt><dd><p><a class="reference internal" href="ref-core.html#firebird.driver.core.DistributedTransactionManager" title="firebird.driver.core.DistributedTransactionManager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DistributedTransactionManager</span></code></a>, <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a>, <a class="reference internal" href="ref-core.html#firebird.driver.core.Cursor" title="firebird.driver.core.Cursor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Cursor</span></code></a>, <a class="reference internal" href="ref-core.html#firebird.driver.core.Server" title="firebird.driver.core.Server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server</span></code></a> and <a class="reference internal" href="ref-core.html#firebird.driver.core.TPB" title="firebird.driver.core.TPB"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TPB</span></code></a></p>
+</dd>
+</dl>
+</section>
+<section id="types">
+<h3>types<a class="headerlink" href="#types" title="Permalink to this heading">¶</a></h3>
+<dl class="simple">
+<dt>Exceptions:</dt><dd><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Warning" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Warning</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.Error" title="firebird.driver.types.Error"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Error</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.InterfaceError" title="firebird.driver.types.InterfaceError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InterfaceError</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.DatabaseError" title="firebird.driver.types.DatabaseError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DatabaseError</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.DataError" title="firebird.driver.types.DataError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataError</span></code></a>,
+<a class="reference internal" href="ref-types.html#firebird.driver.types.OperationalError" title="firebird.driver.types.OperationalError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OperationalError</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.IntegrityError" title="firebird.driver.types.IntegrityError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IntegrityError</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.InternalError" title="firebird.driver.types.InternalError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InternalError</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.ProgrammingError" title="firebird.driver.types.ProgrammingError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProgrammingError</span></code></a>
+and <a class="reference internal" href="ref-types.html#firebird.driver.types.NotSupportedError" title="firebird.driver.types.NotSupportedError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NotSupportedError</span></code></a></p>
+</dd>
+<dt>Enums:</dt><dd><p><a class="reference internal" href="ref-types.html#firebird.driver.types.NetProtocol" title="firebird.driver.types.NetProtocol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NetProtocol</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.DirectoryCode" title="firebird.driver.types.DirectoryCode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DirectoryCode</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.PageSize" title="firebird.driver.types.PageSize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PageSize</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.DBKeyScope" title="firebird.driver.types.DBKeyScope"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DBKeyScope</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.DbInfoCode" title="firebird.driver.types.DbInfoCode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DbInfoCode</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.Features" title="firebird.driver.types.Features"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Features</span></code></a>,
+<a class="reference internal" href="ref-types.html#firebird.driver.types.TraInfoCode" title="firebird.driver.types.TraInfoCode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TraInfoCode</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.ReplicaMode" title="firebird.driver.types.ReplicaMode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ReplicaMode</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.StmtInfoCode" title="firebird.driver.types.StmtInfoCode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StmtInfoCode</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.TraInfoIsolation" title="firebird.driver.types.TraInfoIsolation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TraInfoIsolation</span></code></a>,
+<a class="reference internal" href="ref-types.html#firebird.driver.types.TraInfoReadCommitted" title="firebird.driver.types.TraInfoReadCommitted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TraInfoReadCommitted</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.TraInfoAccess" title="firebird.driver.types.TraInfoAccess"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TraInfoAccess</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.TraIsolation" title="firebird.driver.types.TraIsolation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TraIsolation</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.TraReadCommitted" title="firebird.driver.types.TraReadCommitted"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TraReadCommitted</span></code></a>,
+<a class="reference internal" href="ref-types.html#firebird.driver.types.TraLockResolution" title="firebird.driver.types.TraLockResolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TraLockResolution</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.TraAccessMode" title="firebird.driver.types.TraAccessMode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TraAccessMode</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.TableShareMode" title="firebird.driver.types.TableShareMode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TableShareMode</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.TableAccessMode" title="firebird.driver.types.TableAccessMode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TableAccessMode</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.Isolation" title="firebird.driver.types.Isolation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Isolation</span></code></a>,
+<a class="reference internal" href="ref-types.html#firebird.driver.types.DefaultAction" title="firebird.driver.types.DefaultAction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DefaultAction</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.StatementType" title="firebird.driver.types.StatementType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StatementType</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.BlobType" title="firebird.driver.types.BlobType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BlobType</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.DbAccessMode" title="firebird.driver.types.DbAccessMode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DbAccessMode</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.DbSpaceReservation" title="firebird.driver.types.DbSpaceReservation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DbSpaceReservation</span></code></a>,
+<a class="reference internal" href="ref-types.html#firebird.driver.types.DbWriteMode" title="firebird.driver.types.DbWriteMode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DbWriteMode</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.ShutdownMode" title="firebird.driver.types.ShutdownMode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ShutdownMode</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.OnlineMode" title="firebird.driver.types.OnlineMode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OnlineMode</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.ShutdownMethod" title="firebird.driver.types.ShutdownMethod"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ShutdownMethod</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.CancelType" title="firebird.driver.types.CancelType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CancelType</span></code></a>,
+<a class="reference internal" href="ref-types.html#firebird.driver.types.DecfloatRound" title="firebird.driver.types.DecfloatRound"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DecfloatRound</span></code></a> and <a class="reference internal" href="ref-types.html#firebird.driver.types.DecfloatTraps" title="firebird.driver.types.DecfloatTraps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DecfloatTraps</span></code></a></p>
+</dd>
+<dt>Flags:</dt><dd><p><a class="reference internal" href="ref-types.html#firebird.driver.types.ServerCapability" title="firebird.driver.types.ServerCapability"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerCapability</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.SrvRepairFlag" title="firebird.driver.types.SrvRepairFlag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SrvRepairFlag</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.SrvStatFlag" title="firebird.driver.types.SrvStatFlag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SrvStatFlag</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.SrvBackupFlag" title="firebird.driver.types.SrvBackupFlag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SrvBackupFlag</span></code></a>,
+<a class="reference internal" href="ref-types.html#firebird.driver.types.SrvRestoreFlag" title="firebird.driver.types.SrvRestoreFlag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SrvRestoreFlag</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.SrvNBackupFlag" title="firebird.driver.types.SrvNBackupFlag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SrvNBackupFlag</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.ConnectionFlag" title="firebird.driver.types.ConnectionFlag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConnectionFlag</span></code></a> and <a class="reference internal" href="ref-types.html#firebird.driver.types.EncryptionFlag" title="firebird.driver.types.EncryptionFlag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EncryptionFlag</span></code></a></p>
+</dd>
+<dt>Globals and other objects required by Python DB API 2.0:</dt><dd><p><a class="reference internal" href="ref-types.html#firebird.driver.types.apilevel" title="firebird.driver.types.apilevel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">apilevel</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.threadsafety" title="firebird.driver.types.threadsafety"><code class="xref py py-obj docutils literal notranslate"><span class="pre">threadsafety</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.paramstyle" title="firebird.driver.types.paramstyle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">paramstyle</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.Date" title="firebird.driver.types.Date"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Date</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.Time" title="firebird.driver.types.Time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Time</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.Timestamp" title="firebird.driver.types.Timestamp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Timestamp</span></code></a>,
+<a class="reference internal" href="ref-types.html#firebird.driver.types.DateFromTicks" title="firebird.driver.types.DateFromTicks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DateFromTicks</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.TimeFromTicks" title="firebird.driver.types.TimeFromTicks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeFromTicks</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.TimestampFromTicks" title="firebird.driver.types.TimestampFromTicks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimestampFromTicks</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.STRING" title="firebird.driver.types.STRING"><code class="xref py py-obj docutils literal notranslate"><span class="pre">STRING</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.BINARY" title="firebird.driver.types.BINARY"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BINARY</span></code></a>,
+<a class="reference internal" href="ref-types.html#firebird.driver.types.NUMBER" title="firebird.driver.types.NUMBER"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NUMBER</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.DATETIME" title="firebird.driver.types.DATETIME"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DATETIME</span></code></a> and <a class="reference internal" href="ref-types.html#firebird.driver.types.ROWID" title="firebird.driver.types.ROWID"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ROWID</span></code></a></p>
+</dd>
+<dt>Helper constants:</dt><dd><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">DESCRIPTION_NAME</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">DESCRIPTION_TYPE_CODE</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">DESCRIPTION_DISPLAY_SIZE</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">DESCRIPTION_INTERNAL_SIZE</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">DESCRIPTION_PRECISION</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">DESCRIPTION_SCALE</span></code>
+and <code class="xref py py-obj docutils literal notranslate"><span class="pre">DESCRIPTION_NULL_OK</span></code></p>
+</dd>
+<dt>Helper functions:</dt><dd><p><a class="reference internal" href="ref-types.html#firebird.driver.types.get_timezone" title="firebird.driver.types.get_timezone"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_timezone()</span></code></a></p>
+</dd>
+</dl>
+</section>
+<section id="fbapi">
+<h3>fbapi<a class="headerlink" href="#fbapi" title="Permalink to this heading">¶</a></h3>
+<p>Functions <a class="reference internal" href="ref-fbapi.html#firebird.driver.fbapi.load_api" title="firebird.driver.fbapi.load_api"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_api()</span></code></a> and <a class="reference internal" href="ref-fbapi.html#firebird.driver.fbapi.get_api" title="firebird.driver.fbapi.get_api"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_api()</span></code></a>.</p>
+</section>
+</section>
+</section>
+</div>
+</div>
+</div>
+<footer class="footer">
+<div class="container">
+<p class="pull-right">
+<a href="#">Back to top</a>
+</p>
+<p>
+        © Copyright 2020-2022, The Firebird Project.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.2.<br/>
+</p>
+</div>
+</footer>
+</body>
+</html>

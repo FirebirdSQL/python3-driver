@@ -1,0 +1,463 @@
+.. module:: firebird.driver.types
+    :synopsis: Firebird driver types
+
+=====================
+firebird.driver.types
+=====================
+
+Exceptions
+==========
+
+Next exceptions are required by Python DB API 2.0
+
+Error
+-----
+Imported from `firebird.base.types`.
+
+.. autoexception:: Error
+
+InterfaceError
+--------------
+.. autoexception:: InterfaceError
+
+DatabaseError
+-------------
+.. autoexception:: DatabaseError
+
+DataError
+---------
+.. autoexception:: DataError
+
+OperationalError
+----------------
+.. autoexception:: OperationalError
+
+IntegrityError
+--------------
+.. autoexception:: IntegrityError
+
+InternalError
+-------------
+.. autoexception:: InternalError
+
+ProgrammingError
+----------------
+.. autoexception:: ProgrammingError
+
+NotSupportedError
+-----------------
+.. autoexception:: NotSupportedError
+
+FirebirdWarning
+---------------
+.. autoexception:: FirebirdWarning
+
+This is the exception inheritance layout::
+
+    StandardError
+    |__UserWarning
+        |__FirebirdWarning
+    |__Error
+        |__InterfaceError
+        |__DatabaseError
+            |__DataError
+            |__OperationalError
+            |__IntegrityError
+            |__InternalError
+            |__ProgrammingError
+            |__NotSupportedError
+
+Other constants and types required by Python DB API 2.0 specification
+=====================================================================
+
+Globals
+-------
+
+.. autodata:: apilevel
+
+.. autodata:: threadsafety
+
+.. autodata:: paramstyle
+
+Helper constants for work with :attr:`Cursor.description` content
+-----------------------------------------------------------------
+
+- DESCRIPTION_NAME
+- DESCRIPTION_TYPE_CODE
+- DESCRIPTION_DISPLAY_SIZE
+- DESCRIPTION_INTERNAL_SIZE
+- DESCRIPTION_PRECISION
+- DESCRIPTION_SCALE
+- DESCRIPTION_NULL_OK
+
+Types
+-----
+
+.. autodata:: STRING
+
+.. autodata:: BINARY
+
+.. autodata:: NUMBER
+
+.. autodata:: DATETIME
+
+.. autodata:: ROWID
+
+Constructors for data types
+---------------------------
+
+.. autodata:: Date
+
+.. autodata:: Time
+
+.. autodata:: Timestamp
+
+.. autofunction:: DateFromTicks
+
+.. autofunction:: TimeFromTicks
+
+.. autofunction:: TimestampFromTicks
+
+.. autodata:: Binary
+
+Types for type hints
+====================
+
+.. autodata:: DESCRIPTION
+
+.. autodata:: CB_OUTPUT_LINE
+
+.. autoclass:: Transactional
+
+Enums
+=====
+
+NetProtocol
+-----------
+.. autoclass:: NetProtocol
+
+DirectoryCode
+-------------
+.. autoclass:: DirectoryCode
+
+XpbKind
+-------
+.. autoclass:: XpbKind
+
+StateResult
+-----------
+.. autoclass:: StateResult
+
+PageSize
+--------
+.. autoclass:: PageSize
+
+DBKeyScope
+----------
+.. autoclass:: DBKeyScope
+
+InfoItemType
+------------
+.. autoclass:: InfoItemType
+
+SrvInfoCode
+-----------
+.. autoclass:: SrvInfoCode
+
+BlobInfoCode
+------------
+.. autoclass:: BlobInfoCode
+
+DbInfoCode
+----------
+.. autoclass:: DbInfoCode
+
+Features
+--------
+.. autoclass:: Features
+
+ReplicaMode
+-----------
+.. autoclass:: ReplicaMode
+
+StmtInfoCode
+------------
+.. autoclass:: StmtInfoCode
+
+TraInfoCode
+-----------
+.. autoclass:: TraInfoCode
+
+TraInfoIsolation
+----------------
+.. autoclass:: TraInfoIsolation
+
+TraInfoReadCommitted
+--------------------
+.. autoclass:: TraInfoReadCommitted
+
+TraInfoAccess
+-------------
+.. autoclass:: TraInfoAccess
+
+TraAccessMode
+-------------
+.. autoclass:: TraAccessMode
+
+TraIsolation
+------------
+.. autoclass:: TraIsolation
+
+TraReadCommitted
+----------------
+.. autoclass:: TraReadCommitted
+
+Isolation
+---------
+.. autoclass:: Isolation
+
+TraLockResolution
+-----------------
+.. autoclass:: TraLockResolution
+
+TableShareMode
+--------------
+.. autoclass:: TableShareMode
+
+TableAccessMode
+---------------
+.. autoclass:: TableAccessMode
+
+DefaultAction
+-------------
+.. autoclass:: DefaultAction
+
+StatementType
+-------------
+.. autoclass:: StatementType
+
+SQLDataType
+-----------
+.. autoclass:: SQLDataType
+
+DPBItem
+-------
+.. autoclass:: DPBItem
+
+TPBItem
+-------
+.. autoclass:: TPBItem
+
+SPBItem
+-------
+.. autoclass:: SPBItem
+
+BPBItem
+-------
+.. autoclass:: BPBItem
+
+BlobType
+--------
+.. autoclass:: BlobType
+
+BlobStorage
+-----------
+.. autoclass:: BlobStorage
+
+ServerAction
+------------
+.. autoclass:: ServerAction
+
+SrvDbInfoOption
+---------------
+.. autoclass:: SrvDbInfoOption
+
+SrvRepairOption
+---------------
+.. autoclass:: SrvRepairOption
+
+SrvBackupOption
+---------------
+.. autoclass:: SrvBackupOption
+
+SrvRestoreOption
+----------------
+.. autoclass:: SrvRestoreOption
+
+SrvNBackupOption
+----------------
+.. autoclass:: SrvNBackupOption
+
+SrvTraceOption
+--------------
+.. autoclass:: SrvTraceOption
+
+SrvPropertiesOption
+-------------------
+.. autoclass:: SrvPropertiesOption
+
+SrvValidateOption
+-----------------
+.. autoclass:: SrvValidateOption
+
+SrvUserOption
+-------------
+.. autoclass:: SrvUserOption
+
+DbAccessMode
+------------
+.. autoclass:: DbAccessMode
+
+DbSpaceReservation
+-------------------
+.. autoclass:: DbSpaceReservation
+
+DbWriteMode
+------------
+.. autoclass:: DbWriteMode
+
+ShutdownMode
+------------
+.. autoclass:: ShutdownMode
+
+OnlineMode
+----------
+.. autoclass:: OnlineMode
+
+ShutdownMethod
+--------------
+.. autoclass:: ShutdownMethod
+
+TransactionState
+----------------
+.. autoclass:: TransactionState
+
+DbProvider
+----------
+.. autoclass:: DbProvider
+
+DbClass
+-------
+.. autoclass:: DbClass
+
+Implementation
+--------------
+.. autoclass:: Implementation
+
+ImpCPU
+------
+.. autoclass:: ImpCPU
+
+ImpOS
+-----
+.. autoclass:: ImpOS
+
+ImpCompiler
+-----------
+.. autoclass:: ImpCompiler
+
+CancelType
+----------
+.. autoclass:: CancelType
+
+DecfloatRound
+-------------
+.. autoclass:: DecfloatRound
+
+DecfloatTraps
+-------------
+.. autoclass:: DecfloatTraps
+
+Flags
+=====
+
+StateFlag
+---------
+.. autoclass:: StateFlag
+
+PreparePrefetchFlag
+-------------------
+.. autoclass:: PreparePrefetchFlag
+
+StatementFlag
+-------------
+.. autoclass:: StatementFlag
+
+CursorFlag
+----------
+.. autoclass:: CursorFlag
+
+ConnectionFlag
+--------------
+.. autoclass:: ConnectionFlag
+
+EncryptionFlag
+--------------
+.. autoclass:: EncryptionFlag
+
+ServerCapability
+----------------
+.. autoclass:: ServerCapability
+
+SrvRepairFlag
+-------------
+.. autoclass:: SrvRepairFlag
+
+SrvStatFlag
+-----------
+.. autoclass:: SrvStatFlag
+
+SrvBackupFlag
+-------------
+.. autoclass:: SrvBackupFlag
+
+SrvRestoreFlag
+--------------
+.. autoclass:: SrvRestoreFlag
+
+SrvNBackupFlag
+--------------
+.. autoclass:: SrvNBackupFlag
+
+SrvPropertiesFlag
+-----------------
+.. autoclass:: SrvPropertiesFlag
+
+ImpFlags
+--------
+.. autoclass:: ImpFlags
+
+Dataclasses
+===========
+
+ItemMetadata
+------------
+.. autoclass:: ItemMetadata
+   :no-members:
+
+TableAccessStats
+----------------
+.. autoclass:: TableAccessStats
+   :no-members:
+
+UserInfo
+--------
+.. autoclass:: UserInfo
+   :no-members:
+
+BCD
+---
+.. autoclass:: BCD
+   :no-members:
+
+TraceSession
+------------
+.. autoclass:: TraceSession
+   :no-members:
+
+Helper functions
+================
+
+get_timezone
+------------
+.. autofunction:: get_timezone

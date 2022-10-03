@@ -1,0 +1,2 @@
+doc2dash -u https://firebird-driver.readthedocs.io/en/latest/ -f -i ./_static/fb-favicon.png -n firebird-driver ./_build/html/
+tar --exclude='.DS_Store' -cvzf ../dist/firebird-driver-docset.tgz firebird-driver.docset

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
+<title>firebird.driver.hooks — firebird-driver 1.5.2 documentation</title>
+<link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
+<link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
+<script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+<script src="_static/jquery.js"></script>
+<script src="_static/underscore.js"></script>
+<script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+<script src="_static/doctools.js"></script>
+<script src="_static/sphinx_highlight.js"></script>
+<link href="genindex.html" rel="index" title="Index"/>
+<link href="search.html" rel="search" title="Search"/>
+<link href="ref-intf.html" rel="next" title="firebird.driver.interfaces"/>
+<link href="ref-core.html" rel="prev" title="firebird.driver.core"/>
+<meta charset="utf-8"/>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1" name="viewport"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<script src="_static/js/jquery-1.12.4.min.js" type="text/javascript"></script>
+<script src="_static/js/jquery-fix.js" type="text/javascript"></script>
+<script src="_static/bootstrap-2.3.2/js/bootstrap.min.js" type="text/javascript"></script>
+<script src="_static/bootstrap-sphinx.js" type="text/javascript"></script>
+</head><body>
+<div class="navbar navbar-inverse navbar-fixed-top" id="navbar">
+<div class="navbar-inner">
+<div class="container">
+<!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+<button class="btn btn-navbar" data-target=".nav-collapse" data-toggle="collapse">
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<a class="brand" href="index.html">
+          firebird-driver</a>
+<span class="navbar-text pull-left"><b>1.5.2</b></span>
+<div class="nav-collapse">
+<ul class="nav">
+<li class="divider-vertical"></li>
+<li><a href="usage-guide.html">Usage Guide</a></li>
+<li><a href="reference.html">Reference</a></li>
+<li><a href="genindex.html">Index</a></li>
+<li class="dropdown globaltoc-container">
+<a data-target="#" data-toggle="dropdown" href="index.html" id="dLabelGlobalToc" role="button">Content <b class="caret"></b></a>
+<ul aria-labelledby="dLabelGlobalToc" class="dropdown-menu globaltoc" role="menu"><p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#installation-from-pypi">Installation from PYPI</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#quick-start-guide">Quick-start Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#driver-configuration">Driver configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#connecting-to-a-database">Connecting to a Database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#creating-a-database">Creating a Database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#executing-sql-statements">Executing SQL Statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#calling-stored-procedures">Calling Stored Procedures</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage-guide.html">Usage Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#driver-structure">Driver structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#configuration">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#the-driver-config-object">The ‘driver_config’ object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#server-and-database-configuration">Server and database configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#databases">Databases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#using-connect">Using connect()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#using-create-database">Using create_database()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#deleting-databases">Deleting databases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#connection-object">Connection object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#closing-the-connection">Closing the connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#getting-information-about-connection">Getting information about connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#getting-information-about-database">Getting information about database</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#executing-sql-statements">Executing SQL Statements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#cursor-object">Cursor object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#sql-execution-basics">SQL Execution Basics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#fetching-data-from-server">Fetching data from server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#index-13">Scrollable cursors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#id3">Parameterized statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#id5">Prepared Statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#named-cursors">Named Cursors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#working-with-stored-procedures">Working with stored procedures</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#data-handling-and-conversions">Data handling and conversions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#implicit-conversion-of-input-parameters-from-strings">Implicit Conversion of Input Parameters from Strings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#automatic-conversion-from-to-unicode">Automatic conversion from/to Unicode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#working-with-blobs">Working with BLOBs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#firebird-array-type">Firebird ARRAY type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#transanction-management">Transanction management</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#basics">Basics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#auto-commit">Auto-commit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#transaction-parameters">Transaction parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#getting-information-about-transaction">Getting information about transaction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#retaining-transactions">Retaining transactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#savepoints">Savepoints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#using-multiple-transactions-with-the-same-connection">Using multiple transactions with the same connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#distributed-transactions">Distributed Transactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#transaction-context-manager">Transaction Context Manager</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#database-events">Database Events</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#what-they-are">What they are</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#why-use-them">Why use them</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#how-events-are-exposed">How events are exposed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#api-for-python-developers">API for Python developers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#working-with-services">Working with Services</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#services-api-connections">Services API Connections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#text-output-from-services">Text output from Services</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#server-configuration-and-state-information">Server Configuration and State information</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#database-options">Database options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#database-maintenance">Database maintenance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#user-maintenance">User maintenance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#trace-sessions">Trace sessions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#logging-driver-activities">Logging driver activities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#index-43">Driver hooks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#apihook">APIHook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#connectionhook">ConnectionHook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#serverhook">ServerHook</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="python-db-api-compliance.html">Compliance to PyDB API 2.0</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="python-db-api-compliance.html#unsupported-optional-features">Unsupported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python-db-api-compliance.html#supported-optional-features">Supported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python-db-api-compliance.html#nominally-supported-optional-features">Nominally Supported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python-db-api-compliance.html#extensions-and-caveats">Extensions and Caveats</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="reference.html">Firebird-driver Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="reference.html#driver-modules">Driver modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ref-main.html">Main driver namespace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-types.html">firebird.driver.types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-config.html">firebird.driver.config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-core.html">firebird.driver.core</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">firebird.driver.hooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-intf.html">firebird.driver.interfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-fbapi.html">firebird.driver.fbapi</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-2">Version 1.5.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-1">Version 1.5.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-0">Version 1.5.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#potentially-breaking-changes">Potentially breaking changes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-4-3">Version 1.4.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-4-2">Version 1.4.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-4-1">Version 1.4.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-4-0">Version 1.4.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#improvements">Improvements:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#backward-incompatible-changes">Backward incompatible changes:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-3-4">Version 1.3.4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-3-3">Version 1.3.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-3-2">Version 1.3.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-3-1">Version 1.3.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-3-0">Version 1.3.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-2-1">Version 1.2.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-2-0">Version 1.2.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-1-0">Version 1.1.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-0-0">Version 1.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-0-8-0">Version 0.8.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-0-7-0">Version 0.7.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-0-6-0">Version 0.6.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-0-5-0">Version 0.5.0</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+</ul>
+</li>
+<li class="dropdown">
+<a data-target="#" data-toggle="dropdown" href="#" id="dLabelLocalToc" role="button">Page <b class="caret"></b></a>
+<ul aria-labelledby="dLabelLocalToc" class="dropdown-menu localtoc" role="menu"><ul>
+<li><a class="reference internal" href="#">firebird.driver.hooks</a><ul>
+<li><a class="reference internal" href="#enums">Enums</a><ul>
+<li><a class="reference internal" href="#apihook">APIHook</a><ul>
+<li><a class="reference internal" href="#firebird.driver.hooks.APIHook"><code class="docutils literal notranslate"><span class="pre">APIHook</span></code></a><ul>
+<li><a class="reference internal" href="#firebird.driver.hooks.APIHook.LOADED"><code class="docutils literal notranslate"><span class="pre">APIHook.LOADED</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#connectionhook">ConnectionHook</a><ul>
+<li><a class="reference internal" href="#firebird.driver.hooks.ConnectionHook"><code class="docutils literal notranslate"><span class="pre">ConnectionHook</span></code></a><ul>
+<li><a class="reference internal" href="#firebird.driver.hooks.ConnectionHook.ATTACHED"><code class="docutils literal notranslate"><span class="pre">ConnectionHook.ATTACHED</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.hooks.ConnectionHook.ATTACH_REQUEST"><code class="docutils literal notranslate"><span class="pre">ConnectionHook.ATTACH_REQUEST</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.hooks.ConnectionHook.CLOSED"><code class="docutils literal notranslate"><span class="pre">ConnectionHook.CLOSED</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.hooks.ConnectionHook.DETACH_REQUEST"><code class="docutils literal notranslate"><span class="pre">ConnectionHook.DETACH_REQUEST</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.hooks.ConnectionHook.DROPPED"><code class="docutils literal notranslate"><span class="pre">ConnectionHook.DROPPED</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#serverhook">ServerHook</a><ul>
+<li><a class="reference internal" href="#firebird.driver.hooks.ServerHook"><code class="docutils literal notranslate"><span class="pre">ServerHook</span></code></a><ul>
+<li><a class="reference internal" href="#firebird.driver.hooks.ServerHook.ATTACHED"><code class="docutils literal notranslate"><span class="pre">ServerHook.ATTACHED</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+</ul>
+<form action="search.html" class="navbar-form navbar-right" method="get">
+<div class="form-group">
+<input class="form-control" name="q" placeholder="Search" type="text"/>
+</div>
+<input name="check_keywords" type="hidden" value="yes"/>
+<input name="area" type="hidden" value="default"/>
+</form>
+</div>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="row">
+<div class="body span12 content" role="main">
+<span class="target" id="module-firebird.driver.hooks"></span><section id="firebird-driver-hooks">
+<a class="dashAnchor" name="//apple_ref/cpp/Module/firebird.driver.hooks"></a><h1>firebird.driver.hooks<a class="headerlink" href="#firebird-driver-hooks" title="Permalink to this heading">¶</a></h1>
+<p>This module contains firebird-driver hooks. Uses hook mechanism from firebird-base package.</p>
+<p>Imports from <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#module-firebird.base.hooks" title="(in Firebird-base v1.4.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firebird.base.hooks</span></code></a>: <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#firebird.base.hooks.register_class" title="(in Firebird-base v1.4.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_class</span></code></a>,
+<a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#firebird.base.hooks.get_callbacks" title="(in Firebird-base v1.4.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_callbacks</span></code></a>, <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#firebird.base.hooks.add_hook" title="(in Firebird-base v1.4.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_hook</span></code></a> and
+<a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#firebird.base.hooks.hook_manager" title="(in Firebird-base v1.4.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hook_manager</span></code></a>.</p>
+<section id="enums">
+<h2>Enums<a class="headerlink" href="#enums" title="Permalink to this heading">¶</a></h2>
+<section id="apihook">
+<h3>APIHook<a class="headerlink" href="#apihook" title="Permalink to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="firebird.driver.hooks.APIHook">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.hooks.</span></span><span class="sig-name descname"><span class="pre">APIHook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.hooks.APIHook"></a><a class="headerlink" href="#firebird.driver.hooks.APIHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
+<p>Firebird API hooks.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.hooks.APIHook.LOADED">
+<span class="sig-name descname"><span class="pre">LOADED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.hooks.APIHook.LOADED"></a><a class="headerlink" href="#firebird.driver.hooks.APIHook.LOADED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+</dd></dl>
+</section>
+<section id="connectionhook">
+<h3>ConnectionHook<a class="headerlink" href="#connectionhook" title="Permalink to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="firebird.driver.hooks.ConnectionHook">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.hooks.</span></span><span class="sig-name descname"><span class="pre">ConnectionHook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.hooks.ConnectionHook"></a><a class="headerlink" href="#firebird.driver.hooks.ConnectionHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
+<p>Connection hooks.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.hooks.ConnectionHook.ATTACHED">
+<span class="sig-name descname"><span class="pre">ATTACHED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.hooks.ConnectionHook.ATTACHED"></a><a class="headerlink" href="#firebird.driver.hooks.ConnectionHook.ATTACHED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.hooks.ConnectionHook.ATTACH_REQUEST">
+<span class="sig-name descname"><span class="pre">ATTACH_REQUEST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.hooks.ConnectionHook.ATTACH_REQUEST"></a><a class="headerlink" href="#firebird.driver.hooks.ConnectionHook.ATTACH_REQUEST" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.hooks.ConnectionHook.CLOSED">
+<span class="sig-name descname"><span class="pre">CLOSED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.hooks.ConnectionHook.CLOSED"></a><a class="headerlink" href="#firebird.driver.hooks.ConnectionHook.CLOSED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.hooks.ConnectionHook.DETACH_REQUEST">
+<span class="sig-name descname"><span class="pre">DETACH_REQUEST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.hooks.ConnectionHook.DETACH_REQUEST"></a><a class="headerlink" href="#firebird.driver.hooks.ConnectionHook.DETACH_REQUEST" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.hooks.ConnectionHook.DROPPED">
+<span class="sig-name descname"><span class="pre">DROPPED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.hooks.ConnectionHook.DROPPED"></a><a class="headerlink" href="#firebird.driver.hooks.ConnectionHook.DROPPED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+</dd></dl>
+</section>
+<section id="serverhook">
+<h3>ServerHook<a class="headerlink" href="#serverhook" title="Permalink to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="firebird.driver.hooks.ServerHook">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.hooks.</span></span><span class="sig-name descname"><span class="pre">ServerHook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.hooks.ServerHook"></a><a class="headerlink" href="#firebird.driver.hooks.ServerHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
+<p>Server hooks.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.hooks.ServerHook.ATTACHED">
+<span class="sig-name descname"><span class="pre">ATTACHED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.hooks.ServerHook.ATTACHED"></a><a class="headerlink" href="#firebird.driver.hooks.ServerHook.ATTACHED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+</dd></dl>
+</section>
+</section>
+</section>
+</div>
+</div>
+</div>
+<footer class="footer">
+<div class="container">
+<p class="pull-right">
+<a href="#">Back to top</a>
+</p>
+<p>
+        © Copyright 2020-2022, The Firebird Project.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.2.<br/>
+</p>
+</div>
+</footer>
+</body>
+</html>

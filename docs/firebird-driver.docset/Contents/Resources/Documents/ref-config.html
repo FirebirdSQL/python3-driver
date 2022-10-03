@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
+<title>firebird.driver.config — firebird-driver 1.5.2 documentation</title>
+<link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
+<link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
+<script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+<script src="_static/jquery.js"></script>
+<script src="_static/underscore.js"></script>
+<script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+<script src="_static/doctools.js"></script>
+<script src="_static/sphinx_highlight.js"></script>
+<link href="genindex.html" rel="index" title="Index"/>
+<link href="search.html" rel="search" title="Search"/>
+<link href="ref-core.html" rel="next" title="firebird.driver.core"/>
+<link href="ref-types.html" rel="prev" title="firebird.driver.types"/>
+<meta charset="utf-8"/>
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1" name="viewport"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<script src="_static/js/jquery-1.12.4.min.js" type="text/javascript"></script>
+<script src="_static/js/jquery-fix.js" type="text/javascript"></script>
+<script src="_static/bootstrap-2.3.2/js/bootstrap.min.js" type="text/javascript"></script>
+<script src="_static/bootstrap-sphinx.js" type="text/javascript"></script>
+</head><body>
+<div class="navbar navbar-inverse navbar-fixed-top" id="navbar">
+<div class="navbar-inner">
+<div class="container">
+<!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+<button class="btn btn-navbar" data-target=".nav-collapse" data-toggle="collapse">
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<a class="brand" href="index.html">
+          firebird-driver</a>
+<span class="navbar-text pull-left"><b>1.5.2</b></span>
+<div class="nav-collapse">
+<ul class="nav">
+<li class="divider-vertical"></li>
+<li><a href="usage-guide.html">Usage Guide</a></li>
+<li><a href="reference.html">Reference</a></li>
+<li><a href="genindex.html">Index</a></li>
+<li class="dropdown globaltoc-container">
+<a data-target="#" data-toggle="dropdown" href="index.html" id="dLabelGlobalToc" role="button">Content <b class="caret"></b></a>
+<ul aria-labelledby="dLabelGlobalToc" class="dropdown-menu globaltoc" role="menu"><p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#installation-from-pypi">Installation from PYPI</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#quick-start-guide">Quick-start Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#driver-configuration">Driver configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#connecting-to-a-database">Connecting to a Database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#creating-a-database">Creating a Database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#executing-sql-statements">Executing SQL Statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#calling-stored-procedures">Calling Stored Procedures</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage-guide.html">Usage Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#driver-structure">Driver structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#configuration">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#the-driver-config-object">The ‘driver_config’ object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#server-and-database-configuration">Server and database configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#databases">Databases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#using-connect">Using connect()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#using-create-database">Using create_database()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#deleting-databases">Deleting databases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#connection-object">Connection object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#closing-the-connection">Closing the connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#getting-information-about-connection">Getting information about connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#getting-information-about-database">Getting information about database</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#executing-sql-statements">Executing SQL Statements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#cursor-object">Cursor object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#sql-execution-basics">SQL Execution Basics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#fetching-data-from-server">Fetching data from server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#index-13">Scrollable cursors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#id3">Parameterized statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#id5">Prepared Statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#named-cursors">Named Cursors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#working-with-stored-procedures">Working with stored procedures</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#data-handling-and-conversions">Data handling and conversions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#implicit-conversion-of-input-parameters-from-strings">Implicit Conversion of Input Parameters from Strings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#automatic-conversion-from-to-unicode">Automatic conversion from/to Unicode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#working-with-blobs">Working with BLOBs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#firebird-array-type">Firebird ARRAY type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#transanction-management">Transanction management</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#basics">Basics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#auto-commit">Auto-commit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#transaction-parameters">Transaction parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#getting-information-about-transaction">Getting information about transaction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#retaining-transactions">Retaining transactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#savepoints">Savepoints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#using-multiple-transactions-with-the-same-connection">Using multiple transactions with the same connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#distributed-transactions">Distributed Transactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#transaction-context-manager">Transaction Context Manager</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#database-events">Database Events</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#what-they-are">What they are</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#why-use-them">Why use them</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#how-events-are-exposed">How events are exposed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#api-for-python-developers">API for Python developers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#working-with-services">Working with Services</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#services-api-connections">Services API Connections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#text-output-from-services">Text output from Services</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#server-configuration-and-state-information">Server Configuration and State information</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#database-options">Database options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#database-maintenance">Database maintenance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#user-maintenance">User maintenance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#trace-sessions">Trace sessions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#logging-driver-activities">Logging driver activities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#index-43">Driver hooks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#apihook">APIHook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#connectionhook">ConnectionHook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#serverhook">ServerHook</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="python-db-api-compliance.html">Compliance to PyDB API 2.0</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="python-db-api-compliance.html#unsupported-optional-features">Unsupported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python-db-api-compliance.html#supported-optional-features">Supported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python-db-api-compliance.html#nominally-supported-optional-features">Nominally Supported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python-db-api-compliance.html#extensions-and-caveats">Extensions and Caveats</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="reference.html">Firebird-driver Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="reference.html#driver-modules">Driver modules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="ref-main.html">Main driver namespace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-types.html">firebird.driver.types</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">firebird.driver.config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-core.html">firebird.driver.core</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-hooks.html">firebird.driver.hooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-intf.html">firebird.driver.interfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-fbapi.html">firebird.driver.fbapi</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-2">Version 1.5.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-1">Version 1.5.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-0">Version 1.5.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#potentially-breaking-changes">Potentially breaking changes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-4-3">Version 1.4.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-4-2">Version 1.4.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-4-1">Version 1.4.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-4-0">Version 1.4.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#improvements">Improvements:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="changelog.html#backward-incompatible-changes">Backward incompatible changes:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-3-4">Version 1.3.4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-3-3">Version 1.3.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-3-2">Version 1.3.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-3-1">Version 1.3.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-3-0">Version 1.3.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-2-1">Version 1.2.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-2-0">Version 1.2.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-1-0">Version 1.1.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-0-0">Version 1.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-0-8-0">Version 0.8.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-0-7-0">Version 0.7.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-0-6-0">Version 0.6.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-0-5-0">Version 0.5.0</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+</ul>
+</li>
+<li class="dropdown">
+<a data-target="#" data-toggle="dropdown" href="#" id="dLabelLocalToc" role="button">Page <b class="caret"></b></a>
+<ul aria-labelledby="dLabelLocalToc" class="dropdown-menu localtoc" role="menu"><ul>
+<li><a class="reference internal" href="#">firebird.driver.config</a><ul>
+<li><a class="reference internal" href="#classes">Classes</a><ul>
+<li><a class="reference internal" href="#driverconfig">DriverConfig</a><ul>
+<li><a class="reference internal" href="#firebird.driver.config.DriverConfig"><code class="docutils literal notranslate"><span class="pre">DriverConfig</span></code></a><ul>
+<li><a class="reference internal" href="#firebird.driver.config.DriverConfig.get_database"><code class="docutils literal notranslate"><span class="pre">DriverConfig.get_database()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DriverConfig.get_server"><code class="docutils literal notranslate"><span class="pre">DriverConfig.get_server()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DriverConfig.read"><code class="docutils literal notranslate"><span class="pre">DriverConfig.read()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DriverConfig.read_dict"><code class="docutils literal notranslate"><span class="pre">DriverConfig.read_dict()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DriverConfig.read_file"><code class="docutils literal notranslate"><span class="pre">DriverConfig.read_file()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DriverConfig.read_string"><code class="docutils literal notranslate"><span class="pre">DriverConfig.read_string()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DriverConfig.register_database"><code class="docutils literal notranslate"><span class="pre">DriverConfig.register_database()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DriverConfig.register_server"><code class="docutils literal notranslate"><span class="pre">DriverConfig.register_server()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DriverConfig.databases"><code class="docutils literal notranslate"><span class="pre">DriverConfig.databases</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DriverConfig.db_defaults"><code class="docutils literal notranslate"><span class="pre">DriverConfig.db_defaults</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DriverConfig.fb_client_library"><code class="docutils literal notranslate"><span class="pre">DriverConfig.fb_client_library</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DriverConfig.server_defaults"><code class="docutils literal notranslate"><span class="pre">DriverConfig.server_defaults</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DriverConfig.servers"><code class="docutils literal notranslate"><span class="pre">DriverConfig.servers</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DriverConfig.stream_blob_threshold"><code class="docutils literal notranslate"><span class="pre">DriverConfig.stream_blob_threshold</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#serverconfig">ServerConfig</a><ul>
+<li><a class="reference internal" href="#firebird.driver.config.ServerConfig"><code class="docutils literal notranslate"><span class="pre">ServerConfig</span></code></a><ul>
+<li><a class="reference internal" href="#firebird.driver.config.ServerConfig.auth_plugin_list"><code class="docutils literal notranslate"><span class="pre">ServerConfig.auth_plugin_list</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.ServerConfig.config"><code class="docutils literal notranslate"><span class="pre">ServerConfig.config</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.ServerConfig.encoding"><code class="docutils literal notranslate"><span class="pre">ServerConfig.encoding</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.ServerConfig.encoding_errors"><code class="docutils literal notranslate"><span class="pre">ServerConfig.encoding_errors</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.ServerConfig.host"><code class="docutils literal notranslate"><span class="pre">ServerConfig.host</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.ServerConfig.password"><code class="docutils literal notranslate"><span class="pre">ServerConfig.password</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.ServerConfig.port"><code class="docutils literal notranslate"><span class="pre">ServerConfig.port</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.ServerConfig.trusted_auth"><code class="docutils literal notranslate"><span class="pre">ServerConfig.trusted_auth</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.ServerConfig.user"><code class="docutils literal notranslate"><span class="pre">ServerConfig.user</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#databaseconfig">DatabaseConfig</a><ul>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig</span></code></a><ul>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.auth_plugin_list"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.auth_plugin_list</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.cache_size"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.cache_size</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.charset"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.charset</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.config"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.config</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.database"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.database</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.db_cache_size"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.db_cache_size</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.db_charset"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.db_charset</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.db_sql_dialect"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.db_sql_dialect</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.decfloat_round"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.decfloat_round</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.decfloat_traps"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.decfloat_traps</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.dsn"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.dsn</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.dummy_packet_interval"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.dummy_packet_interval</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.forced_writes"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.forced_writes</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.no_linger"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.no_linger</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.page_size"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.page_size</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.password"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.password</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.protocol"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.protocol</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.reserve_space"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.reserve_space</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.role"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.role</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.server"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.server</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.session_time_zone"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.session_time_zone</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.set_bind"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.set_bind</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.sql_dialect"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.sql_dialect</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.sweep_interval"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.sweep_interval</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.timeout"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.timeout</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.trusted_auth"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.trusted_auth</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.user"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.user</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.config.DatabaseConfig.utf8filename"><code class="docutils literal notranslate"><span class="pre">DatabaseConfig.utf8filename</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#globals">Globals</a><ul>
+<li><a class="reference internal" href="#driver-config">driver_config</a><ul>
+<li><a class="reference internal" href="#firebird.driver.config.driver_config"><code class="docutils literal notranslate"><span class="pre">driver_config</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+</ul>
+<form action="search.html" class="navbar-form navbar-right" method="get">
+<div class="form-group">
+<input class="form-control" name="q" placeholder="Search" type="text"/>
+</div>
+<input name="check_keywords" type="hidden" value="yes"/>
+<input name="area" type="hidden" value="default"/>
+</form>
+</div>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="row">
+<div class="body span12 content" role="main">
+<span class="target" id="module-firebird.driver.config"></span><section id="firebird-driver-config">
+<a class="dashAnchor" name="//apple_ref/cpp/Module/firebird.driver.config"></a><h1>firebird.driver.config<a class="headerlink" href="#firebird-driver-config" title="Permalink to this heading">¶</a></h1>
+<p>This module contains firebird-driver configuration. Uses configuration classes from firebird-base
+package.</p>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Permalink to this heading">¶</a></h2>
+<section id="driverconfig">
+<h3>DriverConfig<a class="headerlink" href="#driverconfig" title="Permalink to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="firebird.driver.config.DriverConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.config.</span></span><span class="sig-name descname"><span class="pre">DriverConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.config.DriverConfig"></a><a class="headerlink" href="#firebird.driver.config.DriverConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.Config" title="(in Firebird-base v1.4.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Config</span></code></a></p>
+<p>Firebird driver configuration.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.driver.config.DriverConfig.get_database">
+<span class="sig-name descname"><span class="pre">get_database</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.driver.config.DriverConfig.get_database"></a><a class="headerlink" href="#firebird.driver.config.DriverConfig.get_database" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns database configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#firebird.driver.config.DatabaseConfig" title="firebird.driver.config.DatabaseConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatabaseConfig</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.driver.config.DriverConfig.get_server">
+<span class="sig-name descname"><span class="pre">get_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.driver.config.DriverConfig.get_server"></a><a class="headerlink" href="#firebird.driver.config.DriverConfig.get_server" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns server configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#firebird.driver.config.ServerConfig" title="firebird.driver.config.ServerConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">ServerConfig</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.driver.config.DriverConfig.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filenames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.driver.config.DriverConfig.read"></a><a class="headerlink" href="#firebird.driver.config.DriverConfig.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read configuration from a filename or an iterable of filenames.</p>
+<p>Files that cannot be opened are silently ignored; this is
+designed so that you can specify an iterable of potential
+configuration file locations (e.g. current directory, user’s
+home directory, systemwide directory), and all existing
+configuration files in the iterable will be read.  A single
+filename may also be given.</p>
+<p>Return list of successfully read files.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.driver.config.DriverConfig.read_dict">
+<span class="sig-name descname"><span class="pre">read_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dictionary</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.driver.config.DriverConfig.read_dict"></a><a class="headerlink" href="#firebird.driver.config.DriverConfig.read_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read configuration from a dictionary.</p>
+<p>Keys are section names, values are dictionaries with keys and values
+that should be present in the section. If the used dictionary type
+preserves order, sections and their keys will be added in order.</p>
+<p>All types held in the dictionary are converted to strings during
+reading, including section names, option names and keys.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.driver.config.DriverConfig.read_file">
+<span class="sig-name descname"><span class="pre">read_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.driver.config.DriverConfig.read_file"></a><a class="headerlink" href="#firebird.driver.config.DriverConfig.read_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read configuration from a file-like object.</p>
+<p>The <code class="xref py py-obj docutils literal notranslate"><span class="pre">f</span></code> argument must be iterable, returning one line at a time.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.driver.config.DriverConfig.read_string">
+<span class="sig-name descname"><span class="pre">read_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.driver.config.DriverConfig.read_string"></a><a class="headerlink" href="#firebird.driver.config.DriverConfig.read_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read configuration from a given string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.driver.config.DriverConfig.register_database">
+<span class="sig-name descname"><span class="pre">register_database</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.driver.config.DriverConfig.register_database"></a><a class="headerlink" href="#firebird.driver.config.DriverConfig.register_database" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Database name.</p></li>
+<li><p><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – Optional database configuration string in ConfigParser format in [name] section.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>For newly registered database</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#firebird.driver.config.DatabaseConfig" title="firebird.driver.config.DatabaseConfig">DatabaseConfig</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.10)"><strong>ValueError</strong></a> – If database is already registered.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.driver.config.DriverConfig.register_server">
+<span class="sig-name descname"><span class="pre">register_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.driver.config.DriverConfig.register_server"></a><a class="headerlink" href="#firebird.driver.config.DriverConfig.register_server" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register server.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Server name.</p></li>
+<li><p><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – Optional server configuration string in ConfigParser format in [name] section.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>For newly registered server</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#firebird.driver.config.ServerConfig" title="firebird.driver.config.ServerConfig">ServerConfig</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.10)"><strong>ValueError</strong></a> – If server is already registered.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DriverConfig.databases">
+<span class="sig-name descname"><span class="pre">databases</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.ConfigListOption" title="(in Firebird-base v1.4.1)"><span class="pre">ConfigListOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DriverConfig.databases"></a><a class="headerlink" href="#firebird.driver.config.DriverConfig.databases" title="Permalink to this definition">¶</a></dt>
+<dd><p>Registered databases</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DriverConfig.db_defaults">
+<span class="sig-name descname"><span class="pre">db_defaults</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#firebird.driver.config.DatabaseConfig" title="firebird.driver.config.DatabaseConfig"><span class="pre">DatabaseConfig</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DriverConfig.db_defaults"></a><a class="headerlink" href="#firebird.driver.config.DriverConfig.db_defaults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default database configuration (‘firebird.db.defaults’)</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DriverConfig.fb_client_library">
+<span class="sig-name descname"><span class="pre">fb_client_library</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.StrOption" title="(in Firebird-base v1.4.1)"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DriverConfig.fb_client_library"></a><a class="headerlink" href="#firebird.driver.config.DriverConfig.fb_client_library" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path to Firebird client library</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DriverConfig.server_defaults">
+<span class="sig-name descname"><span class="pre">server_defaults</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#firebird.driver.config.ServerConfig" title="firebird.driver.config.ServerConfig"><span class="pre">ServerConfig</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DriverConfig.server_defaults"></a><a class="headerlink" href="#firebird.driver.config.DriverConfig.server_defaults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default server configuration (‘firebird.server.defaults’)</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DriverConfig.servers">
+<span class="sig-name descname"><span class="pre">servers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.ConfigListOption" title="(in Firebird-base v1.4.1)"><span class="pre">ConfigListOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DriverConfig.servers"></a><a class="headerlink" href="#firebird.driver.config.DriverConfig.servers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Registered servers</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DriverConfig.stream_blob_threshold">
+<span class="sig-name descname"><span class="pre">stream_blob_threshold</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.IntOption" title="(in Firebird-base v1.4.1)"><span class="pre">IntOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DriverConfig.stream_blob_threshold"></a><a class="headerlink" href="#firebird.driver.config.DriverConfig.stream_blob_threshold" title="Permalink to this definition">¶</a></dt>
+<dd><p>BLOB size threshold. Bigger BLOB will be returned as stream BLOBs.</p>
+</dd></dl>
+</dd></dl>
+</section>
+<section id="serverconfig">
+<h3>ServerConfig<a class="headerlink" href="#serverconfig" title="Permalink to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="firebird.driver.config.ServerConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.config.</span></span><span class="sig-name descname"><span class="pre">ServerConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.config.ServerConfig"></a><a class="headerlink" href="#firebird.driver.config.ServerConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.Config" title="(in Firebird-base v1.4.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Config</span></code></a></p>
+<p>Server configuration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.ServerConfig.auth_plugin_list">
+<span class="sig-name descname"><span class="pre">auth_plugin_list</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.StrOption" title="(in Firebird-base v1.4.1)"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.ServerConfig.auth_plugin_list"></a><a class="headerlink" href="#firebird.driver.config.ServerConfig.auth_plugin_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of authentication plugins override</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.ServerConfig.config">
+<span class="sig-name descname"><span class="pre">config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.StrOption" title="(in Firebird-base v1.4.1)"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.ServerConfig.config"></a><a class="headerlink" href="#firebird.driver.config.ServerConfig.config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configuration override</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.ServerConfig.encoding">
+<span class="sig-name descname"><span class="pre">encoding</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.StrOption" title="(in Firebird-base v1.4.1)"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.ServerConfig.encoding"></a><a class="headerlink" href="#firebird.driver.config.ServerConfig.encoding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encoding used for text data exchange with server</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.ServerConfig.encoding_errors">
+<span class="sig-name descname"><span class="pre">encoding_errors</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.StrOption" title="(in Firebird-base v1.4.1)"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.ServerConfig.encoding_errors"></a><a class="headerlink" href="#firebird.driver.config.ServerConfig.encoding_errors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handler used for encoding errors. See <a class="reference external" href="https://docs.python.org/3/library/codecs.html#module-codecs" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">codecs</span> <span class="pre">error</span> <span class="pre">handlers</span></code></a> for details.</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.ServerConfig.host">
+<span class="sig-name descname"><span class="pre">host</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.StrOption" title="(in Firebird-base v1.4.1)"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.ServerConfig.host"></a><a class="headerlink" href="#firebird.driver.config.ServerConfig.host" title="Permalink to this definition">¶</a></dt>
+<dd><p>Server host machine specification</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.ServerConfig.password">
+<span class="sig-name descname"><span class="pre">password</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.StrOption" title="(in Firebird-base v1.4.1)"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.ServerConfig.password"></a><a class="headerlink" href="#firebird.driver.config.ServerConfig.password" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default user password, default is envar ISC_PASSWORD or None if not specified</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.ServerConfig.port">
+<span class="sig-name descname"><span class="pre">port</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.StrOption" title="(in Firebird-base v1.4.1)"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.ServerConfig.port"></a><a class="headerlink" href="#firebird.driver.config.ServerConfig.port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Port used by Firebird server</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.ServerConfig.trusted_auth">
+<span class="sig-name descname"><span class="pre">trusted_auth</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.BoolOption" title="(in Firebird-base v1.4.1)"><span class="pre">BoolOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.ServerConfig.trusted_auth"></a><a class="headerlink" href="#firebird.driver.config.ServerConfig.trusted_auth" title="Permalink to this definition">¶</a></dt>
+<dd><p>False</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Use trusted authentication, default</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.ServerConfig.user">
+<span class="sig-name descname"><span class="pre">user</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.StrOption" title="(in Firebird-base v1.4.1)"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.ServerConfig.user"></a><a class="headerlink" href="#firebird.driver.config.ServerConfig.user" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defaul user name, default is envar ISC_USER or None if not specified</p>
+</dd></dl>
+</dd></dl>
+</section>
+<section id="databaseconfig">
+<h3>DatabaseConfig<a class="headerlink" href="#databaseconfig" title="Permalink to this heading">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.config.</span></span><span class="sig-name descname"><span class="pre">DatabaseConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.config.DatabaseConfig"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.Config" title="(in Firebird-base v1.4.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Config</span></code></a></p>
+<p>Database configuration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.auth_plugin_list">
+<span class="sig-name descname"><span class="pre">auth_plugin_list</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.StrOption" title="(in Firebird-base v1.4.1)"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.auth_plugin_list"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.auth_plugin_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of authentication plugins override</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.cache_size">
+<span class="sig-name descname"><span class="pre">cache_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.IntOption" title="(in Firebird-base v1.4.1)"><span class="pre">IntOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.cache_size"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.cache_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Page cache size override for database connection</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.charset">
+<span class="sig-name descname"><span class="pre">charset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.StrOption" title="(in Firebird-base v1.4.1)"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.charset"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.charset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Character set for database connection</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.config">
+<span class="sig-name descname"><span class="pre">config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.StrOption" title="(in Firebird-base v1.4.1)"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.config"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configuration override</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.database">
+<span class="sig-name descname"><span class="pre">database</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.StrOption" title="(in Firebird-base v1.4.1)"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.database"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.database" title="Permalink to this definition">¶</a></dt>
+<dd><p>Database file specification or alias</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.db_cache_size">
+<span class="sig-name descname"><span class="pre">db_cache_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.IntOption" title="(in Firebird-base v1.4.1)"><span class="pre">IntOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.db_cache_size"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.db_cache_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Database create option. Page cache size override for database.</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.db_charset">
+<span class="sig-name descname"><span class="pre">db_charset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.StrOption" title="(in Firebird-base v1.4.1)"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.db_charset"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.db_charset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Database create option. Character set for the database.</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.db_sql_dialect">
+<span class="sig-name descname"><span class="pre">db_sql_dialect</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.IntOption" title="(in Firebird-base v1.4.1)"><span class="pre">IntOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.db_sql_dialect"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.db_sql_dialect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Database create option. SQL dialect for the database.</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.decfloat_round">
+<span class="sig-name descname"><span class="pre">decfloat_round</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.EnumOption" title="(in Firebird-base v1.4.1)"><span class="pre">EnumOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.decfloat_round"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.decfloat_round" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set DECFLOAT ROUND [Firebird 4], value is <a class="reference internal" href="ref-types.html#firebird.driver.types.DecfloatRound" title="firebird.driver.types.DecfloatRound"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DecfloatRound</span></code></a></p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.decfloat_traps">
+<span class="sig-name descname"><span class="pre">decfloat_traps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.ListOption" title="(in Firebird-base v1.4.1)"><span class="pre">ListOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.decfloat_traps"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.decfloat_traps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set DECFLOAT TRAPS [Firebird 4], values are <a class="reference internal" href="ref-types.html#firebird.driver.types.DecfloatTraps" title="firebird.driver.types.DecfloatTraps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DecfloatTraps</span></code></a></p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.dsn">
+<span class="sig-name descname"><span class="pre">dsn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.StrOption" title="(in Firebird-base v1.4.1)"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.dsn"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.dsn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Database connection string</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.dummy_packet_interval">
+<span class="sig-name descname"><span class="pre">dummy_packet_interval</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.IntOption" title="(in Firebird-base v1.4.1)"><span class="pre">IntOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.dummy_packet_interval"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.dummy_packet_interval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dummy packet interval for this database connection</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.forced_writes">
+<span class="sig-name descname"><span class="pre">forced_writes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.BoolOption" title="(in Firebird-base v1.4.1)"><span class="pre">BoolOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.forced_writes"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.forced_writes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Database create option. Write mode (True = sync/False = async).</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.no_linger">
+<span class="sig-name descname"><span class="pre">no_linger</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.BoolOption" title="(in Firebird-base v1.4.1)"><span class="pre">BoolOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.no_linger"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.no_linger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do not use linger for database connection</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.page_size">
+<span class="sig-name descname"><span class="pre">page_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.IntOption" title="(in Firebird-base v1.4.1)"><span class="pre">IntOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.page_size"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.page_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Database create option. Page size to be used.</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.password">
+<span class="sig-name descname"><span class="pre">password</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.StrOption" title="(in Firebird-base v1.4.1)"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.password"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.password" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default user password, default is envar ISC_PASSWORD or None if not specified</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.protocol">
+<span class="sig-name descname"><span class="pre">protocol</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.EnumOption" title="(in Firebird-base v1.4.1)"><span class="pre">EnumOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.protocol"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.protocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Protocol to be used for databasem value is <a class="reference internal" href="ref-types.html#firebird.driver.types.NetProtocol" title="firebird.driver.types.NetProtocol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NetProtocol</span></code></a></p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.reserve_space">
+<span class="sig-name descname"><span class="pre">reserve_space</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.BoolOption" title="(in Firebird-base v1.4.1)"><span class="pre">BoolOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.reserve_space"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.reserve_space" title="Permalink to this definition">¶</a></dt>
+<dd><p>Database create option. Data page space usage (True = reserve space, False = Use all space).</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.role">
+<span class="sig-name descname"><span class="pre">role</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.StrOption" title="(in Firebird-base v1.4.1)"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.role"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.role" title="Permalink to this definition">¶</a></dt>
+<dd><p>User role</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.server">
+<span class="sig-name descname"><span class="pre">server</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.StrOption" title="(in Firebird-base v1.4.1)"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.server"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.server" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of server where database is located</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.session_time_zone">
+<span class="sig-name descname"><span class="pre">session_time_zone</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.StrOption" title="(in Firebird-base v1.4.1)"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.session_time_zone"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.session_time_zone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Session time zone [Firebird 4]</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.set_bind">
+<span class="sig-name descname"><span class="pre">set_bind</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.StrOption" title="(in Firebird-base v1.4.1)"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.set_bind"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.set_bind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set BIND [Firebird 4]</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.sql_dialect">
+<span class="sig-name descname"><span class="pre">sql_dialect</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.IntOption" title="(in Firebird-base v1.4.1)"><span class="pre">IntOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.sql_dialect"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.sql_dialect" title="Permalink to this definition">¶</a></dt>
+<dd><p>3</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>SQL Dialect for database connection, default</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.sweep_interval">
+<span class="sig-name descname"><span class="pre">sweep_interval</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.IntOption" title="(in Firebird-base v1.4.1)"><span class="pre">IntOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.sweep_interval"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.sweep_interval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Database create option. Sweep interval for the database.</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.timeout">
+<span class="sig-name descname"><span class="pre">timeout</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.IntOption" title="(in Firebird-base v1.4.1)"><span class="pre">IntOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.timeout"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.timeout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connection timeout</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.trusted_auth">
+<span class="sig-name descname"><span class="pre">trusted_auth</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.BoolOption" title="(in Firebird-base v1.4.1)"><span class="pre">BoolOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.trusted_auth"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.trusted_auth" title="Permalink to this definition">¶</a></dt>
+<dd><p>False</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Use trusted authentication, default</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.user">
+<span class="sig-name descname"><span class="pre">user</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.StrOption" title="(in Firebird-base v1.4.1)"><span class="pre">StrOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.user"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.user" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defaul user name, default is envar ISC_USER or None if not specified</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.config.DatabaseConfig.utf8filename">
+<span class="sig-name descname"><span class="pre">utf8filename</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#firebird.base.config.BoolOption" title="(in Firebird-base v1.4.1)"><span class="pre">BoolOption</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.config.DatabaseConfig.utf8filename"></a><a class="headerlink" href="#firebird.driver.config.DatabaseConfig.utf8filename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Database filename should be passed in UTF8</p>
+</dd></dl>
+</dd></dl>
+</section>
+</section>
+<section id="globals">
+<h2>Globals<a class="headerlink" href="#globals" title="Permalink to this heading">¶</a></h2>
+<section id="driver-config">
+<h3>driver_config<a class="headerlink" href="#driver-config" title="Permalink to this heading">¶</a></h3>
+<dl class="py data">
+<dt class="sig sig-object py" id="firebird.driver.config.driver_config">
+<span class="sig-prename descclassname"><span class="pre">firebird.driver.config.</span></span><span class="sig-name descname"><span class="pre">driver_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#firebird.driver.config.DriverConfig" title="firebird.driver.config.DriverConfig"><span class="pre">DriverConfig</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;firebird.driver.config.DriverConfig</span> <span class="pre">object&gt;</span></em><a class="dashAnchor" name="//apple_ref/cpp/Value/firebird.driver.config.driver_config"></a><a class="headerlink" href="#firebird.driver.config.driver_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Firebird driver configuration.</p>
+</dd></dl>
+</section>
+</section>
+</section>
+</div>
+</div>
+</div>
+<footer class="footer">
+<div class="container">
+<p class="pull-right">
+<a href="#">Back to top</a>
+</p>
+<p>
+        © Copyright 2020-2022, The Firebird Project.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.2.<br/>
+</p>
+</div>
+</footer>
+</body>
+</html>

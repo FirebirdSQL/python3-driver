@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+    <title>Changelog &#8212; firebird-driver 1.5.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="License" href="license.html" />
+    <link rel="prev" title="firebird.driver.fbapi" href="ref-fbapi.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="_static/bootstrap-2.3.2/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+
+        <a class="brand" href="index.html">
+          firebird-driver</a>
+        <span class="navbar-text pull-left"><b>1.5.2</b></span>
+
+        <div class="nav-collapse">
+          <ul class="nav">
+            <li class="divider-vertical"></li>
+            
+                <li><a href="usage-guide.html">Usage Guide</a></li>
+                <li><a href="reference.html">Reference</a></li>
+                <li><a href="genindex.html">Index</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Content <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#installation-from-pypi">Installation from PYPI</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#quick-start-guide">Quick-start Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#driver-configuration">Driver configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#connecting-to-a-database">Connecting to a Database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#creating-a-database">Creating a Database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#executing-sql-statements">Executing SQL Statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#calling-stored-procedures">Calling Stored Procedures</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage-guide.html">Usage Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#driver-structure">Driver structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#configuration">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#the-driver-config-object">The ‘driver_config’ object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#server-and-database-configuration">Server and database configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#databases">Databases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#using-connect">Using connect()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#using-create-database">Using create_database()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#deleting-databases">Deleting databases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#connection-object">Connection object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#closing-the-connection">Closing the connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#getting-information-about-connection">Getting information about connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#getting-information-about-database">Getting information about database</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#executing-sql-statements">Executing SQL Statements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#cursor-object">Cursor object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#sql-execution-basics">SQL Execution Basics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#fetching-data-from-server">Fetching data from server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#index-13">Scrollable cursors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#id3">Parameterized statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#id5">Prepared Statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#named-cursors">Named Cursors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#working-with-stored-procedures">Working with stored procedures</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#data-handling-and-conversions">Data handling and conversions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#implicit-conversion-of-input-parameters-from-strings">Implicit Conversion of Input Parameters from Strings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#automatic-conversion-from-to-unicode">Automatic conversion from/to Unicode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#working-with-blobs">Working with BLOBs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#firebird-array-type">Firebird ARRAY type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#transanction-management">Transanction management</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#basics">Basics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#auto-commit">Auto-commit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#transaction-parameters">Transaction parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#getting-information-about-transaction">Getting information about transaction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#retaining-transactions">Retaining transactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#savepoints">Savepoints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#using-multiple-transactions-with-the-same-connection">Using multiple transactions with the same connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#distributed-transactions">Distributed Transactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#transaction-context-manager">Transaction Context Manager</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#database-events">Database Events</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#what-they-are">What they are</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#why-use-them">Why use them</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#how-events-are-exposed">How events are exposed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#api-for-python-developers">API for Python developers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#working-with-services">Working with Services</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#services-api-connections">Services API Connections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#text-output-from-services">Text output from Services</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#server-configuration-and-state-information">Server Configuration and State information</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#database-options">Database options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#database-maintenance">Database maintenance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#user-maintenance">User maintenance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#trace-sessions">Trace sessions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#logging-driver-activities">Logging driver activities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage-guide.html#index-43">Driver hooks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#apihook">APIHook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#connectionhook">ConnectionHook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage-guide.html#serverhook">ServerHook</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="python-db-api-compliance.html">Compliance to PyDB API 2.0</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="python-db-api-compliance.html#unsupported-optional-features">Unsupported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python-db-api-compliance.html#supported-optional-features">Supported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python-db-api-compliance.html#nominally-supported-optional-features">Nominally Supported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python-db-api-compliance.html#extensions-and-caveats">Extensions and Caveats</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reference.html">Firebird-driver Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="reference.html#driver-modules">Driver modules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ref-main.html">Main driver namespace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-types.html">firebird.driver.types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-config.html">firebird.driver.config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-core.html">firebird.driver.core</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-hooks.html">firebird.driver.hooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-intf.html">firebird.driver.interfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ref-fbapi.html">firebird.driver.fbapi</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-5-2">Version 1.5.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-5-1">Version 1.5.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-5-0">Version 1.5.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#potentially-breaking-changes">Potentially breaking changes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-4-3">Version 1.4.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-4-2">Version 1.4.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-4-1">Version 1.4.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-4-0">Version 1.4.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#improvements">Improvements:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#backward-incompatible-changes">Backward incompatible changes:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-3-4">Version 1.3.4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-3-3">Version 1.3.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-3-2">Version 1.3.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-3-1">Version 1.3.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-3-0">Version 1.3.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-2-1">Version 1.2.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-2-0">Version 1.2.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-1-0">Version 1.1.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-0-0">Version 1.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-8-0">Version 0.8.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-7-0">Version 0.7.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-6-0">Version 0.6.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#version-0-5-0">Version 0.5.0</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">Changelog</a><ul>
+<li><a class="reference internal" href="#version-1-5-2">Version 1.5.2</a></li>
+<li><a class="reference internal" href="#version-1-5-1">Version 1.5.1</a></li>
+<li><a class="reference internal" href="#version-1-5-0">Version 1.5.0</a><ul>
+<li><a class="reference internal" href="#potentially-breaking-changes">Potentially breaking changes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-1-4-3">Version 1.4.3</a></li>
+<li><a class="reference internal" href="#version-1-4-2">Version 1.4.2</a></li>
+<li><a class="reference internal" href="#version-1-4-1">Version 1.4.1</a></li>
+<li><a class="reference internal" href="#version-1-4-0">Version 1.4.0</a><ul>
+<li><a class="reference internal" href="#improvements">Improvements:</a></li>
+<li><a class="reference internal" href="#backward-incompatible-changes">Backward incompatible changes:</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#version-1-3-4">Version 1.3.4</a></li>
+<li><a class="reference internal" href="#version-1-3-3">Version 1.3.3</a></li>
+<li><a class="reference internal" href="#version-1-3-2">Version 1.3.2</a></li>
+<li><a class="reference internal" href="#version-1-3-1">Version 1.3.1</a></li>
+<li><a class="reference internal" href="#version-1-3-0">Version 1.3.0</a></li>
+<li><a class="reference internal" href="#version-1-2-1">Version 1.2.1</a></li>
+<li><a class="reference internal" href="#version-1-2-0">Version 1.2.0</a></li>
+<li><a class="reference internal" href="#version-1-1-0">Version 1.1.0</a></li>
+<li><a class="reference internal" href="#version-1-0-0">Version 1.0.0</a></li>
+<li><a class="reference internal" href="#version-0-8-0">Version 0.8.0</a></li>
+<li><a class="reference internal" href="#version-0-7-0">Version 0.7.0</a></li>
+<li><a class="reference internal" href="#version-0-6-0">Version 0.6.0</a></li>
+<li><a class="reference internal" href="#version-0-5-0">Version 0.5.0</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body span12 content" role="main">
+      
+  <section id="changelog">
+<h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this heading">¶</a></h1>
+<section id="version-1-5-2">
+<h2>Version 1.5.2<a class="headerlink" href="#version-1-5-2" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Code optionizations.</p></li>
+<li><p>New: Documentation is now also provided as <a class="reference external" href="https://kapeli.com/dash">Dash</a> / <a class="reference external" href="https://zealdocs.org/">Zeal</a> docset, downloadable from <a class="reference external" href="https://github.com/FirebirdSQL/python3-driver/releases">releases</a> at github.</p></li>
+</ul>
+</section>
+<section id="version-1-5-1">
+<h2>Version 1.5.1<a class="headerlink" href="#version-1-5-1" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Fix: <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices.set_replica_mode" title="firebird.driver.core.ServerDbServices.set_replica_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerDbServices.set_replica_mode()</span></code></a> now works correctly.</p></li>
+</ul>
+</section>
+<section id="version-1-5-0">
+<h2>Version 1.5.0<a class="headerlink" href="#version-1-5-0" title="Permalink to this heading">¶</a></h2>
+<ul>
+<li><p>Fix: <a class="reference internal" href="ref-core.html#firebird.driver.core.create_database" title="firebird.driver.core.create_database"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_database()</span></code></a> now use server configuration user/password if either is not
+specified in database configuration (like <a class="reference internal" href="ref-core.html#firebird.driver.core.connect" title="firebird.driver.core.connect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect()</span></code></a>)</p></li>
+<li><p>Fix: Problem in <a class="reference internal" href="ref-core.html#firebird.driver.core.Server" title="firebird.driver.core.Server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server</span></code></a> processing incomplete LINE responses.</p></li>
+<li><p>New: <code class="xref py py-obj docutils literal notranslate"><span class="pre">verbint</span></code> parameter for <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.backup" title="firebird.driver.core.ServerDbServices3.backup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerDbServices3.backup()</span></code></a> and <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.restore" title="firebird.driver.core.ServerDbServices3.restore"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerDbServices3.restore()</span></code></a></p>
+<p>This is undocumented Firebird v3 gbak feature. See <a class="reference external" href="https://github.com/FirebirdSQL/firebird/issues/808">https://github.com/FirebirdSQL/firebird/issues/808</a>
+for details. It’s mutually exclusive with <code class="xref py py-obj docutils literal notranslate"><span class="pre">verbose</span></code>, and minimal value is 100.</p>
+</li>
+</ul>
+<section id="potentially-breaking-changes">
+<h3>Potentially breaking changes<a class="headerlink" href="#potentially-breaking-changes" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Change in <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.restore" title="firebird.driver.core.ServerDbServices3.restore"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerDbServices3.restore()</span></code></a>: The <code class="xref py py-obj docutils literal notranslate"><span class="pre">verbose</span></code> parameter default value was changed
+to <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a> to be consistent with <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.backup" title="firebird.driver.core.ServerDbServices3.backup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerDbServices3.backup()</span></code></a></p></li>
+<li><p>Change in <a class="reference internal" href="ref-types.html#firebird.driver.types.ShutdownMethod" title="firebird.driver.types.ShutdownMethod"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ShutdownMethod</span></code></a>: DENNY_ATTACHMENTS/DENNY_TRANSACTIONS renamed to
+DENY_ATTACHMENTS/DENY_TRANSACTIONS.</p></li>
+</ul>
+</section>
+</section>
+<section id="version-1-4-3">
+<h2>Version 1.4.3<a class="headerlink" href="#version-1-4-3" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Fix: Load driver configuration only when it’s successfully read from file(s)</p></li>
+<li><p>Fix: Reading service output will fail if line is greater than 64K</p></li>
+<li><p>Fix: Avoid division by zero if fetches stats is zero in DatabaseInfoProvider.cache_hit_ratio</p></li>
+<li><p>Fix: Rewind buffer with version string after using in EngineVersionProvider</p></li>
+<li><p>Fix: Add low-level access to fb_shutdown_callback API function</p></li>
+</ul>
+</section>
+<section id="version-1-4-2">
+<h2>Version 1.4.2<a class="headerlink" href="#version-1-4-2" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>New <a class="reference internal" href="ref-config.html#firebird.driver.config.ServerConfig" title="firebird.driver.config.ServerConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerConfig</span></code></a> options: <code class="xref py py-obj docutils literal notranslate"><span class="pre">encoding</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">encoding_errors</span></code>.</p></li>
+<li><p>New <a class="reference internal" href="ref-core.html#firebird.driver.core.connect_server" title="firebird.driver.core.connect_server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect_server</span></code></a> parameters: <code class="xref py py-obj docutils literal notranslate"><span class="pre">encoding</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">encoding_errors</span></code>.</p></li>
+<li><p>Requires firebird-base 1.3.1</p></li>
+</ul>
+</section>
+<section id="version-1-4-1">
+<h2>Version 1.4.1<a class="headerlink" href="#version-1-4-1" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Fixed important bug when iAttachment was not properly released.</p></li>
+</ul>
+</section>
+<section id="version-1-4-0">
+<h2>Version 1.4.0<a class="headerlink" href="#version-1-4-0" title="Permalink to this heading">¶</a></h2>
+<section id="improvements">
+<h3>Improvements:<a class="headerlink" href="#improvements" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>Added <code class="xref py py-obj docutils literal notranslate"><span class="pre">role</span></code> parameter to <a class="reference internal" href="ref-core.html#firebird.driver.core.connect_server" title="firebird.driver.core.connect_server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect_server</span></code></a> and <a class="reference internal" href="ref-core.html#firebird.driver.core.SPB_ATTACH" title="firebird.driver.core.SPB_ATTACH"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SPB_ATTACH</span></code></a>.</p></li>
+<li><p>Added <code class="xref py py-obj docutils literal notranslate"><span class="pre">encoding</span></code> parameter to <a class="reference internal" href="ref-core.html#firebird.driver.core.SPB_ATTACH" title="firebird.driver.core.SPB_ATTACH"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SPB_ATTACH</span></code></a> with default value <a class="reference external" href="https://docs.python.org/3/library/functions.html#ascii" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ascii</span></code></a> - used to encode
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">config</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">user</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">password</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">expected_db</span></code> values.</p></li>
+<li><p>Added <code class="xref py py-obj docutils literal notranslate"><span class="pre">encoding</span></code> parameter to <a class="reference internal" href="ref-core.html#firebird.driver.core.TPB" title="firebird.driver.core.TPB"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TPB</span></code></a> with default value <a class="reference external" href="https://docs.python.org/3/library/functions.html#ascii" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ascii</span></code></a> - used to encode table names.</p></li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.DPB" title="firebird.driver.core.DPB"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DPB</span></code></a> parameter <code class="xref py py-obj docutils literal notranslate"><span class="pre">charset</span></code> is now used to determine encoding for <code class="xref py py-obj docutils literal notranslate"><span class="pre">config</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">user</span></code>,
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">password</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">role</span></code> values.</p></li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.connect_server" title="firebird.driver.core.connect_server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect_server</span></code></a> has new <code class="xref py py-obj docutils literal notranslate"><span class="pre">encoding</span></code> parameter with default value <a class="reference external" href="https://docs.python.org/3/library/functions.html#ascii" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ascii</span></code></a> that is passed
+to new <a class="reference internal" href="ref-core.html#firebird.driver.core.Server.encoding" title="firebird.driver.core.Server.encoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server.encoding</span></code></a> attribute. <a class="reference internal" href="ref-core.html#firebird.driver.core.Server.encoding" title="firebird.driver.core.Server.encoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server.encoding</span></code></a> is used to encode/decode various
+string values passed between client and server in parameter buffers (see below), and text
+output from services.</p></li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerInfoProvider" title="firebird.driver.core.ServerInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerInfoProvider</span></code></a> now uses <a class="reference internal" href="ref-core.html#firebird.driver.core.Server.encoding" title="firebird.driver.core.Server.encoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server.encoding</span></code></a> for returned SERVER_VERSION, IMPLEMENTATION,
+GET_ENV, GET_ENV_MSG, GET_ENV_LOCK, USER_DBPATH and DBNAME values.</p></li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices" title="firebird.driver.core.ServerDbServices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerDbServices</span></code></a> now uses <a class="reference internal" href="ref-core.html#firebird.driver.core.Server.encoding" title="firebird.driver.core.Server.encoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server.encoding</span></code></a> for DBNAME, SQL_ROLE_NAME, FILE, SKIP_DATA,
+INCLUDE_DATA, INCLUDE_TABLE, EXCLUDE_TABLE, INCLUDE_INDEX, EXCLUDE_INDEX, LINE and
+isc_spb_sts_table SPB values.</p></li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerUserServices" title="firebird.driver.core.ServerUserServices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerUserServices</span></code></a> now uses <a class="reference internal" href="ref-core.html#firebird.driver.core.Server.encoding" title="firebird.driver.core.Server.encoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server.encoding</span></code></a> for DBNAME, SQL_ROLE_NAME, USER_NAME,
+GROUP_NAME, FIRST_NAME, MIDDLE_NAME, LAST_NAME and PASSWORD (on storage only) SPB values.</p></li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerTraceServices" title="firebird.driver.core.ServerTraceServices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerTraceServices</span></code></a> now uses <a class="reference internal" href="ref-core.html#firebird.driver.core.Server.encoding" title="firebird.driver.core.Server.encoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server.encoding</span></code></a> for CONFIG SPB value.</p></li>
+<li><p>Failed <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.close" title="firebird.driver.core.Connection.close"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection.close</span></code></a> should not cause problems on object destruction anymore.</p></li>
+<li><p>Failed <a class="reference internal" href="ref-core.html#firebird.driver.core.Server.close" title="firebird.driver.core.Server.close"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server.close</span></code></a> should not cause problems on object destruction anymore.</p></li>
+</ul>
+</section>
+<section id="backward-incompatible-changes">
+<h3>Backward incompatible changes:<a class="headerlink" href="#backward-incompatible-changes" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.tpb" title="firebird.driver.core.tpb"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tpb</span></code></a> parameter <code class="xref py py-obj docutils literal notranslate"><span class="pre">access</span></code> renamed to <code class="xref py py-obj docutils literal notranslate"><span class="pre">access_mode</span></code>.</p></li>
+<li><p><a class="reference internal" href="ref-types.html#firebird.driver.types.FirebirdWarning" title="firebird.driver.types.FirebirdWarning"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FirebirdWarning</span></code></a> now descends from <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#UserWarning" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UserWarning</span></code></a> instead <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Warning" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Warning</span></code></a>, and is reported
+to application via <a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.warn" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">warnings.warn</span></code></a> instead raised as exception.</p></li>
+<li><p><a class="reference internal" href="ref-intf.html#firebird.driver.interfaces.iAttachment_v3" title="firebird.driver.interfaces.iAttachment_v3"><code class="xref py py-obj docutils literal notranslate"><span class="pre">iAttachment_v3</span></code></a> attribute <code class="xref py py-obj docutils literal notranslate"><span class="pre">charset</span></code> was renamed to <code class="xref py py-obj docutils literal notranslate"><span class="pre">encoding</span></code>.</p></li>
+<li><p><a class="reference internal" href="ref-intf.html#firebird.driver.interfaces.iXpbBuilder.insert_string" title="firebird.driver.interfaces.iXpbBuilder.insert_string"><code class="xref py py-obj docutils literal notranslate"><span class="pre">iXpbBuilder.insert_string</span></code></a> optional parameter <code class="xref py py-obj docutils literal notranslate"><span class="pre">encoding</span></code> is now  keyword-only.
+Parameter also added to <a class="reference internal" href="ref-intf.html#firebird.driver.interfaces.iXpbBuilder.get_string" title="firebird.driver.interfaces.iXpbBuilder.get_string"><code class="xref py py-obj docutils literal notranslate"><span class="pre">iXpbBuilder.get_string</span></code></a> method.</p></li>
+</ul>
+</section>
+</section>
+<section id="version-1-3-4">
+<h2>Version 1.3.4<a class="headerlink" href="#version-1-3-4" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="ref-types.html#firebird.driver.types.FirebirdWarning" title="firebird.driver.types.FirebirdWarning"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FirebirdWarning</span></code></a> is not raised as exception, but reported via <a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.warn" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">warnings.warn</span></code></a>  mechanism.</p></li>
+<li><p>User-defined encoding for string parameter and response values exchanged between driver
+and Firebird engine. This includes TPB, DPB, SPB and various service values:</p>
+<ul>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.TPB" title="firebird.driver.core.TPB"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TPB</span></code></a>: New <code class="xref py py-obj docutils literal notranslate"><span class="pre">encoding</span></code> constructor parameter &amp; attribute. Used for <code class="xref py py-obj docutils literal notranslate"><span class="pre">table</span> <span class="pre">names</span></code> in table reservation.</p></li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.DPB" title="firebird.driver.core.DPB"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DPB</span></code></a>: Encoding based on connection charset for <code class="xref py py-obj docutils literal notranslate"><span class="pre">config</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">user</span> <span class="pre">name</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">password</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">role</span></code>.</p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SPB</span></code>: New <code class="xref py py-obj docutils literal notranslate"><span class="pre">encoding</span></code> constructor parameter &amp; attribute. Used for <code class="xref py py-obj docutils literal notranslate"><span class="pre">config</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">user</span> <span class="pre">name</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">password</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">expected</span> <span class="pre">database</span></code>.</p></li>
+<li><p>Connection-related providers: Encoding based on connection charset.</p></li>
+<li><p>Server and Service providers: New <a class="reference internal" href="ref-core.html#firebird.driver.core.Server.encoding" title="firebird.driver.core.Server.encoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server.encoding</span></code></a> attribute.</p></li>
+</ul>
+</li>
+<li><p>Fixed bug in <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.get_statistics" title="firebird.driver.core.ServerDbServices3.get_statistics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerDbServices3.get_statistics</span></code></a> when <code class="xref py py-obj docutils literal notranslate"><span class="pre">tables</span></code> are specified.</p></li>
+</ul>
+</section>
+<section id="version-1-3-3">
+<h2>Version 1.3.3<a class="headerlink" href="#version-1-3-3" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Fix unregistered bug: Newly extended interface breaks the driver (affects usability of
+the driver with Firebird development versions).</p></li>
+<li><p>New exception type <a class="reference internal" href="ref-types.html#firebird.driver.types.FirebirdWarning" title="firebird.driver.types.FirebirdWarning"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FirebirdWarning</span></code></a>. From now on, warnings from engine are raised as
+<a class="reference internal" href="ref-types.html#firebird.driver.types.FirebirdWarning" title="firebird.driver.types.FirebirdWarning"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FirebirdWarning</span></code></a> instead <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Warning" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Warning</span></code></a>. In some future release, warnings will not be raised,
+but reported via <a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.warn" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">warnings.warn</span></code></a> mechanism.</p></li>
+</ul>
+</section>
+<section id="version-1-3-2">
+<h2>Version 1.3.2<a class="headerlink" href="#version-1-3-2" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Fix unregistered bug: iUtil methods removed after FB 4 Beta 2 broke the Int128/TZ handling.</p></li>
+<li><p>New context manager <a class="reference internal" href="ref-core.html#firebird.driver.core.temp_database" title="firebird.driver.core.temp_database"><code class="xref py py-obj docutils literal notranslate"><span class="pre">temp_database</span></code></a>.</p></li>
+</ul>
+</section>
+<section id="version-1-3-1">
+<h2>Version 1.3.1<a class="headerlink" href="#version-1-3-1" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Fix unregistered bug: wrong handling of Firebird 4 string info parameters.</p></li>
+</ul>
+</section>
+<section id="version-1-3-0">
+<h2>Version 1.3.0<a class="headerlink" href="#version-1-3-0" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Fix (#4): exeption returns non ascii-127 symbols.
+The error message decode uses <a class="reference internal" href="ref-fbapi.html#firebird.driver.fbapi.err_encoding" title="firebird.driver.fbapi.err_encoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fbapi.err_encoding</span></code></a> value that is initialized to
+<a class="reference external" href="https://docs.python.org/3/library/locale.html#locale.getpreferredencoding" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">locale.getpreferredencoding</span></code></a>. Also, the decode is now done with <code class="xref py py-obj docutils literal notranslate"><span class="pre">errors=&quot;replace&quot;</span></code>.</p></li>
+<li><p>Fix unregistered bug: wrong handling of milliseconds in TIME and TEMEPSTAMP datatype.</p></li>
+<li><p>Sync _VERSION_ value with package version</p></li>
+<li><p>Fix unregistered bug: Do not raise exception if accessed <a class="reference internal" href="ref-core.html#firebird.driver.core.Statement.plan" title="firebird.driver.core.Statement.plan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Statement.plan</span></code></a> is <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>.</p></li>
+<li><p>Fix unregistered bug: <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.get_statistics" title="firebird.driver.core.ServerDbServices3.get_statistics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_statistics()</span></code></a> does not send <code class="xref py py-obj docutils literal notranslate"><span class="pre">tables</span></code> correctly.</p></li>
+<li><p>Fix annotations.</p></li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerTraceServices" title="firebird.driver.core.ServerTraceServices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerTraceServices</span></code></a> methods now have return values.</p></li>
+<li><p>User name added to <a class="reference internal" href="ref-types.html#firebird.driver.types.TraceSession" title="firebird.driver.types.TraceSession"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TraceSession</span></code></a>.</p></li>
+<li><p>Fix unregistered bug: <code class="xref py py-obj docutils literal notranslate"><span class="pre">auth_plugin_list</span></code> configuration option is ignored</p></li>
+<li><p>All methods of <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3" title="firebird.driver.core.ServerDbServices3"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerDbServices3</span></code></a> except 3 related to limbo transactions have new
+optional keyword-only parameter <code class="xref py py-obj docutils literal notranslate"><span class="pre">role</span></code> that is passed to called utility.</p></li>
+<li><p>Function <a class="reference internal" href="ref-core.html#firebird.driver.core.connect_server" title="firebird.driver.core.connect_server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect_server()</span></code></a> has new optional keyword-only parameter <code class="xref py py-obj docutils literal notranslate"><span class="pre">expected_db</span></code>,
+to access services with non-default security database.</p></li>
+<li><p>Improved Firebird 4 support.</p>
+<ul>
+<li><p>Version-specific classes introduced. Internal classes <a class="reference internal" href="ref-core.html#firebird.driver.core.DatabaseInfoProvider" title="firebird.driver.core.DatabaseInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DatabaseInfoProvider</span></code></a>,
+<a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionInfoProvider" title="firebird.driver.core.TransactionInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransactionInfoProvider</span></code></a> and <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices" title="firebird.driver.core.ServerDbServices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerDbServices</span></code></a> now implement only Firebird 4 features
+and descend from Firebird 3 versions. The proper variant is returned according to
+connected server.</p></li>
+<li><p>New <a class="reference internal" href="ref-config.html#firebird.driver.config.DatabaseConfig" title="firebird.driver.config.DatabaseConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DatabaseConfig</span></code></a> options <code class="xref py py-obj docutils literal notranslate"><span class="pre">session_time_zone</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">set_bind</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">decfloat_round</span></code> and
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">decfloat_traps</span></code>.</p></li>
+<li><p>New <a class="reference internal" href="ref-core.html#firebird.driver.core.DPB" title="firebird.driver.core.DPB"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DPB</span></code></a> parameters <code class="xref py py-obj docutils literal notranslate"><span class="pre">session_time_zone</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">set_db_replica</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">set_bind</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">decfloat_round</span></code>
+and <code class="xref py py-obj docutils literal notranslate"><span class="pre">decfloat_traps</span></code>.</p></li>
+<li><p>New <code class="xref py py-obj docutils literal notranslate"><span class="pre">session_time_zone</span></code> keyword parameter for <a class="reference internal" href="ref-core.html#firebird.driver.core.connect" title="firebird.driver.core.connect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect()</span></code></a>.</p></li>
+<li><p>Added explicit support for READ COMMITTED READ CONSISTENCY isolation (when disabled in
+Firebird configuration).</p></li>
+<li><p>Support for transactions started at specified snapshot number.
+New <a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionInfoProvider.snapshot_number" title="firebird.driver.core.TransactionInfoProvider.snapshot_number"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransactionInfoProvider.snapshot_number</span></code></a> property.
+The <a class="reference internal" href="ref-core.html#firebird.driver.core.TPB" title="firebird.driver.core.TPB"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TPB</span></code></a> has new <code class="xref py py-obj docutils literal notranslate"><span class="pre">at_snapshot_number</span></code> parameter.</p></li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.backup" title="firebird.driver.core.ServerDbServices3.backup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">backup()</span></code></a> and <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.local_backup" title="firebird.driver.core.ServerDbServices3.local_backup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">local_backup()</span></code></a> have new optional keyword-only arguments
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">include_data</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">keyhoder</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">keyname</span></code> and <a class="reference external" href="https://docs.python.org/3/library/crypt.html#module-crypt" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crypt</span></code></a>, and <code class="xref py py-obj docutils literal notranslate"><span class="pre">ZIP</span></code> value was added to <code class="xref py py-obj docutils literal notranslate"><span class="pre">SrvBackupFlag</span></code>.</p></li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.restore" title="firebird.driver.core.ServerDbServices3.restore"><code class="xref py py-obj docutils literal notranslate"><span class="pre">restore()</span></code></a> and <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.local_restore" title="firebird.driver.core.ServerDbServices3.local_restore"><code class="xref py py-obj docutils literal notranslate"><span class="pre">local_restore()</span></code></a> have new optional keyword-only
+arguments <code class="xref py py-obj docutils literal notranslate"><span class="pre">include_data</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">keyhoder</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">keyname</span></code>, <a class="reference external" href="https://docs.python.org/3/library/crypt.html#module-crypt" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crypt</span></code></a> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">replica_mode</span></code>.</p></li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.nbackup" title="firebird.driver.core.ServerDbServices3.nbackup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nbackup()</span></code></a> has new optional keyword-only parameter <code class="xref py py-obj docutils literal notranslate"><span class="pre">guid</span></code>.</p></li>
+<li><p>Support for new services.
+New methods <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices.nfix_database" title="firebird.driver.core.ServerDbServices.nfix_database"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerDbServices.nfix_database()</span></code></a> and <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices.set_replica_mode" title="firebird.driver.core.ServerDbServices.set_replica_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_replica_mode()</span></code></a>.</p></li>
+<li><p>Support for <a class="reference internal" href="ref-core.html#firebird.driver.core.Statement.timeout" title="firebird.driver.core.Statement.timeout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Statement.timeout</span></code></a>, and <code class="xref py py-obj docutils literal notranslate"><span class="pre">idle_timeout</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">statement_timeout</span></code> in <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.info" title="firebird.driver.core.Connection.info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection.info</span></code></a>.</p></li>
+<li><p>New types: <a class="reference internal" href="ref-types.html#firebird.driver.types.Features" title="firebird.driver.types.Features"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Features</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.ReplicaMode" title="firebird.driver.types.ReplicaMode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ReplicaMode</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.CancelType" title="firebird.driver.types.CancelType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CancelType</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.DecfloatRound" title="firebird.driver.types.DecfloatRound"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DecfloatRound</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.DecfloatTraps" title="firebird.driver.types.DecfloatTraps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DecfloatTraps</span></code></a>,
+<a class="reference internal" href="ref-types.html#firebird.driver.types.ConnectionFlag" title="firebird.driver.types.ConnectionFlag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConnectionFlag</span></code></a> and <a class="reference internal" href="ref-types.html#firebird.driver.types.EncryptionFlag" title="firebird.driver.types.EncryptionFlag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EncryptionFlag</span></code></a>. Firebird 4-related values added to some other
+enum types.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="version-1-2-1">
+<h2>Version 1.2.1<a class="headerlink" href="#version-1-2-1" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Fixed dependency to <code class="xref py py-obj docutils literal notranslate"><span class="pre">firebird-base</span></code> (v1.3.0)</p></li>
+</ul>
+</section>
+<section id="version-1-2-0">
+<h2>Version 1.2.0<a class="headerlink" href="#version-1-2-0" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Fix unregistered bug: <code class="xref py py-obj docutils literal notranslate"><span class="pre">sql_dialect</span></code> is used instead <code class="xref py py-obj docutils literal notranslate"><span class="pre">db_sql_dialect</span></code> in <a class="reference internal" href="ref-core.html#firebird.driver.core.create_database" title="firebird.driver.core.create_database"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_database</span></code></a>.</p></li>
+<li><p>Fix (#2): error when handling input parameters with value None</p></li>
+<li><p>Added <a class="reference internal" href="ref-core.html#firebird.driver.core.Server.mode" title="firebird.driver.core.Server.mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server.mode</span></code></a> attribute to allow fetching service output using LINE or TO_EOF method.
+Default mode is TO_EOF.</p></li>
+</ul>
+</section>
+<section id="version-1-1-0">
+<h2>Version 1.1.0<a class="headerlink" href="#version-1-1-0" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Important: Support for Firebird 4 TIMEZONE is broken (for FB4 RC1). It will be fixed in
+next driver version.</p></li>
+<li><p>Build scheme changed to <code class="xref py py-obj docutils literal notranslate"><span class="pre">PEP</span> <span class="pre">517</span></code>.</p></li>
+<li><p>Various changes to documentation and type hint adjustments.</p></li>
+<li><p>Changed: <a class="reference internal" href="ref-config.html#firebird.driver.config.DriverConfig.db_defaults" title="firebird.driver.config.DriverConfig.db_defaults"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DriverConfig.db_defaults</span></code></a> and <a class="reference internal" href="ref-config.html#firebird.driver.config.DriverConfig.server_defaults" title="firebird.driver.config.DriverConfig.server_defaults"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DriverConfig.server_defaults</span></code></a> are now created
+as <code class="xref py py-obj docutils literal notranslate"><span class="pre">optional</span></code> (introduced by firebird-base 1.2.0), so configuration file does not require
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">firebird.db.defaults</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">firebird.server.defaults</span></code> sections (even empty).</p></li>
+<li><p>Fix: unregistered bug in <code class="xref py py-obj docutils literal notranslate"><span class="pre">InfoProvider</span></code>.</p></li>
+<li><p>Fix: unregistered bug in <code class="xref py py-obj docutils literal notranslate"><span class="pre">FirebirdAPI</span></code> initialization.</p></li>
+</ul>
+</section>
+<section id="version-1-0-0">
+<h2>Version 1.0.0<a class="headerlink" href="#version-1-0-0" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Added support for schema and monitor modules from <a class="reference external" href="https://pypi.org/project/firebird-lib/">firebird-lib</a> package.</p></li>
+<li><p>Documentation: adjustments to css.</p></li>
+</ul>
+</section>
+<section id="version-0-8-0">
+<h2>Version 0.8.0<a class="headerlink" href="#version-0-8-0" title="Permalink to this heading">¶</a></h2>
+<p>The driver is no longer <em>beta</em>, and is now considered as <strong>stable</strong> for Firebird 3.0 (support for Firebird 4 is still evolving till final release).</p>
+<ul class="simple">
+<li><p>Documentation, both in code and separate (especially Usage Guide).</p></li>
+<li><p>Added support for new FB4 data types in ARRAY fields.</p></li>
+<li><p>Refactoring in driver hooks.</p></li>
+<li><p>New <a class="reference internal" href="ref-core.html#firebird.driver.core.Cursor.call_procedure" title="firebird.driver.core.Cursor.call_procedure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Cursor.call_procedure()</span></code></a> method.</p></li>
+<li><p>Refactoring and fixes in Server and its services.</p></li>
+</ul>
+</section>
+<section id="version-0-7-0">
+<h2>Version 0.7.0<a class="headerlink" href="#version-0-7-0" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Added support for new FB4 data types (TIME/TIMESTAMP WITH TIMEZONE, DECFLOAT[16|34] and
+extended DECIMAL/NUMERIC via INT128 storage).</p></li>
+</ul>
+</section>
+<section id="version-0-6-0">
+<h2>Version 0.6.0<a class="headerlink" href="#version-0-6-0" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>More documentation.</p></li>
+<li><p>Initial support for Firebird 4+ (interfaces and other definitions). Includes support for
+interface versions.</p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Service</span></code> renamed to <code class="xref py py-obj docutils literal notranslate"><span class="pre">Server</span></code>. Selected functionality moved to inner objects (relates to
+FB4+ support).</p></li>
+<li><p>New module: <a class="reference internal" href="ref-config.html#module-firebird.driver.config" title="firebird.driver.config: Driver configuration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">config</span></code></a> - Driver configuration</p></li>
+<li><p>New module: <a class="reference internal" href="ref-intf.html#module-firebird.driver.interfaces" title="firebird.driver.interfaces: Interface wrappers for Firebird new API"><code class="xref py py-obj docutils literal notranslate"><span class="pre">interfaces</span></code></a> - Interface wrappers for Firebird new API</p></li>
+<li><p>Changed module: <a class="reference internal" href="ref-types.html#module-firebird.driver.types" title="firebird.driver.types: Firebird driver types"><code class="xref py py-obj docutils literal notranslate"><span class="pre">types</span></code></a></p>
+<ul>
+<li><p>Interface wrapper moved to separate module</p></li>
+<li><p>Buffer managers moved to <a class="reference internal" href="ref-core.html#module-firebird.driver.core" title="firebird.driver.core: Main Firebird driver code"><code class="xref py py-obj docutils literal notranslate"><span class="pre">core</span></code></a> module</p></li>
+</ul>
+</li>
+<li><p>Changed module: <a class="reference internal" href="ref-core.html#module-firebird.driver.core" title="firebird.driver.core: Main Firebird driver code"><code class="xref py py-obj docutils literal notranslate"><span class="pre">core</span></code></a></p>
+<ul>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect()</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">create_database()</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">connect_server()</span></code> now use driver configuration.</p></li>
+<li><p>Simplified/unified transaction isolation specification.</p></li>
+<li><p>Emit warnings when objects with allocated Firebird resources are disposed (by Python
+GC) without prior call to <code class="xref py py-obj docutils literal notranslate"><span class="pre">close()</span></code>.</p></li>
+<li><p>Trace instrumentation removed. Use dynamic trace configuration from firebird-base 0.6.0.</p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">Transaction</span></code> information moved to inner objects accessible via <code class="xref py py-obj docutils literal notranslate"><span class="pre">info</span></code>
+properties (relates to FB4+ support).</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="version-0-5-0">
+<h2>Version 0.5.0<a class="headerlink" href="#version-0-5-0" title="Permalink to this heading">¶</a></h2>
+<p>Initial release.</p>
+</section>
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2020-2022, The Firebird Project.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.2.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

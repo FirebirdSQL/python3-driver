@@ -1,0 +1,147 @@
+.. module:: firebird.driver.core
+    :synopsis: Main Firebird driver code
+
+====================
+firebird.driver.core
+====================
+
+This is the main code module of the Firebird driver.
+
+Constants and variables
+=======================
+
+Translation dictionaries
+------------------------
+
+.. autodata:: CHARSET_MAP
+   :annotation:
+
+Context managers
+================
+
+transaction
+-----------
+.. autofunction:: transaction
+
+temp_database
+-------------
+.. autofunction:: temp_database
+
+Functions
+=========
+
+connect
+-------
+.. autofunction:: connect
+
+create_database
+---------------
+.. autofunction:: create_database
+
+connect_server
+--------------
+.. autofunction:: connect_server
+
+tpb
+---
+.. autofunction:: tpb
+
+Managers for parameter buffers
+==============================
+
+TPB
+---
+.. autoclass:: TPB
+
+DPB
+---
+.. autoclass:: DPB
+
+SPB_ATTACH
+----------
+.. autoclass:: SPB_ATTACH
+
+Buffer
+------
+.. autoclass:: Buffer
+
+CBuffer
+-------
+.. autoclass:: CBuffer
+
+Classes
+=======
+
+Connection
+----------
+.. autoclass:: Connection
+
+TransactionManager
+------------------
+.. autoclass:: TransactionManager
+
+DistributedTransactionManager
+-----------------------------
+.. autoclass:: DistributedTransactionManager
+
+Statement
+---------
+.. autoclass:: Statement
+
+Cursor
+------
+.. autoclass:: Cursor
+
+Server
+------
+.. autoclass:: Server
+
+ServerServiceProvider
+---------------------
+.. autoclass:: ServerServiceProvider
+
+ServerDbServices3
+-----------------
+.. autoclass:: ServerDbServices3
+
+ServerDbServices
+----------------
+.. autoclass:: ServerDbServices
+
+ServerUserServices
+------------------
+.. autoclass:: ServerUserServices
+
+ServerTraceServices
+-------------------
+.. autoclass:: ServerTraceServices
+
+InfoProvider
+------------
+.. autoclass:: InfoProvider
+
+DatabaseInfoProvider
+--------------------
+.. autoclass:: DatabaseInfoProvider
+
+TransactionInfoProvider
+-----------------------
+.. autoclass:: TransactionInfoProvider
+
+ServerInfoProvider
+------------------
+.. autoclass:: ServerInfoProvider
+
+EventCollector
+--------------
+.. autoclass:: EventCollector
+
+EventBlock
+----------
+.. autoclass:: EventBlock
+
+BlobReader
+----------
+.. autoclass:: BlobReader
+
+

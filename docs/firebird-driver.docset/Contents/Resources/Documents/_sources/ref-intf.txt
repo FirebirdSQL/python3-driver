@@ -1,0 +1,210 @@
+.. module:: firebird.driver.interfaces
+    :synopsis: Interface wrappers for Firebird new API
+
+==========================
+firebird.driver.interfaces
+==========================
+
+This module contains interface wrappers for Firebird new API.
+
+Classes
+=======
+
+iVersionedMeta
+--------------
+.. autoclass:: iVersionedMeta
+
+Firebird API Interface wrappers
+===============================
+
+iVersioned
+----------
+.. autoclass:: iVersioned
+
+iReferenceCounted
+-----------------
+.. autoclass:: iReferenceCounted
+
+iDisposable
+-----------
+.. autoclass:: iDisposable
+
+iStatus
+-------
+.. autoclass:: iStatus
+
+iPluginBase
+-----------
+.. autoclass:: iPluginBase
+
+iConfigEntry
+------------
+.. autoclass:: iConfigEntry
+
+iConfig
+-------
+.. autoclass:: iConfig
+
+iFirebirdConf_v3
+----------------
+.. autoclass:: iFirebirdConf_v3
+
+iFirebirdConf
+-------------
+.. autoclass:: iFirebirdConf
+
+iPluginManager
+--------------
+.. autoclass:: iPluginManager
+
+iConfigManager_v2
+-----------------
+.. autoclass:: iConfigManager_v2
+
+iConfigManager
+--------------
+.. autoclass:: iConfigManager
+
+iBlob
+-----
+.. autoclass:: iBlob
+
+iTransaction
+------------
+.. autoclass:: iTransaction
+
+iMessageMetadata_v3
+-------------------
+.. autoclass:: iMessageMetadata_v3
+
+iMessageMetadata
+----------------
+.. autoclass:: iMessageMetadata
+
+iMetadataBuilder_v3
+-------------------
+.. autoclass:: iMetadataBuilder_v3
+
+iMetadataBuilder
+----------------
+.. autoclass:: iMetadataBuilder
+
+iResultSet
+----------
+.. autoclass:: iResultSet
+
+iStatement_v3
+-------------
+.. autoclass:: iStatement_v3
+
+iStatement
+----------
+.. autoclass:: iStatement
+
+iBatch
+------
+.. autoclass:: iBatch
+
+iBatchCompletionState
+---------------------
+.. autoclass:: iBatchCompletionState
+
+iRequest
+--------
+.. autoclass:: iRequest
+
+iEvents
+-------
+.. autoclass:: iEvents
+
+iAttachment_v3
+--------------
+.. autoclass:: iAttachment_v3
+
+iAttachment
+-----------
+.. autoclass:: iAttachment
+
+iService
+--------
+.. autoclass:: iService
+
+iProvider
+---------
+.. autoclass:: iProvider
+
+iDtcStart
+---------
+.. autoclass:: iDtcStart
+
+iDtc
+----
+.. autoclass:: iDtc
+
+iTimerControl
+-------------
+.. autoclass:: iTimerControl
+
+iXpbBuilder
+-----------
+.. autoclass:: iXpbBuilder
+
+iUtil_v2
+--------
+.. autoclass:: iUtil_v2
+
+iUtil
+-----
+.. autoclass:: iUtil
+
+iDecFloat16
+-----------
+.. autoclass:: iDecFloat16
+
+iDecFloat34
+-----------
+.. autoclass:: iDecFloat34
+
+iInt128
+-------
+.. autoclass:: iInt128
+
+iMaster
+-------
+.. autoclass:: iMaster
+
+Interface implementations
+=========================
+
+iVersionedImpl
+--------------
+.. autoclass:: iVersionedImpl
+
+iReferenceCountedImpl
+---------------------
+.. autoclass:: iReferenceCountedImpl
+
+iDisposableImpl
+---------------
+.. autoclass:: iDisposableImpl
+
+iVersionCallbackImpl
+--------------------
+.. autoclass:: iVersionCallbackImpl
+
+iCryptKeyCallbackImpl
+---------------------
+.. autoclass:: iCryptKeyCallbackImpl
+
+iOffsetsCallbackImp
+-------------------
+.. autoclass:: iOffsetsCallbackImp
+
+iEventCallbackImpl
+------------------
+.. autoclass:: iEventCallbackImpl
+
+iTimerImpl
+----------
+.. autoclass:: iTimerImpl
+

@@ -59,4 +59,4 @@ from .core import connect, create_database, connect_server, transaction, temp_da
      Server, Statement
 
 #: Current driver version, SEMVER string.
-__VERSION__ = '1.4.2'
+__VERSION__ = '1.5.2'

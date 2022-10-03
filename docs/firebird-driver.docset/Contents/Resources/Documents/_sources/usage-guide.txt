@@ -1,0 +1,3154 @@
+
+===========
+Usage Guide
+===========
+
+.. currentModule:: firebird.driver
+
+Driver structure
+================
+
+Source code is currently divided into next submodules:
+
+* :mod:`~firebird.driver.types` - Data types used by driver.
+* :mod:`~firebird.driver.interfaces` - Interface wrappers for Firebird new API
+* :mod:`~firebird.driver.core` - Main driver source code.
+* :mod:`~firebird.driver.fbapi` - Python `ctypes` interface to Firebird client library.
+* :mod:`~firebird.driver.config` - Driver configuration.
+* :mod:`~firebird.driver.hooks` - Drivers hooks.
+
+All important data, functions, classes and constants are available directly in `firebird.driver`
+name space. In normal circumstances is not necessary to import sub-modules directly. However,
+you may need them to access some not so frequently needed driver functionality like driver
+hooks, or to implement your own callback interfaces.
+
+.. index:: Configuration
+
+Configuration
+=============
+
+The driver uses configuration built on top of `configuration system <firebird.base.config>`
+provided by `firebird-base`_ package. In addition to global settings, the configuration
+also includes the definition of connection parameters to Firebird servers and databases.
+
+The default configuration connects to embedded server using direct/local connection method.
+To access remote servers and databases (or local ones through remote protocols), it's
+necessary to adjust default configuration, or `register` them in configuration manager.
+
+You can manipulate the configuration objects directly, or load configuration from files or
+strings (in `.ini-style` `configparser` format).
+
+The 'driver_config' object
+--------------------------
+
+The global `.driver_config` object holds all configurable driver parameters, and access
+configuration parameters for registered Firebird servers and databases.
+
+In initial state, all parameters have default values and there are no registered servers
+and databases. You can set individual parameter values directly, or you can set multiple
+parameters (including registered servers and databases) at once by loading them from
+configuration string, dict or file(s).
+
+.. important::
+
+   If you want to use specific Firebird client library, you must set the value of
+   `.DriverConfig.fb_client_library` configuration option **before** your application
+   calls any from following functions: `.connect()`, `.create_database()`,
+   `.connect_server()`, `.load_api()` or `.get_api()`.
+
+.. seealso::
+
+   `.DriverConfig` for list of available methods and parameters.
+
+Server and database configuration
+---------------------------------
+
+Firebird provides ever-increasing list of parameter options for database and server connections.
+To keep the Python API clean and manageable, the `firebird-driver` uses server and database
+configuration objects instead function parameters to specify values for almost all such options.
+Connection functions then provide a name parameter that can refer to particular server / database
+or configuration, and few keyword parameters to specify / override selected options.
+
+.. important::
+
+   The configuration objects does not allow specification of next options:
+
+   - set database encryption callback (for technical reasons)
+   - set db_key scope (for security reasons)
+   - disable garbage collection (for security reasons)
+   - disable database triggers (for security reasons)
+   - allow overwrite of existing database with newly created database (for security reasons)
+
+   These options could be specified only as keyword arguments in appropriate functions.
+
+.. seealso::
+
+   `.ServerConfig` and `.DatabaseConfig` for list of available methods and parameters.
+
+
+
+.. index:: Database
+   pair: Connection; creation
+
+Databases
+=========
+
+Access to the database is made available through `.Connection` objects. Firebird-driver
+provides two constructors for these:
+
+* `.connect` - Returns `.Connection` to database that already exists.
+* `.create_database` - Returns `.Connection` to newly created database.
+
+
+.. index::
+   pair: Database; connect
+
+Using connect()
+---------------
+
+This constructor has one positional and several keyword parameters.
+
+The value of `database` positional parameter must be one of:
+
+* name of registered database configuration
+* database name / alias
+
+.. important:: This value **cannot** be DSN / fully qualified Firebird connection string!
+
+Keyword parameters are intended to override selected configuration options, or to specify
+options that are not configurable.
+
+.. note::
+
+   If `database` value is not recognized as name of registered database configuration,
+   the driver uses `~.DriverConfig.db_defaults` and `~.DriverConfig.server_defaults`
+   configuration objects.
+
+
+A simple database connection is typically established with code such as this:
+
+.. sourcecode:: python
+
+   from firebird.driver import connect
+
+   # Attach to 'employee' database/alias using embedded server connection
+   con = connect('employee', user='sysdba', password='masterkey')
+
+   # Attach to 'employee' database/alias using local server connection
+   from firebird.driver import driver_config
+   driver_config.server_defaults.host.value = 'localhost'
+   con = connect('employee', user='sysdba', password='masterkey')
+
+   # Set 'user' and 'password' via configuration
+   driver_config.server_defaults.user.value = 'SYSDBA'
+   driver_config.server_defaults.password.value = 'masterkey'
+   con = connect('employee')
+
+However, it's recommended to use specific configuration for servers and databases.
+It's possible to register servers and databases directly in code like this:
+
+.. sourcecode:: python
+
+   from firebird.driver import connect, driver_config
+
+   # Register Firebird server
+   srv_cfg = """[local]
+   host = localhost
+   user = SYSDBA
+   password = masterkey
+   """
+   driver_config.register_server('local', srv_cfg)
+
+   # Register database
+   db_cfg = """[employee]
+   server = local
+   database = employee.fdb
+   protocol = inet
+   charset = utf8
+   """
+   driver_config.register_database('employee', db_cfg)
+
+   # Attach to 'employee' database
+   con = connect('employee')
+
+But more convenient approach is using single configuration file::
+
+    # file: myapp.cfg
+
+    [firebird.driver]
+    servers = local
+    databases = employee
+
+    [local]
+    host = localhost
+    user = SYSDBA
+    password = masterkey
+
+    [employee]
+    server = local
+    database = employee.fdb
+    protocol = inet
+    charset = utf8
+
+.. sourcecode:: python
+
+   from firebird.driver import connect, driver_config
+
+   driver_config.read('myapp.cfg')
+
+   # Attach to 'employee' database
+   con = connect('employee')
+
+.. seealso:: `.connect()` for details.
+
+.. index::
+   pair: Database; create
+
+Using create_database()
+-----------------------
+
+This constructor returns connection to newly created database. It works in the same way
+as `.connect()`, but utilizes additional database configuration options.
+
+It's possible to specify these options in code like this:
+
+.. sourcecode:: python
+
+   from firebird.driver import connect, driver_config
+
+   # Register Firebird server
+   srv_cfg = """[local]
+   host = localhost
+   user = SYSDBA
+   password = masterkey
+   """
+   driver_config.register_server('local', srv_cfg)
+
+   # Register database
+   db_cfg = """[mydb]
+   server = local
+   database = mydb.fdb
+   protocol = inet
+   charset = utf8
+   # create options
+   page_size = 16384
+   db_charset = utf8
+   sweep_interval = 80000
+   reserve_space = no
+   """
+   driver_config.register_database('mydb', db_cfg)
+
+   # create 'mydb' database
+   con = create_database('mydb')
+
+But more convenient approach is using single configuration file::
+
+    # file: myapp.cfg
+
+    [firebird.driver]
+    servers = local
+    databases = mydb
+
+    [local]
+    host = localhost
+    user = SYSDBA
+    password = masterkey
+
+    [mydb]
+    server = local
+    database = mydb.fdb
+    protocol = inet
+    charset = utf8
+    # create options
+    page_size = 16384
+    db_charset = utf8
+    sweep_interval = 80000
+    reserve_space = no
+
+.. sourcecode:: python
+
+   from firebird.driver import create_database, driver_config
+
+   driver_config.read('myapp.cfg')
+
+   # create 'mydb' database
+   con = create_database('mydb')
+
+.. seealso:: `.create_database()` for details.
+
+.. index::
+   pair: Database; delete
+
+Deleting databases
+------------------
+
+The Firebird engine also supports dropping (deleting) databases dynamically,
+but dropping is a more complicated operation than creating, for several reasons:
+an existing database may be in use by users other than the one who requests
+the deletion, it may have supporting objects such as temporary sort files, and
+it may even have dependent shadow databases. Although the database engine
+recognizes a `DROP DATABASE` SQL statement, support for that statement is limited
+to the `isql` command-line administration utility. However, the engine supports
+the deletion of databases via an API call, which FDB exposes as
+`~.Connection.drop_database` method in `.Connection` class. So, to drop a database
+you need to connect to it first.
+
+**Example:**
+
+.. sourcecode:: python
+
+   from firebird.driver import connect, driver_config
+
+   driver_config.read('myapp.cfg')
+
+   # Attach to 'myapp' database
+   con = connect('myapp')
+   con.drop_database()
+
+.. seealso:: `.Connection.drop_database()` for details.
+
+.. index::
+   pair: Connection; usage
+   pair: connection; Database
+
+Connection object
+-----------------
+
+`.Connection` object represents a direct link to database, and works as
+gateway for next operations with it:
+
+* `Executing SQL Statements`_: methods `~.Connection.execute_immediate()` and `~.Connection.cursor()`.
+* `Dropping database <Deleting databases>`_: method `~.Connection.drop_database()`.
+* `Transanction management`_: methods `~.Connection.begin()`, `~.Connection.commit()`,
+  `~.Connection.rollback()`, `~.Connection.savepoint()`, `~.Connection.transaction_manager()`,
+  `~.Connection.is_active()`, and attributes `~.Connection.main_transaction`,
+  `~.Connection.query_transaction`, `~.Connection.transactions` and `~.Connection.default_tpb`.
+* Work with `Database Events`_: method `~.Connection.event_collector`.
+* `Getting information about connection`_: methods `~.Connection.is_closed()` and
+  `~.Connection.ping()` and attributes `~.Connection.dsn`, `~.Connection.charset`
+  and `~.Connection.sql_dialect`.
+* `Getting information about database`_: attribute `~.Connection.info`.
+* `Closing the connection`_: method `~.Connection.close()`
+
+.. index::
+   pair: Connection; closing
+
+Closing the connection
+----------------------
+
+There are many local and server resources used by firebird-driver that must be properly
+managed, and disposed when they are no longer necessary. All objects that require proper
+finalization provide `close()` method that must be called when object is no longer needed.
+The `.Connection` objects are the most important ones, as other most frequently used
+objects like cursors, prepared statements and transactions are typically associated with
+connections.
+
+You may call the `close()` method directly, or use the :ref:`with <with>` statement
+and context manager support provided by all these objects.
+
+**Example:**
+
+.. sourcecode:: python
+
+   from firebird.driver import connect, driver_config
+
+   driver_config.read('myapp.cfg')
+
+   with connect('employee') as con:
+       cur = con.cursor()
+       cur.execute('select 1 from rdb$database')
+       print(cur.fetchone()[0])
+
+
+.. note::
+
+   Objects that require proper finalization are: `.Connection`, `.TransactionManager`
+   and `.DistributedTransactionManager`, `.Statement`, `.BlobReader`, `.Cursor` and `.Server`.
+
+   Although only `.Connection` and `.Server` objects must be closed directly because
+   all other objects are associated with them and thus closed when connection is
+   closed, it's **recommended** to directly close any resource object obtained by
+   your code when it's no longer needed (either directly by calling `close()` or using
+   `with` statement).
+
+.. important::
+
+   All managed objects have `~object.__del__` method, which ensures that the object in
+   the active state is properly closed before it is destroyed by the Python memory manager.
+   However, **the close operation may fail** as the state of your application could be arbitrary
+   and the sequence in which objects are disposed by memory manager is not deterministic.
+
+   The `~object.__del__` methods should be thus considered as safe guard of last resort
+   that your code should not rely upon. To indicate that your code is not managing
+   resources properly, the `ResourceWarning` is raises when active object is disposed
+   by memory manager.
+
+   .. note::
+
+      Such warnings may not reach your attention if warnings are disabled or filtered
+      on your system. You should always develop and test your applications with enabled
+      delivery of resource warnings.
+
+.. seealso:: `.Connection.close()` for details.
+
+.. index::
+   pair: Connection; information about
+
+Getting information about connection
+------------------------------------
+
+Only (most useful) part of information associated with `.Connection` object is directly
+available:
+
+* It's possible to check whether Connection object is closed or not with
+  `~.Connection.is_closed()` method.
+* It's possible to check whether connection to the Firebird server is not broken with
+  `~.Connection.ping()` method.
+* The DSN (fully qualified Firebird database connection string) is surfaced as `~.Connection.dsn`
+  read-only property.
+* The character set used by Connection is surfaced as `~.Connection.charset` read-only property.
+* The SQL dialect used by Connection is surfaced as `~.Connection.sql_dialect` read-only property.
+
+.. tip::
+
+   Additional connection-specific information is currently held as `bytes` in protected
+   `Connection._dpb` attribute that could be processed using `~firebird.driver.core.DPB` object.
+
+.. index::
+   pair: Database; information about
+
+Getting information about database
+----------------------------------
+
+Because the scope and type of database information depends on the version of the Firebird server
+and database ODS, this information is made available through a separate class `.DatabaseInfoProvider`.
+The `.Connection.info` property provides access to `.DatabaseInfoProvider` object appropriate
+for attached database.
+
+Although you may query the information directly from server using `.DatabaseInfoProvider.get_info()`
+method (that wraps the Firebird IAttachment.getInfo() API call), the `.DatabaseInfoProvider` object
+provides more convenient methods and properties for obtaining specific information directly.
+
+.. note::
+
+   Some information provided by `.DatabaseInfoProvider` properties (like `cache_hit_ratio`)
+   could not be obtained via `get_info()` method.
+
+
+**Example:**
+
+.. sourcecode:: python
+
+   from firebird.driver import connect
+
+   with connect('employee', user='SYSDBA', password='masterkey') as con:
+       print(f"Database character set: {con.info.charset}")
+       print(f"Page size (in bytes): {con.info.page_size}")
+       print(f"Attachment ID: {con.info.id}")
+       print(f"SQL dialect used by connected database: {con.info.sql_dialect}")
+       print(f"Database name (filename or alias): {con.info.name}")
+       print(f"Database site name: {con.info.site}")
+       print(f"Implementation (old format): {con.info.implementation!s}")
+       print(f"Database Provider: {con.info.provider!s}")
+       print(f"Database Class: {con.info.db_class!s}")
+       print(f"Date when database was created: {con.info.creation_date}")
+       print(f"Size of page cache used by connection: {con.info.page_cache_size}")
+       print(f"Number of pages allocated for database: {con.info.pages_allocated}")
+       print(f"Number of database pages in active use: {con.info.pages_used}")
+       print(f"Number of free allocated pages in database: {con.info.pages_free}")
+       print(f"Sweep interval: {con.info.sweep_interval}")
+       print(f"Data page space usage (USE_FULL or RESERVE): {con.info.space_reservation!s}")
+       print(f"Database write mode (SYNC or ASYNC): {con.info.write_mode!s}")
+       print(f"Database access mode (READ_ONLY or READ_WRITE): {con.info.access_mode!s}")
+       print(f"Current I/O statistics - Reads from disk to page cache: {con.info.reads}")
+       print(f"Current I/O statistics - Fetches from page cache: {con.info.fetches}")
+       print(f"Cache hit ratio = 1 - (reads / fetches): {con.info.cache_hit_ratio}")
+       print(f"Current I/O statistics - Writes from page cache to disk: {con.info.writes}")
+       print(f"Current I/O statistics - Writes to page in cache: {con.info.marks}")
+       print(f"Total amount of memory curretly used by database engine: {con.info.current_memory}")
+       print(f"Max. total amount of memory so far used by database engine: {con.info.max_memory}")
+       print(f"ID of Oldest Interesting Transaction: {con.info.oit}")
+       print(f"ID of Oldest Active Transaction: {con.info.oat}")
+       print(f"ID of Oldest Snapshot Transaction: {con.info.ost}")
+       print(f"ID for next transaction: {con.info.next_transaction}")
+
+**Sample output**::
+
+   Database character set: NONE
+   Page size (in bytes): 8192
+   Attachment ID: 378
+   SQL dialect used by connected database: 3
+   Database name (filename or alias): /opt/firebird/examples/empbuild/employee.fdb
+   Database site name: NewAmarisk
+   Implementation (old format): Implementation.RDB_VMS
+   Database Provider: DbProvider.FIREBIRD
+   Database Class: DbClass.SERVER_ACCESS
+   Date when database was created: 2020-05-13 10:13:57.005010
+   Size of page cache used by connection: 2048
+   Number of pages allocated for database: 346
+   Number of database pages in active use: 311
+   Number of free allocated pages in database: 35
+   Sweep interval: 20000
+   Data page space usage (USE_FULL or RESERVE): DbSpaceReservation.RESERVE
+   Database write mode (SYNC or ASYNC): DbWriteMode.SYNC
+   Database access mode (READ_ONLY or READ_WRITE): DbAccessMode.READ_WRITE
+   Current I/O statistics - Reads from disk to page cache: 87
+   Current I/O statistics - Fetches from page cache: 1525
+   Cache hit ratio = 1 - (reads / fetches): 0.9429508196721311
+   Current I/O statistics - Writes from page cache to disk: 2
+   Current I/O statistics - Writes to page in cache: 5
+   Total amount of memory curretly used by database engine: 21925248
+   Max. total amount of memory so far used by database engine: 22033760
+   ID of Oldest Interesting Transaction: 307
+   ID of Oldest Active Transaction: 308
+   ID of Oldest Snapshot Transaction: 308
+   ID for next transaction: 308
+
+.. seealso:: `.DatabaseInfoProvider` for details.
+
+Getting information about Firebird version
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Because functionality and some features depends on actual Firebird version, it could be
+important for driver users to check it. This (otherwise) simple task could be confusing
+for new Firebird users, because Firebird uses two different version lineages. This abomination
+was introduced to Firebird thanks to its InterBase legacy (Firebird 1.0 is a fork of InterBase
+6.0), as applications designed to work with InterBase can often work with Firebird without
+problems (and vice versa).
+
+`.DatabaseInfoProvider` provides these version strings as two properties:
+
+* `~.DatabaseInfoProvider.server_version` - Legacy InterBase-friendly version string.
+* `~.DatabaseInfoProvider.firebird_version` - Firebird’s own version string.
+
+However, this version string contains more information than version number. For example for
+Linux Firebird 4.0.0 it’s ‘LI-T4.0.0.1963 Firebird 4.0 Beta 2’. So `.DatabaseInfoProvider`
+provides two more properties for your convenience:
+
+* `~.DatabaseInfoProvider.version` - Only Firebird version number. It’s a string with
+  format: major.minor.subrelease.build
+* `~.DatabaseInfoProvider.engine_version` - Engine (major.minor) version as (float) number.
+
+
+**Example:**
+
+.. sourcecode:: python
+
+   from firebird.driver import connect
+
+   with connect('employee', user='SYSDBA', password='masterkey') as con:
+       print(f"server_version: '{con.info.server_version}'")
+       print(f"firebird_version: '{con.info.firebird_version}'")
+       print(f"version: '{con.info.version}'")
+       print(f"engine_version: {con.info.engine_version}")
+
+**Sample output**::
+
+   server_version: 'LI-T6.3.0.1963 Firebird 4.0 Beta 2'
+   firebird_version: 'LI-T4.0.0.1963 Firebird 4.0 Beta 2'
+   version: '4.0.0.1963'
+   engine_version: 4.0
+
+Database On-Disk Structure
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Particular Firebird features may also depend on specific support in database
+(for example number and structure of monitoring tables). These required structures are
+present automatically when database is created by particular engine verison that needs
+them, but Firebird engine may work with databases created by older versions and thus with
+older structure, so it could be necessary to consult also On-Disk Structure (ODS for short)
+version. `.DatabaseInfoProvider` provides this number as `~.DatabaseInfoProvider.ods` (float)
+property.
+
+**Example:**
+
+.. sourcecode:: python
+
+   from firebird.driver import connect
+
+   with connect('employee', user='SYSDBA', password='masterkey') as con:
+       print(f"ods: {con.info.ods}")
+       print(f"ods_version: {con.info.ods_version}")
+       print(f"ods_minor_version: {con.info.ods_minor_version}")
+
+**Sample output**::
+
+   ods: 13.0
+   ods_version: 13
+   ods_minor_version: 0
+
+
+
+.. index:: SQL Statement
+
+Executing SQL Statements
+========================
+
+Firebird-driver implements two ways for execution of SQL commands against connected database:
+
+* `~.Connection.execute_immediate` - for execution of SQL commands that don't return any result.
+* `.Cursor` objects that offer rich interface for execution of SQL commands and fetching their results.
+
+
+.. index::
+   pair: Cursor; usage
+
+Cursor object
+-------------
+
+Because `.Cursor` objects always operate in context of single `.Connection` (and `.TransactionManager`),
+`.Cursor` instances are not created directly, but by constructor method. Python DB API 2.0 assumes
+that if database engine supports transactions, it supports only one transaction per connection,
+hence it defines constructor method `~.Connection.cursor` (and other transaction-related methods)
+as part of `.Connection` interface. However, Firebird supports multiple independent transactions
+per connection. To conform to Python DB API, firebird-driver uses concept of internal
+`~.Connection.main_transaction` and secondary `~.Connection.transactions`. Cursor constructor is
+primarily defined by `.TransactionManager`, and Cursor constructor on `.Connection` is therefore
+a shortcut for `main_transaction.cursor()`.
+
+`.Cursor` objects are used for next operations:
+
+* Execution of SQL Statemets: methods `~.Cursor.execute()`, `~.Cursor.executemany()`, `~.Cursor.open()`
+  and `~.Cursor.callproc()`.
+* Creating `.Statement` objects for efficient repeated execution of SQL statements, and to obtain
+  additional information about SQL statements (like execution `~.Statement.plan`): method `~.Cursor.prepare()`.
+* `Fetching results <Fetching data from server>`_: methods `~.Cursor.fetchone()`, `~.Cursor.fetchmany()`,
+  `~.Cursor.fetchall()`, `~.Cursor.fetch_next()`, `~.Cursor.fetch_prior()`, `~.Cursor.fetch_first()`,
+  `~.Cursor.fetch_last()`, `~.Cursor.fetch_absolute()` and `~.Cursor.fetch_relative()`.
+
+.. index::
+   pair: SQL Statement; execution
+
+SQL Execution Basics
+--------------------
+
+There are five methods how to execute SQL commands:
+
+1. `.Connection.execute_immediate()` or `.TransactionManager.execute_immediate()` for SQL commands
+   that don't return any result, and are not executed frequently. This method also **doesn't**
+   support either `parameterized statements <parameterized-statements>`_ or
+   `prepared statements <prepared-statements>`_.
+
+   .. tip::
+
+      This method is efficient for `administrative` and `DDL`_ SQL commands, like `DROP`, `CREATE`
+      or `ALTER` commands, `SET STATISTICS` etc.
+
+2. `.Cursor.execute()` for SQL commands that return result sets, i.e. sequence of `rows` of the same
+   structure, and sequence has unknown number of `rows` (including zero). Each row of the sequence
+   can be read only once, and is returned in the order it is read from the server.
+
+   .. tip::
+
+      This method is preferred for all `SELECT` and other `DML`_ statements, or any statement that
+      is executed frequently, either `as is` or in `parameterized` form.
+
+3. `.Cursor.executemany()` for execution of single parameterized SQL command with various set
+   of parameters.
+
+   .. important::
+
+      Because `executemany()` is basically a simple loop that calls `execute()` with different
+      parameters, it's possible to execute any statement acceptable by `execute()`. However,
+      it's possible to access the result set **only** from last executed command, so this method
+      should not be used for SQL commands that return results.
+
+4. `.Cursor.open()` for SQL command that return result sets, i.e. sequence of `rows` of the same
+   structure, and sequence has unknown number of `rows` (including zero). Instead of just fetching
+   rows sequentially in a forward direction like `execute()`, this method allows flexible navigation
+   through an open cursor set both backwards and forwards. Rows next to, prior to and relative to
+   the current cursor row can be targeted.
+
+   .. seealso:: `Scrollable cursors <scrollable-cursors>`_ for details.
+
+5. `.Cursor.callproc()` for execution of `Stored procedures` that always return exactly one set
+   of values.
+
+   .. note::
+
+      This method of SP invocation is equivalent to `"EXECUTE PROCEDURE ..."` SQL statement.
+
+.. index::
+   pair: Cursor; fetching data
+
+Fetching data from server
+-------------------------
+
+Result of SQL statement execution consists from sequence of zero to unknown number of `rows`,
+where each `row` is a set of exactly the same number of values. `.Cursor` object offer number
+of different methods for fetching these `rows`, that should satisfy all your specific needs:
+
+* `~.Cursor.fetchone()` - Returns the next row of a query result set, or `None` when no more data
+  is available.
+
+  .. tip::
+
+     Cursor supports the :ref:`iterator protocol <python:typeiter>`, yielding tuples of values
+     like `~.Cursor.fetchone()`.
+
+* `~.Cursor.fetchmany()` - Returns the next set of rows of a query result, returning a sequence
+  of sequences (e.g. a list of tuples). An empty sequence is returned when no more rows are available.
+
+  The number of rows to fetch per call is specified by the parameter. If it is not given, the
+  cursor’s `~.Cursor.arraysize` determines the number of rows to be fetched. The method does try
+  to fetch as many rows as indicated by the size parameter. If this is not possible due to
+  the specified number of rows not being available, fewer rows may be returned.
+
+  .. note::
+
+     The default value of `~.Cursor.arraysize` is `1`, so without paremeter it's equivalent to
+     `~.Cursor.fetchone()`, but returns list of `rows`, instead actual `row` directly.
+
+* `~.Cursor.fetchall()` -  Returns all (remaining) rows of a query result as list of tuples,
+  where each tuple is one row of returned values.
+
+  .. tip::
+
+     This method can potentially return huge amount of data, that may exhaust available memory.
+     If you need just `iteration` over potentially big result set, use loops with `~.Cursor.fetchone()`
+     or Cursor's built-in support for :ref:`iterator protocol <python:typeiter>` instead this method.
+
+* Call to `~.Cursor.execute()` returns `self` (Cursor instance) that itself supports the
+  :ref:`iterator protocol <python:typeiter>`, yielding tuples of values like `~.Cursor.fetchone()`.
+
+.. important::
+
+   Firebird-driver makes absolutely no guarantees about the `row` return value of the
+   `fetch*()` methods except that it is a sequence indexed by field position. Therefore, client
+   programmers should not rely on the return value being an instance of a particular class or type.
+
+**Examples:**
+
+.. sourcecode:: python
+
+   from firebird.driver import connect
+
+   with connect('employee', user='SYSDBA', password='masterkey') as con:
+       cur = con.cursor()
+       SELECT = "select country, currency from country"
+
+       # 1. Using built-in support for iteration protocol to iterate over the rows available
+       # from the cursor, unpacking the resulting sequences to yield their elements (country, currency):
+       cur.execute(SELECT)
+       for (country, currency) in cur:
+           print(f"{country} uses {currency} as currency.")
+       # or alternatively you can take an advantage of cur.execute() returning self.
+       for (country, currency) in cur.execute(SELECT):
+           print(f"{country} uses {currency} as currency.")
+
+       # 2. Equivalently using fetchall():
+       # This is potentially dangerous if result set is huge, as the whole result set is
+       # first materialized as list and then used for iteration.
+       cur.execute(SELECT)
+       for row in cur.fetchall():
+           print(f"{row[0]} uses {row[1]} as currency.")
+
+.. important::
+
+   Method `.Cursor.executemany()` is not intended for operations that return results,
+   so it does **NOT** returns `self` like `.Cursor.execute()`, and you can't use calls
+   to this method as iterator.
+
+.. _scrollable-cursors:
+
+.. index::
+   pair: Cursor; scrollable
+
+Scrollable cursors
+------------------
+
+SQL statements executed by `.Cursor.open()` have scrollable result set that could be
+navigated using next methods:
+
+* `~.Cursor.fetch_next()` - Moves the cursor's current position to the next row and
+  returns it. Returns `None` if the cursor is empty or already positioned at the last row.
+
+* `~.Cursor.fetch_prior()` - Moves the cursor's current position to the prior row and
+  returns it. Returns `None` if the cursor is empty or already positioned at the first row.
+
+* `~.Cursor.fetch_first()` - Moves the cursor's current position to the first row and
+  returns it. Returns `None` if the cursor is empty.
+
+* `~.Cursor.fetch_last()` - Moves the cursor's current position to the last row and
+  returns it. Returns `None` if the cursor is empty.
+
+* `~.Cursor.fetch_absolute()` - Moves the cursor's current position to the specified
+  <position> and returns the located row. Returns `None` if <position> is beyond the
+  cursor's boundaries.
+
+* `~.Cursor.fetch_relative()` - Moves the cursor's current position backward or forward
+  by the specified <offset> and returns the located row. Returns `None` if the calculated
+  position is beyond the cursor's boundaries.
+
+.. important::
+
+   Please note that scrollable cursors:
+
+   a) are not supported by all versions of Firebird server.
+
+   b) are internally materialized as a temporary record set, thus consuming
+      memory/disk resources, so this feature should be used only when really necessary.
+
+**Example:**
+
+.. sourcecode:: python
+
+   from firebird.driver import connect
+
+   def print_row(row):
+       if row:
+           print(f"{row[0]}, {row[1]}, {row[2]}")
+       else:
+           print('NO DATA')
+
+   with connect('employee', user='SYSDBA', password='masterkey') as con:
+       cur = con.cursor()
+       cur.open('select row_number() over (order by country), country, currency from country order by country')
+
+       # You can iterate over scrollable cursors
+       for row in cur:
+           print_row(row)
+
+       print('-' * 10)
+       # or fetch particular rows directly
+       print_row(cur.fetch_first())
+       print_row(cur.fetch_last())
+       print_row(cur.fetch_absolute(10))
+       print_row(cur.fetch_next())
+       print_row(cur.fetch_prior())
+       print_row(cur.fetch_relative(-5))
+       print_row(cur.fetch_relative(10))
+
+       print('-' * 10)
+
+       cur.fetch_last()
+       print_row(cur.fetch_next())
+
+**Sample output**::
+
+   1, Australia, ADollar
+   2, Austria, Euro
+   3, Belgium, Euro
+   4, Canada, CdnDlr
+   5, England, Pound
+   6, Fiji, FDollar
+   7, France, Euro
+   8, Germany, Euro
+   9, Hong Kong, HKDollar
+   10, Italy, Euro
+   11, Japan, Yen
+   12, Netherlands, Euro
+   13, Romania, RLeu
+   14, Russia, Ruble
+   15, Switzerland, SFranc
+   16, USA, Dollar
+   ----------
+   1, Australia, ADollar
+   16, USA, Dollar
+   10, Italy, Euro
+   11, Japan, Yen
+   10, Italy, Euro
+   5, England, Pound
+   15, Switzerland, SFranc
+   ----------
+   NO DATA
+
+.. index::
+   pair: SQL Statement; parameterized
+
+.. _parameterized-statements:
+
+Parameterized statements
+------------------------
+
+When SQL command you want to execute contains data `values`, you can either:
+
+* Embed them `directly` or via `string formatting` into command string, e.g.:
+
+  .. sourcecode:: python
+
+     cur.execute("insert into the_table (a,b,c) values ('aardvark', 1, 0.1)")
+     # or
+     cur.execute("select * from the_table where col == 'aardvark'")
+     # or
+     cur.execute("insert into the_table (a,b,c) values ('%s', %i, %f)" % ('aardvark',1,0.1))
+     # or
+     cur.execute(f"select * from the_table where col == '{value}'")
+
+* Use parameter marker (`?`) in command string in the slots where values are expected,
+  then supply those values as Python list or tuple:
+
+  .. sourcecode:: python
+
+     cur.execute("insert into the_table (a,b,c) values (?,?,?)", ('aardvark', 1, 0.1))
+     # or
+     cur.execute("select * from the_table where col == ?",('aardvark',))
+
+While both methods have the same results, the second one (called `parametrized`) has several
+important advantages:
+
+* You don't need to handle conversions from Python data types to strings.
+* Firebird-driver will handle all data type conversions (if necessary) from Python data types
+  to Firebird ones, including `None/NULL` conversion and conversion from `str` to `bytes`
+  in encoding expected by server.
+* You may pass BLOB values as open `file-like` objects, and firebird-driver will handle the
+  transfer of BLOB value.
+
+Parametrized statemets also have some limitations. Currently:
+
+* `DATE`, `TIME` and `DATETIME` values must be relevant `datetime` objects.
+* `NUMERIC` and `DECIMAL` values must be `decimal` objects.
+
+.. index::
+   pair: SQL Statement; prepared
+
+.. _prepared-statements:
+
+Prepared Statements
+-------------------
+
+Execution of any SQL statement has three phases:
+
+* *Preparation*: command is analyzed, validated, execution plan is determined
+  by optimizer and all necessary data structures (for example for input and output
+  parameters) are initialized.
+* *Execution*: input parameters (if any) are passed to server and previously
+  prepared statement is actually executed by database engine.
+* *Fetching*: result of execution and data (if any) are transferred from server
+  to client, and allocated resources are then released (by closing the statement).
+
+The preparation phase consumes some amount of server resources (memory and CPU).
+Although preparation and release of resources typically takes only small amount
+of CPU time, it builds up as number of executed statements grows. Firebird (like
+most database engines) allows to spare this time for subsequent execution if
+particular statement should be executed repeatedly - by reusing once prepared
+statement for repeated execution. This may save significant amount of server
+processing time, and result in better overall performance.
+
+Firebird-driver builds on this by encapsulating the Firebird SQL statement data
+and related code into separate `.Statement` class, and implementing the `.Cursor`
+class around it. The Cursor uses either an internally managed `.Statement` instance
+to execute SQL commands provided as `string`, or uses `.Statement` instance
+provided by your code as SQL command.
+
+To get the (prepared) `.Statement` instance for later (repeated) execution, use
+`~.Cursor.prepare()` method. You can then pass this instance to `~.Cursor.execute()`,
+`~.Cursor.executemany()` or `~.Cursor.open()` instead `command string`.
+
+`.Statement` instances are bound to `.Connection` instance, and can't be used
+with any other `.Connection`. Beside repeated execution they are also useful
+to get information about statement (like its execution `~.Statement.plan` or
+`~.Statement.type`) before its execution.
+
+.. note::
+
+   The internally managed `.Statement` instance is released when `.Cursor` is closed,
+   or before any new statement is executed. It means that if your code executes
+   the same SQL command (passed as string) repeatedly without closing the cursor
+   between calls, the same `.Statement` instance is (re)used.
+
+.. important::
+
+   Implementation of Cursor in firebird-driver somewhat violates the Python DB API 2.0,
+   which requires that cursor will be unusable after call to `~.Cursor.close()`; and
+   an Error (or subclass) exception should be raised if any operation is attempted with
+   the cursor. In firebird-driver, the `.Cursor.close()` call only releases resources
+   associated with executed statement like the result set, and you can't fetch data or
+   query information about the SQL statement. However, you can use the cursor instance
+   to execute new SQL commands.
+
+   .. warning::
+
+      If you'll take advantage of this anomaly, your code would be less portable to other
+      Python DB API 2.0 compliant drivers.
+
+**Example:**
+
+.. sourcecode:: python
+
+   insertStatement = cur.prepare("insert into the_table (a,b,c) values (?,?,?)")
+
+   inputRows = [
+       ('aardvark', 1, 0.1),
+       ('zymurgy', 2147483647, 99999.999),
+       ('foobar', 2000, 9.9)
+     ]
+
+   for row in inputRows:
+      cur.execute(insertStatement,row)
+   #
+   # or you can use executemany
+   #
+   cur.executemany(insertStatement, inputRows)
+
+
+.. seealso:: `.Statement` for details.
+
+.. index::
+   pair: Cursor; named
+
+Named Cursors
+-------------
+
+To allow the Python programmer to perform scrolling **UPDATE** or **DELETE** via the
+**“SELECT ... FOR UPDATE”** syntax, the firebird-driver provides the read-only property
+`.Cursor.name` and method `.Cursor.set_cursor_name()`.
+
+**Example Program:**
+
+.. sourcecode:: python
+
+   from firebird.driver import connect
+
+   with connect('employee', user='sysdba', password='masterkey') as con:
+       curScroll = con.cursor()
+       curUpdate = con.cursor()
+
+       curScroll.execute("select city from customer for update")
+       curScroll.set_cursor_name('city_scroller')
+       update = "update customer set city=? where current of " + curScroll.name
+
+       for (city,) in curScroll:
+           city = ... # make some changes to city
+           curUpdate.execute( update, (city,) )
+
+       con.commit()
+
+.. index::
+   pair: Stored procedure; execution
+
+Working with stored procedures
+------------------------------
+
+Firebird stored procedures can have input parameters and/or output parameters.
+Some databases support input/output parameters, where the same parameter is used
+for both input and output; Firebird does not support this.
+
+It is important to distinguish between procedures that **return a result set** and
+procedures that **populate and return their output parameters** exactly once. Conceptually,
+the latter “return their output parameters” like a Python function, whereas the former
+“yield result rows” like a Python generator.
+
+Firebird’s **server-side** procedural SQL syntax makes no such distinction, but client-side
+SQL code (and C API code) must. A result set is retrieved from a stored procedure by
+**SELECT'ing from the procedure, whereas output parameters are retrieved with an
+'EXECUTE PROCEDURE' statement**.
+
+To **retrieve a result set** from a stored procedure with firebird-driver, use code
+such as this:
+
+.. sourcecode:: python
+
+   cur.execute("select output1, output2 from the_proc(?, ?)", (input1, input2))
+
+   # Ordinary fetch code here, such as:
+   for row in cur:
+      ... # process row
+
+   con.commit() # If the procedure had any side effects, commit them.
+
+To **execute** a stored procedure and **access its output parameters**, you can
+choose from two options:
+
+1. Method `.Cursor.callproc()` that **conforms to Python DB API 2.0**. This method
+   does not returns the output parameters directly, and you must call `.Cursor.fetchone()`
+   **exactly once** to retrieve them.
+
+2. Method `.Cursor.call_procedure()` that returns output parameters directly
+   (or `None` if procedure does not have output parameters).
+
+**Examples:**
+
+.. sourcecode:: python
+
+   # Python DB API 2.0 compliant method:
+   cur.callproc("the_proc", (input1, input2))
+   # If there are output parameters, retrieve them as though they were the
+   # first row of a result set...
+   outputParams = cur.fetchone()
+
+   # alternative method:
+   outputParams = cur.call_procedure("the_proc", (input1, input2))
+
+   con.commit() # If the procedure had any side effects, commit them.
+
+
+.. index::
+   pair: Data; conversion
+
+Data handling and conversions
+=============================
+
+.. index::
+   pair: parameter; conversion
+
+Implicit Conversion of Input Parameters from Strings
+----------------------------------------------------
+
+The Firebird database engine treats most SQL data types in a weakly typed fashion:
+the engine may attempt to convert the raw value to a different type, as appropriate
+for the current context. For instance, the SQL expressions `123` (integer) and `‘123’`
+(string) are treated equivalently when the value is to be inserted into an `integer`
+field; the same applies when `‘123’` and `123` are to be inserted into a `varchar` field.
+
+This weak typing model is quite unlike Python’s dynamic yet strong typing. Although
+weak typing is regarded with suspicion by most experienced Python programmers, the
+database engine is in certain situations so aggressive about its typing model that
+firebird-driver must compromise in order to remain an elegant means of programming
+the database engine.
+
+An example is the handling of “magic values” for date and time fields. The database
+engine interprets certain string values such as `‘yesterday’` and `‘now’` as having
+special meaning in a date/time context. If firebird-driver did not accept strings as
+the values of parameters destined for storage in date/time fields, the resulting code
+would be awkward. Consider the difference between the two Python snippets below, which
+insert a row containing an integer and a timestamp into a table defined with the following
+DDL statement:
+
+.. sourcecode:: sql
+
+   create table test_table (i integer, t timestamp)
+
+.. sourcecode:: python
+
+   i = 1
+   t = 'now'
+   sqlWithMagicValues = f"insert into test_table (i, t) values (?, '{t}')"
+   cur.execute(sqlWithMagicValues, (i,))
+
+.. sourcecode:: python
+
+   i = 1
+   t = 'now'
+   cur.execute("insert into test_table (i, t) values (?, ?)", (i, t))
+
+If firebird-driver did not support weak parameter typing, string parameters that
+the database engine is to interpret as “magic values” would have to be rolled into
+the SQL statement in a separate operation from the binding of the rest of the parameters,
+as in the first Python snippet above. Implicit conversion of parameter values from
+strings allows the consistency evident in the second snippet, which is both more
+readable and more general.
+
+.. note::
+
+   It should be noted that firebird-driver does not perform the conversion from string
+   itself. Instead, it passes that responsibility to the database engine by changing
+   the parameter metadata structure dynamically at the last moment, then restoring
+   the original state of the metadata structure after the database engine has performed
+   the conversion.
+
+A secondary benefit is that when one uses firebird-driver to import large amounts
+of data from flat files into the database, the incoming values need not necessarily
+be converted to their proper Python types before being passed to the database engine.
+Eliminating this intermediate step may accelerate the import process considerably,
+although other factors such as the chosen connection protocol and the deactivation
+of indexes during the import are more consequential. For bulk import tasks, the
+database engine’s external tables also deserve consideration. External tables can
+be used to suck semi-structured data from flat files directly into the relational
+database without the intervention of an ad hoc conversion program.
+
+.. index::
+   pair: unicode; conversion
+
+Automatic conversion from/to Unicode
+------------------------------------
+
+In Firebird, every `CHAR`, `VARCHAR` or textual `BLOB` field can (or, better: must)
+have a `character set` assigned. While it's possible to define single character set
+for whole database, it's also possible to define different character set for each
+textual field. This information is used to correctly store the bytes that make up
+the character string, and together with collation information (that defines the sort
+ordering and uppercase conversions for a string) is vital for correct data manipulation,
+including automatic transliteration between character sets when necessary.
+
+.. important::
+
+   Because data also flow between server and client application, it's vital that client
+   will send data encoded only in character set(s) that server expects. While it's
+   possible to leave this responsibility completely on client application, it's better
+   when client and server settle on single character set they would use for communication,
+   especially when database operates with multiple character sets, or uses character set
+   that is not `native` for client application.
+
+   Character set for communication is specified using `~.DatabaseConfig.charset`
+   configuration option, or parameter in `.connect()` or `.create_database()` call.
+
+   When `connection charset` is defined, all textual data returned from server are encoded
+   in this charset, and client application must ensure that all textual data sent to server
+   are encoded only in this charset as well.
+
+Firebird-driver helps with client side of this character set bargain by automatically
+converting Python `str` values into `bytes` encoded in connection character set,
+and vice versa. However, developers are still responsible that `bytes` strings
+passed to server are in correct encoding (because firebird-driver makes no assumption
+about encoding of `bytes` strings, so it can't recode them to connection charset).
+
+.. important::
+
+   In case that `connection charset` is NOT defined at all, or `NONE` charset is specified,
+   firebird-driver uses `locale.getpreferredencoding` to determine encoding for conversions
+   from/to `unicode`.
+
+.. important::
+
+   There is one exception to automatic conversion: when character set OCTETS is defined
+   for data column. Values assigned to OCTETS columns are always passed `as is`, because
+   they're basically binary streams. This has specific implications. Python 3 native
+   strings are `unicode`, and you would probably want to use `bytes` type instead. However,
+   firebird-driver in this case doesn't check the value type at all, so you'll not be
+   warned if you'll make a mistake and pass `str` to OCTETS column (unless you'll pass
+   more bytes than column may hold, or you intend to store unicode that way).
+
+Conversion is fully automatic in both directions for all textual data, i.e. including
+for string values returned by Firebird Service  and `info` calls etc. When `connection
+charset` is not specified, firebird-driver uses `locale.getpreferredencoding` to
+determine encoding for conversions from/to `unicode`.
+
+.. tip::
+
+   Except for legacy databases that doesn't have `character set` defined, **always**
+   define character set for your databases and specify `connection charset`. It will
+   make your life much easier.
+
+.. index:: BLOB
+   pair: Data; BLOB
+   pair: BLOB; materialized
+   pair: BLOB; stream
+
+.. _working_with_blobs:
+
+Working with BLOBs
+------------------
+
+Firebird-driver uses two types of BLOB values:
+
+* **Materialized** BLOB values are Python `str` or `bytes` values. This is the **default** type.
+* **Streamed** BLOB values are `file-like` objects.
+
+Materialized BLOBs are easy to work with, but are not suitable for:
+
+* **deferred loading** of BLOBs. They're called `materialized` because they're always
+  fetched from server as part of row fetch. Fetching BLOB value means separate API calls
+  (and network roundtrips), which may slow down you application considerably.
+* **large values**, as they are always stored in memory in full size.
+
+These drawbacks are addressed by `stream` BLOBs. Using BLOBs in `stream` mode is easy:
+
+* For **input** values, simply use :ref:`parameterized statement <parameterized-statements>`
+  and pass any `file-like` object in place of BLOB parameter. The `file-like` object must
+  implement only the `~file.read` method, as no other method is used.
+* For **output** values, add column name(s) that should be returned as `file-like`
+  objects to `.Cursor.stream_blobs` list attribute. Firebird-driver then returns
+  `.BlobReader` instance instead string in place of returned BLOB value for these column(s).
+
+.. important::
+
+   The firebird-driver provides `.Cursor.stream_blob_threshold` attribute that controls
+   the maximum size of materialized blobs (as memory exhaustion safeguard). When particular
+   blob value exceeds this threshold, an instance of `.BlobReader` is returned instead
+   string/bytes value.
+
+   Zero threshold value effectively forces all blobs to be returned as stream blobs.
+   Negative value means no size limit for materialized blobs (use at your own risk).
+   Please note that positive threshold value means that your application has to be
+   prepared to handle BLOBs in both incarnations.
+
+   The default threshold is 64K and could be changed using `.DriverConfig.stream_blob_threshold`
+   configuration option.
+
+   Blob size threshold has effect only on materialized blob columns, i.e. columns not
+   explicitly requested to be returned as streamed ones using `.Cursor.stream_blobs`
+   attribute, that are **always** returned as stream blobs.
+
+
+The `.BlobReader` instance is bound to `.Cursor` instance, and it's automatically closed
+with cursor. However, it's good practice to use `with` statement or call `.BlobReader.close()`
+once you're finished reading to release system resources associated with BLOB value.
+
+.. important::
+
+   When working with BLOB values, always have memory efficiency in mind, especially when
+   you're processing huge quantity of rows with BLOB values at once. Materialized BLOB
+   values may exhaust your memory quickly, but using stream BLOBs may have inpact on
+   performance too, as new `.BlobReader` instance is created for each value fetched.
+
+**Example program:**
+
+.. sourcecode:: python
+
+   from firebird.driver import connect
+
+   with connect('employee', user='SYSDBA', password='masterkey') as con:
+       cur = con.cursor()
+       print("Materialized retrieval (as str):")
+       cur.execute('select proj_id, proj_desc from project')
+       proj_id, proj_desc = cur.fetchone()
+       print(f"{proj_id=}, {proj_desc=}")
+
+       print("\nStreaming retrieval (via BlobReader):")
+       cur.stream_blobs.append('PROJ_DESC')
+       cur.execute('select proj_id, proj_desc from project')
+       proj_id, proj_desc = cur.fetchone()
+       with proj_desc:
+           print(f"{proj_id=}, {proj_desc=}")
+           print(proj_desc.read())
+
+Output::
+
+   Materialized retrieval (as str):
+   proj_id='VBASE', proj_desc='Design a video data base management system for\ncontrolling on-demand video distribution.\n'
+
+   Streaming retrieval (via BlobReader):
+   proj_id='VBASE', proj_desc=BlobReader[size=89]
+   Design a video data base management system for
+   controlling on-demand video distribution.
+
+.. index:: ARRAY
+   pair: Data; ARRAY
+
+Firebird ARRAY type
+-------------------
+
+Firebird-driver supports Firebird ARRAY data type. ARRAY values are represented as
+Python lists. On input, the Python sequence (list or tuple) must be nested appropriately
+if the array field is multi-dimensional, and the incoming sequence must not fall short
+of its maximum possible length (it will not be “padded” implicitly–see below). On output,
+the lists will be nested if the database array has multiple dimensions.
+
+.. note::
+
+   Database arrays have no place in a purely relational data model, which requires that
+   data values be atomized (that is, every value stored in the database must be reduced
+   to elementary, non-decomposable parts). The Firebird implementation of database arrays,
+   like that of most relational database engines that support this data type, is fraught
+   with limitations.
+
+   Database arrays are of fixed size, with a predeclared number of dimensions (max. 16)
+   and number of elements per dimension. Individual array elements cannot be set to
+   NULL / None, so the mapping between Python lists (which have dynamic length and are
+   therefore not normally “padded” with dummy values) and non-trivial database arrays is
+   clumsy.
+
+   Stored procedures cannot have array parameters.
+
+   Finally, many interface libraries, GUIs, and even the isql command line utility do not
+   support database arrays.
+
+   In general, it is preferable to avoid using database arrays unless you have a compelling
+   reason.
+
+**Example:**
+
+.. sourcecode:: python
+
+   >>> from firebird.driver import connect
+   >>> con = connect('employee',user='sysdba', password='masterkey')
+   >>> cur = con.cursor()
+   >>> cur.execute("select LANGUAGE_REQ from job where job_code='Eng' and job_grade=3 and job_country='Japan'")
+   >>> cur.fetchone()
+   (['Japanese\n', 'Mandarin\n', 'English\n', '\n', '\n'],)
+
+**Example program:**
+
+.. sourcecode:: python
+
+   from firebird.driver import connect
+
+   arrayIn = [
+       [1, 2, 3, 4],
+       [5, 6, 7, 8],
+       [9,10,11,12]
+     ]
+
+   with connect('/temp/test.db', user='sysdba', password='pass') as con:
+       con.execute_immediate("recreate table array_table (a int[3,4])")
+       con.commit()
+
+       cur = con.cursor()
+
+       print(f"{arrayIn=}")
+       cur.execute("insert into array_table values (?)", (arrayIn,))
+       con.commit()
+
+       cur.execute("select a from array_table")
+       arrayOut = cur.fetchone()[0]
+       print(f"{arrayOut=})
+
+Output::
+
+   arrayIn=[[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]
+   arrayOut=[[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]
+
+.. index::
+   pair: Transaction; management
+
+Transanction management
+=======================
+
+For the sake of simplicity, firebird-driver lets the Python programmer ignore
+transaction management to the greatest extent allowed by the Python Database
+API Specification 2.0. The specification says, “if the database supports an
+auto-commit feature, this must be initially off”. At a minimum, therefore,
+it is necessary to call the commit method of the connection in order to persist
+any changes made to the database.
+
+Remember that because of ACID, every data manipulation operation in the Firebird
+database engine takes place in the context of a transaction, including operations
+that are conceptually “read-only”, such as a typical SELECT. The client programmer
+of firebird-driver establishes a transaction implicitly by using any SQL execution
+method, such as `.Connection.execute_immediate()`, `.Cursor.execute()`, or
+`.Cursor.callproc()`.
+
+Although firebird-driver allows the programmer to pay little attention to transactions,
+it also exposes the full complement of the database engine’s advanced transaction
+control features: `transaction parameters`_, `retaining transactions`_, `savepoints`_,
+and `distributed transactions`_.
+
+Basics
+------
+
+When it comes to transactions, Python Database API 2.0 specify that `.Connection` object
+has to respond to the following methods:
+
+`.Connection.commit()`
+
+  Commits any pending transaction to the database. Note that if the database supports
+  an auto-commit feature, this must be initially off. An interface method may be provided
+  to turn it back on. Database modules that do not support transactions should implement
+  this method with void functionality.
+
+`.Connection.rollback()`
+
+  (optional) In case a database does provide transactions this method causes the the
+  database to roll back to the start of any pending transaction. **Closing a connection
+  without committing the changes first will cause an implicit rollback to be performed.**
+
+In addition to the implicit transaction initiation required by Python Database API,
+firebird-driver allows the programmer to start transactions explicitly via the
+`.Connection.begin()` method. Also `.Connection.savepoint()` method was added to provide
+support for `Firebird SAVEPOINTs`_.
+
+But Python Database API 2.0 was created with assumption that connection can support only
+one transactions per single connection. However, Firebird can support multiple independent
+transactions that can run simultaneously within single connection / attachment to the
+database. This feature is very important, as applications may require multiple transaction
+opened simultaneously to perform various tasks, which would require to open multiple
+connections and thus consume more resources than necessary.
+
+Firebird-driver surfaces this Firebird feature by separating transaction management out
+from `.Connection` into separate `.TransactionManager` objects. To comply with Python DB
+API 2.0 requirements, `.Connection` object uses one `.TransactionManager` instance as
+:attr:`main transaction <.Connection.main_transaction>`, and delegates `~.Connection.begin()`,
+`~.Connection.savepoint()`, `~.Connection.commit()`, `~.Connection.rollback()` and
+`~.Connection.execute_immediate()` calls to it.
+
+.. seealso::
+
+   More about using multiple transactions with the same connection in separate
+   :ref:`section <multiple_transactions>`.
+
+**Example:**
+
+.. sourcecode:: python
+
+   from firebird.driver import connect
+
+   with connect('employee', user='SYSDBA', password='masterkey') as con:
+       cur = con.cursor()
+
+       # Most minimalistic transaction management -> implicit start, only commit() and rollback()
+       # ========================================================================================
+       #
+       # Transaction is started implicitly
+       cur.execute('insert into country values ('Oz','Crowns')
+       con.commit() # commits active transaction
+       # Again, transaction is started implicitly
+       cur.execute('insert into country values ('Barsoom','XXX')
+       con.rollback() # rolls back active transaction
+       cur.execute('insert into country values ('Pellucidar','Shells')
+
+   # Commit was not performed before connection context was closed
+   # This will roll back the transaction because Python DB API 2.0
+   # requires that closing connection with pending transaction must
+   # cause an implicit rollback
+
+.. seealso:: `.TransactionManager` for details.
+
+.. index::
+   pair: Transaction; auto-commit
+
+Auto-commit
+-----------
+
+Firebird-driver doesn't support `auto-commit` feature directly, but developers
+may achieve the similar result using `explicit` transaction start, taking advantage
+of `.TransactionManager.default_action` and its default value (`~.DefaultAction.COMMIT`).
+
+**Example:**
+
+.. sourcecode:: python
+
+   from firebird.driver import connect
+
+   with connect('employee', user='SYSDBA', password='masterkey') as con:
+       cur = con.cursor()
+
+       con.begin()
+       cur.execute('insert into country values ('Oz','Crowns')
+       con.begin() # commits active transaction and starts new one
+       cur.execute('insert into country values ('Barsoom','XXX')
+       con.begin() # commits active transaction and starts new one
+       cur.execute('insert into country values ('Pellucidar','Shells')
+
+       # However, commit is required before connection is closed,
+       # because Python DB API 2.0 requires that closing connection
+       # with pending transaction must cause an implicit rollback
+       con.commit()
+
+.. index::
+   pair: Transaction; parameters
+
+Transaction parameters
+----------------------
+
+The database engine offers the client programmer an optional facility called
+`transaction parameter buffers` (TPBs) for tweaking the operating characteristics
+of the transactions he initiates. These include characteristics such as whether
+the transaction has read and write access to tables, or read-only access, and
+whether or not other simultaneously active transactions can share table access
+with the transaction.
+
+Transaction manager has `~.TransactionManager.default_tpb` attribute that can be
+changed to set the default TPB to be used for all subsequent transactions started
+by this manager. Also Connection have a `~.Connection.default_tpb` attribute,
+but it's used to set the default TPB for all transactions managers subsequently
+created for the connection (see `.Connection.transaction_manager()`).
+
+Alternatively, if the programmer only wants to set the TPB for a single transaction,
+he can start a transaction explicitly via the `.Connection.begin()` or
+`.TransactionManager.begin()` method and pass a TPB for that single transaction.
+
+The TPB is a `bytes` value constructed from various tags and binary values, as
+defined by API. While you can construct the TPB manually, the firebird-driver
+provides several convenient ways for TPB construction:
+
+1. The `.tpb()` function for simple TPBs.
+
+2. The `.TPB` class for complex TPBs (including table reservation etc.).
+
+**Examples:**
+
+.. sourcecode:: python
+
+   from firebird.driver import tpb, TPB, Isolation, TraAccessMode, TableShareMode, TableAccessMode
+
+   # Use tpb() if isolation, timeout and access_mode parameters are enough for you
+   simple_tpb = tpb(Isolation.READ_COMMITTED_READ_CONSISTENCY,100,TraAccessMode.WRITE)
+
+   # Use TPB if you want additional parameters than isolation, timeout and access_mode
+   my_tpb = TPB(isolation=Isolation.SNAPSHOT,
+                access_mode=TraAccessMode.WRITE,
+                lock_timeout=100,
+                no_auto_undo=True,
+                auto_commit=True,
+                ignore_limbo=True)
+   my_tpb.reserve_table('MY_TABLE', TableShareMode.PROTECTED, TableAccessMode.LOCK_WRITE)
+   complex_tpb = my_tpb.get_buffer()
+
+.. index::
+   pair: Transaction; information about
+
+Getting information about transaction
+-------------------------------------
+
+The `.TransactionManager.info` property provides access to `.TransactionInfoProvider`
+object that could be used to obtain information about **active** transaction.
+
+Although you may query the information directly from server using
+`.TransactionInfoProvider.get_info()` method (that wraps the Firebird ITransaction.getInfo()
+API call), the TransactionInfoProvider object provides more convenient methods and properties
+for obtaining specific information directly.
+
+**Example:**
+
+.. sourcecode:: python
+
+   from firebird.driver import connect, driver_config
+
+   driver_config.server_defaults.host.value = 'localhost'
+   with connect('employee', user='SYSDBA', password='masterkey') as con:
+       con.begin()
+       info = con.main_transaction.info
+       print(f"Transaction ID: {info.id}")
+       print(f"Database: {info.database}")
+       print(f"Isolation level: {info.isolation!s}")
+       print(f"Lock timeout: {info.lock_timeout}")
+       print(f"Is Read-Only: {info.is_read_only()}")
+       print(f"ID of Oldest Interesting Transaction: {info.oit}")
+       print(f"ID of Oldest Active Transaction: {info.oat}")
+       print(f"ID of Oldest Snapshot Transaction: {info.ost}")
+
+Output::
+
+   Transaction ID: 352
+   Database: localhost:employee
+   Isolation level: Isolation.SNAPSHOT
+   Lock timeout: -1
+   Is Read-Only: False
+   ID of Oldest Interesting Transaction: 350
+   ID of Oldest Active Transaction: 352
+   ID of Oldest Snapshot Transaction: 352
+
+.. index::
+   pair: Transaction; retaining
+
+Retaining transactions
+----------------------
+
+The `~.TransactionManager.commit()` and `~.TransactionManager.rollback()` methods
+accept an optional boolean keyword parameter `retaining` (**default False**) to
+indicate whether to recycle the transactional context of the transaction being resolved
+by the method call.
+
+If retaining is `True`, the infrastructural support for the transaction active at
+the time of the method call will be “retained” (efficiently and transparently recycled)
+after the database server has committed or rolled back the conceptual transaction.
+
+.. important::
+
+   In code that commits or rolls back frequently in short amount of time (like in loop),
+   “retaining” the transaction may yield better performance. However, retaining transactions
+   must be used cautiously because they can interfere with the server’s ability to garbage
+   collect old record versions. For details about this issue, read the “Garbage” section of
+   `this document <http://www.ibphoenix.com/resources/documents/search/doc_21>`_ by Ann Harrison.
+
+   It's definitely no recommended to use retaining for all transactions, or retain the transaction
+   context indefinitely (you should eventually commit/rollback the transaction in normal
+   way).
+
+For more information about retaining transactions, see `Firebird documentation`.
+
+.. index:: SAVEPOINT
+   pair: Transaction; SAVEPOINT
+
+Savepoints
+----------
+
+Savepoints are named, intermediate control points within an open transaction that
+can later be rolled back to, without affecting the preceding work. Multiple savepoints
+can exist within a single unresolved transaction, providing “multi-level undo” functionality.
+
+Although Firebird savepoints are fully supported from SQL alone via the `SAVEPOINT ‘name’`
+and `ROLLBACK TO ‘name’` statements, firebird-driver also exposes savepoints at the Python
+API level for the sake of convenience.
+
+Call to method `.TransactionManager.savepoint()` establishes a savepoint with the specified
+`name`. To roll back to a specific savepoint, call the `~.TransactionManager.rollback()`
+method and provide the name of the savepoint for the `savepoint` keyword parameter. If the
+savepoint parameter of `~.TransactionManager.rollback()` is not specified, the active
+transaction is cancelled in its entirety, as required by the Python Database API Specification.
+
+The following program demonstrates savepoint manipulation via the firebird-driver API,
+rather than raw SQL.
+
+.. sourcecode:: python
+
+   from firebird.driver import connect
+
+   with connect('employee', user='SYSDBA', password='masterkey') as con:
+       cur = con.cursor()
+
+       cur.execute("recreate table test_savepoints (a integer)")
+       con.commit()
+
+       print('Before the first savepoint, the contents of the table are:')
+       cur.execute("select * from test_savepoints")
+       print(' ', cur.fetchall())
+
+       cur.execute("insert into test_savepoints values (?)", [1])
+       con.savepoint('A')
+       print('After savepoint A, the contents of the table are:')
+       cur.execute("select * from test_savepoints")
+       print(' ', cur.fetchall())
+
+       cur.execute("insert into test_savepoints values (?)", [2])
+       con.savepoint('B')
+       print('After savepoint B, the contents of the table are:')
+       cur.execute("select * from test_savepoints")
+       print(' ', cur.fetchall())
+
+       cur.execute("insert into test_savepoints values (?)", [3])
+       con.savepoint('C')
+       print('After savepoint C, the contents of the table are:')
+       cur.execute("select * from test_savepoints")
+       print(' ', cur.fetchall())
+
+       con.rollback(savepoint='B')
+       print('After rolling back to savepoint B, the contents of the table are:')
+       cur.execute("select * from test_savepoints")
+       print(' ', cur.fetchall())
+
+       con.rollback()
+       print('After rolling back entirely, the contents of the table are:')
+       cur.execute("select * from test_savepoints")
+       print(' ', cur.fetchall())
+
+The output of the example program is shown below::
+
+   Before the first savepoint, the contents of the table are:
+     []
+   After savepoint A, the contents of the table are:
+     [(1,)]
+   After savepoint B, the contents of the table are:
+     [(1,), (2,)]
+   After savepoint C, the contents of the table are:
+     [(1,), (2,), (3,)]
+   After rolling back to savepoint B, the contents of the table are:
+     [(1,), (2,)]
+   After rolling back entirely, the contents of the table are:
+     []
+
+.. index::
+   pair: Transaction; multiple
+
+.. _multiple_transactions:
+
+Using multiple transactions with the same connection
+----------------------------------------------------
+
+To use additional transactions that could run simultaneously with
+:attr:`main transaction <.Connection.main_transaction>` managed by `.Connection`,
+create new `.TransactionManager` object calling `.Connection.transaction_manager()`
+method. If you don't specify the optional `default_tpb` parameter, this new
+`.TransactionManager` inherits the `~.Connection.default_tpb` from `.Connection`.
+Physical transaction is not started when `.TransactionManager` instance is
+created, but implicitly when first SQL statement for cursor created from
+this manager is executed, or explicitly via `.TransactionManager.begin()` call.
+
+To execute statements in context of this additional transaction you have to
+use `cursors` obtained directly from this `.TransactionManager` instance calling
+its `~.TransactionManager.cursor()` method, or call `.TransactionManager.execute_immediate()`
+method.
+
+**Example:**
+
+.. sourcecode:: python
+
+   from firebird.driver import connect, tpb, Isolation, TraAccessMode
+
+   with connect('employee', user='SYSDBA', password='masterkey') as con:
+       # Cursor for main_transaction context
+       cur = con.cursor()
+
+       # Create new READ ONLY READ COMMITTED transaction
+       ro_transaction = con.transaction_manager(tpb(Isolation.READ_COMMITTED_RECORD_VERSION,
+                                                    access=TraAccessMode.READ))
+       # and cursor
+       ro_cur = ro_transaction.cursor()
+
+       cur.execute('insert into country values ('Oz','Crowns')
+       con.commit() # commits main transaction
+
+       # Read data created by main transaction from second one
+       ro_cur.execute("select * from COUNTRY where COUNTRY = `Oz`")
+       print(ro_cur.fetchall())
+
+       # Insert more data, but don't commit
+       cur.execute('insert into country values ('Barsoom','XXX')
+
+       # Read data created by main transaction from second one
+       ro_cur.execute("select * from COUNTRY where COUNTRY = `Barsoom`")
+       print(ro_cur.fetchall())
+
+.. index::
+   pair: Transaction; distributed
+
+.. _distributed_transactions:
+
+Distributed Transactions
+------------------------
+
+Distributed transactions are transactions that span multiple databases.
+Firebird-driver provides this Firebird feature through `.DistributedTransactionManager`
+class. Instances of this class must be created manually, and managed transactions
+are fully independent from all other transactions, main or secondary, of member connections.
+
+Similarly to `.TransactionManager`, distributed transactions are managed
+through `~.DistributedTransactionManager.begin()`,
+`~.DistributedTransactionManager.savepoint()`, `~.DistributedTransactionManager.commit()`
+and `~.DistributedTransactionManager.rollback()` methods.
+Additionally, `.DistributedTransactionManager` exposes method
+`~.DistributedTransactionManager.prepare()` that explicitly initiates the
+first phase of `Two-Phase Commit Protocol`. Transaction parameters are defined
+similarly to `.TransactionManager` using `~.DistributedTransactionManager.default_tpb`
+or as optional parameter to `~.DistributedTransactionManager.begin()` call.
+
+SQL statements that should belong to context of distributed transaction are
+executed via `.Cursor` instances aquired through `.DistributedTransactionManager.cursor()`
+method, or calling `.DistributedTransactionManager.execute_immediate()` method.
+
+.. note::
+
+   Because `.Cursor` instances can belong to only one `.Connection`, the
+   `~.DistributedTransactionManager.cursor()` method has mandatory parameter
+   `connection`, to specify to which member connection cursor should belong.
+
+   The `~.DistributedTransactionManager.execute_immediate()` method operates
+   on **all** databases in *group*.
+
+**Example program:**
+
+.. sourcecode:: python
+
+   from firebird.driver import create_database, DistributedTransactionManager
+
+   # First database
+   con1 = create_database('db1.fdb', user='SYSDBA', password='masterkey')
+   con1.execute_immediate("recreate table T (PK integer, C1 integer)")
+   con1.commit()
+
+   # Second database
+   con2 = create_database('db2.fdb', user='SYSDBA', password='masterkey')
+   con2.execute_immediate("recreate table T (PK integer, C1 integer)")
+   con2.commit()
+
+   # Create distributed transaction manager
+   dt = DistributedTransactionManager((con1,con2))
+
+   # Prepare cursors for each connection
+   dc1 = dt.cursor(con1)
+   dc2 = dt.cursor(con2)
+
+   # Connection cursors to check content of databases
+   q = 'select * from T order by pk'
+
+   cc1 = con1.cursor()
+   p1 = cc1.prep(q)
+
+   cc2 = con2.cursor()
+   p2 = cc2.prep(q)
+
+   print("Distributed transaction: COMMIT")
+   #      ===============================
+   dc1.execute('insert into t (pk) values (1)')
+   dc2.execute('insert into t (pk) values (1)')
+   dt.commit()
+
+   # check it
+   con1.commit()
+   cc1.execute(p1)
+   print('db1:', cc1.fetchall())
+   con2.commit()
+   cc2.execute(p2)
+   print('db2:', cc2.fetchall())
+
+   print("Distributed transaction: PREPARE + COMMIT")
+   #      =========================================
+   dc1.execute('insert into t (pk) values (2)')
+   dc2.execute('insert into t (pk) values (2)')
+   dt.prepare()
+   dt.commit()
+
+   # check it
+   con1.commit()
+   cc1.execute(p1)
+   print('db1:', cc1.fetchall())
+   con2.commit()
+   cc2.execute(p2)
+   print('db2:', cc2.fetchall())
+
+   print("Distributed transaction: SAVEPOINT + ROLLBACK to it")
+   #      ===================================================
+   dc1.execute('insert into t (pk) values (3)')
+   dt.savepoint('CG_SAVEPOINT')
+   dc2.execute('insert into t (pk) values (3)')
+   dt.rollback(savepoint='CG_SAVEPOINT')
+
+   # check it - via group cursors, as transaction is still active
+   dc1.execute(q)
+   print('db1:', dc1.fetchall())
+   dc2.execute(q)
+   print('db2:', dc2.fetchall())
+
+   print("Distributed transaction: ROLLBACK")
+   #      =================================
+   dt.rollback()
+
+   # check it
+   con1.commit()
+   cc1.execute(p1)
+   print('db1:', cc1.fetchall())
+   con2.commit()
+   cc2.execute(p2)
+   print('db2:', cc2.fetchall())
+
+   print("Distributed transaction: EXECUTE_IMMEDIATE")
+   #      ==========================================
+   dt.execute_immediate('insert into t (pk) values (3)')
+   dt.commit()
+
+   # check it
+   con1.commit()
+   cc1.execute(p1)
+   print('db1:', cc1.fetchall())
+   con2.commit()
+   cc2.execute(p2)
+   print('db2:', cc2.fetchall())
+
+   # Finalize
+   con1.drop_database()
+   con1.close()
+   con2.drop_database()
+   con2.close()
+
+Output::
+
+   Distributed transaction: COMMIT
+   db1: [(1, None)]
+   db2: [(1, None)]
+   Distributed transaction: PREPARE + COMMIT
+   db1: [(1, None), (2, None)]
+   db2: [(1, None), (2, None)]
+   Distributed transaction: SAVEPOINT + ROLLBACK to it
+   db1: [(1, None), (2, None), (3, None)]
+   db2: [(1, None), (2, None)]
+   Distributed transaction: ROLLBACK
+   db1: [(1, None), (2, None)]
+   db2: [(1, None), (2, None)]
+   Distributed transaction: EXECUTE_IMMEDIATE
+   db1: [(1, None), (2, None), (3, None)]
+   db2: [(1, None), (2, None), (3, None)]
+
+.. index::
+   pair: Transaction; context manager
+
+.. _transaction-context-manager:
+
+Transaction Context Manager
+---------------------------
+
+Firebird-driver provides context manager `.transaction` that allows automatic
+transaction management using :ref:`WITH statement <WITH>`. It can work with
+any object that supports `begin()`, `commit()` and `rollback()` methods, i.e.
+`.Connection`, `.TransactionManager` or `.DistributedTransactionManager`.
+
+It starts transaction when WITH block is entered and commits it if no exception
+occurs within it, or calls `rollback()` otherwise. Exceptions raised in WITH
+block are never suppressed.
+
+Examples:
+
+.. sourcecode:: python
+
+   from firebird.driver import connect, transaction, DistributedTransactionManager
+
+   with connect('employee', user='SYSDBA', password='masterkey') as con:
+
+       # Uses default main transaction
+       with transaction(con):
+           cur = con.cursor()
+           cur.execute("insert into T (PK,C1) values (1,'TXT')")
+
+       # Uses separate transaction
+       with transaction(con.transaction_manager()) as tr:
+           cur = tr.cursor()
+           cur.execute("insert into T (PK,C1) values (2,'AAA')")
+
+       # Uses distributed transaction
+       with connect('employee2', user='SYSDBA', password='masterkey') as con2,
+            DistributedTransactionManager(con, con2) as dtm:
+           with transaction(dtm):
+               cur1 = cg.cursor(con)
+               cur2 = cg.cursor(con2)
+               cur1.execute("insert into T (PK,C1) values (3,'Local')")
+               cur2.execute("insert into T (PK,C1) values (3,'Remote')")
+
+.. index::
+   pair: Database; events
+
+Database Events
+===============
+
+What they are
+-------------
+The Firebird engine features a distributed, inter-process communication mechanism based on
+messages called `database events`. A database event is a message passed from a trigger or
+stored procedure to an application to announce the occurrence of a specified condition or
+action, usually a database change such as an insertion, modification, or deletion of a record.
+The Firebird event mechanism enables applications to respond to actions and database changes
+made by other, concurrently running applications without the need for those applications to
+communicate directly with one another, and without incurring the expense of CPU time
+required for periodic polling to determine if an event has occurred.
+
+Why use them
+------------
+Anything that can be accomplished with database events can also be implemented using other
+techniques, so why bother with events? Since you’ve chosen to write database-centric programs
+in Python rather than assembly language, you probably already know the answer to this question,
+but let’s illustrate.
+
+A typical application for database events is the handling of administrative messages.
+Suppose you have an administrative message database with a `message's` table, into which
+various applications insert timestamped status reports. It may be desirable to react to
+these messages in diverse ways, depending on the status they indicate: to ignore them, to
+initiate the update of dependent databases upon their arrival, to forward them by e-mail
+to a remote administrator, or even to set off an alarm so that on-site administrators will
+know a problem has occurred.
+
+It is undesirable to tightly couple the program whose status is being reported
+(the `message producer`) to the program that handles the status reports (the `message handler`).
+There are obvious losses of flexibility in doing so. For example, the message producer may
+run on a separate machine from the administrative message database and may lack access rights
+to the downstream reporting facilities (e.g., network access to the SMTP server, in the case
+of forwarded e-mail notifications). Additionally, the actions required to handle status
+reports may themselves be time-consuming and error-prone, as in accessing a remote network
+to transmit e-mail.
+
+In the absence of database event support, the message handler would probably be implemented
+via `polling`. Polling is simply the repetition of a check for a condition at a specified
+interval. In this case, the message handler would check in an infinite loop to see whether
+the most recent record in the `messages` table was more recent than the last message it had
+handled. If so, it would handle the fresh message(s); if not, it would go to sleep for
+a specified interval, then loop.
+
+The `polling-based` implementation of the message handler is fundamentally flawed. Polling
+is a form of busy-wait_; the check for new messages is performed at the specified interval,
+regardless of the actual activity level of the message producers. If the polling interval
+is lengthy, messages might not be handled within a reasonable time period after their arrival;
+if the polling interval is brief, the message handler program (and there may be many such
+programs) will waste a large amount of CPU time on unnecessary checks.
+
+The database server is necessarily aware of the exact moment when a new message arrives.
+Why not let the message handler program request that the database server send it a notification
+when a new message arrives? The message handler can then efficiently sleep until the moment
+its services are needed. Under this `event-based` scheme, the message handler becomes
+aware of new messages at the instant they arrive, yet it does not waste CPU time checking
+in vain for new messages when there are none available.
+
+How events are exposed
+----------------------
+
+#. Server Process ("An event just occurred!")
+
+   To notify any interested listeners that a specific event has
+   occurred, issue the `POST_EVENT` statement from Stored Procedure
+   or Trigger. The `POST_EVENT` statement has one parameter: the name
+   of the event to post. In the preceding example of the administrative
+   message database, `POST_EVENT` might be used from an `after insert`
+   trigger on the `messages` table, like this:
+
+   .. sourcecode:: sql
+
+      create trigger trig_messages_handle_insert
+        for messages
+          after insert
+      as
+      begin
+        POST_EVENT 'new_message';
+      end
+
+   .. note:: The physical notification of the client process does not
+      occur until the transaction in which the `POST_EVENT` took place is
+      actually committed. Therefore, multiple events may *conceptually*
+      occur before the client process is *physically* informed of even one
+      occurrence. Furthermore, the database engine makes no guarantee that
+      clients will be informed of events in the same groupings in which they
+      conceptually occurred. If, within a single transaction, an event named
+      `event_a` is posted once and an event named `event_b` is posted once,
+      the client may receive those posts in separate "batches", despite the
+      fact that they occurred in the same conceptual unit (a single
+      transaction). This also applies to multiple occurrences of *the same*
+      event within a single conceptual unit: the physical notifications may
+      arrive at the client separately.
+
+#. Client Process ("Send me a message when an event occurs.")
+
+   .. note:: If you don't care about the gory details of event notification,
+             skip to the section that describes FDB's Python-level event handling
+             API.
+
+   The Firebird C client library offers two forms of event notification.
+   The first form is *synchronous* notification, by way of the function
+   :c:func:`isc_wait_for_event()`. This form is admirably simple for a C programmer
+   to use, but is inappropriate as a basis for FDB's event support,
+   chiefly because it's not sophisticated enough to serve as the basis for
+   a comfortable Python-level API. The other form of event notification
+   offered by the database client library is *asynchronous*, by way of the
+   functions :c:func:`isc_que_events()` (note that the name of that function
+   is misspelled), :c:func:`isc_cancel_events()`, and others. The details are
+   as nasty as they are numerous, but the essence of using asynchronous
+   notification from C is as follows:
+
+   #. Call :c:func:`isc_event_block()` to create a formatted binary buffer that will tell
+      the server which events the client wants to listen for.
+   #. Call :c:func:`isc_que_events()` (passing the buffer created in the previous step) to
+      inform the server that the client is ready to receive event notifications, and provide
+      a callback that will be asynchronously invoked when one or more of the registered events occurs.
+   #. [The thread that called :c:func:`isc_que_events()` to initiate event listening must
+      now do something else.]
+   #. When the callback is invoked (the database client library starts a thread dedicated
+      to this purpose), it can use the :c:func:`isc_event_counts()` function to determine
+      how many times each of the registered events has occurred since the last call to
+      :c:func:`isc_event_counts()` (if any).
+   #. [The callback thread should now "do its thing", which may include communicating with
+      the thread that called :c:func:`isc_que_events()`.]
+   #. When the callback thread is finished handling an event notification, it must call
+      :c:func:`isc_que_events()` again in order to receive future notifications. Future
+      notifications will invoke the callback again, effectively "looping" the callback
+      thread back to Step 4.
+
+API for Python developers
+-------------------------
+
+The Firebird-driver database event API is comprised of the following: the method
+`.Connection.event_collector()` and the class `.EventCollector`.
+
+Use the `.Connection.event_collector()` method (takes a sequence of string event
+names as parameter) to create `.EventCollector` instance, that collects database event
+notifications sent from the server for given database.
+
+.. important::
+
+   To start listening for events it's necessary to call `.EventCollector.begin()`
+   method or use EventCollector's context manager interface.
+
+Immediately when `~.EventCollector.begin()` method is called, EventCollector starts
+to accumulate notifications of any event that occur within the collector’s internal queue
+until the collector is closed either explicitly (via the `~.EventCollector.close()`
+method) or implicitly (via garbage collection).
+
+Notifications about events are aquired through call to `~.EventCollector.wait()` method,
+that blocks the calling thread until at least one of the events occurs, or the specified
+`timeout` (if any) expires, and returns `None` if the wait timed out, or a dictionary that
+maps `event_name -> event_occurrence_count`.
+
+.. important::
+
+   `.EventCollector` can act as context manager that ensures execution of
+   `~.EventCollector.begin()` and `~.EventCollector.close()` methods.
+   It's strongly advised to use the `.EventCollector` with the `with` statement.
+
+**Example:**
+
+.. sourcecode:: python
+
+   with connection.event_collector(['event_a', 'event_b']) as collector:
+       events = collector.wait()
+       process_events(events)
+
+If you want to drop notifications accumulated so far by conduit, call
+`.EventCollector.flush()` method.
+
+**Example program:**
+
+.. sourcecode:: python
+
+   from firebird.driver import create_database, transaction
+   import threading
+   import time
+
+   # Prepare database
+   con = create_database('event-test', user='SYSDBA', password='masterkey')
+   with transaction(con):
+       con.execute_immediate("CREATE TABLE T (PK Integer, C1 Integer)")
+       con.execute_immediate("""CREATE TRIGGER EVENTS_AU FOR T ACTIVE
+       BEFORE UPDATE POSITION 0
+       AS
+       BEGIN
+          if (old.C1 <> new.C1) then
+             post_event 'c1_updated' ;
+       END""")
+       con.execute_immediate("""CREATE TRIGGER EVENTS_AI FOR T ACTIVE
+       AFTER INSERT POSITION 0
+       AS
+       BEGIN
+          if (new.c1 = 1) then
+            post_event 'insert_1' ;
+          else if (new.c1 = 2) then
+            post_event 'insert_2' ;
+          else if (new.c1 = 3) then
+            post_event 'insert_3' ;
+          else
+            post_event 'insert_other' ;
+       END""")
+   cur = con.cursor()
+
+   # Utility function
+   def send_events(command_list):
+       with transaction(con):
+           for cmd in command_list:
+               cur.execute(cmd)
+
+   print("One event")
+   #      =========
+   timed_event = threading.Timer(3.0,send_events,args=[["insert into T (PK,C1) values (1,1)",]])
+   with con.event_collector(['insert_1']) as events:
+       timed_event.start()
+       e = events.wait()
+   print(e)
+
+   print("Multiple events")
+   #      ===============
+   cmds = ["insert into T (PK,C1) values (1,1)",
+           "insert into T (PK,C1) values (1,2)",
+           "insert into T (PK,C1) values (1,3)",
+           "insert into T (PK,C1) values (1,1)",
+           "insert into T (PK,C1) values (1,2)",]
+   timed_event = threading.Timer(3.0,send_events,args=[cmds])
+   with con.event_collector(['insert_1','insert_3']) as events:
+       timed_event.start()
+       e = events.wait()
+   print(e)
+
+   print("20 events")
+   #      =========
+   cmds = ["insert into T (PK,C1) values (1,1)",
+           "insert into T (PK,C1) values (1,2)",
+           "insert into T (PK,C1) values (1,3)",
+           "insert into T (PK,C1) values (1,1)",
+           "insert into T (PK,C1) values (1,2)",]
+   timed_event = threading.Timer(1.0,send_events,args=[cmds])
+   with con.event_collector(['insert_1','A','B','C','D',
+                             'E','F','G','H','I','J','K','L','M',
+                             'N','O','P','Q','R','insert_3']) as events:
+       timed_event.start()
+       time.sleep(3)
+       e = events.wait()
+   print(e)
+
+   print("Flush events")
+   #      ============
+   timed_event = threading.Timer(3.0,send_events,args=[["insert into T (PK,C1) values (1,1)",]])
+   with con.event_collector(['insert_1']) as events:
+       send_events(["insert into T (PK,C1) values (1,1)",
+                    "insert into T (PK,C1) values (1,1)"])
+       time.sleep(2)
+       events.flush()
+       timed_event.start()
+       e = events.wait()
+   print(e)
+
+   # Finalize
+   con.drop_database()
+   con.close()
+
+Output::
+
+   One event
+   {'insert_1': 1}
+   Multiple events
+   {'insert_3': 1, 'insert_1': 2}
+   20 events
+   {'A': 0, 'C': 0, 'B': 0, 'E': 0, 'D': 0, 'G': 0, 'insert_1': 2, 'I': 0, 'H': 0, 'K': 0, 'J': 0, 'M': 0,
+    'L': 0, 'O': 0, 'N': 0, 'Q': 0, 'P': 0, 'R': 0, 'insert_3': 1, 'F': 0}
+   Flush events
+   {'insert_1': 1}
+
+.. index:: Services
+   pair: Services; working with
+
+.. index:: Server
+   pair: Server; services
+
+.. _working_with_services:
+
+Working with Services
+=====================
+
+Database server maintenance tasks such as user management, load monitoring,
+and database backup have traditionally been automated by scripting the
+command-line tools :program:`gbak`, :program:`gfix`, :program:`gsec`, and :program:`gstat`.
+
+The API presented to the client programmer by these utilities is inelegant
+because they are, after all, command-line tools rather than native components
+of the client language. To address this problem, Firebird has a facility called
+the `Services API`, which exposes a uniform interface to the administrative
+functionality of the traditional command-line tools.
+
+The native Services API, though consistent, is much lower-level than a Pythonic API.
+If the native version were exposed directly, accomplishing a given task would probably
+require more Python code than scripting the traditional command-line tools. For this
+reason, the firebird-driver presents its own abstraction over the native API.
+
+.. index::
+   pair: Services; connection
+   pair: Server; connection
+
+Services API Connections
+------------------------
+
+All Services API operations are performed in the context of a `connection` to a specific
+database server, represented by the `.Server` class. Similarly to database connections,
+firebird-driver provides `.connect_server()` constructor function to create such connections.
+
+This constructor has one positional and several keyword parameters.
+
+The value of `server` positional parameter must be one of:
+
+* name of registered server configuration
+* server host name or address
+
+Keyword parameters are intended to override selected configuration options, or to specify
+options that are not configurable.
+
+A simple server connection is typically established with code such as this:
+
+.. sourcecode:: python
+
+   from firebird.driver import connect_server
+
+   # Attach to 'embedded' server
+   srv = connect_server('', user='SYSDBA', password='masterkey')
+
+   # Attach to 'local' server
+   srv = connect_server('localhost', user='SYSDBA', password='masterkey')
+
+   # Set 'user' and 'password' via configuration
+   from firebird.driver import driver_config
+   driver_config.server_defaults.user.value = 'SYSDBA'
+   driver_config.server_defaults.password.value = 'masterkey'
+   srv = connect_server('localhost')
+
+However, it's recommended to use specific configuration for servers.
+It's possible to register servers directly in code like this:
+
+.. sourcecode:: python
+
+   from firebird.driver import connect_server, driver_config
+
+   # Register Firebird server
+   srv_cfg = """[main_server]
+   host = 192.168.0.15
+   user = SYSDBA
+   password = Xyzzy
+   """
+   driver_config.register_server('main_server', srv_cfg)
+
+   # Attach to 'main' server
+   con = connect('main_server')
+
+But more convenient approach is using single configuration file::
+
+    # file: myapp.cfg
+
+    [firebird.driver]
+    servers = main_server
+    databases = employee
+
+    [main_server]
+    host = 192.168.0.15
+    user = SYSDBA
+    password = Xyzzy
+
+.. sourcecode:: python
+
+   from firebird.driver import connect_server, driver_config
+
+   driver_config.read('myapp.cfg')
+
+   # Attach to 'main' server
+   con = connect('main_server')
+
+.. note::
+
+   Like database connections, it's important to properly `~Server.close()` them
+   when you don't need them anymore.
+
+`.Server` object provides main infrastructure for communication with Firebird server services,
+and manages number of objects that provide actual server services:
+
+* The `.Server.info` property object provides `Server Configuration and State information`_.
+* The `.Server.database` property object provides `Database options`_ and `Database maintenance`_.
+* The `.Server.user` property object provides `User maintenance`_.
+* The `.Server.trace` property object provides management of `Trace sessions`_.
+
+.. seealso:: `.connect_server()` and `.Server` for details.
+
+.. index::
+   pair: Services; output
+
+Text output from Services
+-------------------------
+
+Some services like `.ServerDbServices.backup()` may return significant amount of text.
+Rather than return the whole text as single string value by methods that provide access
+to these services, firebird-driver isolated the transfer process to separate methods:
+
+* `~.Server.readline()` - Similar to `file.readline`, returns next line of output from Service.
+* `~.Server.readlines()` - Like `file.readlines`, returns list of output lines.
+* Iteration over `.Server` object, because `.Server` has built-in support for :ref:`iterator protocol <python:typeiter>`.
+* Using `callback` method provided by developer. Each `.Server` method that returns its result
+  asynchronously accepts an optional parameter `callback`, which must be a function that accepts
+  one string parameter. This method is then called with each output line coming from service.
+* `~.Server.wait()` - Waits for Sevice to finish, ignoring rest of the output it may produce.
+
+.. warning::
+
+   Until output is not fully fetched from service, any attempt to start another asynchronous
+   service will fail with exception! This constraint is set by Firebird Service API.
+
+   You may check the status of asynchronous Services using `.Server.is_running()` method.
+
+   In cases when you're not interested in output produced by Service, call `~.Server.wait()`
+   to wait for service to complete.
+
+**Examples:**
+
+.. sourcecode:: python
+
+   from firebird.driver import connect_server
+   with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+       print("Fetch materialized")
+       print("==================")
+       print("Start backup")
+       srv.database.backup(database='employee', backup='employee.fbk')
+       print("srv.running is", srv.isrunning())
+       report = srv.readlines()
+       print(f"{len(report)} lines returned")
+       print("First 5 lines from output:")
+       for i in xrange(5):
+           print(i,report[i])
+       print("srv.running is", srv.isrunning())
+       print()
+       print("Iterate over result")
+       print("===================")
+       srv.database.backup(database='employee', backup='employee.fbk')
+       output = []
+       for line in srv:
+           output.append(line)
+       print(f"{len(output)} lines returned")
+       print("Last 5 lines from output:")
+       for line in output[-5:]:
+           print(line)
+       print()
+       print("Callback")
+       print("========")
+
+       output = []
+
+       # Callback function
+       def fetchline(line):
+           output.append(line)
+
+       srv.database.backup(database='employee', backup='employee.fbk', callback=fetchline)
+       print(f"{len(output)} lines returned")
+       print("Last 5 lines from output:")
+       for line in output[-5:]:
+           print(line)
+
+Output::
+
+   Fetch materialized
+   ==================
+   Start backup
+   svc.running is True
+   558 lines returned
+   First 5 lines from output:
+   0 gbak:readied database employee for backup
+   1 gbak:creating file employee.fbk
+   2 gbak:starting transaction
+   3 gbak:database employee has a page size of 4096 bytes.
+   4 gbak:writing domains
+   svc.running is False
+
+   Iterate over result
+   ===================
+   558 lines returned
+   Last 5 lines from output:
+   gbak:writing referential constraints
+   gbak:writing check constraints
+   gbak:writing SQL roles
+   gbak:writing names mapping
+   gbak:closing file, committing, and finishing. 74752 bytes written
+
+   Callback
+   ========
+   558 lines returned
+   Last 5 lines from output:
+   gbak:writing referential constraints
+   gbak:writing check constraints
+   gbak:writing SQL roles
+   gbak:writing names mapping
+   gbak:closing file, committing, and finishing. 74752 bytes written
+
+.. index::
+   pair: Services; server information
+
+Server Configuration and State information
+------------------------------------------
+
+Server configuration and other information is provided through `.ServerInfoProvider` instance
+accessible via `.Server.info` property.
+
+`.ServerInfoProvider` methods and properties:
+
+* `~.ServerInfoProvider.get_log()` - Request the contents of the server’s log file (:file:`firebird.log`).
+
+   This method is so-called `Async service` that only initiates log transfer. Actual log
+   content could be read by one from many methods for `text output from Services`_ that
+   `.Server` provides .
+
+* `~.ServerInfoProvider.version` - Returns Firebird server version as SEMVER string.
+
+* `~.ServerInfoProvider.engine_version` - Firebird server version as <major>.<minor> float value.
+
+* `~.ServerInfoProvider.manager_version` - Firebird service manager version.
+
+* `~.ServerInfoProvider.architecture` - Firebird server implementation description.
+
+* `~.ServerInfoProvider.home_directory` - Firebird server home directory.
+
+* `~.ServerInfoProvider.security_database` - Security database.
+
+* `~.ServerInfoProvider.lock_directory` - Directory with lock file(s).
+
+* `~.ServerInfoProvider.message_directory` - Directory with message file(s).
+
+* `~.ServerInfoProvider.capabilities` - Firebird server capabilities (as `.ServerCapability` flags).
+
+* `~.ServerInfoProvider.connection_count` - Current number of database attachments.
+
+* `~.ServerInfoProvider.attached_databases` - List of attached databases.
+
+**Example:**
+
+.. sourcecode:: python
+
+   from firebird.driver import driver_config, connect, connect_server
+
+   srv_cfg = """[local]
+   host = localhost
+   user = SYSDBA
+   password = masterkey
+   """
+   driver_config.register_server('local', srv_cfg)
+   db_cfg = """[employee]
+   server = local
+   database = employee.fdb
+   protocol = inet
+   """
+   driver_config.register_database('employee', db_cfg)
+   with connect('employee', user='SYSDBA', password='masterkey'), connect_server('local', user='SYSDBA', password='masterkey') as srv:
+       print(f'{srv.info.version=}')
+       print(f'{srv.info.engine_version=}')
+       print(f'{srv.info.manager_version=}')
+       print(f'{srv.info.architecture=}')
+       print(f'{srv.info.home_directory=}')
+       print(f'{srv.info.security_database=}')
+       print(f'{srv.info.lock_directory=}')
+       print(f'{srv.info.message_directory=}')
+       print(f'{srv.info.capabilities=!s}')
+       print(f'{srv.info.connection_count=}')
+       print(f'{srv.info.attached_databases=}')
+
+Sample output for 64-bit Linux Firebird 4.0 Beta 2::
+
+   srv.info.version='4.0.0.1963'
+   srv.info.engine_version=4.0
+   srv.info.manager_version=2
+   srv.info.architecture='Firebird/Linux/AMD/Intel/x64'
+   srv.info.home_directory='/opt/firebird/'
+   srv.info.security_database='/opt/firebird/security4.fdb'
+   srv.info.lock_directory='/tmp/firebird/'
+   srv.info.message_directory='/opt/firebird/'
+   srv.info.capabilities=ServerCapability.REMOTE_HOP|MULTI_CLIENT
+   srv.info.connection_count=1
+   srv.info.attached_databases=['/opt/firebird/examples/empbuild/employee.fdb']
+
+.. index::
+   pair: Services; database options
+
+Database options
+----------------
+
+Database options could be set using `.ServerDbServices` instance accessible via
+`.Server.database` property.
+
+`~.ServerDbServices.set_default_cache_size()` - Sets individual page cache size for database.
+
+   .. sourcecode:: python
+
+      >>> from firebird.driver import connect_server
+      >>> with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+      >>>     srv.database.set_default_cache_size(database='employee.fdb', size=5000)
+
+`~.ServerDbServices.set_sweep_interval()` - Sets database sweep interval.
+
+   .. sourcecode:: python
+
+      >>> from firebird.driver import connect_server
+      >>> with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+      >>>     srv.database.set_sweep_interval(database='employee.fdb', interval=100000)
+
+`~.ServerDbServices.set_space_reservation()` - Sets space reservation option for database.
+
+   .. sourcecode:: python
+
+      >>> from firebird.driver import connect_server, DbSpaceReservation
+      >>> with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+      >>>     srv.database.set_space_reservation(database='employee.fdb', mode=DbSpaceReservation.USE_FULL)
+
+`~.ServerDbServices.set_write_mode()` - Sets database write mode (SYNC/ASYNC).
+
+   .. sourcecode:: python
+
+      >>> from firebird.driver import connect_server, DbWriteMode
+      >>> with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+      >>>     srv.database.set_write_mode(database='employee.fdb', mode=DbWriteMode.ASYNC)
+
+`~.ServerDbServices.set_access_mode()` - Sets database access mode (R/W or R/O).
+
+   .. sourcecode:: python
+
+      >>> from firebird.driver import connect_server, DbAccessMode
+      >>> with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+      >>>     srv.database.set_access_mode(database='employee.fdb', mode=DbAccessMode.READ_ONLY)
+
+`~.ServerDbServices.set_sql_dialect()` - Sets database SQL dialect.
+
+   .. warning::
+
+      Changing SQL dialect on existing database is not recommended. Only newly created
+      database objects would respect new dialect setting, while objects created with
+      previous dialect remain unchanged. That may have dire consequences.
+
+   .. sourcecode:: python
+
+      >>> from firebird.driver import connect_server
+      >>> with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+      >>>     srv.database.set_sql_dialect(database='employee.fdb', dialect=1)
+
+`~.ServerDbServices.no_linger()` - Sets one-off override for database linger.
+
+   .. sourcecode:: python
+
+      >>> from firebird.driver import connect_server
+      >>> with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+      >>>     srv.database.no_linger(database='employee.fdb')
+
+.. index::
+   triple: Services; Database; maintenance
+
+Database maintenance
+--------------------
+
+Database maintenance and other database-related actions could be performed using methods
+of `.ServerDbServices` instance accessible via `.Server.database` property.
+
+`~.ServerDbServices.get_statistics()` - Returns database statistics produced by gstat
+utility.
+
+   This method is so-called `Async service` that only initiates report processing. Actual
+   report content could be read by one from many methods for `text output from Services`_ that
+   `.Server` provides .
+
+   .. sourcecode:: python
+
+      from firebird.driver import connect_server, SrvStatFlag
+      with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+          srv.database.get_statistics(database='employee.fdb',
+                                      flags=SrvStatFlag.DATA_PAGES | SrvStatFlag.RECORD_VERSIONS),
+                                      tables=['EMPLOYEE','PROJECT'])
+          stats = srv.readlines()
+
+`~.ServerDbServices.backup()` - Performs logical (GBAK) database backup.
+
+   This method is so-called `Async service` that only initiates the backup process. Output
+   from gbak could be read by one from many methods for `text output from Services`_ that
+   `.Server` provides .
+
+   .. sourcecode:: python
+
+      from firebird.driver import connect_server, SrvBackupFlag
+      with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+          srv.database.backup(database='employee.fdb',
+                              backup='/backup/employee.fbk',
+                              flags=SrvBackupFlag.IGNORE_CHECKSUMS | SrvBackupFlag.NO_GARBAGE_COLLECT,
+                              stats='TD', verbose=True)
+          report = srv.readlines()
+
+`~.ServerDbServices.local_backup()` - Performs logical (GBAK) database backup into local byte
+stream.
+
+   .. sourcecode:: python
+
+      from firebird.driver import connect_server, SrvBackupFlag
+      f = open('/backup/employee.fbk',mode='wb')
+      with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+          srv.database.local_backup(database='employee.fdb', backup_stream=f,
+                                    flags=SrvBackupFlag.IGNORE_CHECKSUMS | SrvBackupFlag.NO_GARBAGE_COLLECT)
+      f.close()
+
+`~.ServerDbServices.restore()` - Performs database restore from logical (GBAK) backup.
+
+   This method is so-called `Async service` that only initiates the restore process. Output
+   from gbak could be read by one from many methods for `text output from Services`_ that
+   `.Server` provides .
+
+   .. sourcecode:: python
+
+      from firebird.driver import connect_server, SrvRestoreFlag
+      with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+          srv.database.restore(backup='/backup/employee.fbk',
+                               database='/data/employee.fdb',
+                               flags=SrvRestoreFlag.REPLACE,
+                               stats='TD', verbose=True, page_size=8192)
+          report = srv.readlines()
+
+`~.ServerDbServices.local_restore()` - Performs database restore from logical (GBAK) backup
+stored in local byte stream.
+
+   .. sourcecode:: python
+
+      from firebird.driver import connect_server, SrvRestoreFlag
+      f = open('/backup/employee.fbk',mode='rb')
+      with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+          srv.database.local_restore(backup_stream=f, database='/data/employee.fdb',
+                                     flags=SrvRestoreFlag.REPLACE, page_size=8192)
+      f.close()
+
+`~.ServerDbServices.nbackup()` - Performs physical (NBACKUP) database backup.
+
+   .. sourcecode:: python
+
+      from firebird.driver import connect_server
+      with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+          srv.database.nbackup(database='employee.fdb', backup='/backup/employee.bkp1', level=1)
+
+`~.ServerDbServices.nrestore()` - Performs restore from physical (NBACKUP) database
+backup.
+
+   .. sourcecode:: python
+
+      from firebird.driver import connect_server
+      with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+          srv.database.nrestore(backups=['/backup/employee.bkp0', '/backup/employee.bkp1'],
+                                database='/data/employee.fdb')
+
+`~.ServerDbServices.shutdown()` - Database shutdown.
+
+   .. sourcecode:: python
+
+      from firebird.driver import connect_server, ShutdownMode, ShutdownMethod
+      with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+          srv.database.shutdown(database='employee.fdb', mode=ShutdownMode.SINGLE,
+                                method=ShutdownMethod.FORCED, timeout=10)
+
+`~.ServerDbServices.bring_online()` - Bring previously shut down database back online.
+
+   .. sourcecode:: python
+
+      from firebird.driver import connect_server, OnlineMode
+      with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+          srv.database.bring_online(database='employee.fdb', mode=OnlineMode.MULTI)
+
+`~.ServerDbServices.sweep()` - Performs database sweep operation.
+
+   .. sourcecode:: python
+
+      from firebird.driver import connect_server
+      with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+          srv.database.sweep(database='employee.fdb')
+
+`~.ServerDbServices.validate()` - Performs database validation.
+
+   This method is so-called `Async service` that only initiates the validation process. Output
+   from validation could be read by one from many methods for `text output from Services`_ that
+   `.Server` provides .
+
+   .. sourcecode:: python
+
+      from firebird.driver import connect_server
+      with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+          srv.database.validate(database='employee.fdb')
+          report = srv.readlines()
+
+`~.ServerDbServices.repair()` - Performs database repair operation.
+
+   .. sourcecode:: python
+
+      from firebird.driver import connect_server, SrvRepairFlag
+      with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+          srv.database.repair(database='employee.fdb',
+                              flags=SrvRepairFlag.REPAIR | SrvRepairFlag.KILL_SHADOWS)
+
+`~.ServerDbServices.get_limbo_transaction_ids()` - Returns list of transactions in limbo.
+
+`~.ServerDbServices.commit_limbo_transaction()` - Resolves limbo transaction with commit.
+
+`~.ServerDbServices.rollback_limbo_transaction()` - Resolves limbo transaction with rollback.
+
+.. index::
+   triple: Services; Database; users
+
+User maintenance
+----------------
+
+User maintenance could be performed using methods of `.ServerUserServices` instance accessible
+via `.Server.user` property.
+
+.. note::
+
+   Since Firebird 2.5 you can use SQL commands (CREATE/ALTER/DROP USER) to manage users in
+   a security database from a regular database attachment.
+
+   The SQL set of DDL commands for managing user accounts has been further enhanced in Firebird 3,
+   thus improving the DDL capabilities in a way that exceeds capabilities of user management services.
+
+`~.ServerUserServices.get_all()` - Returns information about all users.
+
+`~.ServerUserServices.get()` - Returns information about specified users.
+
+`~.ServerUserServices.add()` - Add new user.
+
+`~.ServerUserServices.update()` - Update user information.
+
+`~.ServerUserServices.delete()` - Delete user.
+
+`~.ServerUserServices.exists()` - Returns True if user exists.
+
+.. index::
+   pair: Services; trace
+
+Trace sessions
+--------------
+
+Trace sessions could be managed using methods of `.ServerTraceServices` instance accessible
+via `.Server.trace` property.
+
+`.ServerTraceServices.start()` - Start new trace session. Requires trace `configuration` and returns `Session ID`.
+
+   This method is so-called `Async service` that only starts the trace session. Output
+   from trace session could be read by one from many methods for `text output from Services`_
+   that `.Server` provides .
+
+   .. sourcecode:: python
+
+      from firebird.driver import connect_server
+
+      trace_config = """database = %[\\/]employee.fdb
+      {
+          enabled = true
+          log_statement_finish = true
+          print_plan = true
+          include_filter = %%SELECT%%
+          exclude_filter = %%RDB$%%
+          time_threshold = 0
+          max_sql_length = 2048
+      }
+      """
+
+      with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+          trace_id = srv.trace.start(trace_config,'test_trace_1')
+          trace_log = []
+          # Get first 10 lines of trace output
+          for i in range(10):
+              trace_log.append(srv.readline())
+          # Stop trace session
+          # Because trace session blocks the connection, we need another one to stop trace session!
+          with connect_server('localhost', user='SYSDBA', password='masterkey') as srv_aux:
+              srv_aux.trace.stop(trace_id)
+
+`.ServerTraceServices.stop()` - Stop trace session.
+
+`.ServerTraceServices.suspend()` - Suspend trace session.
+
+`.ServerTraceServices.resume()` - Resume trace session.
+
+`.ServerTraceServices.sessions` - Dictionary with active trace sessions. The key is session ID, value is `.TraceSession` instance.
+
+
+.. index:: Logging
+   pair: driver; logging
+
+Logging driver activities
+=========================
+
+The firebird-driver supports `context-based logging system <firebird.base.logging>`
+provided by `firebird-base`_ package through use of `~firebird.base.logging.LoggingIdMixin`.
+
+Classes that use `~firebird.base.logging.LoggingIdMixin`:
+
+* `.Connection` - Internally used objects have `_logging_id_` set to 'Transaction.Main',
+  'Transaction.Query' and 'Cursor.internal'. The log context is not defined.
+* `.TransactionManager` - The `_logging_id_` is set to 'Transaction'. The
+  `~.TransactionManager.log_context()` is the `.Connection`.
+* `.DistributedTransactionManager` - The `_logging_id_` is set to 'DTransaction'. The
+  `~.DistributedTransactionManager.log_context()` is `~firebird.base.types.UNDEFINED`.
+* `.Statement` - The `~.Statement.log_context()` is `.Connection`.
+* `.BlobReader` - The `~.Statement.log_context()` is the owning object or `~firebird.base.types.UNDEFINED`.
+* `.Cursor` - The `~.Cursor.log_context()` is `.Connection`.
+* `.Server` - The log context is not defined.
+
+**Example:**
+
+.. sourcecode:: python
+
+   import logging
+   from firebird.base.logging import get_logger, LogLevel
+   from firebird.driver import connect, driver_config
+
+   # Helper function
+   def execute(cur: Cursor, cmd: str) -> None:
+       get_logger(cur).debug(f"Execute [{cmd=}]")
+       cur.execute(cmd)
+
+   # Basic Python logging configuration
+   sh = logging.StreamHandler()
+   sh.setFormatter(logging.Formatter('%(levelname)-10s: [%(agent)s][%(context)s] %(message)s'))
+   logger = logging.getLogger()
+   logger.addHandler(sh)
+   logger.setLevel(LogLevel.DEBUG)
+
+   # Firebird driver configuration
+   srv_cfg = """[local]
+   host = localhost
+   user = SYSDBA
+   password = masterkey
+   """
+   driver_config.register_server('local', srv_cfg)
+   db_cfg = """[employee]
+   server = local
+   database = employee.fdb
+   protocol = inet
+   """
+   driver_config.register_database('employee', db_cfg)
+
+   print("Default logging ids")
+   with connect('employee') as con:
+       con_log = get_logger(con)
+       con_log.info('Start')
+       cur1 = con.cursor()
+       cur2 = con.cursor()
+       execute(cur1, 'select * from country')
+       execute(cur2, 'select * from project')
+       con_log.info('Stop')
+
+   print("Custom logging ids")
+   with connect('employee') as con:
+       con._logging_id_ = 'employee-1'
+       con_log = get_logger(con)
+       con_log.info('Start')
+       cur1 = con.cursor()
+       cur1._logging_id_ = 'cursor-1'
+       cur2 = con.cursor()
+       cur2._logging_id_ = 'cursor-2'
+       execute(cur1, 'select * from country')
+       execute(cur2, 'select * from project')
+       con_log.info('Stop')
+
+Output::
+
+   Default logging ids
+   INFO      : [Connection][UNDEFINED] Start
+   DEBUG     : [Cursor][Connection] Execute [cmd='select * from country']
+   DEBUG     : [Cursor][Connection] Execute [cmd='select * from project']
+   INFO      : [Connection][UNDEFINED] Stop
+   Custom logging ids
+   INFO      : [employee-1][UNDEFINED] Start
+   DEBUG     : [cursor-1][employee-1] Execute [cmd='select * from country']
+   DEBUG     : [cursor-2][employee-1] Execute [cmd='select * from project']
+   INFO      : [employee-1][UNDEFINED] Stop
+
+You can also trace the driver activities using `trace/audit for class instances <firebird.base.trace>`
+provided by `firebird-base`_ package.
+
+**Example:**
+
+.. sourcecode:: python
+
+   import logging
+   from firebird.base.logging import get_logger, LogLevel
+   from firebird.base.trace import trace_manager, add_trace, trace_object, traced, TraceFlag
+   from firebird.driver import connect, driver_config
+   from firebird.driver.core import TransactionManager
+
+   # Helper function
+   def execute(cur: Cursor, cmd: str) -> None:
+       cur.execute(cmd)
+
+   # Basic Python logging configuration
+   sh = logging.StreamHandler()
+   sh.setFormatter(logging.Formatter('%(levelname)-10s: [%(agent)s][%(context)s] %(message)s'))
+   logger = logging.getLogger()
+   logger.addHandler(sh)
+   logger.setLevel(LogLevel.DEBUG)
+
+   # Firebird driver configuration
+   srv_cfg = """[local]
+   host = localhost
+   user = SYSDBA
+   password = masterkey
+   """
+   driver_config.register_server('local', srv_cfg)
+   db_cfg = """[employee]
+   server = local
+   database = employee.fdb
+   protocol = inet
+   """
+   driver_config.register_database('employee', db_cfg)
+
+   # Trace configuration
+   # First: register classes and methods that could be traced
+   trace_manager.register(Connection)
+   add_trace(Connection, 'close', traced)
+   trace_manager.register(TransactionManager)
+   add_trace(TransactionManager, 'begin', traced)
+   add_trace(TransactionManager, 'commit', traced)
+   add_trace(TransactionManager, 'rollback', traced)
+   trace_manager.register(Cursor)
+   add_trace(Cursor, 'execute', traced)
+   add_trace(Cursor, 'close', traced)
+   # Activate trace/audit
+   trace_manager.trace |= (TraceFlag.ACTIVE | TraceFlag.BEFORE | TraceFlag.AFTER | TraceFlag.FAIL)
+
+   # Traced code
+   with connect('employee') as con:
+       trace_object(con)
+       trace_object(con.main_transaction)
+       con._logging_id_ = 'employee-1'
+       cur1 = con.cursor()
+       trace_object(cur1)
+       cur1._logging_id_ = 'cursor-1'
+       cur2 = con.cursor()
+       trace_object(cur2)
+       cur2._logging_id_ = 'cursor-2'
+       execute(cur1, 'select * from country')
+       execute(cur2, 'select * from project')
+       con.commit()
+
+Sample output::
+
+   DEBUG     : [cursor-1][employee-1] >>> execute(operation='select * from country', parameters=None)
+   DEBUG     : [Transaction.Main][employee-1] >>> begin(tpb=None)
+   DEBUG     : [Transaction.Main][employee-1] <<< begin[0.00672]
+   DEBUG     : [cursor-1][employee-1] >>> close()
+   DEBUG     : [cursor-1][employee-1] <<< close[0.00004]
+   DEBUG     : [cursor-1][employee-1] <<< execute[0.01119] Result: cursor-1
+   DEBUG     : [cursor-2][employee-1] >>> execute(operation='select * from project', parameters=None)
+   DEBUG     : [cursor-2][employee-1] >>> close()
+   DEBUG     : [cursor-2][employee-1] <<< close[0.00002]
+   DEBUG     : [cursor-2][employee-1] <<< execute[0.00352] Result: cursor-2
+   DEBUG     : [Transaction.Main][employee-1] >>> commit(retaining=False)
+   DEBUG     : [cursor-1][employee-1] >>> close()
+   DEBUG     : [cursor-1][employee-1] <<< close[0.00017]
+   DEBUG     : [cursor-2][employee-1] >>> close()
+   DEBUG     : [cursor-2][employee-1] <<< close[0.00012]
+   DEBUG     : [Transaction.Main][employee-1] <<< commit[0.00225]
+   DEBUG     : [employee-1][UNDEFINED] >>> close()
+   DEBUG     : [employee-1][UNDEFINED] <<< close[0.00764]
+
+
+If you will remove the `con.commit()` from the example above, the output will change to::
+
+   DEBUG     : [cursor-1][employee-1] >>> execute(operation='select * from country', parameters=None)
+   DEBUG     : [Transaction.Main][employee-1] >>> begin(tpb=None)
+   DEBUG     : [Transaction.Main][employee-1] <<< begin[0.00338]
+   DEBUG     : [cursor-1][employee-1] >>> close()
+   DEBUG     : [cursor-1][employee-1] <<< close[0.00003]
+   DEBUG     : [cursor-1][employee-1] <<< execute[0.00730] Result: cursor-1
+   DEBUG     : [cursor-2][employee-1] >>> execute(operation='select * from project', parameters=None)
+   DEBUG     : [cursor-2][employee-1] >>> close()
+   DEBUG     : [cursor-2][employee-1] <<< close[0.00003]
+   DEBUG     : [cursor-2][employee-1] <<< execute[0.00345] Result: cursor-2
+   DEBUG     : [employee-1][UNDEFINED] >>> close()
+   DEBUG     : [Transaction.Main][employee-1] >>> rollback(retaining=False, savepoint=None)
+   DEBUG     : [cursor-1][employee-1] >>> close()
+   DEBUG     : [cursor-1][employee-1] <<< close[0.00016]
+   DEBUG     : [cursor-2][employee-1] >>> close()
+   DEBUG     : [cursor-2][employee-1] <<< close[0.00014]
+   DEBUG     : [Transaction.Main][employee-1] <<< rollback[0.00171]
+   DEBUG     : [employee-1][UNDEFINED] <<< close[0.01001]
+
+
+.. _driver-hooks:
+
+.. index::
+   pair: driver; hooks
+   pair: hooks; usage
+
+
+Driver hooks
+============
+
+The firebird-driver uses `hook manager <firebird.base.hooks>` from `firebird-base`_ package
+to provide internal notification mechanism that allows installation of custom hooks into
+certain driver tasks.
+
+Driver hooks are divided into several types exposed as enums in `firebird.driver.hooks` module.
+
+APIHook
+-------
+
+`.APIHook.LOADED` - This hook is invoked once when instance of `.FirebirdAPI` is created.
+It could be used for additional initialization tasks that require Firebird API, or to manipulate
+the FirebirdAPI instance itself before its use.
+
+Hook routine must have signature: `hook_func(api: FirebirdAPI) -> None`. Any value returned
+by hook is ignored.
+
+ConnectionHook
+--------------
+
+`.ConnectionHook.ATTACH_REQUEST`
+
+  This hook is invoked after all parameters are preprocessed and before `.Connection` is created.
+
+  Hook routine must have signature: `hook_func(dsn: str, dpb: bytes) -> Optional[Connection]`
+  where `dpb` is Database Parameter Buffer that would be used to create the attachment to the
+  database defined by `dsn`. It may return `.Connection` (or subclass) instance or `None`.
+
+  First instance returned by any hook of this type will become the return value of caller function
+  and other hooks of the same type are not invoked.
+
+`.ConnectionHook.ATTACHED`
+
+  This hook is invoked just before `.Connection` (or subclass) instance is returned to the client
+  application.
+
+  Hook routine must have signature: `hook_func(con: Connection) -> None`.
+
+`.ConnectionHook.DETACH_REQUEST`
+
+  This hook is invoked before connection is closed.
+
+  Hook must have signature: `hook_func(con: Connection) -> None`.
+
+  If any hook function returns True, connection is not closed.
+
+`.ConnectionHook.CLOSED`
+
+  This hook is invoked after connection is closed.
+
+  Hook routine must have signature: `hook_func(con: Connection) -> None`.
+
+`.ConnectionHook.DROPPED`
+
+  This hook is invoked after database is dropped (and connection is closed).
+
+  Hook routine must have signature: `hook_func(con: Connection) -> None`.
+
+ServerHook
+----------
+
+`.ServerHook.ATTACHED`
+
+  This hook is invoked before `.Server` instance is returned.
+
+  Hook routine must have signature: `hook_func(srv: Server) -> None`.
+
+.. index::
+   pair: hooks; invocation
+
+
+.. _DDL: http://en.wikipedia.org/wiki/Data_Definition_Language
+.. _DML: http://en.wikipedia.org/wiki/Data_Manipulation_Language
+.. _Firebird SAVEPOINTs: http://www.firebirdsql.org/refdocs/langrefupd15-savepoint.html
+.. _Firebird Book: https://www.ibphoenix.com/products/books/firebird_book
+.. _busy-wait: http://www.catb.org/jargon/html/B/busy-wait.html
+.. _Visitor Pattern: http://en.wikipedia.org/wiki/Visitor_pattern
+.. _setuptools: https://pypi.org/project/setuptools/
+.. _PYPI: https://pypi.org/
+.. _ctypes: http://docs.python.org/library/ctypes.html
+.. _pip: https://pypi.org/project/pip/
+.. _firebird-base: https://firebird-base.rtfd.io
