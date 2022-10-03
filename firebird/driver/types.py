@@ -61,7 +61,7 @@ class DatabaseError(Error):
     #: Returned SQLCODE or None
     sqlcode: int = None
     #: Tuple with all returned GDS error codes
-    gds_codes: Tuple[int] = tuple()
+    gds_codes: Tuple[int] = ()
 
 class DataError(DatabaseError):
     """Exception raised for errors that are due to problems with the processed
@@ -1392,7 +1392,7 @@ def get_timezone(timezone: str=None) -> datetime.tzinfo:
     database instead zoned time, and to handle offset-based timezones in format required by
     Firebird.
     """
-    if timezone[0] in ['+', '-']:
+    if timezone[0] in ('+', '-'):
         timezone = 'UTC' + timezone
     result = tz.gettz(timezone)
     if result is not None and not hasattr(result, '_timezone_'):

@@ -40,6 +40,7 @@ import sys
 import threading
 import datetime
 from warnings import warn
+from contextlib import suppress
 from ctypes import memmove, memset, create_string_buffer, cast, byref, string_at, sizeof, \
      c_char_p, c_void_p, c_byte, c_ulong
 from .types import Error, DatabaseError, InterfaceError, FirebirdWarning, BCD, \
@@ -1657,10 +1658,8 @@ class iVersionCallbackImpl(iVersionedImpl):
                 a.IVersionCallback_struct,
                 a.IVersionCallback)
     def __callback(self, this: a.IVersionCallback, status: a.IStatus, text: c_char_p):
-        try:
+        with suppress(Exception):
             self.callback(text.decode())
-        except Exception:
-            pass
     def callback(self, text: str) -> None:
         "Method called by engine"
 
@@ -1677,13 +1676,11 @@ class iCryptKeyCallbackImpl(iVersionedImpl):
                 a.ICryptKeyCallback)
     def __callback(self, this: a.ICryptKeyCallback, data_length: a.Cardinal, data: c_void_p,
                    buffer_length: a.Cardinal, buffer: c_void_p) -> a.Cardinal:
-        try:
+        with suppress(Exception):
             key = self.get_crypt_key(data[:data_length], buffer_length)
             key_size = min(len(key), buffer_length)
             memmove(buffer, key, key_size)
             return key_size
-        except Exception:
-            pass
     def get_crypt_key(self, data: bytes, max_key_size: int) -> bytes:
         "Should return crypt key"
         return b''
@@ -1701,10 +1698,8 @@ class iOffsetsCallbackImp(iVersionedImpl):
                 a.IOffsetsCallback)
     def __callback(self, this: a.IOffsetsCallback, status: a.IStatus, index: a.Cardinal,
                    offset: a.Cardinal, nullOffset: a.Cardinal) -> None:
-        try:
+        with suppress(Exception):
             self.set_offset(index, offset, nullOffset)
-        except Exception:
-            pass
     def set_offset(self, index: int, offset: int, nullOffset: int) -> None:
         "Method called by engine"
 
@@ -1720,10 +1715,8 @@ class iEventCallbackImpl(iReferenceCountedImpl):
                 a.IEventCallback_struct,
                 a.IEventCallback)
     def __callback(self, this: a.IVersionCallback, length: a.Cardinal, events: a.BytePtr) -> None:
-        try:
+        with suppress(Exception):
             self.events_arrived(string_at(events, length))
-        except Exception:
-            pass
     def events_arrived(self, events: bytes) -> None:
         "Method called by engine"
 
@@ -1736,10 +1729,8 @@ class iTimerImpl(iReferenceCountedImpl):
     def _get_intf(self):
         return (a.ITimer_VTable, a.ITimer_VTablePtr, a.ITimer_struct, a.ITimer)
     def __callback(self, this: a.ITimer) -> None:
-        try:
+        with suppress(Exception):
             self.handler()
-        except Exception:
-            pass
     def handler(self) -> None:
         "Timer callback handler"
 

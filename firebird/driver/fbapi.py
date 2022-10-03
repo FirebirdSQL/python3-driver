@@ -43,6 +43,7 @@ from ctypes import c_byte, c_ubyte, c_char, c_bool, c_short, c_ushort, c_int, c_
 from ctypes.util import find_library
 from locale import getpreferredencoding
 from pathlib import Path
+from contextlib import suppress
 import platform
 from .config import driver_config
 from .hooks import APIHook, register_class, get_callbacks
@@ -1932,11 +1933,9 @@ class FirebirdAPI:
             else:
                 filename = find_library('fbclient')
                 if not filename:
-                    try:
+                    with suppress(Exception):
                         ctypes.CDLL('libfbclient.so')
                         filename = 'libfbclient.so'
-                    except Exception:
-                        pass
             if not filename:
                 raise Exception("The location of Firebird Client Library could not be determined.")
         elif not filename.exists():
@@ -1945,7 +1944,7 @@ class FirebirdAPI:
                 raise Exception(f"Firebird Client Library '{filename}' not found")
             filename = file_name
         self.client_library: ctypes.CDLL = None
-        if sys.platform in ['win32', 'cygwin', 'os2', 'os2emx']:
+        if sys.platform in ('win32', 'cygwin', 'os2', 'os2emx'):
             self.client_library: ctypes.CDLL = ctypes.WinDLL(str(filename))
         else:
             self.client_library: ctypes.CDLL = ctypes.CDLL(str(filename))

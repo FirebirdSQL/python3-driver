@@ -142,10 +142,12 @@ def _encode_timestamp(v: Union[datetime.datetime, datetime.date]) -> bytes:
 
 def _is_fixed_point(dialect: int, datatype: SQLDataType, subtype: int,
                     scale: int) -> bool:
-    return ((datatype in [SQLDataType.SHORT, SQLDataType.LONG, SQLDataType.INT64]
-             and (subtype or scale)) or
+    return ((datatype in (SQLDataType.SHORT, SQLDataType.LONG, SQLDataType.INT64)
+             and (subtype or scale))
+            or
             ((dialect < 3) and scale
-             and (datatype in [SQLDataType.DOUBLE, SQLDataType.D_FLOAT])))
+             and (datatype in (SQLDataType.DOUBLE, SQLDataType.D_FLOAT)))
+            )
 
 def _get_external_data_type_name(dialect: int, datatype: SQLDataType,
                                  subtype: int, scale: int) -> str:
@@ -168,7 +170,7 @@ def _get_external_data_type_name(dialect: int, datatype: SQLDataType,
         return 'BIGINT'
     elif datatype == SQLDataType.FLOAT:
         return 'FLOAT'
-    elif datatype in [SQLDataType.DOUBLE, SQLDataType.D_FLOAT]:
+    elif datatype in (SQLDataType.DOUBLE, SQLDataType.D_FLOAT):
         return 'DOUBLE'
     elif datatype == SQLDataType.TIMESTAMP:
         return 'TIMESTAMP'
@@ -184,7 +186,7 @@ def _get_external_data_type_name(dialect: int, datatype: SQLDataType,
         return 'UNKNOWN'
 
 def _get_internal_data_type_name(data_type: SQLDataType) -> str:
-    if data_type in [SQLDataType.DOUBLE, SQLDataType.D_FLOAT]:
+    if data_type in (SQLDataType.DOUBLE, SQLDataType.D_FLOAT):
         value = SQLDataType.DOUBLE
     else:
         value = data_type
@@ -215,7 +217,7 @@ which has range [%s,%s].""" % (str(value),
 
 def _is_str_param(value: Any, datatype: SQLDataType) -> bool:
     return ((isinstance(value, str) and datatype != SQLDataType.BLOB) or
-            datatype in [SQLDataType.TEXT, SQLDataType.VARYING])
+            datatype in (SQLDataType.TEXT, SQLDataType.VARYING))
 
 def create_meta_descriptors(meta: iMessageMetadata) -> List[ItemMetadata]:
     result = []
@@ -364,7 +366,7 @@ class TPB:
             isolation = (Isolation.READ_COMMITTED_RECORD_VERSION
                          if self.isolation == Isolation.READ_COMMITTED
                          else self.isolation)
-            if isolation in [Isolation.SNAPSHOT, Isolation.SERIALIZABLE]:
+            if isolation in (Isolation.SNAPSHOT, Isolation.SERIALIZABLE):
                 tpb.insert_tag(isolation)
             elif isolation == Isolation.READ_COMMITTED_READ_CONSISTENCY:
                 tpb.insert_tag(TPBItem.READ_CONSISTENCY)
@@ -777,7 +779,7 @@ class EventBlock:
         self.__queue: PriorityQueue = weakref.proxy(queue)
         self._db_handle: a.FB_API_HANDLE = db_handle
         self._isc_status: a.ISC_STATUS_ARRAY = a.ISC_STATUS_ARRAY(0)
-        self.event_names: List[str] = list(event_names)
+        self.event_names: List[str] = event_names
 
         self.__results: a.RESULT_VECTOR = a.RESULT_VECTOR(0)
         self.__closed: bool = False
@@ -1700,7 +1702,7 @@ class Connection(LoggingIdMixin):
             # for example for queries with dynamically computed fields
             return 0
         # Special case for automatic RDB$DB_KEY fields.
-        if (meta.field in ['DB_KEY', 'RDB$DB_KEY']):
+        if (meta.field in ('DB_KEY', 'RDB$DB_KEY')):
             return 0
         precision = self.__precision_cache.get((meta.relation, meta.field))
         if precision is not None:
@@ -1860,8 +1862,7 @@ class Connection(LoggingIdMixin):
             default_action: Default action to be performed on implicit transaction end.
         """
         assert self._att is not None
-        transaction = TransactionManager(self, default_tpb if default_tpb else self.default_tpb,
-                                         default_action)
+        transaction = TransactionManager(self, default_tpb or self.default_tpb, default_action)
         self._transactions.append(transaction)
         return transaction
     def begin(self, tpb: bytes=None) -> None:
@@ -2241,9 +2242,8 @@ class TransactionInfoProvider3(InfoProvider):
         if cnt == 1:
             # The value is `TraInfoIsolation` that maps to `Isolation`
             return Isolation(self.response.read_byte())
-        else:
-            # The values are `TraInfoIsolation` + `TraInfoReadCommitted` that maps to `Isolation`
-            return Isolation(self.response.read_byte() + self.response.read_byte())
+        # The values are `TraInfoIsolation` + `TraInfoReadCommitted` that maps to `Isolation`
+        return Isolation(self.response.read_byte() + self.response.read_byte())
     def __access(self) -> TraInfoAccess:
         return TraInfoAccess(self.response.read_sized_int())
     def __lock_timeout(self) -> int:
@@ -2421,7 +2421,7 @@ class TransactionManager(LoggingIdMixin):
         """
         assert not self.__closed
         self._finish()  # Make sure that previous transaction (if any) is ended
-        self._tra = self._connection()._att.start_transaction(tpb if tpb else self.default_tpb)
+        self._tra = self._connection()._att.start_transaction(tpb or self.default_tpb)
     def commit(self, *, retaining: bool=False) -> None:
         """Commits the transaction managed by this instance.
 
@@ -2561,7 +2561,7 @@ class DistributedTransactionManager(TransactionManager):
         self._finish()  # Make sure that previous transaction (if any) is ended
         with self._dtc.start_builder() as builder:
             for con in self._connections:
-                builder.add_with_tpb(con._att, tpb if tpb else self.default_tpb)
+                builder.add_with_tpb(con._att, tpb or self.default_tpb)
             self._tra = builder.start()
     def prepare(self) -> None:
         """Manually triggers the first phase of a two-phase commit (2PC).
@@ -3296,12 +3296,12 @@ class Cursor(LoggingIdMixin):
                         value = str(value)
                     if isinstance(value, str) and self._encoding:
                         value = value.encode(self._encoding)
-                    if (datatype in [SQLDataType.TEXT, SQLDataType.VARYING]
+                    if (datatype in (SQLDataType.TEXT, SQLDataType.VARYING)
                         and len(value) > length):
                         raise ValueError(f"Value of parameter ({i}) is too long,"
                                          f" expected {length}, found {len(value)}")
                     memmove(buf_addr + offset, value, len(value))
-                elif datatype in [SQLDataType.SHORT, SQLDataType.LONG, SQLDataType.INT64]:
+                elif datatype in (SQLDataType.SHORT, SQLDataType.LONG, SQLDataType.INT64):
                     # It's scalled integer?
                     scale = in_meta.get_scale(i)
                     if in_meta.get_subtype(i) or scale:
@@ -3471,7 +3471,7 @@ class Cursor(LoggingIdMixin):
                         value = value.decode(self._encoding)
                 elif datatype == SQLDataType.BOOLEAN:
                     value = bool((0).from_bytes(buffer[offset], 'little'))
-                elif datatype in [SQLDataType.SHORT, SQLDataType.LONG, SQLDataType.INT64]:
+                elif datatype in (SQLDataType.SHORT, SQLDataType.LONG, SQLDataType.INT64):
                     value = (0).from_bytes(buffer[offset:offset + length], 'little', signed=True)
                     # It's scalled integer?
                     if desc.subtype or desc.scale:
@@ -3832,8 +3832,7 @@ class Cursor(LoggingIdMixin):
         self._last_fetch_status = self._result.fetch_next(self._stmt._out_buffer)
         if self._last_fetch_status == StateResult.OK:
             return self._unpack_output()
-        else:
-            return None
+        return None
     def fetch_prior(self) -> Optional[Tuple]:
         """Fetch the previous row of a scrollable query result set.
 
@@ -3843,8 +3842,7 @@ class Cursor(LoggingIdMixin):
         self._last_fetch_status = self._result.fetch_prior(self._stmt._out_buffer)
         if self._last_fetch_status == StateResult.OK:
             return self._unpack_output()
-        else:
-            return None
+        return None
     def fetch_first(self) -> Optional[Tuple]:
         """Fetch the first row of a scrollable query result set.
 
@@ -3854,8 +3852,7 @@ class Cursor(LoggingIdMixin):
         self._last_fetch_status = self._result.fetch_first(self._stmt._out_buffer)
         if self._last_fetch_status == StateResult.OK:
             return self._unpack_output()
-        else:
-            return None
+        return None
     def fetch_last(self) -> Optional[Tuple]:
         """Fetch the last row of a scrollable query result set.
 
@@ -3865,8 +3862,7 @@ class Cursor(LoggingIdMixin):
         self._last_fetch_status = self._result.fetch_last(self._stmt._out_buffer)
         if self._last_fetch_status == StateResult.OK:
             return self._unpack_output()
-        else:
-            return None
+        return None
     def fetch_absolute(self, position: int) -> Optional[Tuple]:
         """Fetch the row of a scrollable query result set specified by absolute position.
 
@@ -3879,8 +3875,7 @@ class Cursor(LoggingIdMixin):
         self._last_fetch_status = self._result.fetch_absolute(position, self._stmt._out_buffer)
         if self._last_fetch_status == StateResult.OK:
             return self._unpack_output()
-        else:
-            return None
+        return None
     def fetch_relative(self, offset: int) -> Optional[Tuple]:
         """Fetch the row of a scrollable query result set specified by relative position.
 
@@ -3894,8 +3889,7 @@ class Cursor(LoggingIdMixin):
         self._last_fetch_status = self._result.fetch_relative(offset, self._stmt._out_buffer)
         if self._last_fetch_status == StateResult.OK:
             return self._unpack_output()
-        else:
-            return None
+        return None
     def setinputsizes(self, sizes: Sequence[Type]) -> None:
         """Required by Python DB API 2.0, but pointless for Firebird, so it does nothing.
         """
@@ -3946,7 +3940,7 @@ class Cursor(LoggingIdMixin):
             for meta in self._stmt._out_desc:
                 scale = meta.scale
                 precision = 0
-                if meta.datatype in [SQLDataType.TEXT, SQLDataType.VARYING]:
+                if meta.datatype in (SQLDataType.TEXT, SQLDataType.VARYING):
                     vtype = str
                     if meta.subtype in (4, 69):  # UTF8 and GB18030
                         dispsize = meta.length // 4
@@ -3954,7 +3948,7 @@ class Cursor(LoggingIdMixin):
                         dispsize = meta.length // 3
                     else:
                         dispsize = meta.length
-                elif (meta.datatype in [SQLDataType.SHORT, SQLDataType.LONG, SQLDataType.INT64]
+                elif (meta.datatype in (SQLDataType.SHORT, SQLDataType.LONG, SQLDataType.INT64)
                       and (meta.subtype or meta.scale)):
                     vtype = decimal.Decimal
                     precision = self._connection._determine_field_precision(meta)
@@ -3968,7 +3962,7 @@ class Cursor(LoggingIdMixin):
                 elif meta.datatype == SQLDataType.INT64:
                     vtype = int
                     dispsize = 20
-                elif meta.datatype in [SQLDataType.FLOAT, SQLDataType.D_FLOAT, SQLDataType.DOUBLE]:
+                elif meta.datatype in (SQLDataType.FLOAT, SQLDataType.D_FLOAT, SQLDataType.DOUBLE):
                     # Special case, dialect 1 DOUBLE/FLOAT
                     # could be Fixed point
                     if (self._stmt._dialect < 3) and meta.scale:
@@ -4023,10 +4017,10 @@ class Cursor(LoggingIdMixin):
         if self._stmt is None:
             return -1
         result = -1
-        if (self._executed and self._stmt.type in [StatementType.SELECT,
+        if (self._executed and self._stmt.type in (StatementType.SELECT,
                                                    StatementType.INSERT,
                                                    StatementType.UPDATE,
-                                                   StatementType.DELETE]):
+                                                   StatementType.DELETE)):
             info = create_string_buffer(64)
             self._stmt._istmt.get_info(bytes([23, 1]), info) # bytes(isc_info_sql_records, isc_info_end)
             if ord(info[0]) != 23:  # pragma: no cover
@@ -4512,7 +4506,7 @@ class ServerDbServices3(ServerServiceProvider):
                 else:  # pragma: no cover
                     raise InterfaceError(f"Service responded with error code: {tag}")
                 tag = self._srv().response.get_tag()
-            keep_going = no_data or request_length != 0 or len(line) > 0
+            keep_going = no_data or request_length != 0 or line
     def nbackup(self, *, database: FILESPEC, backup: FILESPEC, level: int=0,
                 direct: bool=None, flags: SrvNBackupFlag=SrvNBackupFlag.NONE,
                 role: str=None, guid: str=None) -> None:
@@ -5301,10 +5295,9 @@ class Server(LoggingIdMixin):
     def _make_request(self, timeout: int) -> bytes:
         if timeout == -1:
             return None
-        else:
-            return b''.join([SrvInfoCode.TIMEOUT.to_bytes(1, 'little'),
-                             (4).to_bytes(2, 'little'),
-                             timeout.to_bytes(4, 'little'), isc_info_end.to_bytes(1, 'little')])
+        return b''.join([SrvInfoCode.TIMEOUT.to_bytes(1, 'little'),
+                         (4).to_bytes(2, 'little'),
+                         timeout.to_bytes(4, 'little'), isc_info_end.to_bytes(1, 'little')])
     def _fetch_complex_info(self, request: bytes, timeout: int=-1) -> None:
         send = self._make_request(timeout)
         self.response.clear()
@@ -5494,7 +5487,7 @@ def connect_server(server: str, *, user: str=None, password: str=None,
     srv_config = driver_config.get_server(server)
     if srv_config is None:
         srv_config = driver_config.server_defaults
-        host = server if server else None
+        host = server or None
     else:
         host = srv_config.host.value
     if host is None:
