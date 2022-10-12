@@ -39,10 +39,10 @@ from typing import Tuple, List, Callable, Protocol, Union
 import time
 import datetime
 import decimal
-from dateutil import tz
 from pathlib import Path
-from enum import Enum, IntEnum, IntFlag
 from dataclasses import dataclass, field
+from enum import Enum, IntEnum, IntFlag
+from dateutil import tz
 from firebird.base.types import Error
 
 # Exceptions required by Python Database API 2.0
@@ -1367,19 +1367,15 @@ class Transactional(Protocol):  # pragma: no cover
     def begin(self, tpb: bytes = None) -> None:
         """Begin transaction.
         """
-        ...
     def commit(self, *, retaining: bool = False) -> None:
         """Commit transaction.
         """
-        ...
     def rollback(self, *, retaining: bool = False, savepoint: str = None) -> None:
         """Rollback transaction.
         """
-        ...
     def is_active(self) -> bool:
         """Returns True if transaction is active.
         """
-        ...
 
 # timezone
 

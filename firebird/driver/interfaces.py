@@ -30,6 +30,7 @@
 #
 # Contributor(s): Pavel Císař (original code)
 #                 ______________________________________
+# pylint: disable=C0302, W0212, R0902, R0912,R0913, R0914, R0915, R0904
 
 """firebird-driver - Interface wrappers for Firebird new API
 """
@@ -70,7 +71,11 @@ of wrapped interface.
         v = intf.contents.vtable.contents.version
         for c in cls.__mro__:
             if getattr(c, 'VERSION', 0) <= v:
-                return super(iVersionedMeta, iVersionedMeta).__call__(c, intf)
+                result = super(iVersionedMeta, iVersionedMeta).__call__(c, intf)
+                #print(f"{result.__class__.__name__}.{getattr(c, 'VERSION', 0)}")
+                return result
+                #return super(iVersionedMeta, iVersionedMeta).__call__(c, intf)
+        return None
 
 # IVersioned(1)
 class iVersioned(metaclass=iVersionedMeta):
@@ -170,7 +175,14 @@ class iDisposable(iVersioned):
 
 # IStatus(3) : Disposable
 class iStatus(iDisposable):
-    "Class that wraps IStatus interface for use from Python"
+    """Class that wraps IStatus interface for use from Python
+
+    IStatus replaces ISC_STATUS_ARRAY. Functionality is extended – Status has separate
+    access to errors and warnings vectors, can hold vectors of unlimited length, itself
+    stores strings used in vectors avoiding need in circular strings buffer. Interface is
+    on purpose minimized (methods like convert it to text are moved to Util interface) in
+    order to simplify it's implementation by users when needed.
+    """
     VERSION = 3
     def init(self) -> None:
         "Cleanup interface, set it to initial state"
@@ -334,7 +346,7 @@ class iConfigManager(iConfigManager_v2):
         return self.vtable.getDefaultSecurityDb(self).decode()
 
 # IBlob(3) : ReferenceCounted
-class iBlob(iReferenceCounted):
+class iBlob_v3(iReferenceCounted):
     "Class that wraps IBlob interface for use from Python"
     VERSION = 3
     def get_info(self, items: bytes, buffer: bytes) -> None:
@@ -343,8 +355,9 @@ class iBlob(iReferenceCounted):
         self._check()
     def get_segment(self, size: int, buffer: a.c_void_p, bytes_read: a.Cardinal) -> StateResult:
         """Replaces `isc_get_segment()`. Unlike it never returns `isc_segstr_eof`
-and `isc_segment` errors (that are actually not errors), instead returns completion
-codes IStatus::RESULT_NO_DATA and IStatus::RESULT_SEGMENT, normal return is IStatus::RESULT_OK."""
+        and `isc_segment` errors (that are actually not errors), instead returns completion
+        codes `.StateResult.NO_DATA` and `.StateResult.SEGMENT`, normal return is `.StateResult.OK`.
+        """
         result = self.vtable.getSegment(self, self.status, size, buffer, bytes_read)
         self._check()
         return StateResult(result)
@@ -354,12 +367,12 @@ codes IStatus::RESULT_NO_DATA and IStatus::RESULT_SEGMENT, normal return is ISta
         self._check()
     def cancel(self) -> None:
         "Replaces `isc_cancel_blob()`. On success releases interface."
-        self.vtable.cancel(self, self.status)
+        self.vtable.deprecatedCancel(self, self.status)
         self._check()
         self._refcnt -= 1
     def close(self) -> None:
         "Replaces `isc_close_blob()`. On success releases interface."
-        self.vtable.close(self, self.status)
+        self.vtable.deprecatedClose(self, self.status)
         self._check()
         self._refcnt -= 1
     def seek(self, mode: int, offset: int) -> int:
@@ -381,8 +394,23 @@ codes IStatus::RESULT_NO_DATA and IStatus::RESULT_SEGMENT, normal return is ISta
                 i += size + 2
         return result
 
+# IBlob(4) : IBlob(3)
+class iBlob(iBlob_v3):
+    "Class that wraps IBlob interface for use from Python"
+    VERSION = 4
+    def cancel(self) -> None:
+        "Replaces `isc_cancel_blob()`. On success releases interface."
+        self.vtable.cancel(self, self.status)
+        self._check()
+        self._refcnt -= 1
+    def close(self) -> None:
+        "Replaces `isc_close_blob()`. On success releases interface."
+        self.vtable.close(self, self.status)
+        self._check()
+        self._refcnt -= 1
+
 # ITransaction(3) : ReferenceCounted
-class iTransaction(iReferenceCounted):
+class iTransaction_v3(iReferenceCounted):
     "Class that wraps ITransaction interface for use from Python"
     VERSION = 3
     def get_info(self, items: bytes, buffer: bytes) -> None:
@@ -395,7 +423,7 @@ class iTransaction(iReferenceCounted):
         self._check()
     def commit(self) -> None:
         "Replaces `isc_commit_transaction()`"
-        self.vtable.commit(self, self.status)
+        self.vtable.deprecatedCommit(self, self.status)
         self._check()
         self._refcnt -= 1
     def commit_retaining(self) -> None:
@@ -404,7 +432,7 @@ class iTransaction(iReferenceCounted):
         self._check()
     def rollback(self) -> None:
         "Replaces `isc_rollback_transaction()`"
-        self.vtable.rollback(self, self.status)
+        self.vtable.deprecatedRollback(self, self.status)
         self._check()
         self._refcnt -= 1
     def rollback_retaining(self) -> None:
@@ -413,7 +441,7 @@ class iTransaction(iReferenceCounted):
         self._check()
     def disconnect(self) -> None:
         "Replaces `fb_disconnect_transaction()`"
-        self.vtable.disconnect(self, self.status)
+        self.vtable.deprecatedDisconnect(self, self.status)
         self._check()
     def join(self, transaction: iTransaction) -> iTransaction:
         """Joins current transaction and passed as parameter transaction into
@@ -432,6 +460,25 @@ and passed as parameter transaction are released and should not be used any more
     def enter_dtc(self) -> iTransaction:  # pragma: no cover
         "This method is used to support distributed transactions coordinator"
         raise InterfaceError("Method not supported")
+
+# ITransaction(4) : ITransaction(3)
+class iTransaction(iTransaction_v3):
+    "Class that wraps ITransaction interface for use from Python"
+    VERSION = 4
+    def commit(self) -> None:
+        "Replaces `isc_commit_transaction()`"
+        self.vtable.commit(self, self.status)
+        self._check()
+        self._refcnt -= 1
+    def rollback(self) -> None:
+        "Replaces `isc_rollback_transaction()`"
+        self.vtable.rollback(self, self.status)
+        self._check()
+        self._refcnt -= 1
+    def disconnect(self) -> None:
+        "Replaces `fb_disconnect_transaction()`"
+        self.vtable.disconnect(self, self.status)
+        self._check()
 
 # IMessageMetadata(3) : ReferenceCounted
 class iMessageMetadata_v3(iReferenceCounted):
@@ -520,12 +567,15 @@ class iMessageMetadata(iMessageMetadata_v3):
     "Class that wraps IMessageMetadata v4 interface for use from Python"
     VERSION = 4
     def get_alignment(self) -> int:
-        "TODO"
+        """Returns alignment required for message buffer.
+        """
         result = self.vtable.getAlignment(self, self.status)
         self._check()
         return result
     def get_aligned_length(self) -> int:
-        "TODO"
+        """Returns length of message buffer taking into an account alignment requirements
+        (use it to allocate memory for an array of buffers and navigate through that array).
+        """
         result = self.vtable.getAlignedLength(self, self.status)
         self._check()
         return result
@@ -600,7 +650,7 @@ class iMetadataBuilder(iMetadataBuilder_v3):
         self._check()
 
 # IResultSet(3) : ReferenceCounted
-class iResultSet(iReferenceCounted):
+class iResultSet_v3(iReferenceCounted):
     "Class that wraps IResultSet interface for use from Python"
     VERSION = 3
     def fetch_next(self, message: bytes) -> StateResult:
@@ -654,13 +704,26 @@ parameter (this is the only way to obtain message format in this case)"""
         return iMessageMetadata(result)
     def close(self) -> None:
         "Close result set, releases interface on success"
-        self.vtable.close(self, self.status)
+        self.vtable.deprecatedClose(self, self.status)
         self._check()
         self._refcnt -= 1
     def set_delayed_output_format(self, fmt: iMessageMetadata) -> None:
-        "Information not available"
+        """Important:
+             This item is for ISC API emulation only. It may be gone in future versions.
+             Please do not use it!
+        """
         self.vtable.setDelayedOutputFormat(self, self.status, fmt)
         self._check()
+
+# IResultSet(3) : ReferenceCounted
+class iResultSet(iResultSet_v3):
+    "Class that wraps IResultSet interface for use from Python"
+    VERSION = 4
+    def close(self) -> None:
+        "Close result set, releases interface on success"
+        self.vtable.close(self, self.status)
+        self._check()
+        self._refcnt -= 1
 
 # IStatement(3) : ReferenceCounted
 class iStatement_v3(iReferenceCounted):
@@ -719,7 +782,7 @@ value to IStatement::CURSOR_TYPE_SCROLLABLE."""
         self._check()
     def free(self) -> None:
         "Free statement, releases interface on success"
-        self.vtable.free(self, self.status)
+        self.vtable.deprecatedFree(self, self.status)
         self._check()
         self._refcnt -= 1
     def get_flags(self) -> StatementFlag:
@@ -730,7 +793,7 @@ value to IStatement::CURSOR_TYPE_SCROLLABLE."""
 
 # >>> Firebird 4
 # IStatement(4) : IStatement(3)
-class iStatement(iStatement_v3):
+class iStatement_v4(iStatement_v3):
     "Class that wraps IStatement v4 interface for use from Python"
     VERSION = 4
     def get_timeout(self) -> int:
@@ -748,80 +811,183 @@ class iStatement(iStatement_v3):
         self._check()
         return iBatch(result)
 
+# IStatement(5) : IStatement(4)
+class iStatement(iStatement_v4):
+    "Class that wraps IStatement v4 interface for use from Python"
+    VERSION = 5
+    def free(self) -> None:
+        "Free statement, releases interface on success"
+        self.vtable.free(self, self.status)
+        self._check()
+        self._refcnt -= 1
+
 # IBatch(3) : ReferenceCounted
-class iBatch(iReferenceCounted):
+class iBatch_v3(iReferenceCounted):
     "Class that wraps IBatch interface for use from Python"
     VERSION = 3
+    TAG_MULTIERROR = 1
+    TAG_RECORD_COUNTS = 2
+    TAG_BUFFER_BYTES_SIZE = 3
+    TAG_BLOB_POLICY = 4
+    TAG_DETAILED_ERRORS = 5
+    INF_BUFFER_BYTES_SIZE = 10
+    INF_DATA_BYTES_SIZE = 11
+    INF_BLOBS_BYTES_SIZE = 12
+    INF_BLOB_ALIGNMENT = 13
+    INF_BLOB_HEADER = 14
+    BLOB_NONE = 0
+    BLOB_ID_ENGINE = 1
+    BLOB_ID_USER = 2
+    BLOB_STREAM = 3
+    BLOB_SEGHDR_ALIGN = 2
     def add(self, count: int, in_buffer: bytes) -> None:
-        "TODO"
+        """Adds count messages from inBuffer to the batch. Total size of messages that can
+        be added to the batch is limited by TAG_BUFFER_BYTES_SIZE parameter of batch creation.
+        """
         self.vtable.add(self, self.status, count, in_buffer)
         self._check()
     def add_blob(self, length: int, in_buffer: bytes, id_: a.ISC_QUAD, params: bytes) -> None:
-        "TODO"
+        """Adds single blob having length bytes from `in_buffer` to the batch,
+        blob identifier is located at `id_` address. If blob should be created with
+        non-default parameters BPB may be passed (format matches one used in
+        `~.iAttachment_v3.create_blob`). Total size of inline blobs that can be added to the
+        batch (including optional BPBs, blob headers, segment sizes and taking into an
+        accoount alignment) is limited by TAG_BUFFER_BYTES_SIZE parameter of batch creation
+        (affects all blob-oriented methods except `register_blob()`).
+        """
         self.vtable.addBlob(self, self.status, length, in_buffer, byref(id_), len(params), params)
         self._check()
     def append_blob_data(self, length: int, in_buffer: bytes) -> None:
-        "TODO"
+        """Extend last added blob: append length bytes taken from `in_buffer` to it.
+        """
         self.vtable.appendBlobData(self, self.status, length, in_buffer)
         self._check()
     def add_blob_stream(self, length: int, in_buffer: bytes) -> None:
-        "TODO"
+        """Adds blob data (this can be multiple objects or part of single blob) to the batch.
+        Header of each blob in the stream is aligned at `get_blob_alignment()` boundary
+        and contains 3 fields: first - 8-bytes blob identifier (in ISC_QUAD format),
+        second - 4-bytes length of blob, third – 4-bytes length of BPB. Blob header should
+        not cross boundaries of buffer in this function call. BPB data is placed right after
+        header, blob data goes next. Length of blob includes BPB (if it present). All data
+        may be distributed between multiple `add_blob_stream()` calls. Blob data in turn
+        may be structured in case of segmented blob, see chapter “Modifying data in a batch”
+        in `Using_OO_API` guide.
+        """
         self.vtable.addBlobStream(self, self.status, length, in_buffer)
         self._check()
     def register_blob(self, existing: a.ISC_QUAD, id_: a.ISC_QUAD):
-        "TODO"
+        """Makes it possible to use in batch blobs added using standard Blob interface.
+        This function contains 2 ISC_QUAD* parameters, it’s important not to mix them –
+        first parameter (`existing`) is a blob identifier, already added out of batch scope,
+        second (`id_`) is blob identifier that will be placed in a message in this batch.
+        """
         self.vtable.registerBlob(self, self.status, byref(existing), byref(id_))
         self._check()
     def execute(self, transaction: iTransaction) -> iBatchCompletionState:
-        "TODO"
+        """Execute batch with parameters passed to it in the messages. If parameter
+        MULTIERROR is not set in parameters block when creating the batch execution will be
+        stopped after first error, in MULTIERROR mode an unlimited number of errors can
+        happen, after an error execution is continued from the next message. This function
+        returns `.iBatchCompletionState` interface that contains all requested information
+        about the results of batch execution.
+        """
         result = self.vtable.execute(self, self.status, transaction)
         self._check()
         return iBatchCompletionState(result)
     def cancel(self) -> None:
-        "TODO"
+        """Clear messages and blobs buffers, return batch to a state it had right after
+        creation.
+
+        Note:
+           Being reference counted interface batch does not contain any special function to
+           close it, please use release() for this purposes.
+        """
         self.vtable.cancel(self, self.status)
         self._check()
     def get_blob_alignment(self) -> int:
-        "TODO"
+        """Returns required alignment for the data placed into the buffer of `.add_blob_stream()`.
+        """
         result = self.vtable.getBlobAlignment(self, self.status)
         self._check()
         return result
     def get_metadata(self) -> iMessageMetadata:
-        "TODO"
+        """Returns format of metadata used in batch’s messages.
+        """
         result = self.vtable.getMetadata(self, self.status)
         self._check()
         return iMessageMetadata(result)
     def set_default_bpb(self, bpb: bytes) -> None:
-        "TODO"
+        """Sets BPB which will be used for all blobs missing non-default BPB. Must be called
+        before adding any message or blob to batch.
+        """
         self.vtable.setDefaultBpb(self, self.status, len(bpb), bpb)
+        self._check()
+    def close(self) -> None:
+        """Sets BPB which will be used for all blobs missing non-default BPB. Must be called
+        before adding any message or blob to batch.
+        """
+        self.vtable.deprecatedClose(self, self.status)
+        self._check()
+
+# IBatch(4) : IBatch(3)
+class iBatch(iBatch_v3):
+    "Class that wraps IBatch interface for use from Python"
+    VERSION = 4
+    def close(self) -> None:
+        """Sets BPB which will be used for all blobs missing non-default BPB. Must be called
+        before adding any message or blob to batch.
+        """
+        self.vtable.close(self, self.status)
+        self._check()
+    def get_info(self, items: bytes, buffer: bytes) -> None:
+        """Requests information about batch.
+        """
+        self.vtable.getInfo(self, self.status, len(items), items, len(buffer), buffer)
         self._check()
 
 # IBatchCompletionState(3) : Disposable
 class iBatchCompletionState(iDisposable):
     "Class that wraps IBatchCompletionState interface for use from Python"
     VERSION = 3
+    EXECUTE_FAILED = -1
+    SUCCESS_NO_INFO = -2
+    NO_MORE_ERRORS = 0xffffffff
     def get_size(self) -> int:
-        "TODO"
+        """Returns the total number of processed messages.
+        """
         result = self.vtable.getSize(self, self.status)
         self._check()
         return result
     def get_state(self, pos: int) -> int:
-        "TODO"
+        """Returns the result of execution of message number `pos`. On any error with the
+        message this is `.EXECUTE_FAILED` constant, value returned on success depends upon
+        presence of `.RECORD_COUNTS` parameter of batch creation. When it present and has
+        non-zero value number of records inserted, updated or deleted during particular
+        message processing is returned, else `.SUCCESS_NO_INFO` constant is returned.
+        """
         result = self.vtable.getState(self, self.status, pos)
         self._check()
         return result
     def find_error(self, pos: int) -> int:
-        "TODO"
+        """Finds next (starting with pos) message which processing caused an error. When
+        such message is missing NO_MORE_ERRORS constant is returned. Number of status vectors,
+        returned in this interface, is limited by the value of `.DETAILED_ERRORS` parameter
+        of batch creation.
+        """
         result = self.vtable.findError(self, self.status, pos)
         self._check()
         return result
-    def get_status(self, result: iStatus, pos: int) -> None:
-        "TODO"
+    def get_status(self, pos: int) -> iStatus:
+        """Returns detailed information (full status vector) about an error that took place
+        when processing `pos` message.
+        """
+        result = _master.get_status()
         self.vtable.getStatus(self, self.status, result, pos)
         self._check()
+        return result
 
 # IRequest(3) : ReferenceCounted
-class iRequest(iReferenceCounted):
+class iRequest_v3(iReferenceCounted):
     "Class that wraps IRequest interface for use from Python"
     VERSION = 3
     def receive(self, level: int, msg_type: int, message: bytes) -> None:
@@ -850,14 +1016,33 @@ class iRequest(iReferenceCounted):
         self._check()
     def free(self) -> None:
         "Information not available"
+        self.vtable.deprecatedFree(self, self.status)
+        self._check()
+        self._refcnt -= 1
+
+# IRequest(4) : IRequest(3)
+class iRequest(iRequest_v3):
+    "Class that wraps IRequest interface for use from Python"
+    VERSION = 4
+    def free(self) -> None:
+        "Information not available"
         self.vtable.free(self, self.status)
         self._check()
         self._refcnt -= 1
 
 # IEvents(3) : ReferenceCounted
-class iEvents(iReferenceCounted):
+class iEvents_v3(iReferenceCounted):
     "Class that wraps IEvents interface for use from Python"
     VERSION = 3
+    def cancel(self) -> None:
+        "Cancels events monitoring started by IAttachment::queEvents()"
+        self.vtable.deprecatedCancel(self, self.status)
+        self._check()
+
+# IEvents(4) : IEvents(3)
+class iEvents(iEvents_v3):
+    "Class that wraps IEvents interface for use from Python"
+    VERSION = 4
     def cancel(self) -> None:
         "Cancels events monitoring started by IAttachment::queEvents()"
         self.vtable.cancel(self, self.status)
@@ -980,6 +1165,57 @@ with attachment is to close it."""
         self._check()
     def detach(self) -> None:
         "Replaces `isc_detach_database()`. On success releases interface."
+        self.vtable.deprecatedDetach(self, self.status)
+        self._check()
+        self._refcnt -= 1
+    def drop_database(self) -> None:
+        "Replaces `isc_drop_database()`. On success releases interface."
+        self.vtable.deprecatedDropDatabase(self, self.status)
+        self._check()
+        self._refcnt -= 1
+
+# >>> Firebird 4
+# IAttachment(4) : IAttachment(3)
+class iAttachment_v4(iAttachment_v3):
+    "Class that wraps IAttachment v4 interface for use from Python"
+    VERSION = 4
+    def get_idle_timeout(self) -> int:
+        "Returns idle timeout for attachment."
+        result = self.vtable.getIdleTimeout(self, self.status)
+        self._check()
+        return result
+    def set_idle_timeout(self, timeout: int) -> None:
+        "Sets idle timeout for attachment."
+        self.vtable.setIdleTimeout(self, self.status, timeout)
+        self._check()
+    def get_statement_timeout(self) -> int:
+        "Returns idle timeout for statement."
+        result = self.vtable.getStatementTimeout(self, self.status)
+        self._check()
+        return result
+    def set_statement_timeout(self, timeout: int) -> None:
+        "Sets idle timeout for statement."
+        self.vtable.setStatementTimeout(self, self.status, timeout)
+        self._check()
+    def create_batch(self, transaction: iTransaction, stmt: str, dialect: int,
+                     in_metadata: iMessageMetadata, params: bytes) -> iBatch:
+        """Prepares `stmt` and creates `.iBatch` interface ready to accept multiple sets
+        of input parameters in `in_metadata` format. Leaving `in_metadata` `None` makes
+        batch use default format for `stmt`. Parameters block may be passed to `create_batch`
+        making it possible to adjust batch behavior.
+        """
+        b_stmt: bytes = stmt.encode(self.encoding)
+        result = self.vtable.createBatch(self, self.status, transaction, len(b_stmt), b_stmt,
+                                         dialect, in_metadata, len(params), params)
+        self._check()
+        return iBatch(result)
+
+# IAttachment(5) : IAttachment(4)
+class iAttachment(iAttachment_v4):
+    "Class that wraps IAttachment v4 interface for use from Python"
+    VERSION = 5
+    def detach(self) -> None:
+        "Replaces `isc_detach_database()`. On success releases interface."
         self.vtable.detach(self, self.status)
         self._check()
         self._refcnt -= 1
@@ -989,52 +1225,22 @@ with attachment is to close it."""
         self._check()
         self._refcnt -= 1
 
-# >>> Firebird 4
-# IAttachment(4) : IAttachment(3)
-class iAttachment(iAttachment_v3):
-    "Class that wraps IAttachment v4 interface for use from Python"
-    VERSION = 4
-    def get_idle_timeout(self) -> int:
-        "TODO"
-        result = self.vtable.getIdleTimeout(self, self.status)
-        self._check()
-        return result
-    def set_idle_timeout(self, timeout: int) -> None:
-        "TODO"
-        self.vtable.setIdleTimeout(self, self.status, timeout)
-        self._check()
-    def get_statement_timeout(self) -> int:
-        "TODO"
-        result = self.vtable.getStatementTimeout(self, self.status)
-        self._check()
-        return result
-    def set_statement_timeout(self, timeout: int) -> None:
-        "TODO"
-        self.vtable.setStatementTimeout(self, self.status, timeout)
-        self._check()
-    def create_batch(self, transaction: iTransaction, stmt: str, dialect: int,
-                     in_metadata: iMessageMetadata, params: bytes) -> iBatch:
-        "TODO"
-        b_stmt: bytes = stmt.encode(self.encoding)
-        result = self.vtable.createBatch(self, self.status, transaction, len(b_stmt), b_stmt,
-                                         dialect, in_metadata, len(params), params)
-        self._check()
-        return iBatch(result)
-
 # IService(3) : ReferenceCounted
-class iService(iReferenceCounted):
+class iService_v3(iReferenceCounted):
     "Class that wraps IService interface for use from Python"
     VERSION = 3
     def detach(self) -> None:
         """Close attachment to services manager, on success releases interface.
-Replaces `isc_service_detach()`."""
-        self.vtable.detach(self, self.status)
+        Replaces `isc_service_detach()`.
+        """
+        self.vtable.deprecatedDetach(self, self.status)
         self._check()
         self._refcnt -= 1
     def query(self, send: bytes, receive: bytes, buffer: bytes) -> None:
         """Send and request information to/from service, with different `receive`
-may be used for both running services and to obtain various server-wide information.
-Replaces `isc_service_query()`."""
+        may be used for both running services and to obtain various server-wide information.
+        Replaces `isc_service_query()`.
+        """
         self.vtable.query(self, self.status, 0 if send is None else len(send),
                           send, len(receive), receive, len(buffer), buffer)
         self._check()
@@ -1042,6 +1248,29 @@ Replaces `isc_service_query()`."""
         "Start utility in services manager. Replaces `isc_service_start()`."
         self.vtable.start(self, self.status, len(spb), spb)
         self._check()
+
+# IService(4) : IService(3)
+class iService_v4(iService_v3):
+    "Class that wraps IService interface for use from Python"
+    VERSION = 4
+    def detach(self) -> None:
+        """Close attachment to services manager, on success releases interface.
+        Replaces `isc_service_detach()`.
+        """
+        self.vtable.detach(self, self.status)
+        self._check()
+        self._refcnt -= 1
+
+# IService(5) : IService(4)
+class iService(iService_v4):
+    "Class that wraps IService interface for use from Python"
+    VERSION = 5
+    def cancel(self) -> None:
+        """Cancel wait of current `query()` call. Supported only for embedded connections.
+        """
+        self.vtable.cancel(self, self.status)
+        self._check()
+        self._refcnt -= 1
 
 # IProvider(4) : PluginBase
 class iProvider(iPluginBase):
@@ -1538,12 +1767,14 @@ class iInt128(iVersioned):
         super().__init__(intf)
         self.str_buf = create_string_buffer(self.STR_SIZE)
     def to_str(self, value: a.FB_I128, scale: int) -> str:
+        "Converts INT128 to string"
         # procedure toString(this: IInt128; status: IStatus; from: FB_I128Ptr; scale: Integer; bufferLength: Cardinal; buffer: PAnsiChar)
         memset(self.str_buf, 0, self.STR_SIZE)
         self.vtable.toString(self, self.status, byref(value), scale, self.STR_SIZE, self.str_buf)
         self._check()
         return self.str_buf.value.decode()
     def from_str(self, value: str, scale: int, into: a.FB_I128=None) -> a.FB_I128:
+        "Converts string to INT128"
         # procedure fromString(this: IInt128; status: IStatus; scale: Integer; from: PAnsiChar; to_: FB_I128Ptr)
         result = a.FB_I128(0) if into is None else into
         self.vtable.fromString(self, self.status, scale, value.encode(), byref(result))
@@ -1657,7 +1888,7 @@ class iVersionCallbackImpl(iVersionedImpl):
                 a.IVersionCallback_VTablePtr,
                 a.IVersionCallback_struct,
                 a.IVersionCallback)
-    def __callback(self, this: a.IVersionCallback, status: a.IStatus, text: c_char_p):
+    def __callback(self, this: a.IVersionCallback, status: a.IStatus, text: c_char_p): # pylint: disable=W0613
         with suppress(Exception):
             self.callback(text.decode())
     def callback(self, text: str) -> None:
@@ -1674,14 +1905,14 @@ class iCryptKeyCallbackImpl(iVersionedImpl):
                 a.ICryptKeyCallback_VTablePtr,
                 a.ICryptKeyCallback_struct,
                 a.ICryptKeyCallback)
-    def __callback(self, this: a.ICryptKeyCallback, data_length: a.Cardinal, data: c_void_p,
+    def __callback(self, this: a.ICryptKeyCallback, data_length: a.Cardinal, data: c_void_p, # pylint: disable=W0613
                    buffer_length: a.Cardinal, buffer: c_void_p) -> a.Cardinal:
         with suppress(Exception):
             key = self.get_crypt_key(data[:data_length], buffer_length)
             key_size = min(len(key), buffer_length)
             memmove(buffer, key, key_size)
             return key_size
-    def get_crypt_key(self, data: bytes, max_key_size: int) -> bytes:
+    def get_crypt_key(self, data: bytes, max_key_size: int) -> bytes: # pylint: disable=W0613
         "Should return crypt key"
         return b''
 
@@ -1696,7 +1927,7 @@ class iOffsetsCallbackImp(iVersionedImpl):
                 a.IOffsetsCallback_VTablePtr,
                 a.IOffsetsCallback_struct,
                 a.IOffsetsCallback)
-    def __callback(self, this: a.IOffsetsCallback, status: a.IStatus, index: a.Cardinal,
+    def __callback(self, this: a.IOffsetsCallback, status: a.IStatus, index: a.Cardinal, # pylint: disable=W0613
                    offset: a.Cardinal, nullOffset: a.Cardinal) -> None:
         with suppress(Exception):
             self.set_offset(index, offset, nullOffset)
@@ -1714,7 +1945,7 @@ class iEventCallbackImpl(iReferenceCountedImpl):
                 a.IEventCallback_VTablePtr,
                 a.IEventCallback_struct,
                 a.IEventCallback)
-    def __callback(self, this: a.IVersionCallback, length: a.Cardinal, events: a.BytePtr) -> None:
+    def __callback(self, this: a.IVersionCallback, length: a.Cardinal, events: a.BytePtr) -> None: # pylint: disable=W0613
         with suppress(Exception):
             self.events_arrived(string_at(events, length))
     def events_arrived(self, events: bytes) -> None:
@@ -1728,7 +1959,7 @@ class iTimerImpl(iReferenceCountedImpl):
         self.vtable.handler = a.ITimer_handler(self.__callback)
     def _get_intf(self):
         return (a.ITimer_VTable, a.ITimer_VTablePtr, a.ITimer_struct, a.ITimer)
-    def __callback(self, this: a.ITimer) -> None:
+    def __callback(self, this: a.ITimer) -> None: # pylint: disable=W0613
         with suppress(Exception):
             self.handler()
     def handler(self) -> None:
@@ -1736,7 +1967,7 @@ class iTimerImpl(iReferenceCountedImpl):
 
 # API_LOADED hook
 def __augment_api(api: a.FirebirdAPI) -> None:
-    def wrap(result, func=None, arguments=None) -> iMaster:
+    def wrap(result, func=None, arguments=None) -> iMaster: # pylint: disable=W0613
         return iMaster(result)
 
     api.fb_get_master_interface.errcheck = wrap

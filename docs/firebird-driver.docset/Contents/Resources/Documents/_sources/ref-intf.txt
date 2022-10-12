@@ -7,204 +7,146 @@ firebird.driver.interfaces
 
 This module contains interface wrappers for Firebird new API.
 
-Classes
-=======
+.. important::
 
-iVersionedMeta
---------------
+   1. Firebird OO API interfaces use inheritance, i.e. they could be inherited from other
+      interface. In fact, all interfaces returned by Firebird are inherited from `IVersioned`
+      interface.
+
+   2. Firebird OO API interfaces are versioned. Any addition to particular interface
+      increases its version number. Application developers are responsible to check the
+      version of returned interface to verify that it supports methods they want to use.
+
+   If you want to use Firebird OO API interfaces directly in you application, read next
+   section very carefuly.
+
+In Python driver, interfaces are represented as instances of interface wrapper classes
+that expose the methods provided by particular Firebird interface version. The wrapper
+class hierarchy thus represent not only inheritabce between Firebird interfaces, but also
+between versions of particular Firebird interface.
+
+Because all interfaces returned by Firebird are inherited from `IVersioned` interface,
+all wrapper classes have `VERSION` class attribute that contain version number of wrapped
+interface.
+
+Each Firebird interface has it's "canonical" Python wrapper with coresponding name. For
+example interface `IService` has wrapper class `.iService`. However, if there are multiple
+public versions of Firebird interface, there are multiple wrapper classes for each published
+interface version (interim, non-public versions used during Firebird development are skipped).
+These wrapper classes have names based on their canonical name with suffix that represent
+the interface version they wrap. It means that canonical wrapper **always** represents
+the highest interface version.
+
+Whenever Firebird interface is returned from Firebird OO API call, it's wrapped to its
+Python wrapper class according to interface type and version. The Python driver ensures
+that correct wrapper class is used according to returned interface version.
+
+However, this architecture has several important consequences:
+
+1. The interface wrapper classes may change between driver releases as new interface versions
+   are introduced. For example, driver versions up to 1.5.2 had only canonical `.iService`
+   (version 3), but in version 1.6.0 it was renamed to `.iService_v3`, new wrappers
+   `.iService_v4` and (new canonical) `.iService` (version 5) were added.
+2. Instead using `isinstance` to check interface versions, you should always use
+   `VERSION` attribute on wrapper class instance.
+
+
+Metaclasses
+===========
+
 .. autoclass:: iVersionedMeta
 
 Firebird API Interface wrappers
 ===============================
 
-iVersioned
-----------
+Base interfaces
+---------------
 .. autoclass:: iVersioned
-
-iReferenceCounted
------------------
 .. autoclass:: iReferenceCounted
-
-iDisposable
------------
 .. autoclass:: iDisposable
-
-iStatus
--------
 .. autoclass:: iStatus
-
-iPluginBase
------------
 .. autoclass:: iPluginBase
+.. autoclass:: iMaster
 
-iConfigEntry
-------------
-.. autoclass:: iConfigEntry
-
-iConfig
--------
-.. autoclass:: iConfig
-
-iFirebirdConf_v3
-----------------
-.. autoclass:: iFirebirdConf_v3
-
-iFirebirdConf
+Configuration
 -------------
+.. autoclass:: iConfigEntry
+.. autoclass:: iConfig
+.. autoclass:: iFirebirdConf_v3
 .. autoclass:: iFirebirdConf
-
-iPluginManager
---------------
-.. autoclass:: iPluginManager
-
-iConfigManager_v2
------------------
 .. autoclass:: iConfigManager_v2
-
-iConfigManager
---------------
 .. autoclass:: iConfigManager
 
-iBlob
------
-.. autoclass:: iBlob
-
-iTransaction
-------------
-.. autoclass:: iTransaction
-
-iMessageMetadata_v3
--------------------
-.. autoclass:: iMessageMetadata_v3
-
-iMessageMetadata
-----------------
-.. autoclass:: iMessageMetadata
-
-iMetadataBuilder_v3
--------------------
-.. autoclass:: iMetadataBuilder_v3
-
-iMetadataBuilder
-----------------
-.. autoclass:: iMetadataBuilder
-
-iResultSet
-----------
-.. autoclass:: iResultSet
-
-iStatement_v3
--------------
-.. autoclass:: iStatement_v3
-
-iStatement
-----------
-.. autoclass:: iStatement
-
-iBatch
-------
-.. autoclass:: iBatch
-
-iBatchCompletionState
----------------------
-.. autoclass:: iBatchCompletionState
-
-iRequest
---------
-.. autoclass:: iRequest
-
-iEvents
--------
-.. autoclass:: iEvents
-
-iAttachment_v3
---------------
-.. autoclass:: iAttachment_v3
-
-iAttachment
------------
-.. autoclass:: iAttachment
-
-iService
---------
-.. autoclass:: iService
-
-iProvider
----------
+Database and service attachments
+--------------------------------
 .. autoclass:: iProvider
-
-iDtcStart
----------
-.. autoclass:: iDtcStart
-
-iDtc
-----
-.. autoclass:: iDtc
-
-iTimerControl
--------------
-.. autoclass:: iTimerControl
-
-iXpbBuilder
------------
+.. autoclass:: iAttachment_v3
+.. autoclass:: iAttachment_v4
+.. autoclass:: iAttachment
+.. autoclass:: iService_v3
+.. autoclass:: iService_v4
+.. autoclass:: iService
 .. autoclass:: iXpbBuilder
 
-iUtil_v2
---------
-.. autoclass:: iUtil_v2
-
-iUtil
+Blobs
 -----
+.. autoclass:: iBlob_v3
+.. autoclass:: iBlob
+
+Transactions
+------------
+.. autoclass:: iTransaction_v3
+.. autoclass:: iTransaction
+.. autoclass:: iDtcStart
+.. autoclass:: iDtc
+
+Metadata
+--------
+.. autoclass:: iMessageMetadata_v3
+.. autoclass:: iMessageMetadata
+.. autoclass:: iMetadataBuilder_v3
+.. autoclass:: iMetadataBuilder
+
+SQL execution
+-------------
+.. autoclass:: iStatement_v3
+.. autoclass:: iStatement_v4
+.. autoclass:: iStatement
+.. autoclass:: iResultSet_v3
+.. autoclass:: iResultSet
+.. autoclass:: iBatch_v3
+.. autoclass:: iBatch
+.. autoclass:: iBatchCompletionState
+
+Events
+------
+.. autoclass:: iEvents_v3
+.. autoclass:: iEvents
+
+Utilities
+---------
+.. autoclass:: iTimerControl
+.. autoclass:: iUtil_v2
 .. autoclass:: iUtil
-
-iDecFloat16
------------
 .. autoclass:: iDecFloat16
-
-iDecFloat34
------------
 .. autoclass:: iDecFloat34
-
-iInt128
--------
 .. autoclass:: iInt128
 
-iMaster
--------
-.. autoclass:: iMaster
+Other
+-----
+.. autoclass:: iPluginManager
+.. autoclass:: iRequest_v3
+.. autoclass:: iRequest
 
 Interface implementations
 =========================
 
-iVersionedImpl
---------------
 .. autoclass:: iVersionedImpl
-
-iReferenceCountedImpl
----------------------
 .. autoclass:: iReferenceCountedImpl
-
-iDisposableImpl
----------------
 .. autoclass:: iDisposableImpl
-
-iVersionCallbackImpl
---------------------
 .. autoclass:: iVersionCallbackImpl
-
-iCryptKeyCallbackImpl
----------------------
 .. autoclass:: iCryptKeyCallbackImpl
-
-iOffsetsCallbackImp
--------------------
 .. autoclass:: iOffsetsCallbackImp
-
-iEventCallbackImpl
-------------------
 .. autoclass:: iEventCallbackImpl
-
-iTimerImpl
-----------
 .. autoclass:: iTimerImpl
 

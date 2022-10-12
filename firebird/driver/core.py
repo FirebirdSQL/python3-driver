@@ -30,6 +30,7 @@
 #
 # Contributor(s): Pavel Císař (original code)
 #                 ______________________________________
+# pylint: disable=C0302, W0212, R0902, R0912,R0913, R0914, R0915, R0904
 
 """firebird-driver - Main driver code (connection, transaction, cursor etc.)
 """
@@ -45,8 +46,11 @@ import threading
 import io
 import contextlib
 import struct
+import datetime
+import decimal
 from abc import ABC, abstractmethod
 from warnings import warn
+from pathlib import Path
 from queue import PriorityQueue
 from ctypes import memset, memmove, create_string_buffer, byref, string_at, addressof, pointer
 from firebird.base.types import Sentinel, UNLIMITED, ByteOrder
@@ -54,7 +58,24 @@ from firebird.base.logging import LoggingIdMixin, UNDEFINED
 from firebird.base.buffer import MemoryBuffer, BufferFactory, BytesBufferFactory, \
      CTypesBufferFactory, safe_ord
 from . import fbapi as a
-from .types import *
+from .types import (Error, InterfaceError, DatabaseError, DataError,
+                    OperationalError, IntegrityError, InternalError, ProgrammingError,
+                    NotSupportedError,
+                    NetProtocol, DBKeyScope, DbInfoCode, Features, ReplicaMode, TraInfoCode,
+                    TraInfoAccess, TraIsolation, TraReadCommitted, TraLockResolution, TraAccessMode,
+                    TableShareMode, TableAccessMode, Isolation, DefaultAction, StatementType, BlobType,
+                    DbAccessMode, DbSpaceReservation, DbWriteMode, ShutdownMode, OnlineMode,
+                    ShutdownMethod,
+                    DecfloatRound, DecfloatTraps, DESCRIPTION,
+                    ServerCapability, SrvRepairFlag, SrvStatFlag, SrvBackupFlag,
+                    SrvRestoreFlag, SrvNBackupFlag, SrvInfoCode, ConnectionFlag, EncryptionFlag,
+                    TPBItem, DPBItem, BPBItem, SPBItem, SQLDataType, ItemMetadata, Transactional,
+                    XpbKind, CursorFlag, ImpCompiler, ImpCPU, ImpFlags, ImpOS, Implementation,
+                    TableAccessStats, DbProvider, DbClass, StatementFlag, BlobInfoCode,
+                    StateResult, SrvDbInfoOption, ServerAction, CB_OUTPUT_LINE, FILESPEC,
+                    SrvBackupOption, SrvRestoreOption, SrvNBackupOption, SrvRepairOption,
+                    SrvPropertiesOption, SrvPropertiesFlag, SrvValidateOption,
+                    SrvUserOption, SrvTraceOption, UserInfo, TraceSession)
 from .interfaces import iAttachment, iTransaction, iStatement, iMessageMetadata, iBlob, \
      iResultSet, iDtc, iService, iCryptKeyCallbackImpl
 from .hooks import APIHook, ConnectionHook, ServerHook, register_class, get_callbacks, add_hook
@@ -68,8 +89,11 @@ INT_MAX = 2147483647
 UINT_MAX = 4294967295
 LONG_MIN = -9223372036854775808
 LONG_MAX = 9223372036854775807
+
+#: Max BLOB segment size
 MAX_BLOB_SEGMENT_SIZE = 65535
 
+#: Current filesystem encoding
 FS_ENCODING = sys.getfilesystemencoding()
 
 #: Python dictionary that maps Firebird character set names (key) to Python character sets (value).
@@ -95,7 +119,9 @@ CHARSET_MAP = {None: a.getpreferredencoding(), 'NONE': a.getpreferredencoding(),
                }
 
 # Internal
+#: Firebird `.iMaster` interface
 _master = None
+#: Firebird `.iUtil` interface
 _util = None
 _thns = threading.local()
 
@@ -135,10 +161,9 @@ def _encode_timestamp(v: Union[datetime.datetime, datetime.date]) -> bytes:
     # Convert datetime.datetime or datetime.date to BLR format timestamp
     if isinstance(v, datetime.datetime):
         return _util.encode_date(v.date()).to_bytes(4, 'little') + _util.encode_time(v.time()).to_bytes(4, 'little')
-    elif isinstance(v, datetime.date):
+    if isinstance(v, datetime.date):
         return _util.encode_date(v.date()).to_bytes(4, 'little') + _util.encode_time(datetime.time()).to_bytes(4, 'little')
-    else:
-        raise ValueError("datetime.datetime or datetime.date expected")
+    raise ValueError("datetime.datetime or datetime.date expected")
 
 def _is_fixed_point(dialect: int, datatype: SQLDataType, subtype: int,
                     scale: int) -> bool:
@@ -151,39 +176,15 @@ def _is_fixed_point(dialect: int, datatype: SQLDataType, subtype: int,
 
 def _get_external_data_type_name(dialect: int, datatype: SQLDataType,
                                  subtype: int, scale: int) -> str:
-    if datatype == SQLDataType.TEXT:
-        return 'CHAR'
-    elif datatype == SQLDataType.VARYING:
-        return 'VARCHAR'
-    elif _is_fixed_point(dialect, datatype, subtype, scale):
-        if subtype == 1:
-            return 'NUMERIC'
-        elif subtype == 2:
-            return 'DECIMAL'
-        else:
-            return 'NUMERIC/DECIMAL'
-    elif datatype == SQLDataType.SHORT:
-        return 'SMALLINT'
-    elif datatype == SQLDataType.LONG:
-        return 'INTEGER'
-    elif datatype == SQLDataType.INT64:
-        return 'BIGINT'
-    elif datatype == SQLDataType.FLOAT:
-        return 'FLOAT'
-    elif datatype in (SQLDataType.DOUBLE, SQLDataType.D_FLOAT):
-        return 'DOUBLE'
-    elif datatype == SQLDataType.TIMESTAMP:
-        return 'TIMESTAMP'
-    elif datatype == SQLDataType.DATE:
-        return 'DATE'
-    elif datatype == SQLDataType.TIME:
-        return 'TIME'
-    elif datatype == SQLDataType.BLOB:
-        return 'BLOB'
-    elif datatype == SQLDataType.BOOLEAN:
-        return 'BOOLEAN'
-    else:
-        return 'UNKNOWN'
+    if _is_fixed_point(dialect, datatype, subtype, scale):
+        return {1: 'NUMERIC', 2: 'DECIMAL'}.get(subtype, 'NUMERIC/DECIMAL')
+    return {SQLDataType.TEXT: 'CHAR', SQLDataType.VARYING: 'VARCHAR',
+            SQLDataType.SHORT: 'SMALLINT', SQLDataType.LONG: 'INTEGER',
+            SQLDataType.INT64: 'BIGINT', SQLDataType.FLOAT: 'FLOAT',
+            SQLDataType.DOUBLE: 'DOUBLE', SQLDataType.D_FLOAT: 'DOUBLE',
+            SQLDataType.TIMESTAMP: 'TIMESTAMP', SQLDataType.DATE: 'DATE',
+            SQLDataType.TIME: 'TIME', SQLDataType.BLOB: 'BLOB',
+            SQLDataType.BOOLEAN: 'BOOLEAN'}.get(datatype, 'UNKNOWN')
 
 def _get_internal_data_type_name(data_type: SQLDataType) -> str:
     if data_type in (SQLDataType.DOUBLE, SQLDataType.D_FLOAT):
@@ -204,15 +205,10 @@ def _check_integer_range(value: int, dialect: int, datatype: SQLDataType,
         vmin = LONG_MIN
         vmax = LONG_MAX
     if (value < vmin) or (value > vmax):
-        msg = """numeric overflow: value %s
-(%s scaled for %d decimal places) is of
-too great a magnitude to fit into its internal storage type %s,
-which has range [%s,%s].""" % (str(value),
-                            _get_external_data_type_name(dialect, datatype,
-                                                         subtype, scale),
-                            scale,
-                            _get_internal_data_type_name(datatype),
-                            str(vmin), str(vmax))
+        msg = f"""numeric overflow: value {value}
+({_get_external_data_type_name(dialect, datatype, subtype, scale)} scaled for {scale} decimal places) is of
+too great a magnitude to fit into its internal storage type {_get_internal_data_type_name(datatype)},
+which has range [{vmin},{vmax}]."""
         raise ValueError(msg)
 
 def _is_str_param(value: Any, datatype: SQLDataType) -> bool:
@@ -220,6 +216,7 @@ def _is_str_param(value: Any, datatype: SQLDataType) -> bool:
             datatype in (SQLDataType.TEXT, SQLDataType.VARYING))
 
 def create_meta_descriptors(meta: iMessageMetadata) -> List[ItemMetadata]:
+    "Returns list of metadata descriptors from statement metadata."
     result = []
     for i in range(meta.get_count()):
         result.append(ItemMetadata(field=meta.get_field(i),
@@ -240,8 +237,7 @@ def create_meta_descriptors(meta: iMessageMetadata) -> List[ItemMetadata]:
 # Context managers
 
 @contextlib.contextmanager
-def transaction(transact_object: Transactional, *, tpb: bytes=None,
-                bypass: bool=False) -> Transactional:
+def transaction(transact_object: Transactional, *, tpb: bytes=None, bypass: bool=False) -> Transactional: # pylint: disable=W0621
     """Context manager for `~firebird.driver.types.Transactional` objects.
 
     Starts new transaction when context is entered. On exit calls `rollback()` when
@@ -286,7 +282,7 @@ _OP_DIE = object()
 _OP_RECORD_AND_REREGISTER = object()
 
 # Managers for Parameter buffers
-class TPB:
+class TPB: # pylint: disable=R0902
     """Transaction Parameter Buffer.
     """
     def __init__(self, *, access_mode: TraAccessMode = TraAccessMode.WRITE,
@@ -320,22 +316,22 @@ class TPB:
         """Load information from TPB.
         """
         self.clear()
-        with a.get_api().util.get_xpb_builder(XpbKind.TPB, buffer) as tpb:
+        with a.get_api().util.get_xpb_builder(XpbKind.TPB, buffer) as tpb: # pylint: disable=W0621
             while not tpb.is_eof():
                 tag = tpb.get_tag()
-                if tag in TraAccessMode._value2member_map_:
+                if tag in TraAccessMode._value2member_map_: # pylint: disable=E1101
                     self.access_mode = TraAccessMode(tag)
-                elif tag in TraIsolation._value2member_map_:
+                elif tag in TraIsolation._value2member_map_: # pylint: disable=E1101
                     isolation = TraIsolation(tag)
                     if isolation != TraIsolation.READ_COMMITTED:
                         self.isolation = Isolation(isolation)
-                elif tag in TraReadCommitted._value2member_map_:
+                elif tag in TraReadCommitted._value2member_map_: # pylint: disable=E1101
                     isolation = TraReadCommitted(tag)
                     if isolation == TraReadCommitted.RECORD_VERSION:
                         self.isolation = Isolation.READ_COMMITTED_RECORD_VERSION
                     else:
                         self.isolation = Isolation.READ_COMMITTED_NO_RECORD_VERSION
-                elif tag in TraLockResolution._value2member_map_:
+                elif tag in TraLockResolution._value2member_map_: # pylint: disable=E1101
                     self.lock_timeout = -1 if TraLockResolution(tag).WAIT else 0
                 elif tag == TPBItem.AUTOCOMMIT:
                     self.auto_commit = True
@@ -347,13 +343,13 @@ class TPB:
                     self.lock_timeout = tpb.get_int()
                 elif tag == TPBItem.AT_SNAPSHOT_NUMBER:
                     self.at_snapshot_number = tpb.get_bigint()
-                elif tag in TableAccessMode._value2member_map_:
+                elif tag in TableAccessMode._value2member_map_: # pylint: disable=E1101
                     tbl_access = TableAccessMode(tag)
                     tbl_name = tpb.get_string(encoding=self.encoding)
                     tpb.move_next()
                     if tpb.is_eof():
                         raise ValueError(f"Missing share mode value in table {tbl_name} reservation")
-                    if (val := tpb.get_tag()) not in TableShareMode._value2member_map_:
+                    if (val := tpb.get_tag()) not in TableShareMode._value2member_map_: # pylint: disable=E1101
                         raise ValueError(f"Missing share mode value in table {tbl_name} reservation")
                     tbl_share = TableShareMode(val)
                     self.reserve_table(tbl_name, tbl_share, tbl_access)
@@ -361,7 +357,7 @@ class TPB:
     def get_buffer(self) -> bytes:
         """Create TPB from stored information.
         """
-        with a.get_api().util.get_xpb_builder(XpbKind.TPB) as tpb:
+        with a.get_api().util.get_xpb_builder(XpbKind.TPB) as tpb: # pylint: disable=W0621
             tpb.insert_tag(self.access_mode)
             isolation = (Isolation.READ_COMMITTED_RECORD_VERSION
                          if self.isolation == Isolation.READ_COMMITTED
@@ -795,7 +791,7 @@ class EventBlock:
                                                 *[x.encode() for x in event_names])
     def __del__(self):
         if not self.__closed:
-            warn(f"EventBlock disposed without prior close()", ResourceWarning)
+            warn("EventBlock disposed without prior close()", ResourceWarning)
             self.close()
     def __lt__(self, other):
         return self.event_id.value < other.event_id.value
@@ -821,8 +817,8 @@ class EventBlock:
             self.__wait_for_events()
             return None
 
-        for i in range(len(self.event_names)):
-            result[self.event_names[i]] = int(self.__results[i])
+        for i, name in enumerate(self.event_names):
+            result[name] = int(self.__results[i])
         self.__wait_for_events()
         return result
     def close(self) -> None:
@@ -878,9 +874,10 @@ class EventCollector:
         self.__events_ready: threading.Event = threading.Event()
         self.__blocks: List[List[str]] = [[x for x in y if x] for y in itertools.zip_longest(*[iter(event_names)]*15)]
         self.__initialized: bool = False
+        self.__process_thread = None
     def __del__(self):
         if not self.__closed:
-            warn(f"EventCollector disposed without prior close()", ResourceWarning)
+            warn("EventCollector disposed without prior close()", ResourceWarning)
             self.close()
     def __enter__(self):
         self.begin()
@@ -948,7 +945,7 @@ class EventCollector:
             raise InterfaceError("Event collection not initialized (begin() not called).")
         if not self.__closed:
             self.__events_ready.wait(timeout)
-            return self.__events.copy()
+        return self.__events.copy()
     def flush(self) -> None:
         """Clear any event notifications that have accumulated in the collector’s
         internal queue.
@@ -1020,10 +1017,8 @@ class InfoProvider(ABC):
                     buf_size = min(buf_size * 2, max_size)
                     self.response.resize(buf_size)
                     continue
-                else:  # pragma: no cover
-                    raise InterfaceError("Response too large")
-            else:
-                break
+                raise InterfaceError("Response too large")  # pragma: no cover
+            break
         self.response.seek_last_data()
         if not self.response.is_eof():  # pragma: no cover
             raise InterfaceError("Invalid response format")
@@ -1049,16 +1044,16 @@ class EngineVersionProvider(InfoProvider):
         else:
             self.con()._svc.query(None, request, self.response.raw)
     def get_server_version(self, con: Union[Connection, Server]) -> str:
+        "Returns server version sctring."
         self.con = con
         info_code = DbInfoCode.FIREBIRD_VERSION if isinstance(con(), Connection) \
             else SrvInfoCode.SERVER_VERSION
         self._get_data(bytes([info_code]))
         tag = self.response.get_tag()
-        if (tag != info_code.value):
+        if tag != info_code.value:
             if tag == isc_info_error:  # pragma: no cover
                 raise InterfaceError("An error response was received")
-            else:  # pragma: no cover
-                raise InterfaceError("Result code does not match request code")
+            raise InterfaceError("Result code does not match request code") # pragma: no cover
         if isinstance(con(), Connection):
             self.response.read_byte()  # Cluster length
             self.response.read_short()  # number of strings
@@ -1075,6 +1070,7 @@ class EngineVersionProvider(InfoProvider):
         self.con = None
         return result
     def get_engine_version(self, con: Union[Connection, Server]) -> float:
+        "Returns Firebird version as <major>.<minor> float number."
         x = self.get_server_version(con).split('.')
         return float(f'{x[0]}.{x[1]}')
 
@@ -1098,7 +1094,6 @@ class DatabaseInfoProvider3(InfoProvider):
              DbInfoCode.IMPLEMENTATION_OLD: self.__implementation_old,
              DbInfoCode.VERSION: self._info_string,
              DbInfoCode.FIREBIRD_VERSION: self._info_string,
-             DbInfoCode.CRYPT_KEY: self._info_string,
              DbInfoCode.USER_NAMES: self.__user_names,
              DbInfoCode.ACTIVE_TRANSACTIONS: self.__tra_active,
              DbInfoCode.LIMBO: self.__tra_limbo,
@@ -1273,7 +1268,7 @@ class DatabaseInfoProvider3(InfoProvider):
                 self.response.resize(self.page_size + 10)
         self._get_data(request)
         tag = self.response.get_tag()
-        if (request[0] != tag):
+        if request[0] != tag:
             if info_code == DbInfoCode.ACTIVE_TRANSACTIONS:
                 # isc_info_active_transactions with no active transactions returns empty buffer
                 # and does not follow this rule
@@ -1327,7 +1322,7 @@ class DatabaseInfoProvider3(InfoProvider):
                 tables.setdefault(table, dict.fromkeys(info_codes))[info_code] = count
         return [TableAccessStats(table, **{_i2name[code]:count
                                            for code, count in tables[table].items()})
-                for table in tables]
+                for table in tables] # pylint: disable=C0206
     def is_compressed(self) -> bool:
         """Returns True if connection to the server uses data compression.
         """
@@ -1567,7 +1562,7 @@ class DatabaseInfoProvider(DatabaseInfoProvider3):
         """
         return self._con()._att.get_idle_timeout()
     @idle_timeout.setter
-    def __idle_timeout(self, value: int) -> None:
+    def set_idle_timeout(self, value: int) -> None:
         self._con()._att.set_idle_timeout(value)
     @property
     def statement_timeout(self) -> int:
@@ -1575,7 +1570,7 @@ class DatabaseInfoProvider(DatabaseInfoProvider3):
         """
         return self._con()._att.get_statement_timeout()
     @statement_timeout.setter
-    def __statement_timeout(self, value: int) -> None:
+    def set_statement_timeout(self, value: int) -> None:
         self._con()._att.set_statement_timeout(value)
 
 class Connection(LoggingIdMixin):
@@ -1583,10 +1578,6 @@ class Connection(LoggingIdMixin):
 
     Note:
         Implements context manager protocol to call `.close()` automatically.
-
-    Attributes:
-        default_tpb (bytes): Default Transaction parameter buffer for started transactions.
-            Default is set to SNAPSHOT isolation with WAIT lock resolution (infinite lock timeout).
     """
     # PEP 249 (Python DB API 2.0) extension
     Warning = Warning
@@ -1670,9 +1661,9 @@ class Connection(LoggingIdMixin):
         self.main_transaction._finish(DefaultAction.ROLLBACK)
         self.query_transaction._finish(DefaultAction.ROLLBACK)
         while self._transactions:
-            transaction = self._transactions.pop(0)
-            transaction.default_action = DefaultAction.ROLLBACK  # Required by Python DB API 2.0
-            transaction.close()
+            tra = self._transactions.pop(0)
+            tra.default_action = DefaultAction.ROLLBACK  # Required by Python DB API 2.0
+            tra.close()
         while self._statements:
             s = self._statements.pop()()
             if s is not None:
@@ -1686,14 +1677,14 @@ class Connection(LoggingIdMixin):
         if self.__ev is None:
             self.__ev = _engine_version_provider.get_engine_version(weakref.ref(self))
         return self.__ev
-    def _prepare(self, sql: str, transaction: TransactionManager) -> Statement:
-        if _commit := not transaction.is_active():
-            transaction.begin()
-        stmt = self._att.prepare(transaction._tra, sql, self.__sql_dialect)
+    def _prepare(self, sql: str, tra: TransactionManager) -> Statement:
+        if _commit := not tra.is_active():
+            tra.begin()
+        stmt = self._att.prepare(tra._tra, sql, self.__sql_dialect)
         result = Statement(self, stmt, sql, self.__sql_dialect)
         self._statements.append(weakref.ref(result, self.__stmt_deleted))
         if _commit:
-            transaction.commit()
+            tra.commit()
         return result
     def _determine_field_precision(self, meta: ItemMetadata) -> int:
         if (not meta.relation) or (not meta.field):
@@ -1702,7 +1693,7 @@ class Connection(LoggingIdMixin):
             # for example for queries with dynamically computed fields
             return 0
         # Special case for automatic RDB$DB_KEY fields.
-        if (meta.field in ('DB_KEY', 'RDB$DB_KEY')):
+        if meta.field in ('DB_KEY', 'RDB$DB_KEY'):
             return 0
         precision = self.__precision_cache.get((meta.relation, meta.field))
         if precision is not None:
@@ -1753,6 +1744,7 @@ class Connection(LoggingIdMixin):
         if result:
             self.__sqlsubtype_cache[(relation, column)] = result[0]
             return result[0]
+        return None
     def drop_database(self) -> None:
         """Drops the connected database.
 
@@ -1862,10 +1854,10 @@ class Connection(LoggingIdMixin):
             default_action: Default action to be performed on implicit transaction end.
         """
         assert self._att is not None
-        transaction = TransactionManager(self, default_tpb or self.default_tpb, default_action)
-        self._transactions.append(transaction)
-        return transaction
-    def begin(self, tpb: bytes=None) -> None:
+        tra = TransactionManager(self, default_tpb or self.default_tpb, default_action)
+        self._transactions.append(tra)
+        return tra
+    def begin(self, tpb: bytes=None) -> None: # pylint: disable=W0621
         """Starts new transaction managed by `.main_transaction`.
 
         Arguments:
@@ -1972,7 +1964,7 @@ class Connection(LoggingIdMixin):
         """Access to database schema. Requires firebird.lib package.
         """
         if self.__schema is None:
-            import firebird.lib.schema
+            import firebird.lib.schema # pylint: disable=C0415
             self.__schema = firebird.lib.schema.Schema()
             self.__schema.bind(self)
             self.__schema._set_internal(True)
@@ -1982,7 +1974,7 @@ class Connection(LoggingIdMixin):
         """Access to database monitoring tables. Requires firebird.lib package.
         """
         if self.__monitor is None:
-            import firebird.lib.monitor
+            import firebird.lib.monitor # pylint: disable=C0415
             self.__monitor = firebird.lib.monitor.Monitor(self)
             self.__monitor._set_internal(True)
         return self.__monitor
@@ -1998,7 +1990,7 @@ def tpb(isolation: Isolation, lock_timeout: int=-1, access_mode: TraAccessMode=T
     return TPB(isolation=isolation, lock_timeout=lock_timeout, access_mode=access_mode).get_buffer()
 
 def _connect_helper(dsn: str, host: str, port: str, database: str, protocol: NetProtocol) -> str:
-    if ((not dsn and not host and not database) or
+    if ((not dsn and not host and not database) or # pylint: disable=R0916
             (dsn and (host or database)) or
             (host and not database)):
         raise InterfaceError("Must supply one of:\n"
@@ -2256,16 +2248,17 @@ class TransactionInfoProvider3(InfoProvider):
     def _close(self) -> None:
         self._mngr = None
     def get_info(self, info_code: TraInfoCode) -> Any:
+        """Returns response for transaction INFO request. The type anc content of returned
+        value(s) depend on INFO code passed as parameter.
+        """
         if info_code not in self._handlers:
             raise NotSupportedError(f"Info code {info_code} not supported by engine version {self._mngr()._connection()._engine_version()}")
         request = bytes([info_code])
         self._get_data(request)
         tag = self.response.get_tag()
-        if (request[0] != tag):
-            if tag == isc_info_error:  # pragma: no cover
-                raise InterfaceError("An error response was received")
-            else:  # pragma: no cover
-                raise InterfaceError("Result code does not match request code")
+        if request[0] != tag:
+            raise InterfaceError("An error response was received" if tag == isc_info_error
+                                 else "Result code does not match request code")
         #
         return self._handlers[info_code]()
     # Functions
@@ -2339,10 +2332,6 @@ class TransactionManager(LoggingIdMixin):
 
     Note:
         Implements context manager protocol to call `.close()` automatically.
-
-    Attributes:
-        default_tpb (bytes): Default Transaction parameter buffer.
-        default_action (DefaultAction): Default action for implicit transaction end.
     """
     def __init__(self, connection: Connection, default_tpb: bytes,
                  default_action: DefaultAction=DefaultAction.COMMIT):
@@ -2365,7 +2354,7 @@ class TransactionManager(LoggingIdMixin):
         if self._tra is not None:
             warn(f"Transaction '{self.logging_id}' disposed while active", ResourceWarning)
             self._finish()
-    def __dead_con(self, obj) -> None:
+    def __dead_con(self, obj) -> None: # pylint: disable=W0613
         self._connection = None
     def _close_cursors(self) -> None:
         for cursor in self._cursors:
@@ -2412,7 +2401,7 @@ class TransactionManager(LoggingIdMixin):
         if not self.is_active():
             self.begin()
         self._connection()._att.execute(self._tra, sql, self._connection().sql_dialect)
-    def begin(self, tpb: bytes=None) -> None:
+    def begin(self, tpb: bytes=None) -> None: # pylint: disable=W0621
         """Starts new transaction managed by this instance.
 
         Arguments:
@@ -2495,6 +2484,7 @@ class TransactionManager(LoggingIdMixin):
         return self.__info
     @property
     def log_context(self) -> Connection:
+        "Logging context [connection]."
         if self._connection is None:
             return 'Connection.GC'
         return self._connection()
@@ -2510,12 +2500,8 @@ class DistributedTransactionManager(TransactionManager):
 
     Note:
         Implements context manager protocol to call `.close()` automatically.
-
-    Attributes:
-        default_tpb (bytes): Default Transaction parameter buffer
-        default_action (DefaultAction): Default action for implicit transaction end
     """
-    def __init__(self, connections: Sequence[Connection], default_tpb: bytes=None,
+    def __init__(self, connections: Sequence[Connection], default_tpb: bytes=None, # pylint: disable=W0231
                  default_action: DefaultAction=DefaultAction.COMMIT):
         self._connections: List[Connection] = list(connections)
         self.default_tpb: bytes = default_tpb if default_tpb is not None else tpb(Isolation.SNAPSHOT)
@@ -2550,7 +2536,7 @@ class DistributedTransactionManager(TransactionManager):
             self.begin()
         for connection in self._connections:
             connection._att.execute(self._tra, sql, connection.sql_dialect)
-    def begin(self, tpb: bytes=None) -> None:
+    def begin(self, tpb: bytes=None) -> None: # pylint: disable=W0621
         """Starts new distributed transaction managed by this instance.
 
         Arguments:
@@ -2619,7 +2605,7 @@ class DistributedTransactionManager(TransactionManager):
             name: Name for the savepoint
         """
         self.execute_immediate(f'SAVEPOINT {name}')
-    def cursor(self, connection: Connection) -> Cursor:
+    def cursor(self, connection: Connection) -> Cursor: # pylint: disable=W0221
         """Returns new `Cursor` instance associated with specified connection and
         this distributed transaction manager.
 
@@ -2688,7 +2674,7 @@ class Statement(LoggingIdMixin):
         return f'{self.logging_id}[{self.sql}]'
     def __repr__(self):
         return str(self)
-    def __dead_con(self, obj) -> None:
+    def __dead_con(self, obj) -> None: # pylint: disable=W0613
         self._connection = None
     def __get_plan(self, detailed: bool) -> str:
         assert self._istmt is not None
@@ -2722,6 +2708,7 @@ class Statement(LoggingIdMixin):
     # Properties
     @property
     def log_context(self) -> Connection:
+        "Logging context [Connection]"
         if self._connection is None:
             return 'Connection.GC'
         return self._connection()
@@ -2769,9 +2756,6 @@ class BlobReader(io.IOBase, LoggingIdMixin):
 
     Note:
         Implements context manager protocol to call `.close()` automatically.
-
-    Attributes:
-        sub_type (int): BLOB sub-type
     """
     def __init__(self, blob: iBlob, blob_id: a.ISC_QUAD, sub_type: int,
                  length: int, segment_size: int, charset: str, owner: Any=None):
@@ -2783,9 +2767,7 @@ class BlobReader(io.IOBase, LoggingIdMixin):
         self._blob_length: int = length
         self._segment_size: int = segment_size
         self.__blob_id: a.ISC_QUAD = blob_id
-        self.__bytes_read = 0
         self.__pos = 0
-        self.__index = 0
         self.__buf = create_string_buffer(self._segment_size)
         self.__buf_pos = 0
         self.__buf_data = 0
@@ -2793,8 +2775,7 @@ class BlobReader(io.IOBase, LoggingIdMixin):
         line = self.readline()
         if line:
             return line
-        else:
-            raise StopIteration
+        raise StopIteration
     def __iter__(self):
         return self
     def __reset_buffer(self) -> None:
@@ -2821,7 +2802,6 @@ class BlobReader(io.IOBase, LoggingIdMixin):
     def flush(self) -> None:
         """Does nothing.
         """
-        pass
     def close(self) -> None:
         """Close the BlobReader.
         """
@@ -2954,6 +2934,7 @@ class BlobReader(io.IOBase, LoggingIdMixin):
     # Properties
     @property
     def log_context(self) -> Any:
+        "Logging context [owner]"
         if self._owner is None:
             return UNDEFINED
         if (r := self._owner()) is not None:
@@ -2998,7 +2979,7 @@ class Cursor(LoggingIdMixin):
     #:
     #: Required by Python DB API 2.0
     arraysize: int = 1
-    def __init__(self, connection: Connection, transaction: TransactionManager):
+    def __init__(self, connection: Connection, transaction: TransactionManager): # pylint: disable=W0621
         self._connection: Connection = connection
         self._dialect: int = connection.sql_dialect
         self._transaction: TransactionManager = transaction
@@ -3027,11 +3008,10 @@ class Cursor(LoggingIdMixin):
     def __next__(self):
         if (row := self.fetchone()) is not None:
             return row
-        else:
-            raise StopIteration
+        raise StopIteration
     def __iter__(self):
         return self
-    def _dead_con(self, obj) -> None:
+    def _dead_con(self, obj) -> None: # pylint: disable=W0613
         self._connection = None
     def _extract_db_array_to_list(self, esize: int, dtype: int, subtype: int,
                                   scale: int, dim: int, dimensions: List[int],
@@ -3041,7 +3021,6 @@ class Cursor(LoggingIdMixin):
             for _ in range(dimensions[dim]):
                 if dtype in (a.blr_text, a.blr_text2):
                     val = string_at(buf[bufpos:bufpos+esize], esize)
-                    ### Todo: verify handling of P version differences
                     if subtype != 1:   # non OCTETS
                         val = val.decode(self._encoding)
                     # CHAR with multibyte encoding requires special handling
@@ -3258,6 +3237,7 @@ class Cursor(LoggingIdMixin):
         return ok
     def _pack_input(self, meta: iMessageMetadata, buffer: bytes,
                     parameters: Sequence) -> Tuple[iMessageMetadata, bytes]:
+        # pylint: disable=R1702
         in_cnt = meta.get_count()
         if len(parameters) != in_cnt:
             raise InterfaceError(f"Statement parameter sequence contains"
@@ -3441,6 +3421,7 @@ class Cursor(LoggingIdMixin):
             in_meta.add_ref() # Everything went just fine, so we keep the metadata past 'with'
         return (in_meta, in_buffer)
     def _unpack_output(self) -> Tuple:
+        # pylint: disable=R1702
         values = []
         buffer = self._stmt._out_buffer
         buf_addr = addressof(buffer)
@@ -3581,7 +3562,7 @@ class Cursor(LoggingIdMixin):
                         raise a.exception_from_status(DatabaseError,
                                                       isc_status,
                                                       "Error in Cursor._unpack_output:isc_array_get_slice()")
-                    (value, bufpos) = self._extract_db_array_to_list(value_size,
+                    (value, _) = self._extract_db_array_to_list(value_size,
                                                                      value_type,
                                                                      sqlsubtype,
                                                                      value_scale,
@@ -3600,12 +3581,10 @@ class Cursor(LoggingIdMixin):
                 self._last_fetch_status = StateResult.NO_DATA
                 self.__output_cache = None
                 return result
-            else:
-                self._last_fetch_status = self._result.fetch_next(self._stmt._out_buffer)
-                if self._last_fetch_status == StateResult.OK:
-                    return self._unpack_output()
-                else:
-                    return None
+            self._last_fetch_status = self._result.fetch_next(self._stmt._out_buffer)
+            if self._last_fetch_status == StateResult.OK:
+                return self._unpack_output()
+            return None
         raise InterfaceError("Cannot fetch from cursor that did not executed a statement.")
     def _execute(self, operation: Union[str, Statement],
                  parameters: Sequence=None, flags: CursorFlag=CursorFlag.NONE) -> None:
@@ -3795,8 +3774,7 @@ class Cursor(LoggingIdMixin):
         """
         if self._stmt:
             return self._fetchone()
-        else:
-            raise InterfaceError("Cannot fetch from cursor that did not executed a statement.")
+        raise InterfaceError("Cannot fetch from cursor that did not executed a statement.")
     def fetchmany(self, size: int=None) -> List[Tuple]:
         """Fetch the next set of rows of a query result, returning a sequence of
         sequences (e.g. a list of tuples).
@@ -3822,7 +3800,7 @@ class Cursor(LoggingIdMixin):
     def fetchall(self) -> List[Tuple]:
         """Fetch all remaining rows of a query result set.
         """
-        return [row for row in self]
+        return list(self)
     def fetch_next(self) -> Optional[Tuple]:
         """Fetch the next row of a scrollable query result set.
 
@@ -3893,11 +3871,9 @@ class Cursor(LoggingIdMixin):
     def setinputsizes(self, sizes: Sequence[Type]) -> None:
         """Required by Python DB API 2.0, but pointless for Firebird, so it does nothing.
         """
-        pass
     def setoutputsize(self, size: int, column: int=None) -> None:
         """Required by Python DB API 2.0, but pointless for Firebird, so it does nothing.
         """
-        pass
     def is_closed(self) -> bool:
         """Returns True if cursor is closed.
         """
@@ -3920,6 +3896,7 @@ class Cursor(LoggingIdMixin):
         return self._connection
     @property
     def log_context(self) -> Connection:
+        "Logging context [Connection"
         return self._connection
     @property
     def statement(self) -> Statement:
@@ -4033,6 +4010,7 @@ class Cursor(LoggingIdMixin):
                 size = (0).from_bytes(info[res_walk:res_walk + 2], 'little')
                 res_walk += 2
                 count = (0).from_bytes(info[res_walk:res_walk + size], 'little')
+                # pylint: disable=R0916
                 if ((cur_count_type == 13 and self._stmt.type == StatementType.SELECT)
                     or (cur_count_type == 14 and self._stmt.type == StatementType.INSERT)
                     or (cur_count_type == 15 and self._stmt.type == StatementType.UPDATE)
@@ -4093,11 +4071,9 @@ class ServerInfoProvider(InfoProvider):
         request = bytes([info_code])
         self._get_data(request)
         tag = self.response.get_tag()
-        if (tag != info_code.value):
-            if tag == isc_info_error:  # pragma: no cover
-                raise InterfaceError("An error response was received")
-            else:  # pragma: no cover
-                raise InterfaceError("Result code does not match request code")
+        if tag != info_code.value:
+            raise InterfaceError("An error response was received" if tag == isc_info_error
+                                     else "Result code does not match request code")
         #
         if info_code in (SrvInfoCode.VERSION, SrvInfoCode.CAPABILITIES, SrvInfoCode.RUNNING):
             result = self.response.read_int()
@@ -4112,7 +4088,7 @@ class ServerInfoProvider(InfoProvider):
                 tag = self.response.get_tag()
                 if tag == SrvInfoCode.TIMEOUT:
                     return None
-                elif tag == SrvDbInfoOption.ATT:
+                if tag == SrvDbInfoOption.ATT:
                     num_attachments = self.response.read_short()
                 elif tag == SPBItem.DBNAME:
                     databases.append(self.response.read_sized_string(encoding=self._srv().encoding))
@@ -4814,69 +4790,69 @@ class ServerDbServices3(ServerServiceProvider):
         Arguments:
             database: Database specification or alias.
         """
-        #raise NotImplementedError
-        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
-            spb.insert_tag(ServerAction .REPAIR)
-            spb.insert_string(SPBItem.DBNAME, str(database))
-            spb.insert_int(SPBItem.OPTIONS, SrvRepairFlag.LIST_LIMBO_TRANS)
-            self._srv()._svc.start(spb.get_buffer())
-        self._srv()._reset_output()
-        self._srv()._fetch_complex_info(bytes([SrvInfoCode.LIMBO_TRANS]))
-        trans_ids = []
-        while not self._srv().response.is_eof():
-            tag = self._srv().response.get_tag()
-            if tag == SrvInfoCode.TIMEOUT:
-                return None
-            elif tag == SrvInfoCode.LIMBO_TRANS:
-                size = self._srv().response.read_short()
-                while not self._srv().response.is_eof() and self._srv().response.pos < size:
-                    tag = self._srv().response.get_tag()
-                    if tag == SvcRepairOption.TRA_HOST_SITE:
-                        site = self._srv().response.get_string()
-                    elif tag == SvcRepairOption.TRA_STATE:
-                        tag = self._srv().response.get_tag()
-                        if tag == SvcRepairOption.TRA_STATE_LIMBO:
-                            state = TransactionState.LIMBO
-                        elif tag == SvcRepairOption.TRA_STATE_COMMIT:
-                            state = TransactionState.COMMIT
-                        elif tag == SvcRepairOption.TRA_STATE_ROLLBACK:
-                            state = TransactionState.ROLLBACK
-                        elif tag == SvcRepairOption.TRA_STATE_UNKNOWN:
-                            state = TransactionState.UNKNOWN
-                        else:
-                            raise InterfaceError(f"Unknown transaction state {tag}")
-                    elif tag == SvcRepairOption.TRA_REMOTE_SITE:
-                        remote_site = self._srv().response.get_string()
-                    elif tag == SvcRepairOption.TRA_DB_PATH:
-                        db_path = self._srv().response.get_string()
-                    elif tag == SvcRepairOption.TRA_ADVISE:
-                        tag = self._srv().response.get_tag()
-                        if tag == SvcRepairOption.TRA_ADVISE_COMMIT:
-                            advise = TransactionState.COMMIT
-                        elif tag == SvcRepairOption.TRA_ADVISE_ROLLBACK:
-                            advise = TransactionState.ROLLBACK
-                        elif tag == SvcRepairOption.TRA_ADVISE_UNKNOWN:
-                            advise = TransactionState.UNKNOWN
-                        else:
-                            raise InterfaceError(f"Unknown transaction state {tag}")
-                    elif tag == SvcRepairOption.MULTI_TRA_ID:
-                        multi_id = self._srv().response.get_int()
-                    elif tag == SvcRepairOption.SINGLE_TRA_ID:
-                        single_id = self._srv().response.get_int()
-                    elif tag == SvcRepairOption.TRA_ID:
-                        tra_id = self._srv().response.get_int()
-                    elif tag == SvcRepairOption.MULTI_TRA_ID_64:
-                        multi_id = self._srv().response.get_int64()
-                    elif tag == SvcRepairOption.SINGLE_TRA_ID_64:
-                        single_id = self._srv().response.get_int64()
-                    elif tag == SvcRepairOption.TRA_ID_64:
-                        tra_id = self._srv().response.get_int64()
-                    else:
-                        raise InterfaceError(f"Unknown transaction state {tag}")
-                    trans_ids.append(None)
-        if self._srv().response.get_tag() != isc_info_end:
-            raise InterfaceError("Malformed result buffer (missing isc_info_end item)")
-        return trans_ids
+        raise NotSupportedError("Feature not yet implemented")
+        #with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
+            #spb.insert_tag(ServerAction .REPAIR)
+            #spb.insert_string(SPBItem.DBNAME, str(database))
+            #spb.insert_int(SPBItem.OPTIONS, SrvRepairFlag.LIST_LIMBO_TRANS)
+            #self._srv()._svc.start(spb.get_buffer())
+        #self._srv()._reset_output()
+        #self._srv()._fetch_complex_info(bytes([SrvInfoCode.LIMBO_TRANS]))
+        #trans_ids = []
+        #while not self._srv().response.is_eof():
+            #tag = self._srv().response.get_tag()
+            #if tag == SrvInfoCode.TIMEOUT:
+                #return None
+            #if tag == SrvInfoCode.LIMBO_TRANS:
+                #size = self._srv().response.read_short()
+                #while not self._srv().response.is_eof() and self._srv().response.pos < size:
+                    #tag = self._srv().response.get_tag()
+                    #if tag == SrvRepairOption.TRA_HOST_SITE:
+                        #site = self._srv().response.get_string()
+                    #elif tag == SrvRepairOption.TRA_STATE:
+                        #tag = self._srv().response.get_tag()
+                        #if tag == SrvRepairOption.TRA_STATE_LIMBO:
+                            #state = TransactionState.LIMBO
+                        #elif tag == SrvRepairOption.TRA_STATE_COMMIT:
+                            #state = TransactionState.COMMIT
+                        #elif tag == SrvRepairOption.TRA_STATE_ROLLBACK:
+                            #state = TransactionState.ROLLBACK
+                        #elif tag == SrvRepairOption.TRA_STATE_UNKNOWN:
+                            #state = TransactionState.UNKNOWN
+                        #else:
+                            #raise InterfaceError(f"Unknown transaction state {tag}")
+                    #elif tag == SrvRepairOption.TRA_REMOTE_SITE:
+                        #remote_site = self._srv().response.get_string()
+                    #elif tag == SrvRepairOption.TRA_DB_PATH:
+                        #db_path = self._srv().response.get_string()
+                    #elif tag == SrvRepairOption.TRA_ADVISE:
+                        #tag = self._srv().response.get_tag()
+                        #if tag == SrvRepairOption.TRA_ADVISE_COMMIT:
+                            #advise = TransactionState.COMMIT
+                        #elif tag == SrvRepairOption.TRA_ADVISE_ROLLBACK:
+                            #advise = TransactionState.ROLLBACK
+                        #elif tag == SrvRepairOption.TRA_ADVISE_UNKNOWN:
+                            #advise = TransactionState.UNKNOWN
+                        #else:
+                            #raise InterfaceError(f"Unknown transaction state {tag}")
+                    #elif tag == SrvRepairOption.MULTI_TRA_ID:
+                        #multi_id = self._srv().response.get_int()
+                    #elif tag == SrvRepairOption.SINGLE_TRA_ID:
+                        #single_id = self._srv().response.get_int()
+                    #elif tag == SrvRepairOption.TRA_ID:
+                        #tra_id = self._srv().response.get_int()
+                    #elif tag == SrvRepairOption.MULTI_TRA_ID_64:
+                        #multi_id = self._srv().response.get_int64()
+                    #elif tag == SrvRepairOption.SINGLE_TRA_ID_64:
+                        #single_id = self._srv().response.get_int64()
+                    #elif tag == SrvRepairOption.TRA_ID_64:
+                        #tra_id = self._srv().response.get_int64()
+                    #else:
+                        #raise InterfaceError(f"Unknown transaction state {tag}")
+                    #trans_ids.append(None)
+        #if self._srv().response.get_tag() != isc_info_end:
+            #raise InterfaceError("Malformed result buffer (missing isc_info_end item)")
+        #return trans_ids
     def commit_limbo_transaction(self, *, database: FILESPEC, transaction_id: int) -> None:
         """Resolve limbo transaction with commit.
 
@@ -5169,9 +5145,9 @@ class ServerTraceServices(ServerServiceProvider):
         response = self._srv()._fetch_line()
         if response.startswith('Trace session ID'):
             return int(response.split()[3])
-        else:  # pragma: no cover
-            # response should contain the error message
-            raise DatabaseError(response)
+        # pragma: no cover
+        # response should contain the error message
+        raise DatabaseError(response)
     def stop(self, *, session_id: int) -> str:
         """Stop trace session.
 
@@ -5279,8 +5255,7 @@ class Server(LoggingIdMixin):
     def __next__(self):
         if (line := self.readline()) is not None:
             return line
-        else:
-            raise StopIteration
+        raise StopIteration
     def __iter__(self):
         return self
     def __str__(self):
@@ -5304,14 +5279,14 @@ class Server(LoggingIdMixin):
         self._svc.query(send, request, self.response.raw)
         if self.response.is_truncated():  # pragma: no cover
             raise InterfaceError("Requested data can't fint into largest possible buffer")
-    def _fetch_line(self, timeout: int=-1) -> Optional[str]:
+    def _fetch_line(self, timeout: int=-1) -> Optional[str]: # pylint: disable=W0613
         self._fetch_complex_info(bytes([SrvInfoCode.LINE]))
         result = None
         while not self.response.is_eof():
             tag = self.response.get_tag()
             if tag == SrvInfoCode.TIMEOUT:
                 return None
-            elif tag == SrvInfoCode.LINE:
+            if tag == SrvInfoCode.LINE:
                 result = self.response.read_sized_string(encoding=self.encoding)
         if self.response.get_tag() != isc_info_end:  # pragma: no cover
             raise InterfaceError("Malformed result buffer (missing isc_info_end item)")
@@ -5393,7 +5368,7 @@ class Server(LoggingIdMixin):
     def readlines(self) -> List[str]:
         """Get list of remaining output lines from last service query.
         """
-        return [line for line in self]
+        return list(self)
     def wait(self) -> None:
         """Wait until running service completes, i.e. stops sending data.
         """

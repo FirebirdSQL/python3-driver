@@ -22,7 +22,7 @@
 # See LICENSE.TXT for details.
 
 import unittest
-from unittest.mock import patch
+#from unittest.mock import patch
 import datetime
 import sys
 import os
@@ -1571,7 +1571,7 @@ class TestServerStandard(DriverTestBase):
             svc.info.get_log()
             self.assertTrue(svc.is_running())
             # fetch materialized
-            print(''.join(svc.readlines()))
+            svc.readlines()
             self.assertFalse(svc.is_running())
     def test_wait(self):
         with connect_server(FBTEST_HOST, user='SYSDBA', password=FBTEST_PASSWORD) as svc:
@@ -1632,7 +1632,7 @@ class TestServerServices(DriverTestBase):
         self.assertGreater(len(output), 0)
         self.assertEqual(output, log)
     def test_04_get_limbo_transaction_ids(self):
-        #self.skipTest('Not implemented yet')
+        self.skipTest('Not implemented yet')
         ids = self.svc.database.get_limbo_transaction_ids(database='employee')
         self.assertIsInstance(ids, type(list()))
     def test_05_trace(self):

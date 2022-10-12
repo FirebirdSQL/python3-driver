@@ -22,6 +22,44 @@ name space. In normal circumstances is not necessary to import sub-modules direc
 you may need them to access some not so frequently needed driver functionality like driver
 hooks, or to implement your own callback interfaces.
 
+.. important::
+
+   `firebird-driver` is designed to support all Firebird versions starting from version 3.0.
+   Because each Firebird major version adds new functionality, and Firebird OO API could
+   be extended even in maintenance releases, the driver isolates volatile functionality
+   into special class hierarchies.
+
+   For example information about database (provided via `~.iAttachment_v3.get_info()` API
+   call) is isolated into separate `.DatabaseInfoProvider` class hierarchy.
+   The `.Connection.info` attribute then provides access to instance of appropriate class
+   - `.DatabaseInfoProvider` or its ancestor - for connected database.
+   The `.DatabaseInfoProvider` class **always** provides functionality of most recent
+   Firebird version supported by driver.
+
+   This layout has several important consequences:
+
+   1. The `.DatabaseInfoProvider` class may change in major driver release if new Firebird
+      functionality is introduced. This normally represent no problems for client application
+      as backward compatibility is guaranteed.
+   2. You should check the class hierarchy for "evolving" classes when you start using the
+      driver, and whenever you upgrade to new **major** driver version. If there are versioned
+      ancestor classes (they always have Firebird version number in their name) for canonical
+      (top level) ones, you should adjust your application to deal with situations when
+      instance of ancestor class is provided by driver instead top-level one, to prevent
+      run-time exceptions caused by access to functionality not provided by currently attached
+      Firebird server.
+
+      .. note::
+
+         The same apply for low-level API (`~firebird.driver.interfaces`) with difference
+         that they may change in minor driver releases (because API could be extended in
+         Firebird maintenance releases).
+
+   .. seealso::
+
+      `.DatabaseInfoProvider`, `.TransactionInfoProvider`, `.ServerInfoProvider`,
+      `.ServerDbServices`, `.ServerUserServices` and `.ServerTraceServices`.
+
 .. index:: Configuration
 
 Configuration
@@ -53,7 +91,7 @@ configuration string, dict or file(s).
 
    If you want to use specific Firebird client library, you must set the value of
    `.DriverConfig.fb_client_library` configuration option **before** your application
-   calls any from following functions: `.connect()`, `.create_database()`,
+   calls any from following functions: `.connect()`, `~firebird.driver.core.create_database()`,
    `.connect_server()`, `.load_api()` or `.get_api()`.
 
 .. seealso::
@@ -97,7 +135,7 @@ Access to the database is made available through `.Connection` objects. Firebird
 provides two constructors for these:
 
 * `.connect` - Returns `.Connection` to database that already exists.
-* `.create_database` - Returns `.Connection` to newly created database.
+* `~firebird.driver.core.create_database` - Returns `.Connection` to newly created database.
 
 
 .. index::
@@ -274,7 +312,7 @@ But more convenient approach is using single configuration file::
    # create 'mydb' database
    con = create_database('mydb')
 
-.. seealso:: `.create_database()` for details.
+.. seealso:: `~firebird.driver.core.create_database()` for details.
 
 .. index::
    pair: Database; delete
@@ -289,7 +327,7 @@ the deletion, it may have supporting objects such as temporary sort files, and
 it may even have dependent shadow databases. Although the database engine
 recognizes a `DROP DATABASE` SQL statement, support for that statement is limited
 to the `isql` command-line administration utility. However, the engine supports
-the deletion of databases via an API call, which FDB exposes as
+the deletion of databases via an API call, which `firebird-driver` exposes as
 `~.Connection.drop_database` method in `.Connection` class. So, to drop a database
 you need to connect to it first.
 
@@ -339,8 +377,8 @@ Closing the connection
 There are many local and server resources used by firebird-driver that must be properly
 managed, and disposed when they are no longer necessary. All objects that require proper
 finalization provide `close()` method that must be called when object is no longer needed.
-The `.Connection` objects are the most important ones, as other most frequently used
-objects like cursors, prepared statements and transactions are typically associated with
+The `.Connection` (and `.Server`) objects are the most important ones, as other most frequently
+used objects like cursors, prepared statements and transactions are typically associated with
 connections.
 
 You may call the `close()` method directly, or use the :ref:`with <with>` statement
@@ -420,19 +458,24 @@ available:
 Getting information about database
 ----------------------------------
 
-Because the scope and type of database information depends on the version of the Firebird server
-and database ODS, this information is made available through a separate class `.DatabaseInfoProvider`.
-The `.Connection.info` property provides access to `.DatabaseInfoProvider` object appropriate
-for attached database.
+.. important::
 
-Although you may query the information directly from server using `.DatabaseInfoProvider.get_info()`
-method (that wraps the Firebird IAttachment.getInfo() API call), the `.DatabaseInfoProvider` object
+   Because the scope and type of database information depends on the version of the Firebird
+   server and database ODS, this information is made available through a separate class
+   `.DatabaseInfoProvider`. The `.Connection.info` property provides access to
+   instance of `.DatabaseInfoProvider` or it's **ancestor** class according to ODS of attached
+   database and Firebird version.
+
+Although you may query the information directly from server using
+`~firebird.driver.core.DatabaseInfoProvider3.get_info()` method (that wraps the Firebird
+`.iAttachment.getInfo()` API call), the `.DatabaseInfoProvider` object
 provides more convenient methods and properties for obtaining specific information directly.
 
 .. note::
 
-   Some information provided by `.DatabaseInfoProvider` properties (like `cache_hit_ratio`)
-   could not be obtained via `get_info()` method.
+   Some information provided by `.DatabaseInfoProvider` properties
+   (like `~.DatabaseInfoProvider3.cache_hit_ratio`) could not be obtained via
+   `get_info()` method.
 
 
 **Example:**
@@ -1171,7 +1214,7 @@ including automatic transliteration between character sets when necessary.
    that is not `native` for client application.
 
    Character set for communication is specified using `~.DatabaseConfig.charset`
-   configuration option, or parameter in `.connect()` or `.create_database()` call.
+   configuration option, or parameter in `.connect()` or `~firebird.driver.core.create_database()` call.
 
    When `connection charset` is defined, all textual data returned from server are encoded
    in this charset, and client application must ensure that all textual data sent to server
@@ -1534,7 +1577,7 @@ provides several convenient ways for TPB construction:
 
 1. The `.tpb()` function for simple TPBs.
 
-2. The `.TPB` class for complex TPBs (including table reservation etc.).
+2. The `~firebird.driver.core.TPB` class for complex TPBs (including table reservation etc.).
 
 **Examples:**
 
@@ -1561,12 +1604,17 @@ provides several convenient ways for TPB construction:
 Getting information about transaction
 -------------------------------------
 
-The `.TransactionManager.info` property provides access to `.TransactionInfoProvider`
-object that could be used to obtain information about **active** transaction.
+.. important::
+
+   Because the scope and type of transaction information depends on the version of the Firebird
+   server, this information is made available through a separate class
+   `.TransactionInfoProvider`. The `.TransactionManager.info` property provides access to
+   instance of `.TransactionInfoProvider` or it's **ancestor** class according to used
+   Firebird version.
 
 Although you may query the information directly from server using
-`.TransactionInfoProvider.get_info()` method (that wraps the Firebird ITransaction.getInfo()
-API call), the TransactionInfoProvider object provides more convenient methods and properties
+`~.TransactionInfoProvider3.get_info()` method (that wraps the Firebird `ITransaction.getInfo()`
+API call), the `.TransactionInfoProvider` object provides more convenient methods and properties
 for obtaining specific information directly.
 
 **Example:**
@@ -1927,7 +1975,7 @@ Output::
 Transaction Context Manager
 ---------------------------
 
-Firebird-driver provides context manager `.transaction` that allows automatic
+Firebird-driver provides context manager `~firebird.driver.core.transaction` that allows automatic
 transaction management using :ref:`WITH statement <WITH>`. It can work with
 any object that supports `begin()`, `commit()` and `rollback()` methods, i.e.
 `.Connection`, `.TransactionManager` or `.DistributedTransactionManager`.
@@ -2382,6 +2430,24 @@ to these services, firebird-driver isolated the transfer process to separate met
   one string parameter. This method is then called with each output line coming from service.
 * `~.Server.wait()` - Waits for Sevice to finish, ignoring rest of the output it may produce.
 
+.. important::
+
+   The Firebird server sends text output from services as packets, that could have two forms.
+   The method for packet construction used for text transfer is controlled by `.Server.mode`
+   attribute with next possible values:
+
+   1. `.SrvInfoCode.LINE` : A single line of text.
+   2. `.SrvInfoCode.TO_EOF` : A block of text up to specified (buffer) size.
+
+   Both methods have specific pros and cons:
+
+   1. `~.SrvInfoCode.LINE` means more roundtrips and thus slower transfer of service output,
+      but each line is sent to client immediately when it's available.
+   2. `~.SrvInfoCode.TO_EOF` means fewer roundtrips so large output is transferred quickly,
+      but service output is not sent until the transfer buffer is not full, or service stops.
+
+   **The default mode is** `~.SrvInfoCode.TO_EOF` **with 64K buffer.**
+
 .. warning::
 
    Until output is not fully fetched from service, any attempt to start another asynchronous
@@ -2477,16 +2543,22 @@ Output::
 Server Configuration and State information
 ------------------------------------------
 
-Server configuration and other information is provided through `.ServerInfoProvider` instance
-accessible via `.Server.info` property.
+.. important::
+
+   Because the scope and type of service information depends on the version of the Firebird
+   server, this information is made available through a separate class
+   `.ServerInfoProvider`. The `.Server.info` property provides access to
+   instance of `.ServerInfoProvider` or it's **ancestor** class according to attached
+   Firebird server version.
+
 
 `.ServerInfoProvider` methods and properties:
 
 * `~.ServerInfoProvider.get_log()` - Request the contents of the server’s log file (:file:`firebird.log`).
 
-   This method is so-called `Async service` that only initiates log transfer. Actual log
-   content could be read by one from many methods for `text output from Services`_ that
-   `.Server` provides .
+  This method is so-called `Async service` that only initiates log transfer. Actual log
+  content could be read by one from many methods for `text output from Services`_ that
+  `.Server` provides .
 
 * `~.ServerInfoProvider.version` - Returns Firebird server version as SEMVER string.
 
@@ -2564,67 +2636,67 @@ Database options
 Database options could be set using `.ServerDbServices` instance accessible via
 `.Server.database` property.
 
-`~.ServerDbServices.set_default_cache_size()` - Sets individual page cache size for database.
+* `~.ServerDbServices.set_default_cache_size()` - Sets individual page cache size for database.
 
-   .. sourcecode:: python
+  .. sourcecode:: python
 
-      >>> from firebird.driver import connect_server
-      >>> with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
-      >>>     srv.database.set_default_cache_size(database='employee.fdb', size=5000)
+     >>> from firebird.driver import connect_server
+     >>> with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+     >>>     srv.database.set_default_cache_size(database='employee.fdb', size=5000)
 
-`~.ServerDbServices.set_sweep_interval()` - Sets database sweep interval.
+* `~.ServerDbServices.set_sweep_interval()` - Sets database sweep interval.
 
-   .. sourcecode:: python
+  .. sourcecode:: python
 
-      >>> from firebird.driver import connect_server
-      >>> with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
-      >>>     srv.database.set_sweep_interval(database='employee.fdb', interval=100000)
+     >>> from firebird.driver import connect_server
+     >>> with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+     >>>     srv.database.set_sweep_interval(database='employee.fdb', interval=100000)
 
-`~.ServerDbServices.set_space_reservation()` - Sets space reservation option for database.
+* `~.ServerDbServices.set_space_reservation()` - Sets space reservation option for database.
 
-   .. sourcecode:: python
+  .. sourcecode:: python
 
-      >>> from firebird.driver import connect_server, DbSpaceReservation
-      >>> with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
-      >>>     srv.database.set_space_reservation(database='employee.fdb', mode=DbSpaceReservation.USE_FULL)
+     >>> from firebird.driver import connect_server, DbSpaceReservation
+     >>> with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+     >>>     srv.database.set_space_reservation(database='employee.fdb', mode=DbSpaceReservation.USE_FULL)
 
-`~.ServerDbServices.set_write_mode()` - Sets database write mode (SYNC/ASYNC).
+* `~.ServerDbServices.set_write_mode()` - Sets database write mode (SYNC/ASYNC).
 
-   .. sourcecode:: python
+  .. sourcecode:: python
 
-      >>> from firebird.driver import connect_server, DbWriteMode
-      >>> with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
-      >>>     srv.database.set_write_mode(database='employee.fdb', mode=DbWriteMode.ASYNC)
+     >>> from firebird.driver import connect_server, DbWriteMode
+     >>> with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+     >>>     srv.database.set_write_mode(database='employee.fdb', mode=DbWriteMode.ASYNC)
 
-`~.ServerDbServices.set_access_mode()` - Sets database access mode (R/W or R/O).
+* `~.ServerDbServices.set_access_mode()` - Sets database access mode (R/W or R/O).
 
-   .. sourcecode:: python
+  .. sourcecode:: python
 
-      >>> from firebird.driver import connect_server, DbAccessMode
-      >>> with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
-      >>>     srv.database.set_access_mode(database='employee.fdb', mode=DbAccessMode.READ_ONLY)
+     >>> from firebird.driver import connect_server, DbAccessMode
+     >>> with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+     >>>     srv.database.set_access_mode(database='employee.fdb', mode=DbAccessMode.READ_ONLY)
 
-`~.ServerDbServices.set_sql_dialect()` - Sets database SQL dialect.
+* `~.ServerDbServices.set_sql_dialect()` - Sets database SQL dialect.
 
-   .. warning::
+  .. warning::
 
-      Changing SQL dialect on existing database is not recommended. Only newly created
-      database objects would respect new dialect setting, while objects created with
-      previous dialect remain unchanged. That may have dire consequences.
+     Changing SQL dialect on existing database is not recommended. Only newly created
+     database objects would respect new dialect setting, while objects created with
+     previous dialect remain unchanged. That may have dire consequences.
 
-   .. sourcecode:: python
+  .. sourcecode:: python
 
-      >>> from firebird.driver import connect_server
-      >>> with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
-      >>>     srv.database.set_sql_dialect(database='employee.fdb', dialect=1)
+     >>> from firebird.driver import connect_server
+     >>> with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+     >>>     srv.database.set_sql_dialect(database='employee.fdb', dialect=1)
 
-`~.ServerDbServices.no_linger()` - Sets one-off override for database linger.
+* `~.ServerDbServices.no_linger()` - Sets one-off override for database linger.
 
-   .. sourcecode:: python
+  .. sourcecode:: python
 
-      >>> from firebird.driver import connect_server
-      >>> with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
-      >>>     srv.database.no_linger(database='employee.fdb')
+     >>> from firebird.driver import connect_server
+     >>> with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+     >>>     srv.database.no_linger(database='employee.fdb')
 
 .. index::
    triple: Services; Database; maintenance
@@ -2632,151 +2704,159 @@ Database options could be set using `.ServerDbServices` instance accessible via
 Database maintenance
 --------------------
 
-Database maintenance and other database-related actions could be performed using methods
-of `.ServerDbServices` instance accessible via `.Server.database` property.
+.. important::
 
-`~.ServerDbServices.get_statistics()` - Returns database statistics produced by gstat
-utility.
+   Because available database-related actions depends on the version of the Firebird
+   server, they are made available through a separate class `.ServerDbServices`.
+   The `.Server.database` property provides access to instance of `.ServerDbServices` or
+   it's **ancestor** class according to attached Firebird server version.
 
-   This method is so-called `Async service` that only initiates report processing. Actual
-   report content could be read by one from many methods for `text output from Services`_ that
-   `.Server` provides .
+* `~.ServerDbServices3.get_statistics()` - Returns database statistics produced by gstat
+  utility.
 
-   .. sourcecode:: python
+  This method is so-called `Async service` that only initiates report processing. Actual
+  report content could be read by one from many methods for `text output from Services`_ that
+  `.Server` provides .
 
-      from firebird.driver import connect_server, SrvStatFlag
-      with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
-          srv.database.get_statistics(database='employee.fdb',
-                                      flags=SrvStatFlag.DATA_PAGES | SrvStatFlag.RECORD_VERSIONS),
-                                      tables=['EMPLOYEE','PROJECT'])
-          stats = srv.readlines()
+  .. sourcecode:: python
 
-`~.ServerDbServices.backup()` - Performs logical (GBAK) database backup.
+     from firebird.driver import connect_server, SrvStatFlag
+     with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+         srv.database.get_statistics(database='employee.fdb',
+                                     flags=SrvStatFlag.DATA_PAGES | SrvStatFlag.RECORD_VERSIONS),
+                                     tables=['EMPLOYEE','PROJECT'])
+         stats = srv.readlines()
 
-   This method is so-called `Async service` that only initiates the backup process. Output
-   from gbak could be read by one from many methods for `text output from Services`_ that
-   `.Server` provides .
+* `~.ServerDbServices3.backup()` - Performs logical (GBAK) database backup.
 
-   .. sourcecode:: python
+  This method is so-called `Async service` that only initiates the backup process. Output
+  from gbak could be read by one from many methods for `text output from Services`_ that
+  `.Server` provides .
 
-      from firebird.driver import connect_server, SrvBackupFlag
-      with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
-          srv.database.backup(database='employee.fdb',
-                              backup='/backup/employee.fbk',
-                              flags=SrvBackupFlag.IGNORE_CHECKSUMS | SrvBackupFlag.NO_GARBAGE_COLLECT,
-                              stats='TD', verbose=True)
-          report = srv.readlines()
+  .. sourcecode:: python
 
-`~.ServerDbServices.local_backup()` - Performs logical (GBAK) database backup into local byte
-stream.
+     from firebird.driver import connect_server, SrvBackupFlag
+     with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+         srv.database.backup(database='employee.fdb',
+                             backup='/backup/employee.fbk',
+                             flags=SrvBackupFlag.IGNORE_CHECKSUMS | SrvBackupFlag.NO_GARBAGE_COLLECT,
+                             stats='TD', verbose=True)
+         report = srv.readlines()
 
-   .. sourcecode:: python
+* `~.ServerDbServices3.local_backup()` - Performs logical (GBAK) database backup into local byte
+  stream.
 
-      from firebird.driver import connect_server, SrvBackupFlag
-      f = open('/backup/employee.fbk',mode='wb')
-      with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
-          srv.database.local_backup(database='employee.fdb', backup_stream=f,
-                                    flags=SrvBackupFlag.IGNORE_CHECKSUMS | SrvBackupFlag.NO_GARBAGE_COLLECT)
-      f.close()
+  .. sourcecode:: python
 
-`~.ServerDbServices.restore()` - Performs database restore from logical (GBAK) backup.
+     from firebird.driver import connect_server, SrvBackupFlag
+     f = open('/backup/employee.fbk',mode='wb')
+     with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+         srv.database.local_backup(database='employee.fdb', backup_stream=f,
+                                   flags=SrvBackupFlag.IGNORE_CHECKSUMS | SrvBackupFlag.NO_GARBAGE_COLLECT)
+     f.close()
 
-   This method is so-called `Async service` that only initiates the restore process. Output
-   from gbak could be read by one from many methods for `text output from Services`_ that
-   `.Server` provides .
+* `~.ServerDbServices3.restore()` - Performs database restore from logical (GBAK) backup.
 
-   .. sourcecode:: python
+  This method is so-called `Async service` that only initiates the restore process. Output
+  from gbak could be read by one from many methods for `text output from Services`_ that
+  `.Server` provides .
 
-      from firebird.driver import connect_server, SrvRestoreFlag
-      with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
-          srv.database.restore(backup='/backup/employee.fbk',
-                               database='/data/employee.fdb',
-                               flags=SrvRestoreFlag.REPLACE,
-                               stats='TD', verbose=True, page_size=8192)
-          report = srv.readlines()
+  .. sourcecode:: python
 
-`~.ServerDbServices.local_restore()` - Performs database restore from logical (GBAK) backup
-stored in local byte stream.
+     from firebird.driver import connect_server, SrvRestoreFlag
+     with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+         srv.database.restore(backup='/backup/employee.fbk',
+                              database='/data/employee.fdb',
+                              flags=SrvRestoreFlag.REPLACE,
+                              stats='TD', verbose=True, page_size=8192)
+         report = srv.readlines()
 
-   .. sourcecode:: python
+* `~.ServerDbServices3.local_restore()` - Performs database restore from logical (GBAK) backup
+  stored in local byte stream.
 
-      from firebird.driver import connect_server, SrvRestoreFlag
-      f = open('/backup/employee.fbk',mode='rb')
-      with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
-          srv.database.local_restore(backup_stream=f, database='/data/employee.fdb',
-                                     flags=SrvRestoreFlag.REPLACE, page_size=8192)
-      f.close()
+  .. sourcecode:: python
 
-`~.ServerDbServices.nbackup()` - Performs physical (NBACKUP) database backup.
+     from firebird.driver import connect_server, SrvRestoreFlag
+     f = open('/backup/employee.fbk',mode='rb')
+     with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+         srv.database.local_restore(backup_stream=f, database='/data/employee.fdb',
+                                    flags=SrvRestoreFlag.REPLACE, page_size=8192)
+     f.close()
 
-   .. sourcecode:: python
+* `~.ServerDbServices3.nbackup()` - Performs physical (NBACKUP) database backup.
 
-      from firebird.driver import connect_server
-      with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
-          srv.database.nbackup(database='employee.fdb', backup='/backup/employee.bkp1', level=1)
+  .. sourcecode:: python
 
-`~.ServerDbServices.nrestore()` - Performs restore from physical (NBACKUP) database
-backup.
+     from firebird.driver import connect_server
+     with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+         srv.database.nbackup(database='employee.fdb', backup='/backup/employee.bkp1', level=1)
 
-   .. sourcecode:: python
+* `~.ServerDbServices3.nrestore()` - Performs restore from physical (NBACKUP) database
+  backup.
 
-      from firebird.driver import connect_server
-      with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
-          srv.database.nrestore(backups=['/backup/employee.bkp0', '/backup/employee.bkp1'],
-                                database='/data/employee.fdb')
+  .. sourcecode:: python
 
-`~.ServerDbServices.shutdown()` - Database shutdown.
+     from firebird.driver import connect_server
+     with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+         srv.database.nrestore(backups=['/backup/employee.bkp0', '/backup/employee.bkp1'],
+                               database='/data/employee.fdb')
 
-   .. sourcecode:: python
+* `~.ServerDbServices3.shutdown()` - Database shutdown.
 
-      from firebird.driver import connect_server, ShutdownMode, ShutdownMethod
-      with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
-          srv.database.shutdown(database='employee.fdb', mode=ShutdownMode.SINGLE,
-                                method=ShutdownMethod.FORCED, timeout=10)
+  .. sourcecode:: python
 
-`~.ServerDbServices.bring_online()` - Bring previously shut down database back online.
+     from firebird.driver import connect_server, ShutdownMode, ShutdownMethod
+     with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+         srv.database.shutdown(database='employee.fdb', mode=ShutdownMode.SINGLE,
+                               method=ShutdownMethod.FORCED, timeout=10)
 
-   .. sourcecode:: python
+* `~.ServerDbServices3.bring_online()` - Bring previously shut down database back online.
 
-      from firebird.driver import connect_server, OnlineMode
-      with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
-          srv.database.bring_online(database='employee.fdb', mode=OnlineMode.MULTI)
+  .. sourcecode:: python
 
-`~.ServerDbServices.sweep()` - Performs database sweep operation.
+     from firebird.driver import connect_server, OnlineMode
+     with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+         srv.database.bring_online(database='employee.fdb', mode=OnlineMode.MULTI)
 
-   .. sourcecode:: python
+* `~.ServerDbServices3.sweep()` - Performs database sweep operation.
 
-      from firebird.driver import connect_server
-      with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
-          srv.database.sweep(database='employee.fdb')
+  .. sourcecode:: python
 
-`~.ServerDbServices.validate()` - Performs database validation.
+     from firebird.driver import connect_server
+     with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+         srv.database.sweep(database='employee.fdb')
 
-   This method is so-called `Async service` that only initiates the validation process. Output
-   from validation could be read by one from many methods for `text output from Services`_ that
-   `.Server` provides .
+* `~.ServerDbServices3.validate()` - Performs database validation.
 
-   .. sourcecode:: python
+  This method is so-called `Async service` that only initiates the validation process. Output
+  from validation could be read by one from many methods for `text output from Services`_ that
+  `.Server` provides .
 
-      from firebird.driver import connect_server
-      with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
-          srv.database.validate(database='employee.fdb')
-          report = srv.readlines()
+  .. sourcecode:: python
 
-`~.ServerDbServices.repair()` - Performs database repair operation.
+     from firebird.driver import connect_server
+     with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+         srv.database.validate(database='employee.fdb')
+         report = srv.readlines()
 
-   .. sourcecode:: python
+* `~.ServerDbServices3.repair()` - Performs database repair operation.
 
-      from firebird.driver import connect_server, SrvRepairFlag
-      with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
-          srv.database.repair(database='employee.fdb',
-                              flags=SrvRepairFlag.REPAIR | SrvRepairFlag.KILL_SHADOWS)
+  .. sourcecode:: python
 
-`~.ServerDbServices.get_limbo_transaction_ids()` - Returns list of transactions in limbo.
+     from firebird.driver import connect_server, SrvRepairFlag
+     with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+         srv.database.repair(database='employee.fdb',
+                             flags=SrvRepairFlag.REPAIR | SrvRepairFlag.KILL_SHADOWS)
 
-`~.ServerDbServices.commit_limbo_transaction()` - Resolves limbo transaction with commit.
+* `~.ServerDbServices3.get_limbo_transaction_ids()` - Returns list of transactions in limbo.
 
-`~.ServerDbServices.rollback_limbo_transaction()` - Resolves limbo transaction with rollback.
+* `~.ServerDbServices3.commit_limbo_transaction()` - Resolves limbo transaction with commit.
+
+* `~.ServerDbServices3.rollback_limbo_transaction()` - Resolves limbo transaction with rollback.
+
+* `~.ServerDbServices.nfix_database` - Fixup database after filesystem copy.
+
+* `~.ServerDbServices.set_replica_mode` - Manage replica database.
 
 .. index::
    triple: Services; Database; users
@@ -2784,10 +2864,15 @@ backup.
 User maintenance
 ----------------
 
-User maintenance could be performed using methods of `.ServerUserServices` instance accessible
-via `.Server.user` property.
+.. important::
 
-.. note::
+   Because user maintenance functionality may depend on the version of the Firebird
+   server, this functionality is made available through a separate class
+   `.ServerUserServices`. The `.Server.user` property provides access to
+   instance of `.ServerUserServices` or it's **ancestor** class according to attached
+   Firebird server version.
+
+.. tip::
 
    Since Firebird 2.5 you can use SQL commands (CREATE/ALTER/DROP USER) to manage users in
    a security database from a regular database attachment.
@@ -2795,17 +2880,17 @@ via `.Server.user` property.
    The SQL set of DDL commands for managing user accounts has been further enhanced in Firebird 3,
    thus improving the DDL capabilities in a way that exceeds capabilities of user management services.
 
-`~.ServerUserServices.get_all()` - Returns information about all users.
+* `~.ServerUserServices.get_all()` - Returns information about all users.
 
-`~.ServerUserServices.get()` - Returns information about specified users.
+* `~.ServerUserServices.get()` - Returns information about specified users.
 
-`~.ServerUserServices.add()` - Add new user.
+* `~.ServerUserServices.add()` - Add new user.
 
-`~.ServerUserServices.update()` - Update user information.
+* `~.ServerUserServices.update()` - Update user information.
 
-`~.ServerUserServices.delete()` - Delete user.
+* `~.ServerUserServices.delete()` - Delete user.
 
-`~.ServerUserServices.exists()` - Returns True if user exists.
+* `~.ServerUserServices.exists()` - Returns True if user exists.
 
 .. index::
    pair: Services; trace
@@ -2813,49 +2898,54 @@ via `.Server.user` property.
 Trace sessions
 --------------
 
-Trace sessions could be managed using methods of `.ServerTraceServices` instance accessible
-via `.Server.trace` property.
+.. important::
 
-`.ServerTraceServices.start()` - Start new trace session. Requires trace `configuration` and returns `Session ID`.
+   Because trace functionality may depend on the version of the Firebird server, this
+   functionality is made available through a separate class `.ServerTraceServices`.
+   The `.Server.trace` property provides access to instance of `.ServerTraceServices` or
+   its **ancestor** class according to attached Firebird server version.
 
-   This method is so-called `Async service` that only starts the trace session. Output
-   from trace session could be read by one from many methods for `text output from Services`_
-   that `.Server` provides .
 
-   .. sourcecode:: python
+* `.ServerTraceServices.start()` - Start new trace session. Requires trace `configuration` and returns `Session ID`.
 
-      from firebird.driver import connect_server
+  This method is so-called `Async service` that only starts the trace session. Output
+  from trace session could be read by one from many methods for `text output from Services`_
+  that `.Server` provides .
 
-      trace_config = """database = %[\\/]employee.fdb
-      {
-          enabled = true
-          log_statement_finish = true
-          print_plan = true
-          include_filter = %%SELECT%%
-          exclude_filter = %%RDB$%%
-          time_threshold = 0
-          max_sql_length = 2048
-      }
-      """
+  .. sourcecode:: python
 
-      with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
-          trace_id = srv.trace.start(trace_config,'test_trace_1')
-          trace_log = []
-          # Get first 10 lines of trace output
-          for i in range(10):
-              trace_log.append(srv.readline())
-          # Stop trace session
-          # Because trace session blocks the connection, we need another one to stop trace session!
-          with connect_server('localhost', user='SYSDBA', password='masterkey') as srv_aux:
-              srv_aux.trace.stop(trace_id)
+     from firebird.driver import connect_server
 
-`.ServerTraceServices.stop()` - Stop trace session.
+     trace_config = """database = %[\\/]employee.fdb
+     {
+         enabled = true
+         log_statement_finish = true
+         print_plan = true
+         include_filter = %%SELECT%%
+         exclude_filter = %%RDB$%%
+         time_threshold = 0
+         max_sql_length = 2048
+     }
+     """
 
-`.ServerTraceServices.suspend()` - Suspend trace session.
+     with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
+         trace_id = srv.trace.start(trace_config,'test_trace_1')
+         trace_log = []
+         # Get first 10 lines of trace output
+         for i in range(10):
+             trace_log.append(srv.readline())
+         # Stop trace session
+         # Because trace session blocks the connection, we need another one to stop trace session!
+         with connect_server('localhost', user='SYSDBA', password='masterkey') as srv_aux:
+             srv_aux.trace.stop(trace_id)
 
-`.ServerTraceServices.resume()` - Resume trace session.
+* `.ServerTraceServices.stop()` - Stop trace session.
 
-`.ServerTraceServices.sessions` - Dictionary with active trace sessions. The key is session ID, value is `.TraceSession` instance.
+* `.ServerTraceServices.suspend()` - Suspend trace session.
+
+* `.ServerTraceServices.resume()` - Resume trace session.
+
+* `.ServerTraceServices.sessions` - Dictionary with active trace sessions. The key is session ID, value is `.TraceSession` instance.
 
 
 .. index:: Logging
@@ -3090,7 +3180,7 @@ by hook is ignored.
 ConnectionHook
 --------------
 
-`.ConnectionHook.ATTACH_REQUEST`
+* `.ConnectionHook.ATTACH_REQUEST`
 
   This hook is invoked after all parameters are preprocessed and before `.Connection` is created.
 
@@ -3101,14 +3191,14 @@ ConnectionHook
   First instance returned by any hook of this type will become the return value of caller function
   and other hooks of the same type are not invoked.
 
-`.ConnectionHook.ATTACHED`
+* `.ConnectionHook.ATTACHED`
 
   This hook is invoked just before `.Connection` (or subclass) instance is returned to the client
   application.
 
   Hook routine must have signature: `hook_func(con: Connection) -> None`.
 
-`.ConnectionHook.DETACH_REQUEST`
+* `.ConnectionHook.DETACH_REQUEST`
 
   This hook is invoked before connection is closed.
 
@@ -3116,13 +3206,13 @@ ConnectionHook
 
   If any hook function returns True, connection is not closed.
 
-`.ConnectionHook.CLOSED`
+* `.ConnectionHook.CLOSED`
 
   This hook is invoked after connection is closed.
 
   Hook routine must have signature: `hook_func(con: Connection) -> None`.
 
-`.ConnectionHook.DROPPED`
+* `.ConnectionHook.DROPPED`
 
   This hook is invoked after database is dropped (and connection is closed).
 
@@ -3131,7 +3221,7 @@ ConnectionHook
 ServerHook
 ----------
 
-`.ServerHook.ATTACHED`
+* `.ServerHook.ATTACHED`
 
   This hook is invoked before `.Server` instance is returned.
 

@@ -641,3 +641,63 @@ dt.field-even:after {
 dd.field-list {
   grid-column-start: 2;
 }
+
+hr.docutils {
+    font-weight: bold;
+/*    border: 2px solid #7a9eec; */
+    border: 2px solid grey;
+    border-left-style: none;
+    border-right-style: none;
+    border-top-style: none;
+}
+
+div.versionadded {
+    color: black;
+/*    padding: 10px 0 0 10px; */
+    font-weight: bold;
+    margin: 5px 0;
+}
+
+div.versionchanged {
+    color: black;
+/*   padding: 0 10px 0 0; */
+    font-weight: bold;
+    margin: 5px 0;
+}
+
+span.added {
+    background: #eeffcc ;
+    border: 2px solid #aacc99;
+    border-left-style: none;
+    border-right-style: none;
+    padding: 5px;
+}
+
+span.changed {
+    background: #fbe3e4 ;
+    border: 2px solid #fbc2c4;
+    border-left-style: none;
+    border-right-style: none;
+    padding: 5px;
+}
+
+dl.class, dl.exception, dl.data, dl.function {
+/*    background: #fbe3e4 ;*/
+    border: 1px solid grey;
+    border-top-style: none;
+    border-left-style: none;
+    border-right-style: none;
+/*    padding: 3px;*/
+}
+
+dt.py {
+    background: #f8f8f8;
+/*    border: 2px solid #aacc99;*/
+/*    border: 2px solid #ffcccc;  /*#ffd324;*/
+/*    border: 2px solid #fbc2c4;*/
+    border: 1px solid #e1e1e8;
+    border-top-style: none;
+    border-left-style: none;
+/*    border-right-style: none; */
+    padding: 2px 5px;
+}

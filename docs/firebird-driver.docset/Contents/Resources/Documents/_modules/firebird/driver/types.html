@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>firebird.driver.types &#8212; firebird-driver 1.5.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../../../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../../../_static/bootstrap-2.3.2/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+
+        <a class="brand" href="../../../index.html">
+          firebird-driver</a>
+        <span class="navbar-text pull-left"><b>1.5.3</b></span>
+
+        <div class="nav-collapse">
+          <ul class="nav">
+            <li class="divider-vertical"></li>
+            
+                <li><a href="../../../usage-guide.html">Usage Guide</a></li>
+                <li><a href="../../../reference.html">Reference</a></li>
+                <li><a href="../../../genindex.html">Index</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../index.html">Content <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting-started.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../getting-started.html#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../getting-started.html#installation-from-pypi">Installation from PYPI</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../getting-started.html#quick-start-guide">Quick-start Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../getting-started.html#driver-configuration">Driver configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../getting-started.html#connecting-to-a-database">Connecting to a Database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../getting-started.html#creating-a-database">Creating a Database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../getting-started.html#executing-sql-statements">Executing SQL Statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../getting-started.html#calling-stored-procedures">Calling Stored Procedures</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage-guide.html">Usage Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#driver-structure">Driver structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#configuration">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#the-driver-config-object">The ‘driver_config’ object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#server-and-database-configuration">Server and database configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#databases">Databases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#using-connect">Using connect()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#using-create-database">Using create_database()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#deleting-databases">Deleting databases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#connection-object">Connection object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#closing-the-connection">Closing the connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#getting-information-about-connection">Getting information about connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#getting-information-about-database">Getting information about database</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#executing-sql-statements">Executing SQL Statements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#cursor-object">Cursor object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#sql-execution-basics">SQL Execution Basics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#fetching-data-from-server">Fetching data from server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#index-13">Scrollable cursors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#id3">Parameterized statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#id5">Prepared Statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#named-cursors">Named Cursors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#working-with-stored-procedures">Working with stored procedures</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#data-handling-and-conversions">Data handling and conversions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#implicit-conversion-of-input-parameters-from-strings">Implicit Conversion of Input Parameters from Strings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#automatic-conversion-from-to-unicode">Automatic conversion from/to Unicode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#working-with-blobs">Working with BLOBs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#firebird-array-type">Firebird ARRAY type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#transanction-management">Transanction management</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#basics">Basics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#auto-commit">Auto-commit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#transaction-parameters">Transaction parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#getting-information-about-transaction">Getting information about transaction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#retaining-transactions">Retaining transactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#savepoints">Savepoints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#using-multiple-transactions-with-the-same-connection">Using multiple transactions with the same connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#distributed-transactions">Distributed Transactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#transaction-context-manager">Transaction Context Manager</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#database-events">Database Events</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#what-they-are">What they are</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#why-use-them">Why use them</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#how-events-are-exposed">How events are exposed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#api-for-python-developers">API for Python developers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#working-with-services">Working with Services</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#services-api-connections">Services API Connections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#text-output-from-services">Text output from Services</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#server-configuration-and-state-information">Server Configuration and State information</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#database-options">Database options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#database-maintenance">Database maintenance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#user-maintenance">User maintenance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#trace-sessions">Trace sessions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#logging-driver-activities">Logging driver activities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#index-43">Driver hooks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#apihook">APIHook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#connectionhook">ConnectionHook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#serverhook">ServerHook</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../python-db-api-compliance.html">Compliance to PyDB API 2.0</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../python-db-api-compliance.html#unsupported-optional-features">Unsupported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../python-db-api-compliance.html#supported-optional-features">Supported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../python-db-api-compliance.html#nominally-supported-optional-features">Nominally Supported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../python-db-api-compliance.html#extensions-and-caveats">Extensions and Caveats</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference.html">Firebird-driver Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../reference.html#driver-modules">Driver modules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../ref-main.html">Main driver namespace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ref-types.html">firebird.driver.types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ref-config.html">firebird.driver.config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ref-core.html">firebird.driver.core</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ref-hooks.html">firebird.driver.hooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ref-intf.html">firebird.driver.interfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ref-fbapi.html">firebird.driver.fbapi</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-5-3">Version 1.5.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-5-2">Version 1.5.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-5-1">Version 1.5.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-5-0">Version 1.5.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../changelog.html#potentially-breaking-changes">Potentially breaking changes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-4-3">Version 1.4.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-4-2">Version 1.4.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-4-1">Version 1.4.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-4-0">Version 1.4.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../changelog.html#improvements">Improvements:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../changelog.html#backward-incompatible-changes">Backward incompatible changes:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-3-4">Version 1.3.4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-3-3">Version 1.3.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-3-2">Version 1.3.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-3-1">Version 1.3.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-3-0">Version 1.3.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-2-1">Version 1.2.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-2-0">Version 1.2.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-1-0">Version 1.1.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-0-0">Version 1.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-0-8-0">Version 0.8.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-0-7-0">Version 0.7.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-0-6-0">Version 0.6.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-0-5-0">Version 0.5.0</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body span12 content" role="main">
+      
+  <h1>Source code for firebird.driver.types</h1><div class="highlight"><pre>
+<span></span><span class="c1"># coding:utf-8</span>
+<span class="c1">#</span>
+<span class="c1"># PROGRAM/MODULE: firebird-driver</span>
+<span class="c1"># FILE:           firebird/driver/types.py</span>
+<span class="c1"># DESCRIPTION:    Types for Firebird driver</span>
+<span class="c1"># CREATED:        4.3.2020</span>
+<span class="c1">#</span>
+<span class="c1"># The contents of this file are subject to the MIT License</span>
+<span class="c1">#</span>
+<span class="c1"># Permission is hereby granted, free of charge, to any person obtaining a copy</span>
+<span class="c1"># of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
+<span class="c1"># in the Software without restriction, including without limitation the rights</span>
+<span class="c1"># to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span>
+<span class="c1"># copies of the Software, and to permit persons to whom the Software is</span>
+<span class="c1"># furnished to do so, subject to the following conditions:</span>
+<span class="c1">#</span>
+<span class="c1"># The above copyright notice and this permission notice shall be included in all</span>
+<span class="c1"># copies or substantial portions of the Software.</span>
+<span class="c1">#</span>
+<span class="c1"># THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span>
+<span class="c1"># IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span>
+<span class="c1"># FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span>
+<span class="c1"># AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span>
+<span class="c1"># LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span>
+<span class="c1"># OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span>
+<span class="c1"># SOFTWARE.</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2020 Firebird Project (www.firebirdsql.org)</span>
+<span class="c1"># All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Contributor(s): Pavel Císař (original code)</span>
+<span class="c1">#                 ______________________________________</span>
+
+<span class="sd">&quot;&quot;&quot;firebird-driver - Types for Firebird driver</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">decimal</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">,</span> <span class="n">IntFlag</span>
+<span class="kn">from</span> <span class="nn">dateutil</span> <span class="kn">import</span> <span class="n">tz</span>
+<span class="kn">from</span> <span class="nn">firebird.base.types</span> <span class="kn">import</span> <span class="n">Error</span>
+
+<span class="c1"># Exceptions required by Python Database API 2.0</span>
+
+<div class="viewcode-block" id="InterfaceError"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.InterfaceError">[docs]</a><span class="k">class</span> <span class="nc">InterfaceError</span><span class="p">(</span><span class="n">Error</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Exception raised for errors that are reported by the driver rather than</span>
+<span class="sd">    the Firebird itself.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="DatabaseError"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.DatabaseError">[docs]</a><span class="k">class</span> <span class="nc">DatabaseError</span><span class="p">(</span><span class="n">Error</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Exception raised for all errors reported by Firebird.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#: Returned SQLSTATE or None</span>
+    <span class="n">sqlstate</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1">#: Returned SQLCODE or None</span>
+    <span class="n">sqlcode</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1">#: Tuple with all returned GDS error codes</span>
+    <span class="n">gds_codes</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span></div>
+
+<div class="viewcode-block" id="DataError"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.DataError">[docs]</a><span class="k">class</span> <span class="nc">DataError</span><span class="p">(</span><span class="n">DatabaseError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Exception raised for errors that are due to problems with the processed</span>
+<span class="sd">    data like division by zero, numeric value out of range, etc.</span>
+
+<span class="sd">    Important:</span>
+<span class="sd">        This exceptions is never directly thrown by Firebird driver.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="OperationalError"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.OperationalError">[docs]</a><span class="k">class</span> <span class="nc">OperationalError</span><span class="p">(</span><span class="n">DatabaseError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Exception raised for errors that are related to the database&#39;s operation</span>
+<span class="sd">    and not necessarily under the control of the programmer, e.g. an unexpected</span>
+<span class="sd">    disconnect occurs, the data source name is not found, a transaction could not</span>
+<span class="sd">    be processed, a memory allocation error occurred during processing, etc.</span>
+
+<span class="sd">    Important:</span>
+<span class="sd">        This exceptions is never directly thrown by Firebird driver.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="IntegrityError"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.IntegrityError">[docs]</a><span class="k">class</span> <span class="nc">IntegrityError</span><span class="p">(</span><span class="n">DatabaseError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Exception raised when the relational integrity of the database is affected,</span>
+<span class="sd">    e.g. a foreign key check fails.</span>
+
+<span class="sd">    Important:</span>
+<span class="sd">        This exceptions is never directly thrown by Firebird driver.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="InternalError"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.InternalError">[docs]</a><span class="k">class</span> <span class="nc">InternalError</span><span class="p">(</span><span class="n">DatabaseError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Exception raised when the database encounters an internal error, e.g. the</span>
+<span class="sd">    cursor is not valid anymore, the transaction is out of sync, etc.</span>
+
+<span class="sd">    Important:</span>
+<span class="sd">        This exceptions is never directly thrown by Firebird driver.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="ProgrammingError"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.ProgrammingError">[docs]</a><span class="k">class</span> <span class="nc">ProgrammingError</span><span class="p">(</span><span class="n">DatabaseError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Exception raised for programming errors, e.g. table not found or already</span>
+<span class="sd">    exists, syntax error in the SQL statement, wrong number of parameters specified,</span>
+<span class="sd">    etc.</span>
+
+<span class="sd">    Important:</span>
+<span class="sd">        This exceptions is never directly thrown by Firebird driver.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="NotSupportedError"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.NotSupportedError">[docs]</a><span class="k">class</span> <span class="nc">NotSupportedError</span><span class="p">(</span><span class="n">DatabaseError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Exception raised in case a method or database API was used which is not</span>
+<span class="sd">    supported by the database.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+<span class="c1"># Firebird engine warning via Python Warning mechanism</span>
+
+<div class="viewcode-block" id="FirebirdWarning"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.FirebirdWarning">[docs]</a><span class="k">class</span> <span class="nc">FirebirdWarning</span><span class="p">(</span><span class="ne">UserWarning</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Warning from Firebird engine.</span>
+
+<span class="sd">    The important difference from `Warning` class is that `FirebirdWarning` accepts keyword</span>
+<span class="sd">    arguments, that are stored into instance attributes with the same name.</span>
+
+<span class="sd">    Important:</span>
+<span class="sd">        Attribute lookup on this class never fails, as all attributes that are not actually</span>
+<span class="sd">        set, have `None` value.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        try:</span>
+<span class="sd">            if condition:</span>
+<span class="sd">                raise FirebirdWarning(&quot;Error message&quot;, err_code=1)</span>
+<span class="sd">            else:</span>
+<span class="sd">                raise FirebirdWarning(&quot;Unknown error&quot;)</span>
+<span class="sd">        except FirebirdWarning as e:</span>
+<span class="sd">            if e.err_code is None:</span>
+<span class="sd">                ...</span>
+<span class="sd">            elif e.err_code == 1:</span>
+<span class="sd">                ...</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<span class="c1"># Enums</span>
+
+<div class="viewcode-block" id="NetProtocol"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.NetProtocol">[docs]</a><span class="k">class</span> <span class="nc">NetProtocol</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Network protocol options available for connection.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">XNET</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">INET</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">INET4</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">WNET</span> <span class="o">=</span> <span class="mi">4</span></div>
+
+<div class="viewcode-block" id="DirectoryCode"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.DirectoryCode">[docs]</a><span class="k">class</span> <span class="nc">DirectoryCode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;IConfigManager directory codes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">DIR_BIN</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">DIR_SBIN</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">DIR_CONF</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">DIR_LIB</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">DIR_INC</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">DIR_DOC</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">DIR_UDF</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">DIR_SAMPLE</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="n">DIR_SAMPLEDB</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">DIR_HELP</span> <span class="o">=</span> <span class="mi">9</span>
+    <span class="n">DIR_INTL</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">DIR_MISC</span> <span class="o">=</span> <span class="mi">11</span>
+    <span class="n">DIR_SECDB</span> <span class="o">=</span> <span class="mi">12</span>
+    <span class="n">DIR_MSG</span> <span class="o">=</span> <span class="mi">13</span>
+    <span class="n">DIR_LOG</span> <span class="o">=</span> <span class="mi">14</span>
+    <span class="n">DIR_GUARD</span> <span class="o">=</span> <span class="mi">15</span>
+    <span class="n">DIR_PLUGINS</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="n">DIR_TZDATA</span> <span class="o">=</span> <span class="mi">17</span> <span class="c1"># &gt;&gt;&gt; Firebird 4</span></div>
+
+<div class="viewcode-block" id="XpbKind"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.XpbKind">[docs]</a><span class="k">class</span> <span class="nc">XpbKind</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Xpb builder kinds.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">DPB</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">SPB_ATTACH</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">SPB_START</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">TPB</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="c1"># Firebird 4 amd 3.5.6+</span>
+    <span class="n">BATCH</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">BPB</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">SPB_SEND</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="n">SPB_RECEIVE</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">SPB_RESPONSE</span> <span class="o">=</span> <span class="mi">9</span></div>
+
+
+<div class="viewcode-block" id="StateResult"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.StateResult">[docs]</a><span class="k">class</span> <span class="nc">StateResult</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;IState result codes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ERROR</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">OK</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">NO_DATA</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">SEGMENT</span> <span class="o">=</span> <span class="mi">2</span></div>
+
+<div class="viewcode-block" id="PageSize"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.PageSize">[docs]</a><span class="k">class</span> <span class="nc">PageSize</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Supported database page sizes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">PAGE_4K</span> <span class="o">=</span> <span class="mi">4096</span>
+    <span class="n">PAGE_8K</span> <span class="o">=</span> <span class="mi">8192</span>
+    <span class="n">PAGE_16K</span> <span class="o">=</span> <span class="mi">16384</span>
+    <span class="n">PAGE_32K</span> <span class="o">=</span> <span class="mi">32768</span>  <span class="c1"># Firebird 4</span></div>
+
+<div class="viewcode-block" id="DBKeyScope"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.DBKeyScope">[docs]</a><span class="k">class</span> <span class="nc">DBKeyScope</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Scope of DBKey context.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">TRANSACTION</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">ATTACHMENT</span> <span class="o">=</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="InfoItemType"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.InfoItemType">[docs]</a><span class="k">class</span> <span class="nc">InfoItemType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Data type of information item.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">BYTE</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">INTEGER</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">BIGINT</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">BYTES</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">RAW_BYTES</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">STRING</span> <span class="o">=</span> <span class="mi">6</span></div>
+
+<div class="viewcode-block" id="SrvInfoCode"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.SrvInfoCode">[docs]</a><span class="k">class</span> <span class="nc">SrvInfoCode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Service information (isc_info_svc_*) codes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">SRV_DB_INFO</span> <span class="o">=</span> <span class="mi">50</span>
+    <span class="n">GET_CONFIG</span> <span class="o">=</span> <span class="mi">53</span>
+    <span class="n">VERSION</span> <span class="o">=</span> <span class="mi">54</span>
+    <span class="n">SERVER_VERSION</span> <span class="o">=</span> <span class="mi">55</span>
+    <span class="n">IMPLEMENTATION</span> <span class="o">=</span> <span class="mi">56</span>
+    <span class="n">CAPABILITIES</span> <span class="o">=</span> <span class="mi">57</span>
+    <span class="n">USER_DBPATH</span> <span class="o">=</span> <span class="mi">58</span>
+    <span class="n">GET_ENV</span> <span class="o">=</span> <span class="mi">59</span>
+    <span class="n">GET_ENV_LOCK</span> <span class="o">=</span> <span class="mi">60</span>
+    <span class="n">GET_ENV_MSG</span> <span class="o">=</span> <span class="mi">61</span>
+    <span class="n">LINE</span> <span class="o">=</span> <span class="mi">62</span>
+    <span class="n">TO_EOF</span> <span class="o">=</span> <span class="mi">63</span>
+    <span class="n">TIMEOUT</span> <span class="o">=</span> <span class="mi">64</span>
+    <span class="n">LIMBO_TRANS</span> <span class="o">=</span> <span class="mi">66</span>
+    <span class="n">RUNNING</span> <span class="o">=</span> <span class="mi">67</span>
+    <span class="n">GET_USERS</span> <span class="o">=</span> <span class="mi">68</span>
+    <span class="n">AUTH_BLOCK</span> <span class="o">=</span> <span class="mi">69</span>
+    <span class="n">STDIN</span> <span class="o">=</span> <span class="mi">78</span></div>
+
+<div class="viewcode-block" id="BlobInfoCode"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.BlobInfoCode">[docs]</a><span class="k">class</span> <span class="nc">BlobInfoCode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;BLOB information (isc_info_blob_*) codes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">NUM_SEGMENTS</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">MAX_SEGMENT</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">TOTAL_LENGTH</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">TYPE</span> <span class="o">=</span> <span class="mi">7</span></div>
+
+<div class="viewcode-block" id="DbInfoCode"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.DbInfoCode">[docs]</a><span class="k">class</span> <span class="nc">DbInfoCode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Database information (isc_info_*) codes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">DB_ID</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">READS</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">WRITES</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">FETCHES</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="n">MARKS</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">IMPLEMENTATION_OLD</span> <span class="o">=</span> <span class="mi">11</span>
+    <span class="n">VERSION</span> <span class="o">=</span> <span class="mi">12</span>
+    <span class="n">BASE_LEVEL</span> <span class="o">=</span> <span class="mi">13</span>
+    <span class="n">PAGE_SIZE</span> <span class="o">=</span> <span class="mi">14</span>
+    <span class="n">NUM_BUFFERS</span> <span class="o">=</span> <span class="mi">15</span>
+    <span class="n">LIMBO</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="n">CURRENT_MEMORY</span> <span class="o">=</span> <span class="mi">17</span>
+    <span class="n">MAX_MEMORY</span> <span class="o">=</span> <span class="mi">18</span>
+    <span class="c1"># Obsolete 19-20</span>
+    <span class="n">ALLOCATION</span> <span class="o">=</span> <span class="mi">21</span>
+    <span class="n">ATTACHMENT_ID</span> <span class="o">=</span> <span class="mi">22</span>
+    <span class="n">READ_SEQ_COUNT</span> <span class="o">=</span> <span class="mi">23</span>
+    <span class="n">READ_IDX_COUNT</span> <span class="o">=</span> <span class="mi">24</span>
+    <span class="n">INSERT_COUNT</span> <span class="o">=</span> <span class="mi">25</span>
+    <span class="n">UPDATE_COUNT</span> <span class="o">=</span> <span class="mi">26</span>
+    <span class="n">DELETE_COUNT</span> <span class="o">=</span> <span class="mi">27</span>
+    <span class="n">BACKOUT_COUNT</span> <span class="o">=</span> <span class="mi">28</span>
+    <span class="n">PURGE_COUNT</span> <span class="o">=</span> <span class="mi">29</span>
+    <span class="n">EXPUNGE_COUNT</span> <span class="o">=</span> <span class="mi">30</span>
+    <span class="n">SWEEP_INTERVAL</span> <span class="o">=</span> <span class="mi">31</span>
+    <span class="n">ODS_VERSION</span> <span class="o">=</span> <span class="mi">32</span>
+    <span class="n">ODS_MINOR_VERSION</span> <span class="o">=</span> <span class="mi">33</span>
+    <span class="n">NO_RESERVE</span> <span class="o">=</span> <span class="mi">34</span>
+    <span class="c1"># Obsolete 35-51</span>
+    <span class="n">FORCED_WRITES</span> <span class="o">=</span> <span class="mi">52</span>
+    <span class="n">USER_NAMES</span> <span class="o">=</span> <span class="mi">53</span>
+    <span class="n">PAGE_ERRORS</span> <span class="o">=</span> <span class="mi">54</span>
+    <span class="n">RECORD_ERRORS</span> <span class="o">=</span> <span class="mi">55</span>
+    <span class="n">BPAGE_ERRORS</span> <span class="o">=</span> <span class="mi">56</span>
+    <span class="n">DPAGE_ERRORS</span> <span class="o">=</span> <span class="mi">57</span>
+    <span class="n">IPAGE_ERRORS</span> <span class="o">=</span> <span class="mi">58</span>
+    <span class="n">PPAGE_ERRORS</span> <span class="o">=</span> <span class="mi">59</span>
+    <span class="n">TPAGE_ERRORS</span> <span class="o">=</span> <span class="mi">60</span>
+    <span class="n">SET_PAGE_BUFFERS</span> <span class="o">=</span> <span class="mi">61</span>
+    <span class="n">DB_SQL_DIALECT</span> <span class="o">=</span> <span class="mi">62</span>
+    <span class="n">DB_READ_ONLY</span> <span class="o">=</span> <span class="mi">63</span>
+    <span class="n">DB_SIZE_IN_PAGES</span> <span class="o">=</span> <span class="mi">64</span>
+    <span class="c1"># Values 65 -100 unused to avoid conflict with InterBase</span>
+    <span class="n">ATT_CHARSET</span> <span class="o">=</span> <span class="mi">101</span>
+    <span class="n">DB_CLASS</span> <span class="o">=</span> <span class="mi">102</span>
+    <span class="n">FIREBIRD_VERSION</span> <span class="o">=</span> <span class="mi">103</span>
+    <span class="n">OLDEST_TRANSACTION</span> <span class="o">=</span> <span class="mi">104</span>
+    <span class="n">OLDEST_ACTIVE</span> <span class="o">=</span> <span class="mi">105</span>
+    <span class="n">OLDEST_SNAPSHOT</span> <span class="o">=</span> <span class="mi">106</span>
+    <span class="n">NEXT_TRANSACTION</span> <span class="o">=</span> <span class="mi">107</span>
+    <span class="n">DB_PROVIDER</span> <span class="o">=</span> <span class="mi">108</span>
+    <span class="n">ACTIVE_TRANSACTIONS</span> <span class="o">=</span> <span class="mi">109</span>
+    <span class="n">ACTIVE_TRAN_COUNT</span> <span class="o">=</span> <span class="mi">110</span>
+    <span class="n">CREATION_DATE</span> <span class="o">=</span> <span class="mi">111</span>
+    <span class="n">DB_FILE_SIZE</span> <span class="o">=</span> <span class="mi">112</span>
+    <span class="n">PAGE_CONTENTS</span> <span class="o">=</span> <span class="mi">113</span>
+    <span class="n">IMPLEMENTATION</span> <span class="o">=</span> <span class="mi">114</span>
+    <span class="n">PAGE_WARNS</span> <span class="o">=</span> <span class="mi">115</span>
+    <span class="n">RECORD_WARNS</span> <span class="o">=</span> <span class="mi">116</span>
+    <span class="n">BPAGE_WARNS</span> <span class="o">=</span> <span class="mi">117</span>
+    <span class="n">DPAGE_WARNS</span> <span class="o">=</span> <span class="mi">118</span>
+    <span class="n">IPAGE_WARNS</span> <span class="o">=</span> <span class="mi">119</span>
+    <span class="n">PPAGE_WARNS</span> <span class="o">=</span> <span class="mi">120</span>
+    <span class="n">TPAGE_WARNS</span> <span class="o">=</span> <span class="mi">121</span>
+    <span class="n">PIP_ERRORS</span> <span class="o">=</span> <span class="mi">122</span>
+    <span class="n">PIP_WARNS</span> <span class="o">=</span> <span class="mi">123</span>
+    <span class="n">PAGES_USED</span> <span class="o">=</span> <span class="mi">124</span>
+    <span class="n">PAGES_FREE</span> <span class="o">=</span> <span class="mi">125</span>
+    <span class="n">SES_IDLE_TIMEOUT_DB</span> <span class="o">=</span> <span class="mi">129</span>  <span class="c1"># Firebird 4</span>
+    <span class="n">SES_IDLE_TIMEOUT_ATT</span> <span class="o">=</span> <span class="mi">130</span>  <span class="c1"># Firebird 4</span>
+    <span class="n">SES_IDLE_TIMEOUT_RUN</span> <span class="o">=</span> <span class="mi">131</span>  <span class="c1"># Firebird 4</span>
+    <span class="n">CONN_FLAGS</span> <span class="o">=</span> <span class="mi">132</span>
+    <span class="n">CRYPT_KEY</span> <span class="o">=</span> <span class="mi">133</span>
+    <span class="n">CRYPT_STATE</span> <span class="o">=</span> <span class="mi">134</span>
+    <span class="c1"># Firebird 4</span>
+    <span class="n">STMT_TIMEOUT_DB</span> <span class="o">=</span> <span class="mi">135</span>
+    <span class="n">STMT_TIMEOUT_ATT</span> <span class="o">=</span> <span class="mi">136</span>
+    <span class="n">PROTOCOL_VERSION</span> <span class="o">=</span> <span class="mi">137</span>
+    <span class="n">CRYPT_PLUGIN</span> <span class="o">=</span> <span class="mi">138</span>
+    <span class="n">CREATION_TIMESTAMP_TZ</span> <span class="o">=</span> <span class="mi">139</span>
+    <span class="n">WIRE_CRYPT</span> <span class="o">=</span> <span class="mi">140</span>
+    <span class="n">FEATURES</span> <span class="o">=</span> <span class="mi">141</span>
+    <span class="n">NEXT_ATTACHMENT</span> <span class="o">=</span> <span class="mi">142</span>
+    <span class="n">NEXT_STATEMENT</span> <span class="o">=</span> <span class="mi">143</span>
+    <span class="n">DB_GUID</span> <span class="o">=</span> <span class="mi">144</span>
+    <span class="n">DB_FILE_ID</span> <span class="o">=</span> <span class="mi">145</span>
+    <span class="n">REPLICA_MODE</span> <span class="o">=</span> <span class="mi">146</span></div>
+
+<div class="viewcode-block" id="Features"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.Features">[docs]</a><span class="k">class</span> <span class="nc">Features</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Firebird features (Response to DbInfoCode.FEATURES).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">MULTI_STATEMENTS</span> <span class="o">=</span> <span class="mi">1</span>    <span class="c1"># Multiple prepared statements in single attachment</span>
+    <span class="n">MULTI_TRANSACTIONS</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># Multiple concurrent transaction in single attachment</span>
+    <span class="n">NAMED_PARAMETERS</span> <span class="o">=</span> <span class="mi">3</span>    <span class="c1"># Query parameters can be named</span>
+    <span class="n">SESSION_RESET</span> <span class="o">=</span> <span class="mi">4</span>       <span class="c1"># ALTER SESSION RESET is supported</span>
+    <span class="n">READ_CONSISTENCY</span> <span class="o">=</span> <span class="mi">5</span>    <span class="c1"># Read consistency TIL is supported</span>
+    <span class="n">STATEMENT_TIMEOUT</span> <span class="o">=</span> <span class="mi">6</span>   <span class="c1"># Statement timeout is supported</span>
+    <span class="n">STATEMENT_LONG_LIFE</span> <span class="o">=</span> <span class="mi">7</span> <span class="c1"># Prepared statements are not dropped on transaction end</span></div>
+
+<div class="viewcode-block" id="ReplicaMode"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.ReplicaMode">[docs]</a><span class="k">class</span> <span class="nc">ReplicaMode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Replica modes. Response to DbInfoCode.REPLICA_MODE or as value for</span>
+<span class="sd">    DPBItem.SET_DB_REPLICA.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">NONE</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">READ_ONLY</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">READ_WRITE</span> <span class="o">=</span> <span class="mi">2</span></div>
+
+<div class="viewcode-block" id="StmtInfoCode"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.StmtInfoCode">[docs]</a><span class="k">class</span> <span class="nc">StmtInfoCode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Statement information (isc_info_sql_*) codes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">SELECT</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">BIND</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">NUM_VARIABLES</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">DESCRIBE_VARS</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="n">DESCRIBE_END</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">SQLDA_SEQ</span> <span class="o">=</span> <span class="mi">9</span>
+    <span class="n">MESSAGE_SEQ</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">TYPE</span> <span class="o">=</span> <span class="mi">11</span>
+    <span class="n">SUB_TYPE</span> <span class="o">=</span> <span class="mi">12</span>
+    <span class="n">SCALE</span> <span class="o">=</span> <span class="mi">13</span>
+    <span class="n">LENGTH</span> <span class="o">=</span> <span class="mi">14</span>
+    <span class="n">NULL_IND</span> <span class="o">=</span> <span class="mi">15</span>
+    <span class="n">FIELD</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="n">RELATION</span> <span class="o">=</span> <span class="mi">17</span>
+    <span class="n">OWNER</span> <span class="o">=</span> <span class="mi">18</span>
+    <span class="n">ALIAS</span> <span class="o">=</span> <span class="mi">19</span>
+    <span class="n">SQLDA_START</span> <span class="o">=</span> <span class="mi">20</span>
+    <span class="n">STMT_TYPE</span> <span class="o">=</span> <span class="mi">21</span>
+    <span class="n">GET_PLAN</span> <span class="o">=</span> <span class="mi">22</span>
+    <span class="n">RECORDS</span> <span class="o">=</span> <span class="mi">23</span>
+    <span class="n">BATCH_FETCH</span> <span class="o">=</span> <span class="mi">24</span>
+    <span class="n">RELATION_ALIAS</span> <span class="o">=</span> <span class="mi">25</span>
+    <span class="n">EXPLAIN_PLAN</span> <span class="o">=</span> <span class="mi">26</span>
+    <span class="n">FLAGS</span> <span class="o">=</span> <span class="mi">27</span>
+    <span class="c1"># Firebird 4</span>
+    <span class="n">TIMEOUT_USER</span> <span class="o">=</span> <span class="mi">28</span>
+    <span class="n">TIMEOUT_RUN</span> <span class="o">=</span> <span class="mi">29</span>
+    <span class="n">BLOB_ALIGN</span> <span class="o">=</span> <span class="mi">30</span></div>
+
+<div class="viewcode-block" id="TraInfoCode"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.TraInfoCode">[docs]</a><span class="k">class</span> <span class="nc">TraInfoCode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Transaction information (isc_info_tra_*) codes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ID</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">OLDEST_INTERESTING</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">OLDEST_SNAPSHOT</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">OLDEST_ACTIVE</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="n">ISOLATION</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">ACCESS</span> <span class="o">=</span> <span class="mi">9</span>
+    <span class="n">LOCK_TIMEOUT</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">DBPATH</span> <span class="o">=</span> <span class="mi">11</span>
+    <span class="n">SNAPSHOT_NUMBER</span> <span class="o">=</span> <span class="mi">12</span></div>
+
+<div class="viewcode-block" id="TraInfoIsolation"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.TraInfoIsolation">[docs]</a><span class="k">class</span> <span class="nc">TraInfoIsolation</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Transaction isolation response.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">CONSISTENCY</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">CONCURRENCY</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">READ_COMMITTED</span> <span class="o">=</span> <span class="mi">3</span></div>
+
+<div class="viewcode-block" id="TraInfoReadCommitted"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.TraInfoReadCommitted">[docs]</a><span class="k">class</span> <span class="nc">TraInfoReadCommitted</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Transaction isolation Read Committed response.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">NO_RECORD_VERSION</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">RECORD_VERSION</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">READ_CONSISTENCY</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># Firebird 4</span></div>
+
+<div class="viewcode-block" id="TraInfoAccess"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.TraInfoAccess">[docs]</a><span class="k">class</span> <span class="nc">TraInfoAccess</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Transaction isolation access mode response.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">READ_ONLY</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">READ_WRITE</span> <span class="o">=</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="TraAccessMode"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.TraAccessMode">[docs]</a><span class="k">class</span> <span class="nc">TraAccessMode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Transaction Access Mode TPB parameters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">READ</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">WRITE</span> <span class="o">=</span> <span class="mi">9</span></div>
+
+<div class="viewcode-block" id="TraIsolation"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.TraIsolation">[docs]</a><span class="k">class</span> <span class="nc">TraIsolation</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Transaction Isolation TPB paremeters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">CONSISTENCY</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">CONCURRENCY</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">READ_COMMITTED</span> <span class="o">=</span> <span class="mi">15</span></div>
+
+<div class="viewcode-block" id="TraReadCommitted"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.TraReadCommitted">[docs]</a><span class="k">class</span> <span class="nc">TraReadCommitted</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Read Committed Isolation TPB paremeters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">RECORD_VERSION</span> <span class="o">=</span> <span class="mi">17</span>
+    <span class="n">NO_RECORD_VERSION</span> <span class="o">=</span> <span class="mi">18</span></div>
+
+<div class="viewcode-block" id="Isolation"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.Isolation">[docs]</a><span class="k">class</span> <span class="nc">Isolation</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Transaction Isolation TPB parameters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">READ_COMMITTED</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">SERIALIZABLE</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">SNAPSHOT</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">READ_COMMITTED_NO_RECORD_VERSION</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">READ_COMMITTED_RECORD_VERSION</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">READ_COMMITTED_READ_CONSISTENCY</span> <span class="o">=</span> <span class="mi">5</span> <span class="c1"># Firebird 4</span>
+    <span class="c1"># Aliases</span>
+    <span class="n">REPEATABLE_READ</span> <span class="o">=</span> <span class="n">SNAPSHOT</span>
+    <span class="n">CONCURRENCY</span> <span class="o">=</span> <span class="n">SNAPSHOT</span>
+    <span class="n">CONSISTENCY</span> <span class="o">=</span> <span class="n">SERIALIZABLE</span></div>
+
+<div class="viewcode-block" id="TraLockResolution"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.TraLockResolution">[docs]</a><span class="k">class</span> <span class="nc">TraLockResolution</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Transaction Lock resolution TPB parameters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">WAIT</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">NO_WAIT</span> <span class="o">=</span> <span class="mi">7</span></div>
+
+<div class="viewcode-block" id="TableShareMode"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.TableShareMode">[docs]</a><span class="k">class</span> <span class="nc">TableShareMode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Transaction table share mode TPB parameters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">SHARED</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">PROTECTED</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">EXCLUSIVE</span> <span class="o">=</span> <span class="mi">5</span></div>
+
+<div class="viewcode-block" id="TableAccessMode"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.TableAccessMode">[docs]</a><span class="k">class</span> <span class="nc">TableAccessMode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Transaction Access Mode TPB parameters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">LOCK_READ</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">LOCK_WRITE</span> <span class="o">=</span> <span class="mi">11</span></div>
+
+<div class="viewcode-block" id="DefaultAction"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.DefaultAction">[docs]</a><span class="k">class</span> <span class="nc">DefaultAction</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Default action when transaction is ended automatically.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">COMMIT</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">ROLLBACK</span> <span class="o">=</span> <span class="mi">2</span></div>
+
+<div class="viewcode-block" id="StatementType"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.StatementType">[docs]</a><span class="k">class</span> <span class="nc">StatementType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Statement type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">SELECT</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">INSERT</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">UPDATE</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">DELETE</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">DDL</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">GET_SEGMENT</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">PUT_SEGMENT</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="n">EXEC_PROCEDURE</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">START_TRANS</span> <span class="o">=</span> <span class="mi">9</span>
+    <span class="n">COMMIT</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">ROLLBACK</span> <span class="o">=</span> <span class="mi">11</span>
+    <span class="n">SELECT_FOR_UPD</span> <span class="o">=</span> <span class="mi">12</span>
+    <span class="n">SET_GENERATOR</span> <span class="o">=</span> <span class="mi">13</span>
+    <span class="n">SAVEPOINT</span> <span class="o">=</span> <span class="mi">14</span></div>
+
+<div class="viewcode-block" id="SQLDataType"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.SQLDataType">[docs]</a><span class="k">class</span> <span class="nc">SQLDataType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;SQL data type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">TEXT</span> <span class="o">=</span> <span class="mi">452</span>
+    <span class="n">VARYING</span> <span class="o">=</span> <span class="mi">448</span>
+    <span class="n">SHORT</span> <span class="o">=</span> <span class="mi">500</span>
+    <span class="n">LONG</span> <span class="o">=</span> <span class="mi">496</span>
+    <span class="n">FLOAT</span> <span class="o">=</span> <span class="mi">482</span>
+    <span class="n">DOUBLE</span> <span class="o">=</span> <span class="mi">480</span>
+    <span class="n">D_FLOAT</span> <span class="o">=</span> <span class="mi">530</span>
+    <span class="n">TIMESTAMP</span> <span class="o">=</span> <span class="mi">510</span>
+    <span class="n">BLOB</span> <span class="o">=</span> <span class="mi">520</span>
+    <span class="n">ARRAY</span> <span class="o">=</span> <span class="mi">540</span>
+    <span class="n">QUAD</span> <span class="o">=</span> <span class="mi">550</span>
+    <span class="n">TIME</span> <span class="o">=</span> <span class="mi">560</span>
+    <span class="n">DATE</span> <span class="o">=</span> <span class="mi">570</span>
+    <span class="n">INT64</span> <span class="o">=</span> <span class="mi">580</span>
+    <span class="n">TIMESTAMP_TZ_EX</span> <span class="o">=</span> <span class="mi">32748</span>  <span class="c1"># Firebird 4</span>
+    <span class="n">TIME_TZ_EX</span> <span class="o">=</span> <span class="mi">32750</span>  <span class="c1"># Firebird 4</span>
+    <span class="n">INT128</span> <span class="o">=</span> <span class="mi">32752</span> <span class="c1"># Firebird 4</span>
+    <span class="n">TIMESTAMP_TZ</span> <span class="o">=</span> <span class="mi">32754</span>  <span class="c1"># Firebird 4</span>
+    <span class="n">TIME_TZ</span> <span class="o">=</span> <span class="mi">32756</span>  <span class="c1"># Firebird 4</span>
+    <span class="n">DEC16</span> <span class="o">=</span> <span class="mi">32760</span>  <span class="c1"># Firebird 4</span>
+    <span class="n">DEC34</span> <span class="o">=</span> <span class="mi">32762</span>  <span class="c1"># Firebird 4</span>
+    <span class="n">BOOLEAN</span> <span class="o">=</span> <span class="mi">32764</span>
+    <span class="n">NULL</span> <span class="o">=</span> <span class="mi">32766</span></div>
+
+<div class="viewcode-block" id="DPBItem"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.DPBItem">[docs]</a><span class="k">class</span> <span class="nc">DPBItem</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;isc_dpb_* items (VERSION2).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">PAGE_SIZE</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">NUM_BUFFERS</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">DBKEY_SCOPE</span> <span class="o">=</span> <span class="mi">13</span>
+    <span class="n">NO_GARBAGE_COLLECT</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="n">SWEEP_INTERVAL</span> <span class="o">=</span> <span class="mi">22</span>
+    <span class="n">FORCE_WRITE</span> <span class="o">=</span> <span class="mi">24</span>
+    <span class="n">NO_RESERVE</span> <span class="o">=</span> <span class="mi">27</span>
+    <span class="n">USER_NAME</span> <span class="o">=</span> <span class="mi">28</span>
+    <span class="n">PASSWORD</span> <span class="o">=</span> <span class="mi">29</span>
+    <span class="n">LC_CTYPE</span> <span class="o">=</span> <span class="mi">48</span>
+    <span class="n">RESERVED</span> <span class="o">=</span> <span class="mi">53</span>
+    <span class="n">OVERWRITE</span> <span class="o">=</span> <span class="mi">54</span>
+    <span class="n">CONNECT_TIMEOUT</span> <span class="o">=</span> <span class="mi">57</span>
+    <span class="n">DUMMY_PACKET_INTERVAL</span> <span class="o">=</span> <span class="mi">58</span>
+    <span class="n">SQL_ROLE_NAME</span> <span class="o">=</span> <span class="mi">60</span>
+    <span class="n">SET_PAGE_BUFFERS</span> <span class="o">=</span> <span class="mi">61</span>
+    <span class="n">WORKING_DIRECTORY</span> <span class="o">=</span> <span class="mi">62</span>
+    <span class="n">SQL_DIALECT</span> <span class="o">=</span> <span class="mi">63</span>
+    <span class="n">SET_DB_READONLY</span> <span class="o">=</span> <span class="mi">64</span>
+    <span class="n">SET_DB_SQL_DIALECT</span> <span class="o">=</span> <span class="mi">65</span>
+    <span class="n">SET_DB_CHARSET</span> <span class="o">=</span> <span class="mi">68</span>
+    <span class="n">ADDRESS_PATH</span> <span class="o">=</span> <span class="mi">70</span>
+    <span class="n">PROCESS_ID</span> <span class="o">=</span> <span class="mi">71</span>
+    <span class="n">NO_DB_TRIGGERS</span> <span class="o">=</span> <span class="mi">72</span>
+    <span class="n">TRUSTED_AUTH</span> <span class="o">=</span> <span class="mi">73</span>
+    <span class="n">PROCESS_NAME</span> <span class="o">=</span> <span class="mi">74</span>
+    <span class="n">TRUSTED_ROLE</span> <span class="o">=</span> <span class="mi">75</span>
+    <span class="n">ORG_FILENAME</span> <span class="o">=</span> <span class="mi">76</span>
+    <span class="n">UTF8_FILENAME</span> <span class="o">=</span> <span class="mi">77</span>
+    <span class="n">EXT_CALL_DEPTH</span> <span class="o">=</span> <span class="mi">78</span>
+    <span class="n">AUTH_BLOCK</span> <span class="o">=</span> <span class="mi">79</span>
+    <span class="n">CLIENT_VERSION</span> <span class="o">=</span> <span class="mi">80</span>
+    <span class="n">REMOTE_PROTOCOL</span> <span class="o">=</span> <span class="mi">81</span>
+    <span class="n">HOST_NAME</span> <span class="o">=</span> <span class="mi">82</span>
+    <span class="n">OS_USER</span> <span class="o">=</span> <span class="mi">83</span>
+    <span class="n">SPECIFIC_AUTH_DATA</span> <span class="o">=</span> <span class="mi">84</span>
+    <span class="n">AUTH_PLUGIN_LIST</span> <span class="o">=</span> <span class="mi">85</span>
+    <span class="n">AUTH_PLUGIN_NAME</span> <span class="o">=</span> <span class="mi">86</span>
+    <span class="n">CONFIG</span> <span class="o">=</span> <span class="mi">87</span>
+    <span class="n">NOLINGER</span> <span class="o">=</span> <span class="mi">88</span>
+    <span class="n">RESET_ICU</span> <span class="o">=</span> <span class="mi">89</span>
+    <span class="n">MAP_ATTACH</span> <span class="o">=</span> <span class="mi">90</span>
+    <span class="c1"># Firebird 4</span>
+    <span class="n">SESSION_TIME_ZONE</span> <span class="o">=</span> <span class="mi">91</span>
+    <span class="n">SET_DB_REPLICA</span> <span class="o">=</span> <span class="mi">92</span>
+    <span class="n">SET_BIND</span> <span class="o">=</span> <span class="mi">93</span>
+    <span class="n">DECFLOAT_ROUND</span> <span class="o">=</span> <span class="mi">94</span>
+    <span class="n">DECFLOAT_TRAPS</span> <span class="o">=</span> <span class="mi">95</span></div>
+
+<div class="viewcode-block" id="TPBItem"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.TPBItem">[docs]</a><span class="k">class</span> <span class="nc">TPBItem</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;isc_tpb_* items.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">VERSION3</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">IGNORE_LIMBO</span> <span class="o">=</span> <span class="mi">14</span>
+    <span class="n">AUTOCOMMIT</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="n">NO_AUTO_UNDO</span> <span class="o">=</span> <span class="mi">20</span>
+    <span class="n">LOCK_TIMEOUT</span> <span class="o">=</span> <span class="mi">21</span>
+    <span class="c1"># Firebird 4</span>
+    <span class="n">READ_CONSISTENCY</span> <span class="o">=</span> <span class="mi">22</span>
+    <span class="n">AT_SNAPSHOT_NUMBER</span> <span class="o">=</span> <span class="mi">23</span></div>
+
+<div class="viewcode-block" id="SPBItem"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.SPBItem">[docs]</a><span class="k">class</span> <span class="nc">SPBItem</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;isc_spb_* items.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">USER_NAME</span> <span class="o">=</span> <span class="mi">28</span>
+    <span class="n">PASSWORD</span> <span class="o">=</span> <span class="mi">29</span>
+    <span class="n">CONNECT_TIMEOUT</span> <span class="o">=</span> <span class="mi">57</span>
+    <span class="n">DUMMY_PACKET_INTERVAL</span> <span class="o">=</span> <span class="mi">58</span>
+    <span class="n">SQL_ROLE_NAME</span> <span class="o">=</span> <span class="mi">60</span>
+    <span class="n">COMMAND_LINE</span> <span class="o">=</span> <span class="mi">105</span>
+    <span class="n">DBNAME</span> <span class="o">=</span> <span class="mi">106</span>
+    <span class="n">VERBOSE</span> <span class="o">=</span> <span class="mi">107</span>
+    <span class="n">OPTIONS</span> <span class="o">=</span> <span class="mi">108</span>
+    <span class="n">TRUSTED_AUTH</span> <span class="o">=</span> <span class="mi">111</span>
+    <span class="n">TRUSTED_ROLE</span> <span class="o">=</span> <span class="mi">113</span>
+    <span class="n">VERBINT</span> <span class="o">=</span> <span class="mi">114</span>
+    <span class="n">AUTH_BLOCK</span> <span class="o">=</span> <span class="mi">115</span>
+    <span class="n">AUTH_PLUGIN_NAME</span> <span class="o">=</span> <span class="mi">116</span>
+    <span class="n">AUTH_PLUGIN_LIST</span> <span class="o">=</span> <span class="mi">117</span>
+    <span class="n">UTF8_FILENAME</span> <span class="o">=</span> <span class="mi">118</span>
+    <span class="n">CONFIG</span> <span class="o">=</span> <span class="mi">123</span>
+    <span class="n">EXPECTED_DB</span> <span class="o">=</span> <span class="mi">124</span></div>
+
+<div class="viewcode-block" id="BPBItem"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.BPBItem">[docs]</a><span class="k">class</span> <span class="nc">BPBItem</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;isc_bpb_* items.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">SOURCE_TYPE</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">TARGET_TYPE</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">TYPE</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">SOURCE_INTERP</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">TARGET_INTERP</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">FILTER_PARAMETER</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">STORAGE</span> <span class="o">=</span> <span class="mi">7</span></div>
+
+<div class="viewcode-block" id="BlobType"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.BlobType">[docs]</a><span class="k">class</span> <span class="nc">BlobType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Blob type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">SEGMENTED</span> <span class="o">=</span> <span class="mh">0x0</span>
+    <span class="n">STREAM</span> <span class="o">=</span> <span class="mh">0x1</span></div>
+
+<div class="viewcode-block" id="BlobStorage"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.BlobStorage">[docs]</a><span class="k">class</span> <span class="nc">BlobStorage</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Blob storage.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">MAIN</span> <span class="o">=</span> <span class="mh">0x0</span>
+    <span class="n">TEMP</span> <span class="o">=</span> <span class="mh">0x2</span></div>
+
+<div class="viewcode-block" id="ServerAction"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.ServerAction">[docs]</a><span class="k">class</span> <span class="nc">ServerAction</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;isc_action_svc_* items.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">BACKUP</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">RESTORE</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">REPAIR</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">ADD_USER</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">DELETE_USER</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">MODIFY_USER</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">DISPLAY_USER</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="n">PROPERTIES</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">DB_STATS</span> <span class="o">=</span> <span class="mi">11</span>
+    <span class="n">GET_FB_LOG</span> <span class="o">=</span> <span class="mi">12</span>
+    <span class="n">NBAK</span> <span class="o">=</span> <span class="mi">20</span>
+    <span class="n">NREST</span> <span class="o">=</span> <span class="mi">21</span>
+    <span class="n">TRACE_START</span> <span class="o">=</span> <span class="mi">22</span>
+    <span class="n">TRACE_STOP</span> <span class="o">=</span> <span class="mi">23</span>
+    <span class="n">TRACE_SUSPEND</span> <span class="o">=</span> <span class="mi">24</span>
+    <span class="n">TRACE_RESUME</span> <span class="o">=</span> <span class="mi">25</span>
+    <span class="n">TRACE_LIST</span> <span class="o">=</span> <span class="mi">26</span>
+    <span class="n">SET_MAPPING</span> <span class="o">=</span> <span class="mi">27</span>
+    <span class="n">DROP_MAPPING</span> <span class="o">=</span> <span class="mi">28</span>
+    <span class="n">DISPLAY_USER_ADM</span> <span class="o">=</span> <span class="mi">29</span>
+    <span class="n">VALIDATE</span> <span class="o">=</span> <span class="mi">30</span>
+    <span class="n">NFIX</span> <span class="o">=</span> <span class="mi">31</span> <span class="c1"># Firebird 4</span></div>
+
+<div class="viewcode-block" id="SrvDbInfoOption"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.SrvDbInfoOption">[docs]</a><span class="k">class</span> <span class="nc">SrvDbInfoOption</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parameters for SvcInfoCode.SRV_DB_INFO.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ATT</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">DB</span> <span class="o">=</span> <span class="mi">6</span></div>
+
+<div class="viewcode-block" id="SrvRepairOption"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.SrvRepairOption">[docs]</a><span class="k">class</span> <span class="nc">SrvRepairOption</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parameters for ServerAction.REPAIR.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">COMMIT_TRANS</span> <span class="o">=</span> <span class="mi">15</span>
+    <span class="n">ROLLBACK_TRANS</span> <span class="o">=</span> <span class="mi">34</span>
+    <span class="n">RECOVER_TWO_PHASE</span> <span class="o">=</span> <span class="mi">17</span>
+    <span class="n">TRA_ID</span> <span class="o">=</span> <span class="mi">18</span>
+    <span class="n">SINGLE_TRA_ID</span> <span class="o">=</span> <span class="mi">19</span>
+    <span class="n">MULTI_TRA_ID</span> <span class="o">=</span> <span class="mi">20</span>
+    <span class="n">TRA_STATE</span> <span class="o">=</span> <span class="mi">21</span>
+    <span class="n">TRA_STATE_LIMBO</span> <span class="o">=</span> <span class="mi">22</span>
+    <span class="n">TRA_STATE_COMMIT</span> <span class="o">=</span> <span class="mi">23</span>
+    <span class="n">TRA_STATE_ROLLBACK</span> <span class="o">=</span> <span class="mi">24</span>
+    <span class="n">TRA_STATE_UNKNOWN</span> <span class="o">=</span> <span class="mi">25</span>
+    <span class="n">TRA_HOST_SITE</span> <span class="o">=</span> <span class="mi">26</span>
+    <span class="n">TRA_REMOTE_SITE</span> <span class="o">=</span> <span class="mi">27</span>
+    <span class="n">TRA_DB_PATH</span> <span class="o">=</span> <span class="mi">28</span>
+    <span class="n">TRA_ADVISE</span> <span class="o">=</span> <span class="mi">29</span>
+    <span class="n">TRA_ADVISE_COMMIT</span> <span class="o">=</span> <span class="mi">30</span>
+    <span class="n">TRA_ADVISE_ROLLBACK</span> <span class="o">=</span> <span class="mi">31</span>
+    <span class="n">TRA_ADVISE_UNKNOWN</span> <span class="o">=</span> <span class="mi">33</span>
+    <span class="n">TRA_ID_64</span> <span class="o">=</span> <span class="mi">46</span>
+    <span class="n">SINGLE_TRA_ID_64</span> <span class="o">=</span> <span class="mi">47</span>
+    <span class="n">MULTI_TRA_ID_64</span> <span class="o">=</span> <span class="mi">48</span>
+    <span class="n">COMMIT_TRANS_64</span> <span class="o">=</span> <span class="mi">49</span>
+    <span class="n">ROLLBACK_TRANS_64</span> <span class="o">=</span> <span class="mi">50</span>
+    <span class="n">RECOVER_TWO_PHASE_64</span> <span class="o">=</span> <span class="mi">51</span></div>
+
+<div class="viewcode-block" id="SrvBackupOption"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.SrvBackupOption">[docs]</a><span class="k">class</span> <span class="nc">SrvBackupOption</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parameters for ServerAction.BACKUP.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">FILE</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">FACTOR</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">LENGTH</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="n">SKIP_DATA</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">STAT</span> <span class="o">=</span> <span class="mi">15</span>
+    <span class="c1"># Firebird 4</span>
+    <span class="n">KEYHOLDER</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="n">KEYNAME</span> <span class="o">=</span> <span class="mi">17</span>
+    <span class="n">CRYPT</span> <span class="o">=</span> <span class="mi">18</span>
+    <span class="n">INCLUDE_DATA</span> <span class="o">=</span> <span class="mi">19</span></div>
+
+<div class="viewcode-block" id="SrvRestoreOption"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.SrvRestoreOption">[docs]</a><span class="k">class</span> <span class="nc">SrvRestoreOption</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parameters for ServerAction.RESTORE.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">FILE</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">SKIP_DATA</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">BUFFERS</span> <span class="o">=</span> <span class="mi">9</span>
+    <span class="n">PAGE_SIZE</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">LENGTH</span> <span class="o">=</span> <span class="mi">11</span>
+    <span class="n">ACCESS_MODE</span> <span class="o">=</span> <span class="mi">12</span>
+    <span class="n">FIX_FSS_DATA</span> <span class="o">=</span> <span class="mi">13</span>
+    <span class="n">FIX_FSS_METADATA</span> <span class="o">=</span> <span class="mi">14</span>
+    <span class="n">STAT</span> <span class="o">=</span> <span class="mi">15</span>
+    <span class="c1"># Firebird 4</span>
+    <span class="n">KEYHOLDER</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="n">KEYNAME</span> <span class="o">=</span> <span class="mi">17</span>
+    <span class="n">CRYPT</span> <span class="o">=</span> <span class="mi">18</span>
+    <span class="n">INCLUDE_DATA</span> <span class="o">=</span> <span class="mi">19</span>
+    <span class="n">REPLICA_MODE</span> <span class="o">=</span> <span class="mi">20</span></div>
+
+<div class="viewcode-block" id="SrvNBackupOption"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.SrvNBackupOption">[docs]</a><span class="k">class</span> <span class="nc">SrvNBackupOption</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parameters for ServerAction.NBAK.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">LEVEL</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">FILE</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">DIRECT</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="c1"># Firebird 4</span>
+    <span class="n">GUID</span> <span class="o">=</span> <span class="mi">8</span></div>
+
+<div class="viewcode-block" id="SrvTraceOption"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.SrvTraceOption">[docs]</a><span class="k">class</span> <span class="nc">SrvTraceOption</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parameters for ServerAction.TRACE_*.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ID</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">NAME</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">CONFIG</span> <span class="o">=</span> <span class="mi">3</span></div>
+
+<div class="viewcode-block" id="SrvPropertiesOption"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.SrvPropertiesOption">[docs]</a><span class="k">class</span> <span class="nc">SrvPropertiesOption</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parameters for ServerAction.PROPERTIES.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">PAGE_BUFFERS</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">SWEEP_INTERVAL</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">SHUTDOWN_DB</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="n">DENY_NEW_ATTACHMENTS</span> <span class="o">=</span> <span class="mi">9</span>
+    <span class="n">DENY_NEW_TRANSACTIONS</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">RESERVE_SPACE</span> <span class="o">=</span> <span class="mi">11</span>
+    <span class="n">WRITE_MODE</span> <span class="o">=</span> <span class="mi">12</span>
+    <span class="n">ACCESS_MODE</span> <span class="o">=</span> <span class="mi">13</span>
+    <span class="n">SET_SQL_DIALECT</span> <span class="o">=</span> <span class="mi">14</span>
+    <span class="n">FORCE_SHUTDOWN</span> <span class="o">=</span> <span class="mi">41</span>
+    <span class="n">ATTACHMENTS_SHUTDOWN</span> <span class="o">=</span> <span class="mi">42</span>
+    <span class="n">TRANSACTIONS_SHUTDOWN</span> <span class="o">=</span> <span class="mi">43</span>
+    <span class="n">SHUTDOWN_MODE</span> <span class="o">=</span> <span class="mi">44</span>
+    <span class="n">ONLINE_MODE</span> <span class="o">=</span> <span class="mi">45</span>
+    <span class="n">REPLICA_MODE</span> <span class="o">=</span> <span class="mi">46</span> <span class="c1"># Firebird 4</span></div>
+
+<div class="viewcode-block" id="SrvValidateOption"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.SrvValidateOption">[docs]</a><span class="k">class</span> <span class="nc">SrvValidateOption</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parameters for ServerAction.VALIDATE.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">INCLUDE_TABLE</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">EXCLUDE_TABLE</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">INCLUDE_INDEX</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">EXCLUDE_INDEX</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">LOCK_TIMEOUT</span> <span class="o">=</span> <span class="mi">5</span></div>
+
+<div class="viewcode-block" id="SrvUserOption"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.SrvUserOption">[docs]</a><span class="k">class</span> <span class="nc">SrvUserOption</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parameters for ServerAction.ADD_USER|DELETE_USER|MODIFY_USER|DISPLAY_USER.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">USER_ID</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">GROUP_ID</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">USER_NAME</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="n">PASSWORD</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">GROUP_NAME</span> <span class="o">=</span> <span class="mi">9</span>
+    <span class="n">FIRST_NAME</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">MIDDLE_NAME</span> <span class="o">=</span> <span class="mi">11</span>
+    <span class="n">LAST_NAME</span> <span class="o">=</span> <span class="mi">12</span>
+    <span class="n">ADMIN</span> <span class="o">=</span> <span class="mi">13</span></div>
+
+<div class="viewcode-block" id="DbAccessMode"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.DbAccessMode">[docs]</a><span class="k">class</span> <span class="nc">DbAccessMode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Values for isc_spb_prp_access_mode.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">READ_ONLY</span> <span class="o">=</span> <span class="mi">39</span>
+    <span class="n">READ_WRITE</span> <span class="o">=</span> <span class="mi">40</span></div>
+
+<div class="viewcode-block" id="DbSpaceReservation"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.DbSpaceReservation">[docs]</a><span class="k">class</span> <span class="nc">DbSpaceReservation</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Values for isc_spb_prp_reserve_space.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">USE_FULL</span> <span class="o">=</span> <span class="mi">35</span>
+    <span class="n">RESERVE</span> <span class="o">=</span> <span class="mi">36</span></div>
+
+<div class="viewcode-block" id="DbWriteMode"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.DbWriteMode">[docs]</a><span class="k">class</span> <span class="nc">DbWriteMode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Values for isc_spb_prp_write_mode.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ASYNC</span> <span class="o">=</span> <span class="mi">37</span>
+    <span class="n">SYNC</span> <span class="o">=</span> <span class="mi">38</span></div>
+
+<div class="viewcode-block" id="ShutdownMode"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.ShutdownMode">[docs]</a><span class="k">class</span> <span class="nc">ShutdownMode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Values for isc_spb_prp_shutdown_mode.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">NORMAL</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">MULTI</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">SINGLE</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">FULL</span> <span class="o">=</span> <span class="mi">3</span></div>
+
+<div class="viewcode-block" id="OnlineMode"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.OnlineMode">[docs]</a><span class="k">class</span> <span class="nc">OnlineMode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Values for isc_spb_prp_online_mode.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">NORMAL</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">MULTI</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">SINGLE</span> <span class="o">=</span> <span class="mi">2</span></div>
+
+<div class="viewcode-block" id="ShutdownMethod"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.ShutdownMethod">[docs]</a><span class="k">class</span> <span class="nc">ShutdownMethod</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Database shutdown method options.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">FORCED</span> <span class="o">=</span> <span class="mi">41</span>
+    <span class="n">DENY_ATTACHMENTS</span> <span class="o">=</span> <span class="mi">42</span>
+    <span class="n">DENY_TRANSACTIONS</span> <span class="o">=</span> <span class="mi">43</span></div>
+
+<div class="viewcode-block" id="TransactionState"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.TransactionState">[docs]</a><span class="k">class</span> <span class="nc">TransactionState</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Transaction state.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">UNKNOWN</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">COMMIT</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">ROLLBACK</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">LIMBO</span> <span class="o">=</span> <span class="mi">3</span></div>
+
+<div class="viewcode-block" id="DbProvider"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.DbProvider">[docs]</a><span class="k">class</span> <span class="nc">DbProvider</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Database Providers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">RDB_ELN</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">RDB_VMS</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">INTERBASE</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">FIREBIRD</span> <span class="o">=</span> <span class="mi">4</span></div>
+
+<div class="viewcode-block" id="DbClass"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.DbClass">[docs]</a><span class="k">class</span> <span class="nc">DbClass</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Database Classes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">UNKNOWN</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">ACCESS</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">Y_VALVE</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">REM_INT</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">REM_SRVR</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">PIPE_INT</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="n">PIPE_SRVR</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">SAM_INT</span> <span class="o">=</span> <span class="mi">9</span>
+    <span class="n">SAM_SRVR</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">GATEWAY</span> <span class="o">=</span> <span class="mi">11</span>
+    <span class="n">CACHE</span> <span class="o">=</span> <span class="mi">12</span>
+    <span class="n">CLASSIC_ACCESS</span> <span class="o">=</span> <span class="mi">13</span>
+    <span class="n">SERVER_ACCESS</span> <span class="o">=</span> <span class="mi">14</span></div>
+
+<div class="viewcode-block" id="Implementation"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.Implementation">[docs]</a><span class="k">class</span> <span class="nc">Implementation</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Implementation - Legacy format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">RDB_VMS</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">RDB_ELN</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">RDB_ELN_DEV</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">RDB_VMS_Y</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">RDB_ELN_Y</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">JRI</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">JSV</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="n">ISC_APL_68K</span> <span class="o">=</span> <span class="mi">25</span>
+    <span class="n">ISC_VAX_ULTR</span> <span class="o">=</span> <span class="mi">26</span>
+    <span class="n">ISC_VMS</span> <span class="o">=</span> <span class="mi">27</span>
+    <span class="n">ISC_SUN_68K</span> <span class="o">=</span> <span class="mi">28</span>
+    <span class="n">ISC_OS2</span> <span class="o">=</span> <span class="mi">29</span>
+    <span class="n">ISC_SUN4</span> <span class="o">=</span> <span class="mi">30</span>
+    <span class="n">ISC_HP_UX</span> <span class="o">=</span> <span class="mi">31</span>
+    <span class="n">ISC_SUN_386I</span> <span class="o">=</span> <span class="mi">32</span>
+    <span class="n">ISC_VMS_ORCL</span> <span class="o">=</span> <span class="mi">33</span>
+    <span class="n">ISC_MAC_AUX</span> <span class="o">=</span> <span class="mi">34</span>
+    <span class="n">ISC_RT_AIX</span> <span class="o">=</span> <span class="mi">35</span>
+    <span class="n">ISC_MIPS_ULT</span> <span class="o">=</span> <span class="mi">36</span>
+    <span class="n">ISC_XENIX</span> <span class="o">=</span> <span class="mi">37</span>
+    <span class="n">ISC_DG</span> <span class="o">=</span> <span class="mi">38</span>
+    <span class="n">ISC_HP_MPEXL</span> <span class="o">=</span> <span class="mi">39</span>
+    <span class="n">ISC_HP_UX68K</span> <span class="o">=</span> <span class="mi">40</span>
+    <span class="n">ISC_SGI</span> <span class="o">=</span> <span class="mi">41</span>
+    <span class="n">ISC_SCO_UNIX</span> <span class="o">=</span> <span class="mi">42</span>
+    <span class="n">ISC_CRAY</span> <span class="o">=</span> <span class="mi">43</span>
+    <span class="n">ISC_IMP</span> <span class="o">=</span> <span class="mi">44</span>
+    <span class="n">ISC_DELTA</span> <span class="o">=</span> <span class="mi">45</span>
+    <span class="n">ISC_NEXT</span> <span class="o">=</span> <span class="mi">46</span>
+    <span class="n">ISC_DOS</span> <span class="o">=</span> <span class="mi">47</span>
+    <span class="n">M88K</span> <span class="o">=</span> <span class="mi">48</span>
+    <span class="n">UNIXWARE</span> <span class="o">=</span> <span class="mi">49</span>
+    <span class="n">ISC_WINNT_X86</span> <span class="o">=</span> <span class="mi">50</span>
+    <span class="n">ISC_EPSON</span> <span class="o">=</span> <span class="mi">51</span>
+    <span class="n">ALPHA_OSF</span> <span class="o">=</span> <span class="mi">52</span>
+    <span class="n">ALPHA_VMS</span> <span class="o">=</span> <span class="mi">53</span>
+    <span class="n">NETWARE_386</span> <span class="o">=</span> <span class="mi">54</span>
+    <span class="n">WIN_ONLY</span> <span class="o">=</span> <span class="mi">55</span>
+    <span class="n">NCR_3000</span> <span class="o">=</span> <span class="mi">56</span>
+    <span class="n">WINNT_PPC</span> <span class="o">=</span> <span class="mi">57</span>
+    <span class="n">DG_X86</span> <span class="o">=</span> <span class="mi">58</span>
+    <span class="n">SCO_EV</span> <span class="o">=</span> <span class="mi">59</span>
+    <span class="n">I386</span> <span class="o">=</span> <span class="mi">60</span>
+    <span class="n">FREEBSD</span> <span class="o">=</span> <span class="mi">61</span>
+    <span class="n">NETBSD</span> <span class="o">=</span> <span class="mi">62</span>
+    <span class="n">DARWIN_PPC</span> <span class="o">=</span> <span class="mi">63</span>
+    <span class="n">SINIXZ</span> <span class="o">=</span> <span class="mi">64</span>
+    <span class="n">LINUX_SPARC</span> <span class="o">=</span> <span class="mi">65</span>
+    <span class="n">LINUX_AMD64</span> <span class="o">=</span> <span class="mi">66</span>
+    <span class="n">FREEBSD_AMD64</span> <span class="o">=</span> <span class="mi">67</span>
+    <span class="n">WINNT_AMD64</span> <span class="o">=</span> <span class="mi">68</span>
+    <span class="n">LINUX_PPC</span> <span class="o">=</span> <span class="mi">69</span>
+    <span class="n">DARWIN_X86</span> <span class="o">=</span> <span class="mi">70</span>
+    <span class="n">LINUX_MIPSEL</span> <span class="o">=</span> <span class="mi">71</span>
+    <span class="n">LINUX_MIPS</span> <span class="o">=</span> <span class="mi">72</span>
+    <span class="n">DARWIN_X64</span> <span class="o">=</span> <span class="mi">73</span>
+    <span class="n">SUN_AMD64</span> <span class="o">=</span> <span class="mi">74</span>
+    <span class="n">LINUX_ARM</span> <span class="o">=</span> <span class="mi">75</span>
+    <span class="n">LINUX_IA64</span> <span class="o">=</span> <span class="mi">76</span>
+    <span class="n">DARWIN_PPC64</span> <span class="o">=</span> <span class="mi">77</span>
+    <span class="n">LINUX_S390X</span> <span class="o">=</span> <span class="mi">78</span>
+    <span class="n">LINUX_S390</span> <span class="o">=</span> <span class="mi">79</span>
+    <span class="n">LINUX_SH</span> <span class="o">=</span> <span class="mi">80</span>
+    <span class="n">LINUX_SHEB</span> <span class="o">=</span> <span class="mi">81</span>
+    <span class="n">LINUX_HPPA</span> <span class="o">=</span> <span class="mi">82</span>
+    <span class="n">LINUX_ALPHA</span> <span class="o">=</span> <span class="mi">83</span>
+    <span class="n">LINUX_ARM64</span> <span class="o">=</span> <span class="mi">84</span>
+    <span class="n">LINUX_PPC64EL</span> <span class="o">=</span> <span class="mi">85</span>
+    <span class="n">LINUX_PPC64</span> <span class="o">=</span> <span class="mi">86</span>
+    <span class="n">LINUX_M68K</span> <span class="o">=</span> <span class="mi">87</span>
+    <span class="n">LINUX_RISCV64</span> <span class="o">=</span> <span class="mi">88</span></div>
+
+<div class="viewcode-block" id="ImpCPU"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.ImpCPU">[docs]</a><span class="k">class</span> <span class="nc">ImpCPU</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Implementation - CPU.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">INTEL386</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">AMD_INTEL_X64</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">ULTRA_SPARC</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">POWER_PC</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">POWER_PC64</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">MIPSEL</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">MIPS</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">ARM</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="n">IA64</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">S390</span> <span class="o">=</span> <span class="mi">9</span>
+    <span class="n">S390X</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">SH</span> <span class="o">=</span> <span class="mi">11</span>
+    <span class="n">SHEB</span> <span class="o">=</span> <span class="mi">12</span>
+    <span class="n">HPPA</span> <span class="o">=</span> <span class="mi">13</span>
+    <span class="n">ALPHA</span> <span class="o">=</span> <span class="mi">14</span>
+    <span class="n">ARM64</span> <span class="o">=</span> <span class="mi">15</span>
+    <span class="n">POWER_PC64EL</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="n">M68K</span> <span class="o">=</span> <span class="mi">17</span></div>
+
+<div class="viewcode-block" id="ImpOS"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.ImpOS">[docs]</a><span class="k">class</span> <span class="nc">ImpOS</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Implementation - CPU.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">WINDOWS</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">LINUX</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">DARWIN</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">SOLARIS</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">HPUX</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">AIX</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">MMS</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">FREE_BSD</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="n">NET_BSD</span> <span class="o">=</span> <span class="mi">8</span></div>
+
+<div class="viewcode-block" id="ImpCompiler"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.ImpCompiler">[docs]</a><span class="k">class</span> <span class="nc">ImpCompiler</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Implementation - Compiler.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">MSVC</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">GCC</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">XLC</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">ACC</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">SUN_STUDIO</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">ICC</span> <span class="o">=</span> <span class="mi">5</span></div>
+
+<div class="viewcode-block" id="CancelType"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.CancelType">[docs]</a><span class="k">class</span> <span class="nc">CancelType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Cancel types for `Connection.cancel_operation()`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">DISABLE</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">ENABLE</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">RAISE</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">ABORT</span> <span class="o">=</span> <span class="mi">4</span></div>
+
+<div class="viewcode-block" id="DecfloatRound"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.DecfloatRound">[docs]</a><span class="k">class</span> <span class="nc">DecfloatRound</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;DECFLOAT ROUND options.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">CEILING</span> <span class="o">=</span> <span class="s1">&#39;CEILING&#39;</span>
+    <span class="n">UP</span> <span class="o">=</span> <span class="s1">&#39;UP&#39;</span>
+    <span class="n">HALF_UP</span> <span class="o">=</span> <span class="s1">&#39;HALF_UP&#39;</span>
+    <span class="n">HALF_EVEN</span> <span class="o">=</span> <span class="s1">&#39;HALF_EVEN&#39;</span>
+    <span class="n">HALF_DOWN</span> <span class="o">=</span> <span class="s1">&#39;HALF_DOWN&#39;</span>
+    <span class="n">DOWN</span> <span class="o">=</span> <span class="s1">&#39;DOWN&#39;</span>
+    <span class="n">FLOOR</span> <span class="o">=</span> <span class="s1">&#39;FLOOR&#39;</span>
+    <span class="n">REROUND</span> <span class="o">=</span> <span class="s1">&#39;REROUND&#39;</span></div>
+
+<div class="viewcode-block" id="DecfloatTraps"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.DecfloatTraps">[docs]</a><span class="k">class</span> <span class="nc">DecfloatTraps</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;DECFLOAT TRAPS options.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">DIVISION_BY_ZERO</span> <span class="o">=</span> <span class="s1">&#39;Division_by_zero&#39;</span>
+    <span class="n">INEXACT</span> <span class="o">=</span> <span class="s1">&#39;Inexact&#39;</span>
+    <span class="n">INVALID_OPERATION</span> <span class="o">=</span> <span class="s1">&#39;Invalid_operation&#39;</span>
+    <span class="n">OVERFLOW</span> <span class="o">=</span> <span class="s1">&#39;Overflow&#39;</span>
+    <span class="n">UNDERFLOW</span> <span class="o">=</span> <span class="s1">&#39;Underflow&#39;</span></div>
+
+<span class="c1"># Flags</span>
+
+<div class="viewcode-block" id="StateFlag"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.StateFlag">[docs]</a><span class="k">class</span> <span class="nc">StateFlag</span><span class="p">(</span><span class="n">IntFlag</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;IState flags.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">NONE</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">WARNINGS</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">ERRORS</span> <span class="o">=</span> <span class="mi">2</span></div>
+
+<div class="viewcode-block" id="PreparePrefetchFlag"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.PreparePrefetchFlag">[docs]</a><span class="k">class</span> <span class="nc">PreparePrefetchFlag</span><span class="p">(</span><span class="n">IntFlag</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Flags for Statement Prefetch.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">NONE</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">TYPE</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">INPUT_PARAMETERS</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">OUTPUT_PARAMETERS</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">LEGACY_PLAN</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">DETAILED_PLAN</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="n">AFFECTED_RECORDS</span> <span class="o">=</span> <span class="mi">32</span>
+    <span class="n">FLAGS</span> <span class="o">=</span> <span class="mi">64</span>
+    <span class="n">METADATA</span> <span class="o">=</span> <span class="n">TYPE</span> <span class="o">|</span> <span class="n">FLAGS</span> <span class="o">|</span> <span class="n">INPUT_PARAMETERS</span> <span class="o">|</span> <span class="n">OUTPUT_PARAMETERS</span>
+    <span class="n">ALL</span> <span class="o">=</span> <span class="n">METADATA</span> <span class="o">|</span> <span class="n">LEGACY_PLAN</span> <span class="o">|</span> <span class="n">DETAILED_PLAN</span> <span class="o">|</span> <span class="n">AFFECTED_RECORDS</span></div>
+
+<div class="viewcode-block" id="StatementFlag"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.StatementFlag">[docs]</a><span class="k">class</span> <span class="nc">StatementFlag</span><span class="p">(</span><span class="n">IntFlag</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Statement flags.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">NONE</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">HAS_CURSOR</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">REPEAT_EXECUTE</span> <span class="o">=</span> <span class="mi">2</span></div>
+
+<div class="viewcode-block" id="CursorFlag"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.CursorFlag">[docs]</a><span class="k">class</span> <span class="nc">CursorFlag</span><span class="p">(</span><span class="n">IntFlag</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Cursor flags.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">NONE</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">SCROLLABLE</span> <span class="o">=</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="ConnectionFlag"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.ConnectionFlag">[docs]</a><span class="k">class</span> <span class="nc">ConnectionFlag</span><span class="p">(</span><span class="n">IntFlag</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Flags returned for DbInfoCode.CONN_FLAGS.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">NONE</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">COMPRESSED</span> <span class="o">=</span> <span class="mh">0x01</span>
+    <span class="n">ENCRYPTED</span> <span class="o">=</span> <span class="mh">0x02</span></div>
+
+<div class="viewcode-block" id="EncryptionFlag"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.EncryptionFlag">[docs]</a><span class="k">class</span> <span class="nc">EncryptionFlag</span><span class="p">(</span><span class="n">IntFlag</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Crypto status (Response to DbInfoCode.CRYPT_STATE).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ENCRYPTED</span> <span class="o">=</span> <span class="mh">0x01</span>
+    <span class="n">PROCESS</span> <span class="o">=</span> <span class="mh">0x02</span></div>
+
+<div class="viewcode-block" id="ServerCapability"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.ServerCapability">[docs]</a><span class="k">class</span> <span class="nc">ServerCapability</span><span class="p">(</span><span class="n">IntFlag</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Server capabilities (returned by isc_info_svc_capabilities).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">NONE</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">WAL</span> <span class="o">=</span> <span class="mb">0b00000000001</span>
+    <span class="n">MULTI_CLIENT</span> <span class="o">=</span> <span class="mb">0b00000000010</span>
+    <span class="n">REMOTE_HOP</span> <span class="o">=</span> <span class="mb">0b00000000100</span>
+    <span class="n">NO_SRV_STATS</span> <span class="o">=</span> <span class="mb">0b00000001000</span>
+    <span class="n">NO_DB_STATS</span> <span class="o">=</span> <span class="mb">0b00000010000</span>
+    <span class="n">LOCAL_ENGINE</span> <span class="o">=</span> <span class="mb">0b00000100000</span>
+    <span class="n">NO_FORCED_WRITE</span> <span class="o">=</span> <span class="mb">0b00001000000</span>
+    <span class="n">NO_SHUTDOWN</span> <span class="o">=</span> <span class="mb">0b00010000000</span>
+    <span class="n">NO_SERVER_SHUTDOWN</span> <span class="o">=</span> <span class="mb">0b00100000000</span>
+    <span class="n">SERVER_CONFIG</span> <span class="o">=</span> <span class="mb">0b01000000000</span>
+    <span class="n">QUOTED_FILENAME</span> <span class="o">=</span> <span class="mb">0b10000000000</span></div>
+
+<div class="viewcode-block" id="SrvRepairFlag"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.SrvRepairFlag">[docs]</a><span class="k">class</span> <span class="nc">SrvRepairFlag</span><span class="p">(</span><span class="n">IntFlag</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;isc_spb_rpr_* flags for ServerAction.REPAIR.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">VALIDATE_DB</span> <span class="o">=</span> <span class="mh">0x01</span>
+    <span class="n">SWEEP_DB</span> <span class="o">=</span> <span class="mh">0x02</span>
+    <span class="n">MEND_DB</span> <span class="o">=</span> <span class="mh">0x04</span>
+    <span class="n">LIST_LIMBO_TRANS</span> <span class="o">=</span> <span class="mh">0x08</span>
+    <span class="n">CHECK_DB</span> <span class="o">=</span> <span class="mh">0x10</span>
+    <span class="n">IGNORE_CHECKSUM</span> <span class="o">=</span> <span class="mh">0x20</span>
+    <span class="n">KILL_SHADOWS</span> <span class="o">=</span> <span class="mh">0x40</span>
+    <span class="n">FULL</span> <span class="o">=</span> <span class="mh">0x80</span>
+    <span class="n">ICU</span> <span class="o">=</span> <span class="mh">0x0800</span>
+    <span class="c1">#</span>
+    <span class="n">CORRUPTION_CHECK</span> <span class="o">=</span> <span class="n">VALIDATE_DB</span> <span class="o">|</span> <span class="n">CHECK_DB</span> <span class="o">|</span> <span class="n">FULL</span> <span class="o">|</span> <span class="n">IGNORE_CHECKSUM</span>
+    <span class="n">REPAIR</span> <span class="o">=</span> <span class="n">MEND_DB</span> <span class="o">|</span> <span class="n">FULL</span> <span class="o">|</span> <span class="n">IGNORE_CHECKSUM</span></div>
+
+<div class="viewcode-block" id="SrvStatFlag"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.SrvStatFlag">[docs]</a><span class="k">class</span> <span class="nc">SrvStatFlag</span><span class="p">(</span><span class="n">IntFlag</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;isc_spb_sts_* flags for ServerAction.DB_STATS.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">NONE</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">DATA_PAGES</span> <span class="o">=</span> <span class="mh">0x01</span>
+    <span class="n">DB_LOG</span> <span class="o">=</span> <span class="mh">0x02</span>
+    <span class="n">HDR_PAGES</span> <span class="o">=</span> <span class="mh">0x04</span>
+    <span class="n">IDX_PAGES</span> <span class="o">=</span> <span class="mh">0x08</span>
+    <span class="n">SYS_RELATIONS</span> <span class="o">=</span> <span class="mh">0x10</span>
+    <span class="n">RECORD_VERSIONS</span> <span class="o">=</span> <span class="mh">0x20</span>
+    <span class="n">NOCREATION</span> <span class="o">=</span> <span class="mh">0x80</span>
+    <span class="n">ENCRYPTION</span> <span class="o">=</span> <span class="mh">0x100</span>
+    <span class="n">DEFAULT</span> <span class="o">=</span> <span class="n">DATA_PAGES</span> <span class="o">|</span> <span class="n">IDX_PAGES</span></div>
+
+<div class="viewcode-block" id="SrvBackupFlag"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.SrvBackupFlag">[docs]</a><span class="k">class</span> <span class="nc">SrvBackupFlag</span><span class="p">(</span><span class="n">IntFlag</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;isc_spb_bkp_* flags for ServerAction.BACKUP.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">NONE</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">IGNORE_CHECKSUMS</span> <span class="o">=</span> <span class="mh">0x01</span>
+    <span class="n">IGNORE_LIMBO</span> <span class="o">=</span> <span class="mh">0x02</span>
+    <span class="n">METADATA_ONLY</span> <span class="o">=</span> <span class="mh">0x04</span>
+    <span class="n">NO_GARBAGE_COLLECT</span> <span class="o">=</span> <span class="mh">0x08</span>
+    <span class="n">OLD_DESCRIPTIONS</span> <span class="o">=</span> <span class="mh">0x10</span>
+    <span class="n">NON_TRANSPORTABLE</span> <span class="o">=</span> <span class="mh">0x20</span>
+    <span class="n">CONVERT</span> <span class="o">=</span> <span class="mh">0x40</span>
+    <span class="n">EXPAND</span> <span class="o">=</span> <span class="mh">0x80</span>
+    <span class="n">NO_TRIGGERS</span> <span class="o">=</span> <span class="mh">0x8000</span>
+    <span class="n">ZIP</span> <span class="o">=</span> <span class="mh">0x010000</span> <span class="c1"># Firebird 4</span></div>
+
+<div class="viewcode-block" id="SrvRestoreFlag"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.SrvRestoreFlag">[docs]</a><span class="k">class</span> <span class="nc">SrvRestoreFlag</span><span class="p">(</span><span class="n">IntFlag</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;isc_spb_res_* flags for ServerAction.RESTORE.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">METADATA_ONLY</span> <span class="o">=</span> <span class="mh">0x04</span>
+    <span class="n">DEACTIVATE_IDX</span> <span class="o">=</span> <span class="mh">0x0100</span>
+    <span class="n">NO_SHADOW</span> <span class="o">=</span> <span class="mh">0x0200</span>
+    <span class="n">NO_VALIDITY</span> <span class="o">=</span> <span class="mh">0x0400</span>
+    <span class="n">ONE_AT_A_TIME</span> <span class="o">=</span> <span class="mh">0x0800</span>
+    <span class="n">REPLACE</span> <span class="o">=</span> <span class="mh">0x1000</span>
+    <span class="n">CREATE</span> <span class="o">=</span> <span class="mh">0x2000</span>
+    <span class="n">USE_ALL_SPACE</span> <span class="o">=</span> <span class="mh">0x4000</span>
+    <span class="n">NO_TRIGGERS</span> <span class="o">=</span> <span class="mh">0x8000</span></div>
+
+<div class="viewcode-block" id="SrvNBackupFlag"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.SrvNBackupFlag">[docs]</a><span class="k">class</span> <span class="nc">SrvNBackupFlag</span><span class="p">(</span><span class="n">IntFlag</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;isc_spb_nbk_* flags for ServerAction.NBAK.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">NONE</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">NO_TRIGGERS</span> <span class="o">=</span> <span class="mh">0x01</span>
+    <span class="c1"># Firebird 4</span>
+    <span class="n">IN_PLACE</span> <span class="o">=</span> <span class="mh">0x02</span>
+    <span class="n">SEQUENCE</span> <span class="o">=</span> <span class="mh">0x04</span></div>
+
+<div class="viewcode-block" id="SrvPropertiesFlag"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.SrvPropertiesFlag">[docs]</a><span class="k">class</span> <span class="nc">SrvPropertiesFlag</span><span class="p">(</span><span class="n">IntFlag</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;isc_spb_prp_* flags for ServerAction.PROPERTIES.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ACTIVATE</span> <span class="o">=</span> <span class="mh">0x0100</span>
+    <span class="n">DB_ONLINE</span> <span class="o">=</span> <span class="mh">0x0200</span>
+    <span class="n">NOLINGER</span> <span class="o">=</span> <span class="mh">0x0400</span></div>
+
+<div class="viewcode-block" id="ImpFlags"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.ImpFlags">[docs]</a><span class="k">class</span> <span class="nc">ImpFlags</span><span class="p">(</span><span class="n">IntFlag</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Implementation - Endianness.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">LITTLE_ENDIAN</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">BIG_ENDIAN</span> <span class="o">=</span> <span class="mi">1</span></div>
+
+<span class="c1"># Dataclasses</span>
+
+<div class="viewcode-block" id="ItemMetadata"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.ItemMetadata">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">ItemMetadata</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Information for single item from `iMessageMetadata`.</span>
+
+<span class="sd">    This `dataclass` is used internally, and it&#39;s not intended for general use.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        field (str): Field name</span>
+<span class="sd">        relation (str): Relation name</span>
+<span class="sd">        owner (str): Owner name</span>
+<span class="sd">        alias (str): Field alias</span>
+<span class="sd">        datatype (SQLDataType): Data type</span>
+<span class="sd">        nullable (bool): Whether NULLs are allowed</span>
+<span class="sd">        subtype (int): Data sub-type</span>
+<span class="sd">        length (int): Size of raw field data in message buffer</span>
+<span class="sd">        scale (int): Field scale</span>
+<span class="sd">        charset (int): Character set</span>
+<span class="sd">        offset (int): Offset of raw field data in message buffer</span>
+<span class="sd">        null_offset (int): Offset of null flag in message buffer</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">field</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">relation</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">owner</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">alias</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">datatype</span><span class="p">:</span> <span class="n">SQLDataType</span>
+    <span class="n">nullable</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">subtype</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">length</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">scale</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">charset</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">null_offset</span><span class="p">:</span> <span class="nb">int</span></div>
+
+<div class="viewcode-block" id="TableAccessStats"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.TableAccessStats">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">TableAccessStats</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Table access statistics.</span>
+
+<span class="sd">    Data structure returned by `.Connection.get_table_access_stats()`.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        table_id (int): Relation ID</span>
+<span class="sd">        sequential (int): Number of sequential table scans (row reads)</span>
+<span class="sd">        indexed (int): Number of reads done via an index</span>
+<span class="sd">        inserts (int): Number of inserts</span>
+<span class="sd">        updates (int): Number of updates</span>
+<span class="sd">        deletes (int): Number of deleted</span>
+<span class="sd">        backouts (int): Number of removals of a version of a record</span>
+<span class="sd">        purges (int): Number of removals of old versions of fully mature records (records that</span>
+<span class="sd">                      are committed, so that older ancestor versions are no longer needed)</span>
+<span class="sd">        expunges (int): Number of removals of a record and all of its ancestors, for records</span>
+<span class="sd">                        whose deletions have been committed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">table_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">sequential</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">indexed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">inserts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">updates</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">deletes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">backouts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">purges</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">expunges</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="UserInfo"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.UserInfo">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">UserInfo</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Information about Firebird user.</span>
+
+<span class="sd">    Data structure returned by `.Service.get_user()` and `.Service.get_users()`.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        user_name (str): User (login) name</span>
+<span class="sd">        password (str): User password</span>
+<span class="sd">        first_name (str): First name</span>
+<span class="sd">        middle_name (str): Middle name</span>
+<span class="sd">        last_name (str): Last name</span>
+<span class="sd">        user_id (int): User ID</span>
+<span class="sd">        group_id (int): User Group ID</span>
+<span class="sd">        group_name (str): Group name</span>
+<span class="sd">        admin (bool): True is user has admin priviledges</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">user_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">password</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">first_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">middle_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">last_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">group_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">group_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">admin</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="BCD"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.BCD">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">BCD</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;BCD number.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        sign (int): Sign</span>
+<span class="sd">        number (bytes): Number</span>
+<span class="sd">        exp (int): Exponent</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sign</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">number</span><span class="p">:</span> <span class="nb">bytes</span>
+    <span class="n">exp</span><span class="p">:</span> <span class="nb">int</span></div>
+
+<div class="viewcode-block" id="TraceSession"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.TraceSession">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">TraceSession</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Information about active trace session.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        id (int): Session ID number</span>
+<span class="sd">        user (str): User name</span>
+<span class="sd">        timestamp (datetime.datetime): Session start timestamp</span>
+<span class="sd">        name (str): Session name (if defined)</span>
+<span class="sd">        flags (list): List with session flag names</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">user</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span></div>
+
+<span class="c1"># Constants required by Python DB API 2.0 specification</span>
+
+<span class="c1">#: String constant stating the supported DB API level.</span>
+<span class="n">apilevel</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;2.0&#39;</span>
+<span class="c1">#: Integer constant stating the level of thread safety the interface supports.</span>
+<span class="c1">#: Curretly `1` = Threads may share the module, but not connections.</span>
+<span class="n">threadsafety</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="c1">#: String constant stating the type of parameter marker formatting expected by</span>
+<span class="c1">#: the interface. `&#39;qmark&#39;` = Question mark style, e.g. &#39;...WHERE name=?&#39;</span>
+<span class="n">paramstyle</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;qmark&#39;</span>
+
+<span class="c1"># Named positional constants to be used as indices into the description</span>
+<span class="c1"># attribute of a cursor.</span>
+
+<span class="n">DESCRIPTION_NAME</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">DESCRIPTION_TYPE_CODE</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">DESCRIPTION_DISPLAY_SIZE</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">DESCRIPTION_INTERNAL_SIZE</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">DESCRIPTION_PRECISION</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">DESCRIPTION_SCALE</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">DESCRIPTION_NULL_OK</span> <span class="o">=</span> <span class="mi">6</span>
+
+<span class="c1"># Types Required by Python DB-API 2.0</span>
+
+<span class="c1">#: This callable constructs an object holding a date value.</span>
+<span class="n">Date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span>
+<span class="c1">#: This callable constructs an object holding a time value.</span>
+<span class="n">Time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">time</span>
+<span class="c1">#: This callable constructs an object holding a time stamp value.</span>
+<span class="n">Timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>
+
+<div class="viewcode-block" id="DateFromTicks"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.DateFromTicks">[docs]</a><span class="k">def</span> <span class="nf">DateFromTicks</span><span class="p">(</span><span class="n">ticks</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Date</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+    <span class="sd">&quot;&quot;&quot;Constructs an object holding a date value from the given ticks value</span>
+<span class="sd">    (number of seconds since the epoch).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Date</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="n">ticks</span><span class="p">)[:</span><span class="mi">3</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="TimeFromTicks"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.TimeFromTicks">[docs]</a><span class="k">def</span> <span class="nf">TimeFromTicks</span><span class="p">(</span><span class="n">ticks</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Time</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+    <span class="sd">&quot;&quot;&quot;Constructs an object holding a time value from the given ticks value</span>
+<span class="sd">    (number of seconds since the epoch).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Time</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="n">ticks</span><span class="p">)[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="TimestampFromTicks"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.TimestampFromTicks">[docs]</a><span class="k">def</span> <span class="nf">TimestampFromTicks</span><span class="p">(</span><span class="n">ticks</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Timestamp</span><span class="p">:</span> <span class="c1"># pragma: no cover</span>
+    <span class="sd">&quot;&quot;&quot;Constructs an object holding a time stamp value from the given ticks value</span>
+<span class="sd">    (number of seconds since the epoch).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Timestamp</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="n">ticks</span><span class="p">)[:</span><span class="mi">6</span><span class="p">])</span></div>
+
+<span class="c1">#: This callable constructs an object capable of holding a binary (long) string value.</span>
+<span class="n">Binary</span> <span class="o">=</span> <span class="nb">memoryview</span>
+
+<span class="k">class</span> <span class="nc">DBAPITypeObject</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Python DB API 2.0 - type support.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">values</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">values</span>
+    <span class="k">def</span> <span class="nf">__cmp__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span> <span class="c1"># pragma: no cover</span>
+        <span class="k">if</span> <span class="n">other</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">other</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+<span class="c1">#: This type object is used to describe columns in a database that are string-based (e.g. CHAR).</span>
+<span class="n">STRING</span> <span class="o">=</span> <span class="n">DBAPITypeObject</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+<span class="c1">#: This type object is used to describe (long) binary columns in a database (e.g. LONG, RAW, BLOBs).</span>
+<span class="n">BINARY</span> <span class="o">=</span> <span class="n">DBAPITypeObject</span><span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)</span>
+<span class="c1">#: This type object is used to describe numeric columns in a database.</span>
+<span class="n">NUMBER</span> <span class="o">=</span> <span class="n">DBAPITypeObject</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">)</span>
+<span class="c1">#: This type object is used to describe date/time columns in a database.</span>
+<span class="n">DATETIME</span> <span class="o">=</span> <span class="n">DBAPITypeObject</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
+<span class="c1">#: This type object is used to describe the &quot;Row ID&quot; column in a database.</span>
+<span class="n">ROWID</span> <span class="o">=</span> <span class="n">DBAPITypeObject</span><span class="p">()</span>
+
+<span class="c1"># Types for type hints</span>
+
+<span class="c1">#: DB API 2.0 Cursor DESCRIPTION</span>
+<span class="n">DESCRIPTION</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span>
+<span class="c1">#: Callback that accepts line of text output</span>
+<span class="n">CB_OUTPUT_LINE</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span>
+<span class="c1">#: File name (incl. path) specification</span>
+<span class="n">FILESPEC</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Transactional"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.Transactional">[docs]</a><span class="k">class</span> <span class="nc">Transactional</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+    <span class="sd">&quot;&quot;&quot;Protocol type for object that supports transactional processing.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Transactional.begin"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.Transactional.begin">[docs]</a>    <span class="k">def</span> <span class="nf">begin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tpb</span><span class="p">:</span> <span class="nb">bytes</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Begin transaction.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+<div class="viewcode-block" id="Transactional.commit"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.Transactional.commit">[docs]</a>    <span class="k">def</span> <span class="nf">commit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">retaining</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Commit transaction.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+<div class="viewcode-block" id="Transactional.rollback"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.Transactional.rollback">[docs]</a>    <span class="k">def</span> <span class="nf">rollback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">retaining</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">savepoint</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Rollback transaction.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+<div class="viewcode-block" id="Transactional.is_active"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.Transactional.is_active">[docs]</a>    <span class="k">def</span> <span class="nf">is_active</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns True if transaction is active.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div></div>
+
+<span class="c1"># timezone</span>
+
+<div class="viewcode-block" id="get_timezone"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.get_timezone">[docs]</a><span class="k">def</span> <span class="nf">get_timezone</span><span class="p">(</span><span class="n">timezone</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="o">.</span><span class="n">tzinfo</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns `datetime.tzinfo` for specified time zone.</span>
+
+<span class="sd">    This is preferred method to obtain timezone information for construction of timezone-aware</span>
+<span class="sd">    `datetime.datetime` and `datetime.time` objects. Current implementation uses `dateutil.tz`</span>
+<span class="sd">    for timezone tzinfo objects, but adds metadata neccessary to store timezone regions into</span>
+<span class="sd">    database instead zoned time, and to handle offset-based timezones in format required by</span>
+<span class="sd">    Firebird.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">timezone</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">):</span>
+        <span class="n">timezone</span> <span class="o">=</span> <span class="s1">&#39;UTC&#39;</span> <span class="o">+</span> <span class="n">timezone</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">tz</span><span class="o">.</span><span class="n">gettz</span><span class="p">(</span><span class="n">timezone</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="s1">&#39;_timezone_&#39;</span><span class="p">):</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="s1">&#39;_timezone_&#39;</span><span class="p">,</span> <span class="n">timezone</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span> <span class="k">if</span> <span class="n">timezone</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;UTC&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">timezone</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="k">else</span> <span class="n">timezone</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2020-2022, The Firebird Project.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

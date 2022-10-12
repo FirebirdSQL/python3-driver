@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
-<title>Usage Guide — firebird-driver 1.5.2 documentation</title>
+<title>Usage Guide — firebird-driver 1.6.0 documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
 <link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
 <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -37,7 +37,7 @@
 </button>
 <a class="brand" href="index.html">
           firebird-driver</a>
-<span class="navbar-text pull-left"><b>1.5.2</b></span>
+<span class="navbar-text pull-left"><b>1.6.0</b></span>
 <div class="nav-collapse">
 <ul class="nav">
 <li class="divider-vertical"></li>
@@ -157,6 +157,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-6-0">Version 1.6.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-2">Version 1.5.2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-1">Version 1.5.1</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-0">Version 1.5.0</a><ul>
@@ -288,9 +289,9 @@
 <div class="container">
 <div class="row">
 <div class="body span12 content" role="main">
-<section id="usage-guide">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Usage Guide"></a><section id="usage-guide">
 <h1>Usage Guide<a class="headerlink" href="#usage-guide" title="Permalink to this heading">¶</a></h1>
-<section id="driver-structure">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Driver structure"></a><section id="driver-structure">
 <h2>Driver structure<a class="headerlink" href="#driver-structure" title="Permalink to this heading">¶</a></h2>
 <p>Source code is currently divided into next submodules:</p>
 <ul class="simple">
@@ -305,10 +306,48 @@
 name space. In normal circumstances is not necessary to import sub-modules directly. However,
 you may need them to access some not so frequently needed driver functionality like driver
 hooks, or to implement your own callback interfaces.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">firebird-driver</span></code> is designed to support all Firebird versions starting from version 3.0.
+Because each Firebird major version adds new functionality, and Firebird OO API could
+be extended even in maintenance releases, the driver isolates volatile functionality
+into special class hierarchies.</p>
+<p>For example information about database (provided via <a class="reference internal" href="ref-intf.html#firebird.driver.interfaces.iAttachment_v3.get_info" title="firebird.driver.interfaces.iAttachment_v3.get_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_info()</span></code></a> API
+call) is isolated into separate <a class="reference internal" href="ref-core.html#firebird.driver.core.DatabaseInfoProvider" title="firebird.driver.core.DatabaseInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DatabaseInfoProvider</span></code></a> class hierarchy.
+The <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.info" title="firebird.driver.core.Connection.info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection.info</span></code></a> attribute then provides access to instance of appropriate class
+- <a class="reference internal" href="ref-core.html#firebird.driver.core.DatabaseInfoProvider" title="firebird.driver.core.DatabaseInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DatabaseInfoProvider</span></code></a> or its ancestor - for connected database.
+The <a class="reference internal" href="ref-core.html#firebird.driver.core.DatabaseInfoProvider" title="firebird.driver.core.DatabaseInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DatabaseInfoProvider</span></code></a> class <strong>always</strong> provides functionality of most recent
+Firebird version supported by driver.</p>
+<p>This layout has several important consequences:</p>
+<ol class="arabic">
+<li><p>The <a class="reference internal" href="ref-core.html#firebird.driver.core.DatabaseInfoProvider" title="firebird.driver.core.DatabaseInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DatabaseInfoProvider</span></code></a> class may change in major driver release if new Firebird
+functionality is introduced. This normally represent no problems for client application
+as backward compatibility is guaranteed.</p></li>
+<li><p>You should check the class hierarchy for “evolving” classes when you start using the
+driver, and whenever you upgrade to new <strong>major</strong> driver version. If there are versioned
+ancestor classes (they always have Firebird version number in their name) for canonical
+(top level) ones, you should adjust your application to deal with situations when
+instance of ancestor class is provided by driver instead top-level one, to prevent
+run-time exceptions caused by access to functionality not provided by currently attached
+Firebird server.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The same apply for low-level API (<a class="reference internal" href="ref-intf.html#module-firebird.driver.interfaces" title="firebird.driver.interfaces: Interface wrappers for Firebird new API"><code class="xref py py-obj docutils literal notranslate"><span class="pre">interfaces</span></code></a>) with difference
+that they may change in minor driver releases (because API could be extended in
+Firebird maintenance releases).</p>
+</div>
+</li>
+</ol>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="ref-core.html#firebird.driver.core.DatabaseInfoProvider" title="firebird.driver.core.DatabaseInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DatabaseInfoProvider</span></code></a>, <a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionInfoProvider" title="firebird.driver.core.TransactionInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransactionInfoProvider</span></code></a>, <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerInfoProvider" title="firebird.driver.core.ServerInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerInfoProvider</span></code></a>,
+<a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices" title="firebird.driver.core.ServerDbServices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerDbServices</span></code></a>, <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerUserServices" title="firebird.driver.core.ServerUserServices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerUserServices</span></code></a> and <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerTraceServices" title="firebird.driver.core.ServerTraceServices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerTraceServices</span></code></a>.</p>
+</div>
+</div>
 </section>
-<section id="configuration">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Configuration"></a><section id="configuration">
 <span id="index-0"></span><h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this heading">¶</a></h2>
-<p>The driver uses configuration built on top of <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#module-firebird.base.config" title="(in Firebird-base v1.4.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration</span> <span class="pre">system</span></code></a>
+<p>The driver uses configuration built on top of <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#module-firebird.base.config" title="(in Firebird-base v1.4.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration</span> <span class="pre">system</span></code></a>
 provided by <a class="reference external" href="https://firebird-base.rtfd.io">firebird-base</a> package. In addition to global settings, the configuration
 also includes the definition of connection parameters to Firebird servers and databases.</p>
 <p>The default configuration connects to embedded server using direct/local connection method.
@@ -316,7 +355,7 @@ To access remote servers and databases (or local ones through remote protocols),
 necessary to adjust default configuration, or <code class="xref py py-obj docutils literal notranslate"><span class="pre">register</span></code> them in configuration manager.</p>
 <p>You can manipulate the configuration objects directly, or load configuration from files or
 strings (in <code class="xref py py-obj docutils literal notranslate"><span class="pre">ini-style</span></code> <a class="reference external" href="https://docs.python.org/3/library/configparser.html#module-configparser" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configparser</span></code></a> format).</p>
-<section id="the-driver-config-object">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/The ‘driver_config’ object"></a><section id="the-driver-config-object">
 <h3>The ‘driver_config’ object<a class="headerlink" href="#the-driver-config-object" title="Permalink to this heading">¶</a></h3>
 <p>The global <a class="reference internal" href="ref-config.html#firebird.driver.config.driver_config" title="firebird.driver.config.driver_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">driver_config</span></code></a> object holds all configurable driver parameters, and access
 configuration parameters for registered Firebird servers and databases.</p>
@@ -336,7 +375,7 @@ calls any from following functions: <a class="reference internal" href="ref-core
 <p><a class="reference internal" href="ref-config.html#firebird.driver.config.DriverConfig" title="firebird.driver.config.DriverConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DriverConfig</span></code></a> for list of available methods and parameters.</p>
 </div>
 </section>
-<section id="server-and-database-configuration">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Server and database configuration"></a><section id="server-and-database-configuration">
 <h3>Server and database configuration<a class="headerlink" href="#server-and-database-configuration" title="Permalink to this heading">¶</a></h3>
 <p>Firebird provides ever-increasing list of parameter options for database and server connections.
 To keep the Python API clean and manageable, the <code class="xref py py-obj docutils literal notranslate"><span class="pre">firebird-driver</span></code> uses server and database
@@ -361,7 +400,7 @@ or configuration, and few keyword parameters to specify / override selected opti
 </div>
 </section>
 </section>
-<section id="databases">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Databases"></a><section id="databases">
 <span id="index-1"></span><h2>Databases<a class="headerlink" href="#databases" title="Permalink to this heading">¶</a></h2>
 <p>Access to the database is made available through <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a> objects. Firebird-driver
 provides two constructors for these:</p>
@@ -369,7 +408,7 @@ provides two constructors for these:</p>
 <li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.connect" title="firebird.driver.core.connect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect</span></code></a> - Returns <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a> to database that already exists.</p></li>
 <li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.create_database" title="firebird.driver.core.create_database"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_database</span></code></a> - Returns <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a> to newly created database.</p></li>
 </ul>
-<section id="using-connect">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Using connect()"></a><section id="using-connect">
 <span id="index-2"></span><h3>Using connect()<a class="headerlink" href="#using-connect" title="Permalink to this heading">¶</a></h3>
 <p>This constructor has one positional and several keyword parameters.</p>
 <p>The value of <code class="xref py py-obj docutils literal notranslate"><span class="pre">database</span></code> positional parameter must be one of:</p>
@@ -463,7 +502,7 @@ It’s possible to register servers and databases directly in code like this:</p
 <p><a class="reference internal" href="ref-core.html#firebird.driver.core.connect" title="firebird.driver.core.connect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect()</span></code></a> for details.</p>
 </div>
 </section>
-<section id="using-create-database">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Using create_database()"></a><section id="using-create-database">
 <span id="index-3"></span><h3>Using create_database()<a class="headerlink" href="#using-create-database" title="Permalink to this heading">¶</a></h3>
 <p>This constructor returns connection to newly created database. It works in the same way
 as <a class="reference internal" href="ref-core.html#firebird.driver.core.connect" title="firebird.driver.core.connect"><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect()</span></code></a>, but utilizes additional database configuration options.</p>
@@ -533,7 +572,7 @@ as <a class="reference internal" href="ref-core.html#firebird.driver.core.connec
 <p><a class="reference internal" href="ref-core.html#firebird.driver.core.create_database" title="firebird.driver.core.create_database"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_database()</span></code></a> for details.</p>
 </div>
 </section>
-<section id="deleting-databases">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Deleting databases"></a><section id="deleting-databases">
 <span id="index-4"></span><h3>Deleting databases<a class="headerlink" href="#deleting-databases" title="Permalink to this heading">¶</a></h3>
 <p>The Firebird engine also supports dropping (deleting) databases dynamically,
 but dropping is a more complicated operation than creating, for several reasons:
@@ -542,7 +581,7 @@ the deletion, it may have supporting objects such as temporary sort files, and
 it may even have dependent shadow databases. Although the database engine
 recognizes a <code class="xref py py-obj docutils literal notranslate"><span class="pre">DROP</span> <span class="pre">DATABASE</span></code> SQL statement, support for that statement is limited
 to the <code class="xref py py-obj docutils literal notranslate"><span class="pre">isql</span></code> command-line administration utility. However, the engine supports
-the deletion of databases via an API call, which FDB exposes as
+the deletion of databases via an API call, which <code class="xref py py-obj docutils literal notranslate"><span class="pre">firebird-driver</span></code> exposes as
 <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.drop_database" title="firebird.driver.core.Connection.drop_database"><code class="xref py py-obj docutils literal notranslate"><span class="pre">drop_database</span></code></a> method in <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a> class. So, to drop a database
 you need to connect to it first.</p>
 <p><strong>Example:</strong></p>
@@ -560,7 +599,7 @@ you need to connect to it first.</p>
 <p><a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.drop_database" title="firebird.driver.core.Connection.drop_database"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection.drop_database()</span></code></a> for details.</p>
 </div>
 </section>
-<section id="connection-object">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Connection object"></a><section id="connection-object">
 <span id="index-5"></span><h3>Connection object<a class="headerlink" href="#connection-object" title="Permalink to this heading">¶</a></h3>
 <p><a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a> object represents a direct link to database, and works as
 gateway for next operations with it:</p>
@@ -570,7 +609,7 @@ gateway for next operations with it:</p>
 <li><p><a class="reference internal" href="#transanction-management">Transanction management</a>: methods <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.begin" title="firebird.driver.core.Connection.begin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">begin()</span></code></a>, <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.commit" title="firebird.driver.core.Connection.commit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">commit()</span></code></a>,
 <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.rollback" title="firebird.driver.core.Connection.rollback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rollback()</span></code></a>, <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.savepoint" title="firebird.driver.core.Connection.savepoint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">savepoint()</span></code></a>, <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.transaction_manager" title="firebird.driver.core.Connection.transaction_manager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transaction_manager()</span></code></a>,
 <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.is_active" title="firebird.driver.core.Connection.is_active"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_active()</span></code></a>, and attributes <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.main_transaction" title="firebird.driver.core.Connection.main_transaction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main_transaction</span></code></a>,
-<a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.query_transaction" title="firebird.driver.core.Connection.query_transaction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_transaction</span></code></a>, <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.transactions" title="firebird.driver.core.Connection.transactions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transactions</span></code></a> and <a class="reference internal" href="ref-core.html#id0" title="firebird.driver.core.Connection.default_tpb"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_tpb</span></code></a>.</p></li>
+<a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.query_transaction" title="firebird.driver.core.Connection.query_transaction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_transaction</span></code></a>, <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.transactions" title="firebird.driver.core.Connection.transactions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transactions</span></code></a> and <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.default_tpb" title="firebird.driver.core.Connection.default_tpb"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_tpb</span></code></a>.</p></li>
 <li><p>Work with <a class="reference internal" href="#database-events">Database Events</a>: method <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.event_collector" title="firebird.driver.core.Connection.event_collector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">event_collector</span></code></a>.</p></li>
 <li><p><a class="reference internal" href="#getting-information-about-connection">Getting information about connection</a>: methods <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.is_closed" title="firebird.driver.core.Connection.is_closed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_closed()</span></code></a> and
 <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.ping" title="firebird.driver.core.Connection.ping"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ping()</span></code></a> and attributes <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.dsn" title="firebird.driver.core.Connection.dsn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dsn</span></code></a>, <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.charset" title="firebird.driver.core.Connection.charset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">charset</span></code></a>
@@ -579,13 +618,13 @@ and <a class="reference internal" href="ref-core.html#firebird.driver.core.Conne
 <li><p><a class="reference internal" href="#closing-the-connection">Closing the connection</a>: method <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.close" title="firebird.driver.core.Connection.close"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close()</span></code></a></p></li>
 </ul>
 </section>
-<section id="closing-the-connection">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Closing the connection"></a><section id="closing-the-connection">
 <span id="index-6"></span><h3>Closing the connection<a class="headerlink" href="#closing-the-connection" title="Permalink to this heading">¶</a></h3>
 <p>There are many local and server resources used by firebird-driver that must be properly
 managed, and disposed when they are no longer necessary. All objects that require proper
 finalization provide <code class="xref py py-obj docutils literal notranslate"><span class="pre">close()</span></code> method that must be called when object is no longer needed.
-The <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a> objects are the most important ones, as other most frequently used
-objects like cursors, prepared statements and transactions are typically associated with
+The <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a> (and <a class="reference internal" href="ref-core.html#firebird.driver.core.Server" title="firebird.driver.core.Server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server</span></code></a>) objects are the most important ones, as other most frequently
+used objects like cursors, prepared statements and transactions are typically associated with
 connections.</p>
 <p>You may call the <code class="xref py py-obj docutils literal notranslate"><span class="pre">close()</span></code> method directly, or use the <a class="reference external" href="https://docs.python.org/3/reference/compound_stmts.html#with" title="(in Python v3.10)"><span class="xref std std-ref">with</span></a> statement
 and context manager support provided by all these objects.</p>
@@ -632,7 +671,7 @@ delivery of resource warnings.</p>
 <p><a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.close" title="firebird.driver.core.Connection.close"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection.close()</span></code></a> for details.</p>
 </div>
 </section>
-<section id="getting-information-about-connection">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Getting information about connection"></a><section id="getting-information-about-connection">
 <span id="index-7"></span><h3>Getting information about connection<a class="headerlink" href="#getting-information-about-connection" title="Permalink to this heading">¶</a></h3>
 <p>Only (most useful) part of information associated with <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a> object is directly
 available:</p>
@@ -652,19 +691,25 @@ read-only property.</p></li>
 <code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection._dpb</span></code> attribute that could be processed using <a class="reference internal" href="ref-core.html#firebird.driver.core.DPB" title="firebird.driver.core.DPB"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DPB</span></code></a> object.</p>
 </div>
 </section>
-<section id="getting-information-about-database">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Getting information about database"></a><section id="getting-information-about-database">
 <span id="index-8"></span><h3>Getting information about database<a class="headerlink" href="#getting-information-about-database" title="Permalink to this heading">¶</a></h3>
-<p>Because the scope and type of database information depends on the version of the Firebird server
-and database ODS, this information is made available through a separate class <a class="reference internal" href="ref-core.html#firebird.driver.core.DatabaseInfoProvider" title="firebird.driver.core.DatabaseInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DatabaseInfoProvider</span></code></a>.
-The <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.info" title="firebird.driver.core.Connection.info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection.info</span></code></a> property provides access to <a class="reference internal" href="ref-core.html#firebird.driver.core.DatabaseInfoProvider" title="firebird.driver.core.DatabaseInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DatabaseInfoProvider</span></code></a> object appropriate
-for attached database.</p>
-<p>Although you may query the information directly from server using <code class="xref py py-obj docutils literal notranslate"><span class="pre">DatabaseInfoProvider.get_info()</span></code>
-method (that wraps the Firebird IAttachment.getInfo() API call), the <a class="reference internal" href="ref-core.html#firebird.driver.core.DatabaseInfoProvider" title="firebird.driver.core.DatabaseInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DatabaseInfoProvider</span></code></a> object
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Because the scope and type of database information depends on the version of the Firebird
+server and database ODS, this information is made available through a separate class
+<a class="reference internal" href="ref-core.html#firebird.driver.core.DatabaseInfoProvider" title="firebird.driver.core.DatabaseInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DatabaseInfoProvider</span></code></a>. The <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.info" title="firebird.driver.core.Connection.info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection.info</span></code></a> property provides access to
+instance of <a class="reference internal" href="ref-core.html#firebird.driver.core.DatabaseInfoProvider" title="firebird.driver.core.DatabaseInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DatabaseInfoProvider</span></code></a> or it’s <strong>ancestor</strong> class according to ODS of attached
+database and Firebird version.</p>
+</div>
+<p>Although you may query the information directly from server using
+<a class="reference internal" href="ref-core.html#firebird.driver.core.DatabaseInfoProvider3.get_info" title="firebird.driver.core.DatabaseInfoProvider3.get_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_info()</span></code></a> method (that wraps the Firebird
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">iAttachment.getInfo()</span></code> API call), the <a class="reference internal" href="ref-core.html#firebird.driver.core.DatabaseInfoProvider" title="firebird.driver.core.DatabaseInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DatabaseInfoProvider</span></code></a> object
 provides more convenient methods and properties for obtaining specific information directly.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Some information provided by <a class="reference internal" href="ref-core.html#firebird.driver.core.DatabaseInfoProvider" title="firebird.driver.core.DatabaseInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DatabaseInfoProvider</span></code></a> properties (like <code class="xref py py-obj docutils literal notranslate"><span class="pre">cache_hit_ratio</span></code>)
-could not be obtained via <code class="xref py py-obj docutils literal notranslate"><span class="pre">get_info()</span></code> method.</p>
+<p>Some information provided by <a class="reference internal" href="ref-core.html#firebird.driver.core.DatabaseInfoProvider" title="firebird.driver.core.DatabaseInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DatabaseInfoProvider</span></code></a> properties
+(like <a class="reference internal" href="ref-core.html#firebird.driver.core.DatabaseInfoProvider3.cache_hit_ratio" title="firebird.driver.core.DatabaseInfoProvider3.cache_hit_ratio"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cache_hit_ratio</span></code></a>) could not be obtained via
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">get_info()</span></code> method.</p>
 </div>
 <p><strong>Example:</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect</span>
@@ -737,7 +782,7 @@ could not be obtained via <code class="xref py py-obj docutils literal notransla
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="ref-core.html#firebird.driver.core.DatabaseInfoProvider" title="firebird.driver.core.DatabaseInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DatabaseInfoProvider</span></code></a> for details.</p>
 </div>
-<section id="getting-information-about-firebird-version">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Getting information about Firebird version"></a><section id="getting-information-about-firebird-version">
 <h4>Getting information about Firebird version<a class="headerlink" href="#getting-information-about-firebird-version" title="Permalink to this heading">¶</a></h4>
 <p>Because functionality and some features depends on actual Firebird version, it could be
 important for driver users to check it. This (otherwise) simple task could be confusing
@@ -776,7 +821,7 @@ format: major.minor.subrelease.build</p></li>
 </pre></div>
 </div>
 </section>
-<section id="database-on-disk-structure">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Database On-Disk Structure"></a><section id="database-on-disk-structure">
 <h4>Database On-Disk Structure<a class="headerlink" href="#database-on-disk-structure" title="Permalink to this heading">¶</a></h4>
 <p>Particular Firebird features may also depend on specific support in database
 (for example number and structure of monitoring tables). These required structures are
@@ -803,14 +848,14 @@ property.</p>
 </section>
 </section>
 </section>
-<section id="executing-sql-statements">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Executing SQL Statements"></a><section id="executing-sql-statements">
 <span id="index-9"></span><h2>Executing SQL Statements<a class="headerlink" href="#executing-sql-statements" title="Permalink to this heading">¶</a></h2>
 <p>Firebird-driver implements two ways for execution of SQL commands against connected database:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.execute_immediate" title="firebird.driver.core.Connection.execute_immediate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">execute_immediate</span></code></a> - for execution of SQL commands that don’t return any result.</p></li>
 <li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.Cursor" title="firebird.driver.core.Cursor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Cursor</span></code></a> objects that offer rich interface for execution of SQL commands and fetching their results.</p></li>
 </ul>
-<section id="cursor-object">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Cursor object"></a><section id="cursor-object">
 <span id="index-10"></span><h3>Cursor object<a class="headerlink" href="#cursor-object" title="Permalink to this heading">¶</a></h3>
 <p>Because <a class="reference internal" href="ref-core.html#firebird.driver.core.Cursor" title="firebird.driver.core.Cursor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Cursor</span></code></a> objects always operate in context of single <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a> (and <a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionManager" title="firebird.driver.core.TransactionManager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransactionManager</span></code></a>),
 <a class="reference internal" href="ref-core.html#firebird.driver.core.Cursor" title="firebird.driver.core.Cursor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Cursor</span></code></a> instances are not created directly, but by constructor method. Python DB API 2.0 assumes
@@ -832,7 +877,7 @@ additional information about SQL statements (like execution <a class="reference 
 <a class="reference internal" href="ref-core.html#firebird.driver.core.Cursor.fetch_last" title="firebird.driver.core.Cursor.fetch_last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fetch_last()</span></code></a>, <a class="reference internal" href="ref-core.html#firebird.driver.core.Cursor.fetch_absolute" title="firebird.driver.core.Cursor.fetch_absolute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fetch_absolute()</span></code></a> and <a class="reference internal" href="ref-core.html#firebird.driver.core.Cursor.fetch_relative" title="firebird.driver.core.Cursor.fetch_relative"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fetch_relative()</span></code></a>.</p></li>
 </ul>
 </section>
-<section id="sql-execution-basics">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/SQL Execution Basics"></a><section id="sql-execution-basics">
 <span id="index-11"></span><h3>SQL Execution Basics<a class="headerlink" href="#sql-execution-basics" title="Permalink to this heading">¶</a></h3>
 <p>There are five methods how to execute SQL commands:</p>
 <ol class="arabic">
@@ -884,7 +929,7 @@ of values.</p>
 </li>
 </ol>
 </section>
-<section id="fetching-data-from-server">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Fetching data from server"></a><section id="fetching-data-from-server">
 <span id="index-12"></span><h3>Fetching data from server<a class="headerlink" href="#fetching-data-from-server" title="Permalink to this heading">¶</a></h3>
 <p>Result of SQL statement execution consists from sequence of zero to unknown number of <code class="xref py py-obj docutils literal notranslate"><span class="pre">rows</span></code>,
 where each <code class="xref py py-obj docutils literal notranslate"><span class="pre">row</span></code> is a set of exactly the same number of values. <a class="reference internal" href="ref-core.html#firebird.driver.core.Cursor" title="firebird.driver.core.Cursor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Cursor</span></code></a> object offer number
@@ -959,7 +1004,7 @@ so it does <strong>NOT</strong> returns <code class="xref py py-obj docutils lit
 to this method as iterator.</p>
 </div>
 <a class="dashAnchor" name="//apple_ref/cpp/Section/scrollable-cursors"></a><span class="target" id="id1"></span></section>
-<section id="index-13">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Scrollable cursors"></a><section id="index-13">
 <span id="id2"></span><h3>Scrollable cursors<a class="headerlink" href="#index-13" title="Permalink to this heading">¶</a></h3>
 <p>SQL statements executed by <a class="reference internal" href="ref-core.html#firebird.driver.core.Cursor.open" title="firebird.driver.core.Cursor.open"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Cursor.open()</span></code></a> have scrollable result set that could be
 navigated using next methods:</p>
@@ -1051,7 +1096,7 @@ memory/disk resources, so this feature should be used only when really necessary
 </pre></div>
 </div>
 </section>
-<a class="dashAnchor" name="//apple_ref/cpp/Section/Parameterized statements"></a><section id="id3">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Parameterized statements"></a><a class="dashAnchor" name="//apple_ref/cpp/Section/Parameterized statements"></a><section id="id3">
 <span id="index-14"></span><span id="id4"></span><h3>Parameterized statements<a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
 <p>When SQL command you want to execute contains data <code class="xref py py-obj docutils literal notranslate"><span class="pre">values</span></code>, you can either:</p>
 <ul>
@@ -1091,7 +1136,7 @@ transfer of BLOB value.</p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">NUMERIC</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">DECIMAL</span></code> values must be <a class="reference external" href="https://docs.python.org/3/library/decimal.html#module-decimal" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">decimal</span></code></a> objects.</p></li>
 </ul>
 </section>
-<a class="dashAnchor" name="//apple_ref/cpp/Section/Prepared Statements"></a><section id="id5">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Prepared Statements"></a><a class="dashAnchor" name="//apple_ref/cpp/Section/Prepared Statements"></a><section id="id5">
 <span id="index-15"></span><span id="id6"></span><h3>Prepared Statements<a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h3>
 <p>Execution of any SQL statement has three phases:</p>
 <ul class="simple">
@@ -1166,7 +1211,7 @@ Python DB API 2.0 compliant drivers.</p>
 <p><a class="reference internal" href="ref-core.html#firebird.driver.core.Statement" title="firebird.driver.core.Statement"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Statement</span></code></a> for details.</p>
 </div>
 </section>
-<section id="named-cursors">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Named Cursors"></a><section id="named-cursors">
 <span id="index-16"></span><h3>Named Cursors<a class="headerlink" href="#named-cursors" title="Permalink to this heading">¶</a></h3>
 <p>To allow the Python programmer to perform scrolling <strong>UPDATE</strong> or <strong>DELETE</strong> via the
 <strong>“SELECT … FOR UPDATE”</strong> syntax, the firebird-driver provides the read-only property
@@ -1190,7 +1235,7 @@ Python DB API 2.0 compliant drivers.</p>
 </pre></div>
 </div>
 </section>
-<section id="working-with-stored-procedures">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Working with stored procedures"></a><section id="working-with-stored-procedures">
 <span id="index-17"></span><h3>Working with stored procedures<a class="headerlink" href="#working-with-stored-procedures" title="Permalink to this heading">¶</a></h3>
 <p>Firebird stored procedures can have input parameters and/or output parameters.
 Some databases support input/output parameters, where the same parameter is used
@@ -1238,9 +1283,9 @@ does not returns the output parameters directly, and you must call <a class="ref
 </div>
 </section>
 </section>
-<section id="data-handling-and-conversions">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Data handling and conversions"></a><section id="data-handling-and-conversions">
 <span id="index-18"></span><h2>Data handling and conversions<a class="headerlink" href="#data-handling-and-conversions" title="Permalink to this heading">¶</a></h2>
-<section id="implicit-conversion-of-input-parameters-from-strings">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Implicit Conversion of Input Parameters from Strings"></a><section id="implicit-conversion-of-input-parameters-from-strings">
 <span id="index-19"></span><h3>Implicit Conversion of Input Parameters from Strings<a class="headerlink" href="#implicit-conversion-of-input-parameters-from-strings" title="Permalink to this heading">¶</a></h3>
 <p>The Firebird database engine treats most SQL data types in a weakly typed fashion:
 the engine may attempt to convert the raw value to a different type, as appropriate
@@ -1297,7 +1342,7 @@ database engine’s external tables also deserve consideration. External tables 
 be used to suck semi-structured data from flat files directly into the relational
 database without the intervention of an ad hoc conversion program.</p>
 </section>
-<section id="automatic-conversion-from-to-unicode">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Automatic conversion from/to Unicode"></a><section id="automatic-conversion-from-to-unicode">
 <span id="index-20"></span><h3>Automatic conversion from/to Unicode<a class="headerlink" href="#automatic-conversion-from-to-unicode" title="Permalink to this heading">¶</a></h3>
 <p>In Firebird, every <code class="xref py py-obj docutils literal notranslate"><span class="pre">CHAR</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">VARCHAR</span></code> or textual <code class="xref py py-obj docutils literal notranslate"><span class="pre">BLOB</span></code> field can (or, better: must)
 have a <code class="xref py py-obj docutils literal notranslate"><span class="pre">character</span> <span class="pre">set</span></code> assigned. While it’s possible to define single character set
@@ -1352,7 +1397,7 @@ define character set for your databases and specify <code class="xref py py-obj 
 make your life much easier.</p>
 </div>
 </section>
-<a class="dashAnchor" name="//apple_ref/cpp/Section/Working with BLOBs"></a><section id="working-with-blobs">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Working with BLOBs"></a><a class="dashAnchor" name="//apple_ref/cpp/Section/Working with BLOBs"></a><section id="working-with-blobs">
 <span id="index-21"></span><span id="id7"></span><h3>Working with BLOBs<a class="headerlink" href="#working-with-blobs" title="Permalink to this heading">¶</a></h3>
 <p>Firebird-driver uses two types of BLOB values:</p>
 <ul class="simple">
@@ -1431,7 +1476,7 @@ performance too, as new <a class="reference internal" href="ref-core.html#firebi
 </pre></div>
 </div>
 </section>
-<section id="firebird-array-type">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Firebird ARRAY type"></a><section id="firebird-array-type">
 <span id="index-22"></span><h3>Firebird ARRAY type<a class="headerlink" href="#firebird-array-type" title="Permalink to this heading">¶</a></h3>
 <p>Firebird-driver supports Firebird ARRAY data type. ARRAY values are represented as
 Python lists. On input, the Python sequence (list or tuple) must be nested appropriately
@@ -1496,7 +1541,7 @@ reason.</p>
 </div>
 </section>
 </section>
-<section id="transanction-management">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Transanction management"></a><section id="transanction-management">
 <span id="index-23"></span><h2>Transanction management<a class="headerlink" href="#transanction-management" title="Permalink to this heading">¶</a></h2>
 <p>For the sake of simplicity, firebird-driver lets the Python programmer ignore
 transaction management to the greatest extent allowed by the Python Database
@@ -1514,7 +1559,7 @@ method, such as <a class="reference internal" href="ref-core.html#firebird.drive
 it also exposes the full complement of the database engine’s advanced transaction
 control features: <a class="reference internal" href="#transaction-parameters">transaction parameters</a>, <a class="reference internal" href="#retaining-transactions">retaining transactions</a>, <a class="reference internal" href="#savepoints">savepoints</a>,
 and <a class="reference internal" href="#id8">distributed transactions</a>.</p>
-<section id="basics">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Basics"></a><section id="basics">
 <h3>Basics<a class="headerlink" href="#basics" title="Permalink to this heading">¶</a></h3>
 <p>When it comes to transactions, Python Database API 2.0 specify that <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a> object
 has to respond to the following methods:</p>
@@ -1580,11 +1625,11 @@ API 2.0 requirements, <a class="reference internal" href="ref-core.html#firebird
 <p><a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionManager" title="firebird.driver.core.TransactionManager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransactionManager</span></code></a> for details.</p>
 </div>
 </section>
-<section id="auto-commit">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Auto-commit"></a><section id="auto-commit">
 <span id="index-24"></span><h3>Auto-commit<a class="headerlink" href="#auto-commit" title="Permalink to this heading">¶</a></h3>
 <p>Firebird-driver doesn’t support <code class="xref py py-obj docutils literal notranslate"><span class="pre">auto-commit</span></code> feature directly, but developers
 may achieve the similar result using <code class="xref py py-obj docutils literal notranslate"><span class="pre">explicit</span></code> transaction start, taking advantage
-of <a class="reference internal" href="ref-core.html#id2" title="firebird.driver.core.TransactionManager.default_action"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransactionManager.default_action</span></code></a> and its default value (<a class="reference internal" href="ref-types.html#firebird.driver.types.DefaultAction.COMMIT" title="firebird.driver.types.DefaultAction.COMMIT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">COMMIT</span></code></a>).</p>
+of <a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionManager.default_action" title="firebird.driver.core.TransactionManager.default_action"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransactionManager.default_action</span></code></a> and its default value (<a class="reference internal" href="ref-types.html#firebird.driver.types.DefaultAction.COMMIT" title="firebird.driver.types.DefaultAction.COMMIT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">COMMIT</span></code></a>).</p>
 <p><strong>Example:</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect</span>
 
@@ -1605,7 +1650,7 @@ of <a class="reference internal" href="ref-core.html#id2" title="firebird.driver
 </pre></div>
 </div>
 </section>
-<section id="transaction-parameters">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Transaction parameters"></a><section id="transaction-parameters">
 <span id="index-25"></span><h3>Transaction parameters<a class="headerlink" href="#transaction-parameters" title="Permalink to this heading">¶</a></h3>
 <p>The database engine offers the client programmer an optional facility called
 <code class="xref py py-obj docutils literal notranslate"><span class="pre">transaction</span> <span class="pre">parameter</span> <span class="pre">buffers</span></code> (TPBs) for tweaking the operating characteristics
@@ -1613,9 +1658,9 @@ of the transactions he initiates. These include characteristics such as whether
 the transaction has read and write access to tables, or read-only access, and
 whether or not other simultaneously active transactions can share table access
 with the transaction.</p>
-<p>Transaction manager has <a class="reference internal" href="ref-core.html#id3" title="firebird.driver.core.TransactionManager.default_tpb"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_tpb</span></code></a> attribute that can be
+<p>Transaction manager has <a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionManager.default_tpb" title="firebird.driver.core.TransactionManager.default_tpb"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_tpb</span></code></a> attribute that can be
 changed to set the default TPB to be used for all subsequent transactions started
-by this manager. Also Connection have a <a class="reference internal" href="ref-core.html#id0" title="firebird.driver.core.Connection.default_tpb"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_tpb</span></code></a> attribute,
+by this manager. Also Connection have a <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.default_tpb" title="firebird.driver.core.Connection.default_tpb"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_tpb</span></code></a> attribute,
 but it’s used to set the default TPB for all transactions managers subsequently
 created for the connection (see <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.transaction_manager" title="firebird.driver.core.Connection.transaction_manager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection.transaction_manager()</span></code></a>).</p>
 <p>Alternatively, if the programmer only wants to set the TPB for a single transaction,
@@ -1646,13 +1691,19 @@ provides several convenient ways for TPB construction:</p>
 </pre></div>
 </div>
 </section>
-<section id="getting-information-about-transaction">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Getting information about transaction"></a><section id="getting-information-about-transaction">
 <span id="index-26"></span><h3>Getting information about transaction<a class="headerlink" href="#getting-information-about-transaction" title="Permalink to this heading">¶</a></h3>
-<p>The <a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionManager.info" title="firebird.driver.core.TransactionManager.info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransactionManager.info</span></code></a> property provides access to <a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionInfoProvider" title="firebird.driver.core.TransactionInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransactionInfoProvider</span></code></a>
-object that could be used to obtain information about <strong>active</strong> transaction.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Because the scope and type of transaction information depends on the version of the Firebird
+server, this information is made available through a separate class
+<a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionInfoProvider" title="firebird.driver.core.TransactionInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransactionInfoProvider</span></code></a>. The <a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionManager.info" title="firebird.driver.core.TransactionManager.info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransactionManager.info</span></code></a> property provides access to
+instance of <a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionInfoProvider" title="firebird.driver.core.TransactionInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransactionInfoProvider</span></code></a> or it’s <strong>ancestor</strong> class according to used
+Firebird version.</p>
+</div>
 <p>Although you may query the information directly from server using
-<code class="xref py py-obj docutils literal notranslate"><span class="pre">TransactionInfoProvider.get_info()</span></code> method (that wraps the Firebird ITransaction.getInfo()
-API call), the TransactionInfoProvider object provides more convenient methods and properties
+<a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionInfoProvider3.get_info" title="firebird.driver.core.TransactionInfoProvider3.get_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_info()</span></code></a> method (that wraps the Firebird <code class="xref py py-obj docutils literal notranslate"><span class="pre">ITransaction.getInfo()</span></code>
+API call), the <a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionInfoProvider" title="firebird.driver.core.TransactionInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransactionInfoProvider</span></code></a> object provides more convenient methods and properties
 for obtaining specific information directly.</p>
 <p><strong>Example:</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect</span><span class="p">,</span> <span class="n">driver_config</span>
@@ -1683,7 +1734,7 @@ for obtaining specific information directly.</p>
 </pre></div>
 </div>
 </section>
-<section id="retaining-transactions">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Retaining transactions"></a><section id="retaining-transactions">
 <span id="index-27"></span><h3>Retaining transactions<a class="headerlink" href="#retaining-transactions" title="Permalink to this heading">¶</a></h3>
 <p>The <a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionManager.commit" title="firebird.driver.core.TransactionManager.commit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">commit()</span></code></a> and <a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionManager.rollback" title="firebird.driver.core.TransactionManager.rollback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rollback()</span></code></a> methods
 accept an optional boolean keyword parameter <code class="xref py py-obj docutils literal notranslate"><span class="pre">retaining</span></code> (<strong>default False</strong>) to
@@ -1705,7 +1756,7 @@ way).</p>
 </div>
 <p>For more information about retaining transactions, see <code class="xref py py-obj docutils literal notranslate"><span class="pre">Firebird</span> <span class="pre">documentation</span></code>.</p>
 </section>
-<section id="savepoints">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Savepoints"></a><section id="savepoints">
 <span id="index-28"></span><h3>Savepoints<a class="headerlink" href="#savepoints" title="Permalink to this heading">¶</a></h3>
 <p>Savepoints are named, intermediate control points within an open transaction that
 can later be rolled back to, without affecting the preceding work. Multiple savepoints
@@ -1777,13 +1828,13 @@ rather than raw SQL.</p>
 </pre></div>
 </div>
 </section>
-<section id="using-multiple-transactions-with-the-same-connection">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Using multiple transactions with the same connection"></a><section id="using-multiple-transactions-with-the-same-connection">
 <a class="dashAnchor" name="//apple_ref/cpp/Section/Using multiple transactions with the same connection"></a><span id="multiple-transactions"></span><span id="index-29"></span><h3>Using multiple transactions with the same connection<a class="headerlink" href="#using-multiple-transactions-with-the-same-connection" title="Permalink to this heading">¶</a></h3>
 <p>To use additional transactions that could run simultaneously with
 <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.main_transaction" title="firebird.driver.core.Connection.main_transaction"><code class="xref py py-attr docutils literal notranslate"><span class="pre">main</span> <span class="pre">transaction</span></code></a> managed by <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a>,
 create new <a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionManager" title="firebird.driver.core.TransactionManager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransactionManager</span></code></a> object calling <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.transaction_manager" title="firebird.driver.core.Connection.transaction_manager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection.transaction_manager()</span></code></a>
 method. If you don’t specify the optional <code class="xref py py-obj docutils literal notranslate"><span class="pre">default_tpb</span></code> parameter, this new
-<a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionManager" title="firebird.driver.core.TransactionManager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransactionManager</span></code></a> inherits the <a class="reference internal" href="ref-core.html#id0" title="firebird.driver.core.Connection.default_tpb"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_tpb</span></code></a> from <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a>.
+<a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionManager" title="firebird.driver.core.TransactionManager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransactionManager</span></code></a> inherits the <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.default_tpb" title="firebird.driver.core.Connection.default_tpb"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_tpb</span></code></a> from <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a>.
 Physical transaction is not started when <a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionManager" title="firebird.driver.core.TransactionManager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransactionManager</span></code></a> instance is
 created, but implicitly when first SQL statement for cursor created from
 this manager is executed, or explicitly via <a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionManager.begin" title="firebird.driver.core.TransactionManager.begin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransactionManager.begin()</span></code></a> call.</p>
@@ -1820,7 +1871,7 @@ method.</p>
 </pre></div>
 </div>
 </section>
-<a class="dashAnchor" name="//apple_ref/cpp/Section/Distributed Transactions"></a><section id="distributed-transactions">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Distributed Transactions"></a><a class="dashAnchor" name="//apple_ref/cpp/Section/Distributed Transactions"></a><section id="distributed-transactions">
 <span id="index-30"></span><span id="id8"></span><h3>Distributed Transactions<a class="headerlink" href="#distributed-transactions" title="Permalink to this heading">¶</a></h3>
 <p>Distributed transactions are transactions that span multiple databases.
 Firebird-driver provides this Firebird feature through <a class="reference internal" href="ref-core.html#firebird.driver.core.DistributedTransactionManager" title="firebird.driver.core.DistributedTransactionManager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DistributedTransactionManager</span></code></a>
@@ -1833,7 +1884,7 @@ and <a class="reference internal" href="ref-core.html#firebird.driver.core.Distr
 Additionally, <a class="reference internal" href="ref-core.html#firebird.driver.core.DistributedTransactionManager" title="firebird.driver.core.DistributedTransactionManager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DistributedTransactionManager</span></code></a> exposes method
 <a class="reference internal" href="ref-core.html#firebird.driver.core.DistributedTransactionManager.prepare" title="firebird.driver.core.DistributedTransactionManager.prepare"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prepare()</span></code></a> that explicitly initiates the
 first phase of <code class="xref py py-obj docutils literal notranslate"><span class="pre">Two-Phase</span> <span class="pre">Commit</span> <span class="pre">Protocol</span></code>. Transaction parameters are defined
-similarly to <a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionManager" title="firebird.driver.core.TransactionManager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransactionManager</span></code></a> using <a class="reference internal" href="ref-core.html#id5" title="firebird.driver.core.DistributedTransactionManager.default_tpb"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_tpb</span></code></a>
+similarly to <a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionManager" title="firebird.driver.core.TransactionManager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransactionManager</span></code></a> using <a class="reference internal" href="ref-core.html#firebird.driver.core.DistributedTransactionManager.default_tpb" title="firebird.driver.core.DistributedTransactionManager.default_tpb"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_tpb</span></code></a>
 or as optional parameter to <a class="reference internal" href="ref-core.html#firebird.driver.core.DistributedTransactionManager.begin" title="firebird.driver.core.DistributedTransactionManager.begin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">begin()</span></code></a> call.</p>
 <p>SQL statements that should belong to context of distributed transaction are
 executed via <a class="reference internal" href="ref-core.html#firebird.driver.core.Cursor" title="firebird.driver.core.Cursor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Cursor</span></code></a> instances aquired through <a class="reference internal" href="ref-core.html#firebird.driver.core.DistributedTransactionManager.cursor" title="firebird.driver.core.DistributedTransactionManager.cursor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DistributedTransactionManager.cursor()</span></code></a>
@@ -1968,7 +2019,7 @@ on <strong>all</strong> databases in <em>group</em>.</p>
 </pre></div>
 </div>
 </section>
-<a class="dashAnchor" name="//apple_ref/cpp/Section/Transaction Context Manager"></a><section id="transaction-context-manager">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Transaction Context Manager"></a><a class="dashAnchor" name="//apple_ref/cpp/Section/Transaction Context Manager"></a><section id="transaction-context-manager">
 <span id="index-31"></span><span id="id9"></span><h3>Transaction Context Manager<a class="headerlink" href="#transaction-context-manager" title="Permalink to this heading">¶</a></h3>
 <p>Firebird-driver provides context manager <a class="reference internal" href="ref-core.html#firebird.driver.core.transaction" title="firebird.driver.core.transaction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transaction</span></code></a> that allows automatic
 transaction management using <a class="reference external" href="https://docs.python.org/3/reference/compound_stmts.html#with" title="(in Python v3.10)"><span class="xref std std-ref">WITH statement</span></a>. It can work with
@@ -2004,9 +2055,9 @@ block are never suppressed.</p>
 </div>
 </section>
 </section>
-<section id="database-events">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Database Events"></a><section id="database-events">
 <span id="index-32"></span><h2>Database Events<a class="headerlink" href="#database-events" title="Permalink to this heading">¶</a></h2>
-<section id="what-they-are">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/What they are"></a><section id="what-they-are">
 <h3>What they are<a class="headerlink" href="#what-they-are" title="Permalink to this heading">¶</a></h3>
 <p>The Firebird engine features a distributed, inter-process communication mechanism based on
 messages called <code class="xref py py-obj docutils literal notranslate"><span class="pre">database</span> <span class="pre">events</span></code>. A database event is a message passed from a trigger or
@@ -2017,7 +2068,7 @@ made by other, concurrently running applications without the need for those appl
 communicate directly with one another, and without incurring the expense of CPU time
 required for periodic polling to determine if an event has occurred.</p>
 </section>
-<section id="why-use-them">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Why use them"></a><section id="why-use-them">
 <h3>Why use them<a class="headerlink" href="#why-use-them" title="Permalink to this heading">¶</a></h3>
 <p>Anything that can be accomplished with database events can also be implemented using other
 techniques, so why bother with events? Since you’ve chosen to write database-centric programs
@@ -2057,7 +2108,7 @@ its services are needed. Under this <code class="xref py py-obj docutils literal
 aware of new messages at the instant they arrive, yet it does not waste CPU time checking
 in vain for new messages when there are none available.</p>
 </section>
-<section id="how-events-are-exposed">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/How events are exposed"></a><section id="how-events-are-exposed">
 <h3>How events are exposed<a class="headerlink" href="#how-events-are-exposed" title="Permalink to this heading">¶</a></h3>
 <ol class="arabic">
 <li><p>Server Process (“An event just occurred!”)</p>
@@ -2133,7 +2184,7 @@ thread back to Step 4.</p></li>
 </li>
 </ol>
 </section>
-<section id="api-for-python-developers">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/API for Python developers"></a><section id="api-for-python-developers">
 <h3>API for Python developers<a class="headerlink" href="#api-for-python-developers" title="Permalink to this heading">¶</a></h3>
 <p>The Firebird-driver database event API is comprised of the following: the method
 <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.event_collector" title="firebird.driver.core.Connection.event_collector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection.event_collector()</span></code></a> and the class <a class="reference internal" href="ref-core.html#firebird.driver.core.EventCollector" title="firebird.driver.core.EventCollector"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EventCollector</span></code></a>.</p>
@@ -2272,7 +2323,7 @@ It’s strongly advised to use the <a class="reference internal" href="ref-core.
 </div>
 <span class="target" id="index-33"></span></section>
 </section>
-<a class="dashAnchor" name="//apple_ref/cpp/Section/Working with Services"></a><section id="working-with-services">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Working with Services"></a><a class="dashAnchor" name="//apple_ref/cpp/Section/Working with Services"></a><section id="working-with-services">
 <span id="index-34"></span><span id="id10"></span><h2>Working with Services<a class="headerlink" href="#working-with-services" title="Permalink to this heading">¶</a></h2>
 <p>Database server maintenance tasks such as user management, load monitoring,
 and database backup have traditionally been automated by scripting the
@@ -2286,7 +2337,7 @@ functionality of the traditional command-line tools.</p>
 If the native version were exposed directly, accomplishing a given task would probably
 require more Python code than scripting the traditional command-line tools. For this
 reason, the firebird-driver presents its own abstraction over the native API.</p>
-<section id="services-api-connections">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Services API Connections"></a><section id="services-api-connections">
 <span id="index-35"></span><h3>Services API Connections<a class="headerlink" href="#services-api-connections" title="Permalink to this heading">¶</a></h3>
 <p>All Services API operations are performed in the context of a <code class="xref py py-obj docutils literal notranslate"><span class="pre">connection</span></code> to a specific
 database server, represented by the <a class="reference internal" href="ref-core.html#firebird.driver.core.Server" title="firebird.driver.core.Server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server</span></code></a> class. Similarly to database connections,
@@ -2370,7 +2421,7 @@ and manages number of objects that provide actual server services:</p>
 <p><a class="reference internal" href="ref-core.html#firebird.driver.core.connect_server" title="firebird.driver.core.connect_server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">connect_server()</span></code></a> and <a class="reference internal" href="ref-core.html#firebird.driver.core.Server" title="firebird.driver.core.Server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server</span></code></a> for details.</p>
 </div>
 </section>
-<section id="text-output-from-services">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Text output from Services"></a><section id="text-output-from-services">
 <span id="index-36"></span><h3>Text output from Services<a class="headerlink" href="#text-output-from-services" title="Permalink to this heading">¶</a></h3>
 <p>Some services like <code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerDbServices.backup()</span></code> may return significant amount of text.
 Rather than return the whole text as single string value by methods that provide access
@@ -2384,6 +2435,24 @@ asynchronously accepts an optional parameter <code class="xref py py-obj docutil
 one string parameter. This method is then called with each output line coming from service.</p></li>
 <li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.Server.wait" title="firebird.driver.core.Server.wait"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wait()</span></code></a> - Waits for Sevice to finish, ignoring rest of the output it may produce.</p></li>
 </ul>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The Firebird server sends text output from services as packets, that could have two forms.
+The method for packet construction used for text transfer is controlled by <a class="reference internal" href="ref-core.html#firebird.driver.core.Server.mode" title="firebird.driver.core.Server.mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server.mode</span></code></a>
+attribute with next possible values:</p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="ref-types.html#firebird.driver.types.SrvInfoCode.LINE" title="firebird.driver.types.SrvInfoCode.LINE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SrvInfoCode.LINE</span></code></a> : A single line of text.</p></li>
+<li><p><a class="reference internal" href="ref-types.html#firebird.driver.types.SrvInfoCode.TO_EOF" title="firebird.driver.types.SrvInfoCode.TO_EOF"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SrvInfoCode.TO_EOF</span></code></a> : A block of text up to specified (buffer) size.</p></li>
+</ol>
+<p>Both methods have specific pros and cons:</p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="ref-types.html#firebird.driver.types.SrvInfoCode.LINE" title="firebird.driver.types.SrvInfoCode.LINE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LINE</span></code></a> means more roundtrips and thus slower transfer of service output,
+but each line is sent to client immediately when it’s available.</p></li>
+<li><p><a class="reference internal" href="ref-types.html#firebird.driver.types.SrvInfoCode.TO_EOF" title="firebird.driver.types.SrvInfoCode.TO_EOF"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TO_EOF</span></code></a> means fewer roundtrips so large output is transferred quickly,
+but service output is not sent until the transfer buffer is not full, or service stops.</p></li>
+</ol>
+<p><strong>The default mode is</strong> <a class="reference internal" href="ref-types.html#firebird.driver.types.SrvInfoCode.TO_EOF" title="firebird.driver.types.SrvInfoCode.TO_EOF"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TO_EOF</span></code></a> <strong>with 64K buffer.</strong></p>
+</div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Until output is not fully fetched from service, any attempt to start another asynchronous
@@ -2470,18 +2539,22 @@ to wait for service to complete.</p>
 </pre></div>
 </div>
 </section>
-<section id="server-configuration-and-state-information">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Server Configuration and State information"></a><section id="server-configuration-and-state-information">
 <span id="index-37"></span><h3>Server Configuration and State information<a class="headerlink" href="#server-configuration-and-state-information" title="Permalink to this heading">¶</a></h3>
-<p>Server configuration and other information is provided through <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerInfoProvider" title="firebird.driver.core.ServerInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerInfoProvider</span></code></a> instance
-accessible via <a class="reference internal" href="ref-core.html#firebird.driver.core.Server.info" title="firebird.driver.core.Server.info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server.info</span></code></a> property.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Because the scope and type of service information depends on the version of the Firebird
+server, this information is made available through a separate class
+<a class="reference internal" href="ref-core.html#firebird.driver.core.ServerInfoProvider" title="firebird.driver.core.ServerInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerInfoProvider</span></code></a>. The <a class="reference internal" href="ref-core.html#firebird.driver.core.Server.info" title="firebird.driver.core.Server.info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server.info</span></code></a> property provides access to
+instance of <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerInfoProvider" title="firebird.driver.core.ServerInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerInfoProvider</span></code></a> or it’s <strong>ancestor</strong> class according to attached
+Firebird server version.</p>
+</div>
 <p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerInfoProvider" title="firebird.driver.core.ServerInfoProvider"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerInfoProvider</span></code></a> methods and properties:</p>
 <ul>
 <li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerInfoProvider.get_log" title="firebird.driver.core.ServerInfoProvider.get_log"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_log()</span></code></a> - Request the contents of the server’s log file (<code class="file docutils literal notranslate"><span class="pre">firebird.log</span></code>).</p>
-<blockquote>
-<div><p>This method is so-called <code class="xref py py-obj docutils literal notranslate"><span class="pre">Async</span> <span class="pre">service</span></code> that only initiates log transfer. Actual log
+<p>This method is so-called <code class="xref py py-obj docutils literal notranslate"><span class="pre">Async</span> <span class="pre">service</span></code> that only initiates log transfer. Actual log
 content could be read by one from many methods for <a class="reference internal" href="#text-output-from-services">text output from Services</a> that
 <a class="reference internal" href="ref-core.html#firebird.driver.core.Server" title="firebird.driver.core.Server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server</span></code></a> provides .</p>
-</div></blockquote>
 </li>
 <li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerInfoProvider.version" title="firebird.driver.core.ServerInfoProvider.version"><code class="xref py py-obj docutils literal notranslate"><span class="pre">version</span></code></a> - Returns Firebird server version as SEMVER string.</p></li>
 <li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerInfoProvider.engine_version" title="firebird.driver.core.ServerInfoProvider.engine_version"><code class="xref py py-obj docutils literal notranslate"><span class="pre">engine_version</span></code></a> - Firebird server version as &lt;major&gt;.&lt;minor&gt; float value.</p></li>
@@ -2539,53 +2612,48 @@ content could be read by one from many methods for <a class="reference internal"
 </pre></div>
 </div>
 </section>
-<section id="database-options">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Database options"></a><section id="database-options">
 <span id="index-38"></span><h3>Database options<a class="headerlink" href="#database-options" title="Permalink to this heading">¶</a></h3>
 <p>Database options could be set using <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices" title="firebird.driver.core.ServerDbServices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerDbServices</span></code></a> instance accessible via
 <a class="reference internal" href="ref-core.html#firebird.driver.core.Server.database" title="firebird.driver.core.Server.database"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server.database</span></code></a> property.</p>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_default_cache_size()</span></code> - Sets individual page cache size for database.</p>
-<blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span>
+<ul>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_default_cache_size()</span></code> - Sets individual page cache size for database.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">connect_server</span><span class="p">(</span><span class="s1">'localhost'</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">'SYSDBA'</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">'masterkey'</span><span class="p">)</span> <span class="k">as</span> <span class="n">srv</span><span class="p">:</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">srv</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">set_default_cache_size</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="s1">'employee.fdb'</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
 </pre></div>
 </div>
-</div></blockquote>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_sweep_interval()</span></code> - Sets database sweep interval.</p>
-<blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span>
+</li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_sweep_interval()</span></code> - Sets database sweep interval.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">connect_server</span><span class="p">(</span><span class="s1">'localhost'</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">'SYSDBA'</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">'masterkey'</span><span class="p">)</span> <span class="k">as</span> <span class="n">srv</span><span class="p">:</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">srv</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">set_sweep_interval</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="s1">'employee.fdb'</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">100000</span><span class="p">)</span>
 </pre></div>
 </div>
-</div></blockquote>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_space_reservation()</span></code> - Sets space reservation option for database.</p>
-<blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span><span class="p">,</span> <span class="n">DbSpaceReservation</span>
+</li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_space_reservation()</span></code> - Sets space reservation option for database.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span><span class="p">,</span> <span class="n">DbSpaceReservation</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">connect_server</span><span class="p">(</span><span class="s1">'localhost'</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">'SYSDBA'</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">'masterkey'</span><span class="p">)</span> <span class="k">as</span> <span class="n">srv</span><span class="p">:</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">srv</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">set_space_reservation</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="s1">'employee.fdb'</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">DbSpaceReservation</span><span class="o">.</span><span class="n">USE_FULL</span><span class="p">)</span>
 </pre></div>
 </div>
-</div></blockquote>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_write_mode()</span></code> - Sets database write mode (SYNC/ASYNC).</p>
-<blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span><span class="p">,</span> <span class="n">DbWriteMode</span>
+</li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_write_mode()</span></code> - Sets database write mode (SYNC/ASYNC).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span><span class="p">,</span> <span class="n">DbWriteMode</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">connect_server</span><span class="p">(</span><span class="s1">'localhost'</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">'SYSDBA'</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">'masterkey'</span><span class="p">)</span> <span class="k">as</span> <span class="n">srv</span><span class="p">:</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">srv</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">set_write_mode</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="s1">'employee.fdb'</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">DbWriteMode</span><span class="o">.</span><span class="n">ASYNC</span><span class="p">)</span>
 </pre></div>
 </div>
-</div></blockquote>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_access_mode()</span></code> - Sets database access mode (R/W or R/O).</p>
-<blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span><span class="p">,</span> <span class="n">DbAccessMode</span>
+</li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_access_mode()</span></code> - Sets database access mode (R/W or R/O).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span><span class="p">,</span> <span class="n">DbAccessMode</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">connect_server</span><span class="p">(</span><span class="s1">'localhost'</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">'SYSDBA'</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">'masterkey'</span><span class="p">)</span> <span class="k">as</span> <span class="n">srv</span><span class="p">:</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">srv</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">set_access_mode</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="s1">'employee.fdb'</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">DbAccessMode</span><span class="o">.</span><span class="n">READ_ONLY</span><span class="p">)</span>
 </pre></div>
 </div>
-</div></blockquote>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_sql_dialect()</span></code> - Sets database SQL dialect.</p>
-<blockquote>
-<div><div class="admonition warning">
+</li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_sql_dialect()</span></code> - Sets database SQL dialect.</p>
+<div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Changing SQL dialect on existing database is not recommended. Only newly created
 database objects would respect new dialect setting, while objects created with
@@ -2596,24 +2664,29 @@ previous dialect remain unchanged. That may have dire consequences.</p>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">srv</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">set_sql_dialect</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="s1">'employee.fdb'</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
-</div></blockquote>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">no_linger()</span></code> - Sets one-off override for database linger.</p>
-<blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span>
+</li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">no_linger()</span></code> - Sets one-off override for database linger.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">connect_server</span><span class="p">(</span><span class="s1">'localhost'</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">'SYSDBA'</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">'masterkey'</span><span class="p">)</span> <span class="k">as</span> <span class="n">srv</span><span class="p">:</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">srv</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">no_linger</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="s1">'employee.fdb'</span><span class="p">)</span>
 </pre></div>
 </div>
-</div></blockquote>
+</li>
+</ul>
 </section>
-<section id="database-maintenance">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Database maintenance"></a><section id="database-maintenance">
 <span id="index-39"></span><h3>Database maintenance<a class="headerlink" href="#database-maintenance" title="Permalink to this heading">¶</a></h3>
-<p>Database maintenance and other database-related actions could be performed using methods
-of <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices" title="firebird.driver.core.ServerDbServices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerDbServices</span></code></a> instance accessible via <a class="reference internal" href="ref-core.html#firebird.driver.core.Server.database" title="firebird.driver.core.Server.database"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server.database</span></code></a> property.</p>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_statistics()</span></code> - Returns database statistics produced by gstat
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Because available database-related actions depends on the version of the Firebird
+server, they are made available through a separate class <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices" title="firebird.driver.core.ServerDbServices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerDbServices</span></code></a>.
+The <a class="reference internal" href="ref-core.html#firebird.driver.core.Server.database" title="firebird.driver.core.Server.database"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server.database</span></code></a> property provides access to instance of <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices" title="firebird.driver.core.ServerDbServices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerDbServices</span></code></a> or
+it’s <strong>ancestor</strong> class according to attached Firebird server version.</p>
+</div>
+<ul>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.get_statistics" title="firebird.driver.core.ServerDbServices3.get_statistics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_statistics()</span></code></a> - Returns database statistics produced by gstat
 utility.</p>
-<blockquote>
-<div><p>This method is so-called <code class="xref py py-obj docutils literal notranslate"><span class="pre">Async</span> <span class="pre">service</span></code> that only initiates report processing. Actual
+<p>This method is so-called <code class="xref py py-obj docutils literal notranslate"><span class="pre">Async</span> <span class="pre">service</span></code> that only initiates report processing. Actual
 report content could be read by one from many methods for <a class="reference internal" href="#text-output-from-services">text output from Services</a> that
 <a class="reference internal" href="ref-core.html#firebird.driver.core.Server" title="firebird.driver.core.Server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server</span></code></a> provides .</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span><span class="p">,</span> <span class="n">SrvStatFlag</span>
@@ -2624,10 +2697,9 @@ report content could be read by one from many methods for <a class="reference in
     <span class="n">stats</span> <span class="o">=</span> <span class="n">srv</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
 </pre></div>
 </div>
-</div></blockquote>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">backup()</span></code> - Performs logical (GBAK) database backup.</p>
-<blockquote>
-<div><p>This method is so-called <code class="xref py py-obj docutils literal notranslate"><span class="pre">Async</span> <span class="pre">service</span></code> that only initiates the backup process. Output
+</li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.backup" title="firebird.driver.core.ServerDbServices3.backup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">backup()</span></code></a> - Performs logical (GBAK) database backup.</p>
+<p>This method is so-called <code class="xref py py-obj docutils literal notranslate"><span class="pre">Async</span> <span class="pre">service</span></code> that only initiates the backup process. Output
 from gbak could be read by one from many methods for <a class="reference internal" href="#text-output-from-services">text output from Services</a> that
 <a class="reference internal" href="ref-core.html#firebird.driver.core.Server" title="firebird.driver.core.Server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server</span></code></a> provides .</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span><span class="p">,</span> <span class="n">SrvBackupFlag</span>
@@ -2639,11 +2711,10 @@ from gbak could be read by one from many methods for <a class="reference interna
     <span class="n">report</span> <span class="o">=</span> <span class="n">srv</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
 </pre></div>
 </div>
-</div></blockquote>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">local_backup()</span></code> - Performs logical (GBAK) database backup into local byte
+</li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.local_backup" title="firebird.driver.core.ServerDbServices3.local_backup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">local_backup()</span></code></a> - Performs logical (GBAK) database backup into local byte
 stream.</p>
-<blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span><span class="p">,</span> <span class="n">SrvBackupFlag</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span><span class="p">,</span> <span class="n">SrvBackupFlag</span>
 <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">'/backup/employee.fbk'</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s1">'wb'</span><span class="p">)</span>
 <span class="k">with</span> <span class="n">connect_server</span><span class="p">(</span><span class="s1">'localhost'</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">'SYSDBA'</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">'masterkey'</span><span class="p">)</span> <span class="k">as</span> <span class="n">srv</span><span class="p">:</span>
     <span class="n">srv</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">local_backup</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="s1">'employee.fdb'</span><span class="p">,</span> <span class="n">backup_stream</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
@@ -2651,10 +2722,9 @@ stream.</p>
 <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
-</div></blockquote>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">restore()</span></code> - Performs database restore from logical (GBAK) backup.</p>
-<blockquote>
-<div><p>This method is so-called <code class="xref py py-obj docutils literal notranslate"><span class="pre">Async</span> <span class="pre">service</span></code> that only initiates the restore process. Output
+</li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.restore" title="firebird.driver.core.ServerDbServices3.restore"><code class="xref py py-obj docutils literal notranslate"><span class="pre">restore()</span></code></a> - Performs database restore from logical (GBAK) backup.</p>
+<p>This method is so-called <code class="xref py py-obj docutils literal notranslate"><span class="pre">Async</span> <span class="pre">service</span></code> that only initiates the restore process. Output
 from gbak could be read by one from many methods for <a class="reference internal" href="#text-output-from-services">text output from Services</a> that
 <a class="reference internal" href="ref-core.html#firebird.driver.core.Server" title="firebird.driver.core.Server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server</span></code></a> provides .</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span><span class="p">,</span> <span class="n">SrvRestoreFlag</span>
@@ -2666,11 +2736,10 @@ from gbak could be read by one from many methods for <a class="reference interna
     <span class="n">report</span> <span class="o">=</span> <span class="n">srv</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
 </pre></div>
 </div>
-</div></blockquote>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">local_restore()</span></code> - Performs database restore from logical (GBAK) backup
+</li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.local_restore" title="firebird.driver.core.ServerDbServices3.local_restore"><code class="xref py py-obj docutils literal notranslate"><span class="pre">local_restore()</span></code></a> - Performs database restore from logical (GBAK) backup
 stored in local byte stream.</p>
-<blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span><span class="p">,</span> <span class="n">SrvRestoreFlag</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span><span class="p">,</span> <span class="n">SrvRestoreFlag</span>
 <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">'/backup/employee.fbk'</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s1">'rb'</span><span class="p">)</span>
 <span class="k">with</span> <span class="n">connect_server</span><span class="p">(</span><span class="s1">'localhost'</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">'SYSDBA'</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">'masterkey'</span><span class="p">)</span> <span class="k">as</span> <span class="n">srv</span><span class="p">:</span>
     <span class="n">srv</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">local_restore</span><span class="p">(</span><span class="n">backup_stream</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="s1">'/data/employee.fdb'</span><span class="p">,</span>
@@ -2678,53 +2747,47 @@ stored in local byte stream.</p>
 <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
-</div></blockquote>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nbackup()</span></code> - Performs physical (NBACKUP) database backup.</p>
-<blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span>
+</li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.nbackup" title="firebird.driver.core.ServerDbServices3.nbackup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nbackup()</span></code></a> - Performs physical (NBACKUP) database backup.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span>
 <span class="k">with</span> <span class="n">connect_server</span><span class="p">(</span><span class="s1">'localhost'</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">'SYSDBA'</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">'masterkey'</span><span class="p">)</span> <span class="k">as</span> <span class="n">srv</span><span class="p">:</span>
     <span class="n">srv</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">nbackup</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="s1">'employee.fdb'</span><span class="p">,</span> <span class="n">backup</span><span class="o">=</span><span class="s1">'/backup/employee.bkp1'</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
-</div></blockquote>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nrestore()</span></code> - Performs restore from physical (NBACKUP) database
+</li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.nrestore" title="firebird.driver.core.ServerDbServices3.nrestore"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nrestore()</span></code></a> - Performs restore from physical (NBACKUP) database
 backup.</p>
-<blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span>
 <span class="k">with</span> <span class="n">connect_server</span><span class="p">(</span><span class="s1">'localhost'</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">'SYSDBA'</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">'masterkey'</span><span class="p">)</span> <span class="k">as</span> <span class="n">srv</span><span class="p">:</span>
     <span class="n">srv</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">nrestore</span><span class="p">(</span><span class="n">backups</span><span class="o">=</span><span class="p">[</span><span class="s1">'/backup/employee.bkp0'</span><span class="p">,</span> <span class="s1">'/backup/employee.bkp1'</span><span class="p">],</span>
                           <span class="n">database</span><span class="o">=</span><span class="s1">'/data/employee.fdb'</span><span class="p">)</span>
 </pre></div>
 </div>
-</div></blockquote>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shutdown()</span></code> - Database shutdown.</p>
-<blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span><span class="p">,</span> <span class="n">ShutdownMode</span><span class="p">,</span> <span class="n">ShutdownMethod</span>
+</li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.shutdown" title="firebird.driver.core.ServerDbServices3.shutdown"><code class="xref py py-obj docutils literal notranslate"><span class="pre">shutdown()</span></code></a> - Database shutdown.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span><span class="p">,</span> <span class="n">ShutdownMode</span><span class="p">,</span> <span class="n">ShutdownMethod</span>
 <span class="k">with</span> <span class="n">connect_server</span><span class="p">(</span><span class="s1">'localhost'</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">'SYSDBA'</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">'masterkey'</span><span class="p">)</span> <span class="k">as</span> <span class="n">srv</span><span class="p">:</span>
     <span class="n">srv</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">shutdown</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="s1">'employee.fdb'</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">ShutdownMode</span><span class="o">.</span><span class="n">SINGLE</span><span class="p">,</span>
                           <span class="n">method</span><span class="o">=</span><span class="n">ShutdownMethod</span><span class="o">.</span><span class="n">FORCED</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
-</div></blockquote>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">bring_online()</span></code> - Bring previously shut down database back online.</p>
-<blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span><span class="p">,</span> <span class="n">OnlineMode</span>
+</li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.bring_online" title="firebird.driver.core.ServerDbServices3.bring_online"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bring_online()</span></code></a> - Bring previously shut down database back online.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span><span class="p">,</span> <span class="n">OnlineMode</span>
 <span class="k">with</span> <span class="n">connect_server</span><span class="p">(</span><span class="s1">'localhost'</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">'SYSDBA'</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">'masterkey'</span><span class="p">)</span> <span class="k">as</span> <span class="n">srv</span><span class="p">:</span>
     <span class="n">srv</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">bring_online</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="s1">'employee.fdb'</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">OnlineMode</span><span class="o">.</span><span class="n">MULTI</span><span class="p">)</span>
 </pre></div>
 </div>
-</div></blockquote>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sweep()</span></code> - Performs database sweep operation.</p>
-<blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span>
+</li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.sweep" title="firebird.driver.core.ServerDbServices3.sweep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sweep()</span></code></a> - Performs database sweep operation.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span>
 <span class="k">with</span> <span class="n">connect_server</span><span class="p">(</span><span class="s1">'localhost'</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">'SYSDBA'</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">'masterkey'</span><span class="p">)</span> <span class="k">as</span> <span class="n">srv</span><span class="p">:</span>
     <span class="n">srv</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">sweep</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="s1">'employee.fdb'</span><span class="p">)</span>
 </pre></div>
 </div>
-</div></blockquote>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate()</span></code> - Performs database validation.</p>
-<blockquote>
-<div><p>This method is so-called <code class="xref py py-obj docutils literal notranslate"><span class="pre">Async</span> <span class="pre">service</span></code> that only initiates the validation process. Output
+</li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.validate" title="firebird.driver.core.ServerDbServices3.validate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate()</span></code></a> - Performs database validation.</p>
+<p>This method is so-called <code class="xref py py-obj docutils literal notranslate"><span class="pre">Async</span> <span class="pre">service</span></code> that only initiates the validation process. Output
 from validation could be read by one from many methods for <a class="reference internal" href="#text-output-from-services">text output from Services</a> that
 <a class="reference internal" href="ref-core.html#firebird.driver.core.Server" title="firebird.driver.core.Server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server</span></code></a> provides .</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span>
@@ -2733,45 +2796,60 @@ from validation could be read by one from many methods for <a class="reference i
     <span class="n">report</span> <span class="o">=</span> <span class="n">srv</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
 </pre></div>
 </div>
-</div></blockquote>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">repair()</span></code> - Performs database repair operation.</p>
-<blockquote>
-<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span><span class="p">,</span> <span class="n">SrvRepairFlag</span>
+</li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.repair" title="firebird.driver.core.ServerDbServices3.repair"><code class="xref py py-obj docutils literal notranslate"><span class="pre">repair()</span></code></a> - Performs database repair operation.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span><span class="p">,</span> <span class="n">SrvRepairFlag</span>
 <span class="k">with</span> <span class="n">connect_server</span><span class="p">(</span><span class="s1">'localhost'</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">'SYSDBA'</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">'masterkey'</span><span class="p">)</span> <span class="k">as</span> <span class="n">srv</span><span class="p">:</span>
     <span class="n">srv</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">repair</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="s1">'employee.fdb'</span><span class="p">,</span>
                         <span class="n">flags</span><span class="o">=</span><span class="n">SrvRepairFlag</span><span class="o">.</span><span class="n">REPAIR</span> <span class="o">|</span> <span class="n">SrvRepairFlag</span><span class="o">.</span><span class="n">KILL_SHADOWS</span><span class="p">)</span>
 </pre></div>
 </div>
-</div></blockquote>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_limbo_transaction_ids()</span></code> - Returns list of transactions in limbo.</p>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">commit_limbo_transaction()</span></code> - Resolves limbo transaction with commit.</p>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">rollback_limbo_transaction()</span></code> - Resolves limbo transaction with rollback.</p>
+</li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.get_limbo_transaction_ids" title="firebird.driver.core.ServerDbServices3.get_limbo_transaction_ids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_limbo_transaction_ids()</span></code></a> - Returns list of transactions in limbo.</p></li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.commit_limbo_transaction" title="firebird.driver.core.ServerDbServices3.commit_limbo_transaction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">commit_limbo_transaction()</span></code></a> - Resolves limbo transaction with commit.</p></li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.rollback_limbo_transaction" title="firebird.driver.core.ServerDbServices3.rollback_limbo_transaction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rollback_limbo_transaction()</span></code></a> - Resolves limbo transaction with rollback.</p></li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices.nfix_database" title="firebird.driver.core.ServerDbServices.nfix_database"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nfix_database</span></code></a> - Fixup database after filesystem copy.</p></li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices.set_replica_mode" title="firebird.driver.core.ServerDbServices.set_replica_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_replica_mode</span></code></a> - Manage replica database.</p></li>
+</ul>
 </section>
-<section id="user-maintenance">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/User maintenance"></a><section id="user-maintenance">
 <span id="index-40"></span><h3>User maintenance<a class="headerlink" href="#user-maintenance" title="Permalink to this heading">¶</a></h3>
-<p>User maintenance could be performed using methods of <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerUserServices" title="firebird.driver.core.ServerUserServices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerUserServices</span></code></a> instance accessible
-via <a class="reference internal" href="ref-core.html#firebird.driver.core.Server.user" title="firebird.driver.core.Server.user"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server.user</span></code></a> property.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Because user maintenance functionality may depend on the version of the Firebird
+server, this functionality is made available through a separate class
+<a class="reference internal" href="ref-core.html#firebird.driver.core.ServerUserServices" title="firebird.driver.core.ServerUserServices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerUserServices</span></code></a>. The <a class="reference internal" href="ref-core.html#firebird.driver.core.Server.user" title="firebird.driver.core.Server.user"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server.user</span></code></a> property provides access to
+instance of <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerUserServices" title="firebird.driver.core.ServerUserServices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerUserServices</span></code></a> or it’s <strong>ancestor</strong> class according to attached
+Firebird server version.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
 <p>Since Firebird 2.5 you can use SQL commands (CREATE/ALTER/DROP USER) to manage users in
 a security database from a regular database attachment.</p>
 <p>The SQL set of DDL commands for managing user accounts has been further enhanced in Firebird 3,
 thus improving the DDL capabilities in a way that exceeds capabilities of user management services.</p>
 </div>
-<p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerUserServices.get_all" title="firebird.driver.core.ServerUserServices.get_all"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_all()</span></code></a> - Returns information about all users.</p>
-<p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerUserServices.get" title="firebird.driver.core.ServerUserServices.get"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get()</span></code></a> - Returns information about specified users.</p>
-<p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerUserServices.add" title="firebird.driver.core.ServerUserServices.add"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add()</span></code></a> - Add new user.</p>
-<p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerUserServices.update" title="firebird.driver.core.ServerUserServices.update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update()</span></code></a> - Update user information.</p>
-<p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerUserServices.delete" title="firebird.driver.core.ServerUserServices.delete"><code class="xref py py-obj docutils literal notranslate"><span class="pre">delete()</span></code></a> - Delete user.</p>
-<p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerUserServices.exists" title="firebird.driver.core.ServerUserServices.exists"><code class="xref py py-obj docutils literal notranslate"><span class="pre">exists()</span></code></a> - Returns True if user exists.</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerUserServices.get_all" title="firebird.driver.core.ServerUserServices.get_all"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_all()</span></code></a> - Returns information about all users.</p></li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerUserServices.get" title="firebird.driver.core.ServerUserServices.get"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get()</span></code></a> - Returns information about specified users.</p></li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerUserServices.add" title="firebird.driver.core.ServerUserServices.add"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add()</span></code></a> - Add new user.</p></li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerUserServices.update" title="firebird.driver.core.ServerUserServices.update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update()</span></code></a> - Update user information.</p></li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerUserServices.delete" title="firebird.driver.core.ServerUserServices.delete"><code class="xref py py-obj docutils literal notranslate"><span class="pre">delete()</span></code></a> - Delete user.</p></li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerUserServices.exists" title="firebird.driver.core.ServerUserServices.exists"><code class="xref py py-obj docutils literal notranslate"><span class="pre">exists()</span></code></a> - Returns True if user exists.</p></li>
+</ul>
 </section>
-<section id="trace-sessions">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Trace sessions"></a><section id="trace-sessions">
 <span id="index-41"></span><h3>Trace sessions<a class="headerlink" href="#trace-sessions" title="Permalink to this heading">¶</a></h3>
-<p>Trace sessions could be managed using methods of <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerTraceServices" title="firebird.driver.core.ServerTraceServices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerTraceServices</span></code></a> instance accessible
-via <a class="reference internal" href="ref-core.html#firebird.driver.core.Server.trace" title="firebird.driver.core.Server.trace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server.trace</span></code></a> property.</p>
-<p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerTraceServices.start" title="firebird.driver.core.ServerTraceServices.start"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerTraceServices.start()</span></code></a> - Start new trace session. Requires trace <code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration</span></code> and returns <code class="xref py py-obj docutils literal notranslate"><span class="pre">Session</span> <span class="pre">ID</span></code>.</p>
-<blockquote>
-<div><p>This method is so-called <code class="xref py py-obj docutils literal notranslate"><span class="pre">Async</span> <span class="pre">service</span></code> that only starts the trace session. Output
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Because trace functionality may depend on the version of the Firebird server, this
+functionality is made available through a separate class <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerTraceServices" title="firebird.driver.core.ServerTraceServices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerTraceServices</span></code></a>.
+The <a class="reference internal" href="ref-core.html#firebird.driver.core.Server.trace" title="firebird.driver.core.Server.trace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server.trace</span></code></a> property provides access to instance of <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerTraceServices" title="firebird.driver.core.ServerTraceServices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerTraceServices</span></code></a> or
+its <strong>ancestor</strong> class according to attached Firebird server version.</p>
+</div>
+<ul>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerTraceServices.start" title="firebird.driver.core.ServerTraceServices.start"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerTraceServices.start()</span></code></a> - Start new trace session. Requires trace <code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration</span></code> and returns <code class="xref py py-obj docutils literal notranslate"><span class="pre">Session</span> <span class="pre">ID</span></code>.</p>
+<p>This method is so-called <code class="xref py py-obj docutils literal notranslate"><span class="pre">Async</span> <span class="pre">service</span></code> that only starts the trace session. Output
 from trace session could be read by one from many methods for <a class="reference internal" href="#text-output-from-services">text output from Services</a>
 that <a class="reference internal" href="ref-core.html#firebird.driver.core.Server" title="firebird.driver.core.Server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server</span></code></a> provides .</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span>
@@ -2800,27 +2878,28 @@ that <a class="reference internal" href="ref-core.html#firebird.driver.core.Serv
         <span class="n">srv_aux</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">trace_id</span><span class="p">)</span>
 </pre></div>
 </div>
-</div></blockquote>
-<p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerTraceServices.stop" title="firebird.driver.core.ServerTraceServices.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerTraceServices.stop()</span></code></a> - Stop trace session.</p>
-<p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerTraceServices.suspend" title="firebird.driver.core.ServerTraceServices.suspend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerTraceServices.suspend()</span></code></a> - Suspend trace session.</p>
-<p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerTraceServices.resume" title="firebird.driver.core.ServerTraceServices.resume"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerTraceServices.resume()</span></code></a> - Resume trace session.</p>
-<p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerTraceServices.sessions" title="firebird.driver.core.ServerTraceServices.sessions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerTraceServices.sessions</span></code></a> - Dictionary with active trace sessions. The key is session ID, value is <a class="reference internal" href="ref-types.html#firebird.driver.types.TraceSession" title="firebird.driver.types.TraceSession"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TraceSession</span></code></a> instance.</p>
+</li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerTraceServices.stop" title="firebird.driver.core.ServerTraceServices.stop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerTraceServices.stop()</span></code></a> - Stop trace session.</p></li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerTraceServices.suspend" title="firebird.driver.core.ServerTraceServices.suspend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerTraceServices.suspend()</span></code></a> - Suspend trace session.</p></li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerTraceServices.resume" title="firebird.driver.core.ServerTraceServices.resume"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerTraceServices.resume()</span></code></a> - Resume trace session.</p></li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerTraceServices.sessions" title="firebird.driver.core.ServerTraceServices.sessions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerTraceServices.sessions</span></code></a> - Dictionary with active trace sessions. The key is session ID, value is <a class="reference internal" href="ref-types.html#firebird.driver.types.TraceSession" title="firebird.driver.types.TraceSession"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TraceSession</span></code></a> instance.</p></li>
+</ul>
 </section>
 </section>
-<section id="logging-driver-activities">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Logging driver activities"></a><section id="logging-driver-activities">
 <span id="index-42"></span><h2>Logging driver activities<a class="headerlink" href="#logging-driver-activities" title="Permalink to this heading">¶</a></h2>
-<p>The firebird-driver supports <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/logging.html#module-firebird.base.logging" title="(in Firebird-base v1.4.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">context-based</span> <span class="pre">logging</span> <span class="pre">system</span></code></a>
-provided by <a class="reference external" href="https://firebird-base.rtfd.io">firebird-base</a> package through use of <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/logging.html#firebird.base.logging.LoggingIdMixin" title="(in Firebird-base v1.4.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggingIdMixin</span></code></a>.</p>
-<p>Classes that use <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/logging.html#firebird.base.logging.LoggingIdMixin" title="(in Firebird-base v1.4.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggingIdMixin</span></code></a>:</p>
+<p>The firebird-driver supports <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/logging.html#module-firebird.base.logging" title="(in Firebird-base v1.4.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">context-based</span> <span class="pre">logging</span> <span class="pre">system</span></code></a>
+provided by <a class="reference external" href="https://firebird-base.rtfd.io">firebird-base</a> package through use of <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/logging.html#firebird.base.logging.LoggingIdMixin" title="(in Firebird-base v1.4.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggingIdMixin</span></code></a>.</p>
+<p>Classes that use <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/logging.html#firebird.base.logging.LoggingIdMixin" title="(in Firebird-base v1.4.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggingIdMixin</span></code></a>:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a> - Internally used objects have <code class="xref py py-obj docutils literal notranslate"><span class="pre">_logging_id_</span></code> set to ‘Transaction.Main’,
 ‘Transaction.Query’ and ‘Cursor.internal’. The log context is not defined.</p></li>
 <li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionManager" title="firebird.driver.core.TransactionManager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransactionManager</span></code></a> - The <code class="xref py py-obj docutils literal notranslate"><span class="pre">_logging_id_</span></code> is set to ‘Transaction’. The
 <a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionManager.log_context" title="firebird.driver.core.TransactionManager.log_context"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log_context()</span></code></a> is the <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a>.</p></li>
 <li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.DistributedTransactionManager" title="firebird.driver.core.DistributedTransactionManager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DistributedTransactionManager</span></code></a> - The <code class="xref py py-obj docutils literal notranslate"><span class="pre">_logging_id_</span></code> is set to ‘DTransaction’. The
-<a class="reference internal" href="ref-core.html#firebird.driver.core.DistributedTransactionManager.log_context" title="firebird.driver.core.DistributedTransactionManager.log_context"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log_context()</span></code></a> is <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/types.html#firebird.base.types.UNDEFINED" title="(in Firebird-base v1.4.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UNDEFINED</span></code></a>.</p></li>
+<a class="reference internal" href="ref-core.html#firebird.driver.core.DistributedTransactionManager.log_context" title="firebird.driver.core.DistributedTransactionManager.log_context"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log_context()</span></code></a> is <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/types.html#firebird.base.types.UNDEFINED" title="(in Firebird-base v1.4.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UNDEFINED</span></code></a>.</p></li>
 <li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.Statement" title="firebird.driver.core.Statement"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Statement</span></code></a> - The <a class="reference internal" href="ref-core.html#firebird.driver.core.Statement.log_context" title="firebird.driver.core.Statement.log_context"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log_context()</span></code></a> is <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a>.</p></li>
-<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.BlobReader" title="firebird.driver.core.BlobReader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BlobReader</span></code></a> - The <a class="reference internal" href="ref-core.html#firebird.driver.core.Statement.log_context" title="firebird.driver.core.Statement.log_context"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log_context()</span></code></a> is the owning object or <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/types.html#firebird.base.types.UNDEFINED" title="(in Firebird-base v1.4.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UNDEFINED</span></code></a>.</p></li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.BlobReader" title="firebird.driver.core.BlobReader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BlobReader</span></code></a> - The <a class="reference internal" href="ref-core.html#firebird.driver.core.Statement.log_context" title="firebird.driver.core.Statement.log_context"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log_context()</span></code></a> is the owning object or <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/types.html#firebird.base.types.UNDEFINED" title="(in Firebird-base v1.4.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UNDEFINED</span></code></a>.</p></li>
 <li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.Cursor" title="firebird.driver.core.Cursor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Cursor</span></code></a> - The <a class="reference internal" href="ref-core.html#firebird.driver.core.Cursor.log_context" title="firebird.driver.core.Cursor.log_context"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log_context()</span></code></a> is <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a>.</p></li>
 <li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.Server" title="firebird.driver.core.Server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server</span></code></a> - The log context is not defined.</p></li>
 </ul>
@@ -2892,7 +2971,7 @@ provided by <a class="reference external" href="https://firebird-base.rtfd.io">f
 <span class="n">INFO</span>      <span class="p">:</span> <span class="p">[</span><span class="n">employee</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">UNDEFINED</span><span class="p">]</span> <span class="n">Stop</span>
 </pre></div>
 </div>
-<p>You can also trace the driver activities using <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/trace.html#module-firebird.base.trace" title="(in Firebird-base v1.4.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trace/audit</span> <span class="pre">for</span> <span class="pre">class</span> <span class="pre">instances</span></code></a>
+<p>You can also trace the driver activities using <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/trace.html#module-firebird.base.trace" title="(in Firebird-base v1.4.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trace/audit</span> <span class="pre">for</span> <span class="pre">class</span> <span class="pre">instances</span></code></a>
 provided by <a class="reference external" href="https://firebird-base.rtfd.io">firebird-base</a> package.</p>
 <p><strong>Example:</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
@@ -2999,13 +3078,13 @@ provided by <a class="reference external" href="https://firebird-base.rtfd.io">f
 </pre></div>
 </div>
 <a class="dashAnchor" name="//apple_ref/cpp/Section/driver-hooks"></a><span class="target" id="driver-hooks"></span></section>
-<section id="index-43">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Driver hooks"></a><section id="index-43">
 <span id="id11"></span><h2>Driver hooks<a class="headerlink" href="#index-43" title="Permalink to this heading">¶</a></h2>
-<p>The firebird-driver uses <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#module-firebird.base.hooks" title="(in Firebird-base v1.4.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hook</span> <span class="pre">manager</span></code></a> from <a class="reference external" href="https://firebird-base.rtfd.io">firebird-base</a> package
+<p>The firebird-driver uses <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#module-firebird.base.hooks" title="(in Firebird-base v1.4.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hook</span> <span class="pre">manager</span></code></a> from <a class="reference external" href="https://firebird-base.rtfd.io">firebird-base</a> package
 to provide internal notification mechanism that allows installation of custom hooks into
 certain driver tasks.</p>
 <p>Driver hooks are divided into several types exposed as enums in <a class="reference internal" href="ref-hooks.html#module-firebird.driver.hooks" title="firebird.driver.hooks: Drivers hooks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firebird.driver.hooks</span></code></a> module.</p>
-<section id="apihook">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/APIHook"></a><section id="apihook">
 <h3>APIHook<a class="headerlink" href="#apihook" title="Permalink to this heading">¶</a></h3>
 <p><a class="reference internal" href="ref-hooks.html#firebird.driver.hooks.APIHook.LOADED" title="firebird.driver.hooks.APIHook.LOADED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">APIHook.LOADED</span></code></a> - This hook is invoked once when instance of <a class="reference internal" href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI" title="firebird.driver.fbapi.FirebirdAPI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FirebirdAPI</span></code></a> is created.
 It could be used for additional initialization tasks that require Firebird API, or to manipulate
@@ -3013,47 +3092,45 @@ the FirebirdAPI instance itself before its use.</p>
 <p>Hook routine must have signature: <code class="xref py py-obj docutils literal notranslate"><span class="pre">hook_func(api:</span> <span class="pre">FirebirdAPI)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code>. Any value returned
 by hook is ignored.</p>
 </section>
-<section id="connectionhook">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/ConnectionHook"></a><section id="connectionhook">
 <h3>ConnectionHook<a class="headerlink" href="#connectionhook" title="Permalink to this heading">¶</a></h3>
-<p><a class="reference internal" href="ref-hooks.html#firebird.driver.hooks.ConnectionHook.ATTACH_REQUEST" title="firebird.driver.hooks.ConnectionHook.ATTACH_REQUEST"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConnectionHook.ATTACH_REQUEST</span></code></a></p>
-<blockquote>
-<div><p>This hook is invoked after all parameters are preprocessed and before <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a> is created.</p>
+<ul>
+<li><p><a class="reference internal" href="ref-hooks.html#firebird.driver.hooks.ConnectionHook.ATTACH_REQUEST" title="firebird.driver.hooks.ConnectionHook.ATTACH_REQUEST"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConnectionHook.ATTACH_REQUEST</span></code></a></p>
+<p>This hook is invoked after all parameters are preprocessed and before <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a> is created.</p>
 <p>Hook routine must have signature: <code class="xref py py-obj docutils literal notranslate"><span class="pre">hook_func(dsn:</span> <span class="pre">str,</span> <span class="pre">dpb:</span> <span class="pre">bytes)</span> <span class="pre">-&gt;</span> <span class="pre">Optional[Connection]</span></code>
 where <code class="xref py py-obj docutils literal notranslate"><span class="pre">dpb</span></code> is Database Parameter Buffer that would be used to create the attachment to the
 database defined by <code class="xref py py-obj docutils literal notranslate"><span class="pre">dsn</span></code>. It may return <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a> (or subclass) instance or <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
 <p>First instance returned by any hook of this type will become the return value of caller function
 and other hooks of the same type are not invoked.</p>
-</div></blockquote>
-<p><a class="reference internal" href="ref-hooks.html#firebird.driver.hooks.ConnectionHook.ATTACHED" title="firebird.driver.hooks.ConnectionHook.ATTACHED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConnectionHook.ATTACHED</span></code></a></p>
-<blockquote>
-<div><p>This hook is invoked just before <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a> (or subclass) instance is returned to the client
+</li>
+<li><p><a class="reference internal" href="ref-hooks.html#firebird.driver.hooks.ConnectionHook.ATTACHED" title="firebird.driver.hooks.ConnectionHook.ATTACHED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConnectionHook.ATTACHED</span></code></a></p>
+<p>This hook is invoked just before <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a> (or subclass) instance is returned to the client
 application.</p>
 <p>Hook routine must have signature: <code class="xref py py-obj docutils literal notranslate"><span class="pre">hook_func(con:</span> <span class="pre">Connection)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code>.</p>
-</div></blockquote>
-<p><a class="reference internal" href="ref-hooks.html#firebird.driver.hooks.ConnectionHook.DETACH_REQUEST" title="firebird.driver.hooks.ConnectionHook.DETACH_REQUEST"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConnectionHook.DETACH_REQUEST</span></code></a></p>
-<blockquote>
-<div><p>This hook is invoked before connection is closed.</p>
+</li>
+<li><p><a class="reference internal" href="ref-hooks.html#firebird.driver.hooks.ConnectionHook.DETACH_REQUEST" title="firebird.driver.hooks.ConnectionHook.DETACH_REQUEST"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConnectionHook.DETACH_REQUEST</span></code></a></p>
+<p>This hook is invoked before connection is closed.</p>
 <p>Hook must have signature: <code class="xref py py-obj docutils literal notranslate"><span class="pre">hook_func(con:</span> <span class="pre">Connection)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code>.</p>
 <p>If any hook function returns True, connection is not closed.</p>
-</div></blockquote>
-<p><a class="reference internal" href="ref-hooks.html#firebird.driver.hooks.ConnectionHook.CLOSED" title="firebird.driver.hooks.ConnectionHook.CLOSED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConnectionHook.CLOSED</span></code></a></p>
-<blockquote>
-<div><p>This hook is invoked after connection is closed.</p>
+</li>
+<li><p><a class="reference internal" href="ref-hooks.html#firebird.driver.hooks.ConnectionHook.CLOSED" title="firebird.driver.hooks.ConnectionHook.CLOSED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConnectionHook.CLOSED</span></code></a></p>
+<p>This hook is invoked after connection is closed.</p>
 <p>Hook routine must have signature: <code class="xref py py-obj docutils literal notranslate"><span class="pre">hook_func(con:</span> <span class="pre">Connection)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code>.</p>
-</div></blockquote>
-<p><a class="reference internal" href="ref-hooks.html#firebird.driver.hooks.ConnectionHook.DROPPED" title="firebird.driver.hooks.ConnectionHook.DROPPED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConnectionHook.DROPPED</span></code></a></p>
-<blockquote>
-<div><p>This hook is invoked after database is dropped (and connection is closed).</p>
+</li>
+<li><p><a class="reference internal" href="ref-hooks.html#firebird.driver.hooks.ConnectionHook.DROPPED" title="firebird.driver.hooks.ConnectionHook.DROPPED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConnectionHook.DROPPED</span></code></a></p>
+<p>This hook is invoked after database is dropped (and connection is closed).</p>
 <p>Hook routine must have signature: <code class="xref py py-obj docutils literal notranslate"><span class="pre">hook_func(con:</span> <span class="pre">Connection)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code>.</p>
-</div></blockquote>
+</li>
+</ul>
 </section>
-<section id="serverhook">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/ServerHook"></a><section id="serverhook">
 <h3>ServerHook<a class="headerlink" href="#serverhook" title="Permalink to this heading">¶</a></h3>
-<p><a class="reference internal" href="ref-hooks.html#firebird.driver.hooks.ServerHook.ATTACHED" title="firebird.driver.hooks.ServerHook.ATTACHED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerHook.ATTACHED</span></code></a></p>
-<blockquote>
-<div><p>This hook is invoked before <a class="reference internal" href="ref-core.html#firebird.driver.core.Server" title="firebird.driver.core.Server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server</span></code></a> instance is returned.</p>
+<ul>
+<li><p><a class="reference internal" href="ref-hooks.html#firebird.driver.hooks.ServerHook.ATTACHED" title="firebird.driver.hooks.ServerHook.ATTACHED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerHook.ATTACHED</span></code></a></p>
+<p>This hook is invoked before <a class="reference internal" href="ref-core.html#firebird.driver.core.Server" title="firebird.driver.core.Server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server</span></code></a> instance is returned.</p>
 <p>Hook routine must have signature: <code class="xref py py-obj docutils literal notranslate"><span class="pre">hook_func(srv:</span> <span class="pre">Server)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code>.</p>
-</div></blockquote>
+</li>
+</ul>
 </section>
 </section>
 </section>
@@ -3067,7 +3144,7 @@ application.</p>
 </p>
 <p>
         © Copyright 2020-2022, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.2.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br/>
 </p>
 </div>
 </footer>

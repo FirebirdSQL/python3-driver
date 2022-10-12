@@ -9,6 +9,7 @@ Constants
 =========
 
 .. autodata:: __VERSION__
+   :no-value:
 
 
 Imports from sub-modules

@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
-<title>firebird.driver.fbapi — firebird-driver 1.5.2 documentation</title>
+<title>firebird.driver.fbapi — firebird-driver 1.6.0 documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
 <link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
 <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -37,7 +37,7 @@
 </button>
 <a class="brand" href="index.html">
           firebird-driver</a>
-<span class="navbar-text pull-left"><b>1.5.2</b></span>
+<span class="navbar-text pull-left"><b>1.6.0</b></span>
 <div class="nav-collapse">
 <ul class="nav">
 <li class="divider-vertical"></li>
@@ -157,6 +157,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-6-0">Version 1.6.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-2">Version 1.5.2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-1">Version 1.5.1</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-0">Version 1.5.0</a><ul>
@@ -195,13 +196,11 @@
 <ul aria-labelledby="dLabelLocalToc" class="dropdown-menu localtoc" role="menu"><ul>
 <li><a class="reference internal" href="#">firebird.driver.fbapi</a><ul>
 <li><a class="reference internal" href="#constants">Constants</a><ul>
-<li><a class="reference internal" href="#c-integer-limit-constants">C integer limit constants</a></li>
 <li><a class="reference internal" href="#type-codes">Type codes</a></li>
 <li><a class="reference internal" href="#internal-type-codes-for-example-used-by-array-descriptor">Internal type codes (for example used by ARRAY descriptor)</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#types">Types</a><ul>
-<li><a class="reference internal" href="#basic-types">Basic types</a><ul>
 <li><a class="reference internal" href="#firebird.driver.fbapi.Int"><code class="docutils literal notranslate"><span class="pre">Int</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IntPtr"><code class="docutils literal notranslate"><span class="pre">IntPtr</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.Int64"><code class="docutils literal notranslate"><span class="pre">Int64</span></code></a></li>
@@ -297,29 +296,17 @@
 </li>
 </ul>
 </li>
-</ul>
-</li>
 <li><a class="reference internal" href="#variables">Variables</a><ul>
 <li><a class="reference internal" href="#firebird.driver.fbapi.err_encoding"><code class="docutils literal notranslate"><span class="pre">err_encoding</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#functions">Functions</a><ul>
-<li><a class="reference internal" href="#has-api">has_api</a><ul>
 <li><a class="reference internal" href="#firebird.driver.fbapi.has_api"><code class="docutils literal notranslate"><span class="pre">has_api()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#load-api">load_api</a><ul>
 <li><a class="reference internal" href="#firebird.driver.fbapi.load_api"><code class="docutils literal notranslate"><span class="pre">load_api()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#get-api">get_api</a><ul>
 <li><a class="reference internal" href="#firebird.driver.fbapi.get_api"><code class="docutils literal notranslate"><span class="pre">get_api()</span></code></a></li>
 </ul>
 </li>
-</ul>
-</li>
 <li><a class="reference internal" href="#classes">Classes</a><ul>
-<li><a class="reference internal" href="#firebirdapi">FirebirdAPI</a><ul>
 <li><a class="reference internal" href="#firebird.driver.fbapi.FirebirdAPI"><code class="docutils literal notranslate"><span class="pre">FirebirdAPI</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.driver.fbapi.FirebirdAPI.client_library"><code class="docutils literal notranslate"><span class="pre">FirebirdAPI.client_library</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.FirebirdAPI.client_library_name"><code class="docutils literal notranslate"><span class="pre">FirebirdAPI.client_library_name</span></code></a></li>
@@ -338,8 +325,6 @@
 <li><a class="reference internal" href="#firebird.driver.fbapi.FirebirdAPI.isc_event_counts"><code class="docutils literal notranslate"><span class="pre">FirebirdAPI.isc_event_counts()</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.FirebirdAPI.isc_cancel_events"><code class="docutils literal notranslate"><span class="pre">FirebirdAPI.isc_cancel_events()</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.FirebirdAPI.isc_event_block"><code class="docutils literal notranslate"><span class="pre">FirebirdAPI.isc_event_block()</span></code></a></li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>
@@ -529,6 +514,8 @@
 <li><a class="reference internal" href="#firebird.driver.fbapi.IBlob_VTable.addRef"><code class="docutils literal notranslate"><span class="pre">IBlob_VTable.addRef</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IBlob_VTable.cancel"><code class="docutils literal notranslate"><span class="pre">IBlob_VTable.cancel</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IBlob_VTable.close"><code class="docutils literal notranslate"><span class="pre">IBlob_VTable.close</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.fbapi.IBlob_VTable.deprecatedCancel"><code class="docutils literal notranslate"><span class="pre">IBlob_VTable.deprecatedCancel</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.fbapi.IBlob_VTable.deprecatedClose"><code class="docutils literal notranslate"><span class="pre">IBlob_VTable.deprecatedClose</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IBlob_VTable.dummy"><code class="docutils literal notranslate"><span class="pre">IBlob_VTable.dummy</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IBlob_VTable.getInfo"><code class="docutils literal notranslate"><span class="pre">IBlob_VTable.getInfo</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IBlob_VTable.getSegment"><code class="docutils literal notranslate"><span class="pre">IBlob_VTable.getSegment</span></code></a></li>
@@ -547,6 +534,9 @@
 <li><a class="reference internal" href="#firebird.driver.fbapi.ITransaction_VTable.addRef"><code class="docutils literal notranslate"><span class="pre">ITransaction_VTable.addRef</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.ITransaction_VTable.commit"><code class="docutils literal notranslate"><span class="pre">ITransaction_VTable.commit</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.ITransaction_VTable.commitRetaining"><code class="docutils literal notranslate"><span class="pre">ITransaction_VTable.commitRetaining</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.fbapi.ITransaction_VTable.deprecatedCommit"><code class="docutils literal notranslate"><span class="pre">ITransaction_VTable.deprecatedCommit</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.fbapi.ITransaction_VTable.deprecatedDisconnect"><code class="docutils literal notranslate"><span class="pre">ITransaction_VTable.deprecatedDisconnect</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.fbapi.ITransaction_VTable.deprecatedRollback"><code class="docutils literal notranslate"><span class="pre">ITransaction_VTable.deprecatedRollback</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.ITransaction_VTable.disconnect"><code class="docutils literal notranslate"><span class="pre">ITransaction_VTable.disconnect</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.ITransaction_VTable.dummy"><code class="docutils literal notranslate"><span class="pre">ITransaction_VTable.dummy</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.ITransaction_VTable.enterDtc"><code class="docutils literal notranslate"><span class="pre">ITransaction_VTable.enterDtc</span></code></a></li>
@@ -623,6 +613,7 @@
 <li><a class="reference internal" href="#firebird.driver.fbapi.IResultSet_VTable"><code class="docutils literal notranslate"><span class="pre">IResultSet_VTable</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IResultSet_VTable.addRef"><code class="docutils literal notranslate"><span class="pre">IResultSet_VTable.addRef</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IResultSet_VTable.close"><code class="docutils literal notranslate"><span class="pre">IResultSet_VTable.close</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.fbapi.IResultSet_VTable.deprecatedClose"><code class="docutils literal notranslate"><span class="pre">IResultSet_VTable.deprecatedClose</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IResultSet_VTable.dummy"><code class="docutils literal notranslate"><span class="pre">IResultSet_VTable.dummy</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IResultSet_VTable.fetchAbsolute"><code class="docutils literal notranslate"><span class="pre">IResultSet_VTable.fetchAbsolute</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IResultSet_VTable.fetchFirst"><code class="docutils literal notranslate"><span class="pre">IResultSet_VTable.fetchFirst</span></code></a></li>
@@ -646,6 +637,7 @@
 <li><a class="reference internal" href="#firebird.driver.fbapi.IStatement_VTable"><code class="docutils literal notranslate"><span class="pre">IStatement_VTable</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IStatement_VTable.addRef"><code class="docutils literal notranslate"><span class="pre">IStatement_VTable.addRef</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IStatement_VTable.createBatch"><code class="docutils literal notranslate"><span class="pre">IStatement_VTable.createBatch</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.fbapi.IStatement_VTable.deprecatedFree"><code class="docutils literal notranslate"><span class="pre">IStatement_VTable.deprecatedFree</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IStatement_VTable.dummy"><code class="docutils literal notranslate"><span class="pre">IStatement_VTable.dummy</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IStatement_VTable.execute"><code class="docutils literal notranslate"><span class="pre">IStatement_VTable.execute</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IStatement_VTable.free"><code class="docutils literal notranslate"><span class="pre">IStatement_VTable.free</span></code></a></li>
@@ -676,9 +668,12 @@
 <li><a class="reference internal" href="#firebird.driver.fbapi.IBatch_VTable.addRef"><code class="docutils literal notranslate"><span class="pre">IBatch_VTable.addRef</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IBatch_VTable.appendBlobData"><code class="docutils literal notranslate"><span class="pre">IBatch_VTable.appendBlobData</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IBatch_VTable.cancel"><code class="docutils literal notranslate"><span class="pre">IBatch_VTable.cancel</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.fbapi.IBatch_VTable.close"><code class="docutils literal notranslate"><span class="pre">IBatch_VTable.close</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.fbapi.IBatch_VTable.deprecatedClose"><code class="docutils literal notranslate"><span class="pre">IBatch_VTable.deprecatedClose</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IBatch_VTable.dummy"><code class="docutils literal notranslate"><span class="pre">IBatch_VTable.dummy</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IBatch_VTable.execute"><code class="docutils literal notranslate"><span class="pre">IBatch_VTable.execute</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IBatch_VTable.getBlobAlignment"><code class="docutils literal notranslate"><span class="pre">IBatch_VTable.getBlobAlignment</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.fbapi.IBatch_VTable.getInfo"><code class="docutils literal notranslate"><span class="pre">IBatch_VTable.getInfo</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IBatch_VTable.getMetadata"><code class="docutils literal notranslate"><span class="pre">IBatch_VTable.getMetadata</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IBatch_VTable.registerBlob"><code class="docutils literal notranslate"><span class="pre">IBatch_VTable.registerBlob</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IBatch_VTable.release"><code class="docutils literal notranslate"><span class="pre">IBatch_VTable.release</span></code></a></li>
@@ -708,6 +703,7 @@
 </li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IRequest_VTable"><code class="docutils literal notranslate"><span class="pre">IRequest_VTable</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IRequest_VTable.addRef"><code class="docutils literal notranslate"><span class="pre">IRequest_VTable.addRef</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.fbapi.IRequest_VTable.deprecatedFree"><code class="docutils literal notranslate"><span class="pre">IRequest_VTable.deprecatedFree</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IRequest_VTable.dummy"><code class="docutils literal notranslate"><span class="pre">IRequest_VTable.dummy</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IRequest_VTable.free"><code class="docutils literal notranslate"><span class="pre">IRequest_VTable.free</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IRequest_VTable.getInfo"><code class="docutils literal notranslate"><span class="pre">IRequest_VTable.getInfo</span></code></a></li>
@@ -728,6 +724,7 @@
 <li><a class="reference internal" href="#firebird.driver.fbapi.IEvents_VTable"><code class="docutils literal notranslate"><span class="pre">IEvents_VTable</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IEvents_VTable.addRef"><code class="docutils literal notranslate"><span class="pre">IEvents_VTable.addRef</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IEvents_VTable.cancel"><code class="docutils literal notranslate"><span class="pre">IEvents_VTable.cancel</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.fbapi.IEvents_VTable.deprecatedCancel"><code class="docutils literal notranslate"><span class="pre">IEvents_VTable.deprecatedCancel</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IEvents_VTable.dummy"><code class="docutils literal notranslate"><span class="pre">IEvents_VTable.dummy</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IEvents_VTable.release"><code class="docutils literal notranslate"><span class="pre">IEvents_VTable.release</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IEvents_VTable.version"><code class="docutils literal notranslate"><span class="pre">IEvents_VTable.version</span></code></a></li>
@@ -745,6 +742,8 @@
 <li><a class="reference internal" href="#firebird.driver.fbapi.IAttachment_VTable.createBatch"><code class="docutils literal notranslate"><span class="pre">IAttachment_VTable.createBatch</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IAttachment_VTable.createBlob"><code class="docutils literal notranslate"><span class="pre">IAttachment_VTable.createBlob</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IAttachment_VTable.createReplicator"><code class="docutils literal notranslate"><span class="pre">IAttachment_VTable.createReplicator</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.fbapi.IAttachment_VTable.deprecatedDetach"><code class="docutils literal notranslate"><span class="pre">IAttachment_VTable.deprecatedDetach</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.fbapi.IAttachment_VTable.deprecatedDropDatabase"><code class="docutils literal notranslate"><span class="pre">IAttachment_VTable.deprecatedDropDatabase</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IAttachment_VTable.detach"><code class="docutils literal notranslate"><span class="pre">IAttachment_VTable.detach</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IAttachment_VTable.dropDatabase"><code class="docutils literal notranslate"><span class="pre">IAttachment_VTable.dropDatabase</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IAttachment_VTable.dummy"><code class="docutils literal notranslate"><span class="pre">IAttachment_VTable.dummy</span></code></a></li>
@@ -776,6 +775,8 @@
 </li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IService_VTable"><code class="docutils literal notranslate"><span class="pre">IService_VTable</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IService_VTable.addRef"><code class="docutils literal notranslate"><span class="pre">IService_VTable.addRef</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.fbapi.IService_VTable.cancel"><code class="docutils literal notranslate"><span class="pre">IService_VTable.cancel</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.fbapi.IService_VTable.deprecatedDetach"><code class="docutils literal notranslate"><span class="pre">IService_VTable.deprecatedDetach</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IService_VTable.detach"><code class="docutils literal notranslate"><span class="pre">IService_VTable.detach</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IService_VTable.dummy"><code class="docutils literal notranslate"><span class="pre">IService_VTable.dummy</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.fbapi.IService_VTable.query"><code class="docutils literal notranslate"><span class="pre">IService_VTable.query</span></code></a></li>
@@ -1017,39 +1018,13 @@
 <div class="container">
 <div class="row">
 <div class="body span12 content" role="main">
-<span class="target" id="module-firebird.driver.fbapi"></span><section id="firebird-driver-fbapi">
+<span class="target" id="module-firebird.driver.fbapi"></span><a class="dashAnchor" name="//apple_ref/cpp/Section/firebird.driver.fbapi"></a><section id="firebird-driver-fbapi">
 <a class="dashAnchor" name="//apple_ref/cpp/Module/firebird.driver.fbapi"></a><h1>firebird.driver.fbapi<a class="headerlink" href="#firebird-driver-fbapi" title="Permalink to this heading">¶</a></h1>
 <p>This module contains low-level <a class="reference external" href="https://docs.python.org/3/whatsnew/2.5.html#module-ctypes" title="(in Python v3.10)"><span class="xref std std-ref">ctypes</span></a> interface to
 Firebird client library (<code class="xref py py-obj docutils literal notranslate"><span class="pre">fbclient.so/dll</span></code>).</p>
-<section id="constants">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Constants"></a><section id="constants">
 <h2>Constants<a class="headerlink" href="#constants" title="Permalink to this heading">¶</a></h2>
-<section id="c-integer-limit-constants">
-<h3>C integer limit constants<a class="headerlink" href="#c-integer-limit-constants" title="Permalink to this heading">¶</a></h3>
-<table class="hlist"><tr><td><ul class="simple">
-<li><p>SHRT_MIN</p></li>
-<li><p>SHRT_MAX</p></li>
-</ul>
-</td><td><ul class="simple">
-<li><p>USHRT_MAX</p></li>
-<li><p>INT_MIN</p></li>
-</ul>
-</td><td><ul class="simple">
-<li><p>INT_MAX</p></li>
-<li><p>UINT_MAX</p></li>
-</ul>
-</td><td><ul class="simple">
-<li><p>LONG_MIN</p></li>
-<li><p>LONG_MAX</p></li>
-</ul>
-</td><td><ul class="simple">
-<li><p>SSIZE_T_MIN</p></li>
-</ul>
-</td><td><ul class="simple">
-<li><p>SSIZE_T_MAX</p></li>
-</ul>
-</td></tr></table>
-</section>
-<section id="type-codes">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Type codes"></a><section id="type-codes">
 <h3>Type codes<a class="headerlink" href="#type-codes" title="Permalink to this heading">¶</a></h3>
 <table class="hlist"><tr><td><ul class="simple">
 <li><p>SQL_TEXT</p></li>
@@ -1083,7 +1058,7 @@ Firebird client library (<code class="xref py py-obj docutils literal notranslat
 </ul>
 </td></tr></table>
 </section>
-<section id="internal-type-codes-for-example-used-by-array-descriptor">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Internal type codes (for example used by ARRAY descriptor)"></a><section id="internal-type-codes-for-example-used-by-array-descriptor">
 <h3>Internal type codes (for example used by ARRAY descriptor)<a class="headerlink" href="#internal-type-codes-for-example-used-by-array-descriptor" title="Permalink to this heading">¶</a></h3>
 <table class="hlist"><tr><td><ul class="simple">
 <li><p>blr_text</p></li>
@@ -1091,49 +1066,49 @@ Firebird client library (<code class="xref py py-obj docutils literal notranslat
 <li><p>blr_short</p></li>
 <li><p>blr_long</p></li>
 <li><p>blr_quad</p></li>
+<li><p>blr_float</p></li>
 </ul>
 </td><td><ul class="simple">
-<li><p>blr_float</p></li>
 <li><p>blr_double</p></li>
 <li><p>blr_d_float</p></li>
 <li><p>blr_timestamp</p></li>
 <li><p>blr_varying</p></li>
-</ul>
-</td><td><ul class="simple">
 <li><p>blr_varying2</p></li>
 <li><p>blr_blob</p></li>
+</ul>
+</td><td><ul class="simple">
 <li><p>blr_cstring</p></li>
 <li><p>blr_cstring2</p></li>
 <li><p>blr_blob_id</p></li>
-</ul>
-</td><td><ul class="simple">
 <li><p>blr_sql_date</p></li>
 <li><p>blr_sql_time</p></li>
+</ul>
+</td><td><ul class="simple">
 <li><p>blr_int64</p></li>
 <li><p>blr_blob2</p></li>
 <li><p>blr_domain_name</p></li>
-</ul>
-</td><td><ul class="simple">
 <li><p>blr_domain_name2</p></li>
 <li><p>blr_not_nullable</p></li>
+</ul>
+</td><td><ul class="simple">
 <li><p>blr_column_name</p></li>
 <li><p>blr_column_name2</p></li>
 <li><p>blr_bool</p></li>
-</ul>
-</td><td><ul class="simple">
 <li><p>blr_dec64</p></li>
 <li><p>blr_dec128</p></li>
+</ul>
+</td><td><ul class="simple">
 <li><p>blr_dec_fixed</p></li>
 <li><p>blr_sql_time_tz</p></li>
 <li><p>blr_timestamp_tz</p></li>
+<li><p>blr_ex_time_tz</p></li>
+<li><p>blr_ex_timestamp_tz</p></li>
 </ul>
 </td></tr></table>
 </section>
 </section>
-<section id="types">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Types"></a><section id="types">
 <h2>Types<a class="headerlink" href="#types" title="Permalink to this heading">¶</a></h2>
-<section id="basic-types">
-<h3>Basic types<a class="headerlink" href="#basic-types" title="Permalink to this heading">¶</a></h3>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.Int">
 <span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">Int</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.Int"></a><a class="headerlink" href="#firebird.driver.fbapi.Int" title="Permalink to this definition">¶</a></dt>
@@ -1246,7 +1221,7 @@ Firebird client library (<code class="xref py py-obj docutils literal notranslat
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_QUAD">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ISC_QUAD</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ISC_QUAD"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_QUAD" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ISC_QUAD</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#ISC_QUAD"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ISC_QUAD"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_QUAD" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_QUAD.high">
 <span class="sig-name descname"><span class="pre">high</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.ISC_QUAD.high"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_QUAD.high" title="Permalink to this definition">¶</a></dt>
@@ -1295,7 +1270,7 @@ Firebird client library (<code class="xref py py-obj docutils literal notranslat
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_ARRAY_BOUND">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ISC_ARRAY_BOUND</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ISC_ARRAY_BOUND"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_ARRAY_BOUND" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ISC_ARRAY_BOUND</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#ISC_ARRAY_BOUND"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ISC_ARRAY_BOUND"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_ARRAY_BOUND" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_ARRAY_BOUND.array_bound_lower">
 <span class="sig-name descname"><span class="pre">array_bound_lower</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.ISC_ARRAY_BOUND.array_bound_lower"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_ARRAY_BOUND.array_bound_lower" title="Permalink to this definition">¶</a></dt>
@@ -1309,7 +1284,7 @@ Firebird client library (<code class="xref py py-obj docutils literal notranslat
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_ARRAY_DESC">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ISC_ARRAY_DESC</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ISC_ARRAY_DESC"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_ARRAY_DESC" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ISC_ARRAY_DESC</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#ISC_ARRAY_DESC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ISC_ARRAY_DESC"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_ARRAY_DESC" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_ARRAY_DESC.array_desc_bounds">
 <span class="sig-name descname"><span class="pre">array_desc_bounds</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.ISC_ARRAY_DESC.array_desc_bounds"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_ARRAY_DESC.array_desc_bounds" title="Permalink to this definition">¶</a></dt>
@@ -1363,7 +1338,7 @@ Firebird client library (<code class="xref py py-obj docutils literal notranslat
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_TIME_TZ">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ISC_TIME_TZ</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ISC_TIME_TZ"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_TIME_TZ" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ISC_TIME_TZ</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#ISC_TIME_TZ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ISC_TIME_TZ"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_TIME_TZ" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_TIME_TZ.time_zone">
 <span class="sig-name descname"><span class="pre">time_zone</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.ISC_TIME_TZ.time_zone"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_TIME_TZ.time_zone" title="Permalink to this definition">¶</a></dt>
@@ -1377,7 +1352,7 @@ Firebird client library (<code class="xref py py-obj docutils literal notranslat
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_TIME_TZ_EX">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ISC_TIME_TZ_EX</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ISC_TIME_TZ_EX"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_TIME_TZ_EX" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ISC_TIME_TZ_EX</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#ISC_TIME_TZ_EX"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ISC_TIME_TZ_EX"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_TIME_TZ_EX" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_TIME_TZ_EX.ext_offset">
 <span class="sig-name descname"><span class="pre">ext_offset</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.ISC_TIME_TZ_EX.ext_offset"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_TIME_TZ_EX.ext_offset" title="Permalink to this definition">¶</a></dt>
@@ -1396,7 +1371,7 @@ Firebird client library (<code class="xref py py-obj docutils literal notranslat
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_TIMESTAMP">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ISC_TIMESTAMP</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ISC_TIMESTAMP"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_TIMESTAMP" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ISC_TIMESTAMP</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#ISC_TIMESTAMP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ISC_TIMESTAMP"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_TIMESTAMP" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_TIMESTAMP.timestamp_date">
 <span class="sig-name descname"><span class="pre">timestamp_date</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.ISC_TIMESTAMP.timestamp_date"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_TIMESTAMP.timestamp_date" title="Permalink to this definition">¶</a></dt>
@@ -1410,7 +1385,7 @@ Firebird client library (<code class="xref py py-obj docutils literal notranslat
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_TIMESTAMP_TZ">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ISC_TIMESTAMP_TZ</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ISC_TIMESTAMP_TZ"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_TIMESTAMP_TZ" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ISC_TIMESTAMP_TZ</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#ISC_TIMESTAMP_TZ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ISC_TIMESTAMP_TZ"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_TIMESTAMP_TZ" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_TIMESTAMP_TZ.time_zone">
 <span class="sig-name descname"><span class="pre">time_zone</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.ISC_TIMESTAMP_TZ.time_zone"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_TIMESTAMP_TZ.time_zone" title="Permalink to this definition">¶</a></dt>
@@ -1424,7 +1399,7 @@ Firebird client library (<code class="xref py py-obj docutils literal notranslat
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_TIMESTAMP_TZ_EX">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ISC_TIMESTAMP_TZ_EX</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ISC_TIMESTAMP_TZ_EX"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_TIMESTAMP_TZ_EX" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ISC_TIMESTAMP_TZ_EX</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#ISC_TIMESTAMP_TZ_EX"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ISC_TIMESTAMP_TZ_EX"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_TIMESTAMP_TZ_EX" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_TIMESTAMP_TZ_EX.ext_offset">
 <span class="sig-name descname"><span class="pre">ext_offset</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.ISC_TIMESTAMP_TZ_EX.ext_offset"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_TIMESTAMP_TZ_EX.ext_offset" title="Permalink to this definition">¶</a></dt>
@@ -1443,7 +1418,7 @@ Firebird client library (<code class="xref py py-obj docutils literal notranslat
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.TraceCounts">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">TraceCounts</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.TraceCounts"></a><a class="headerlink" href="#firebird.driver.fbapi.TraceCounts" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">TraceCounts</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#TraceCounts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.TraceCounts"></a><a class="headerlink" href="#firebird.driver.fbapi.TraceCounts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Trace counters for table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.TraceCounts.counters">
@@ -1463,7 +1438,7 @@ Firebird client library (<code class="xref py py-obj docutils literal notranslat
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.PerformanceInfo">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">PerformanceInfo</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.PerformanceInfo"></a><a class="headerlink" href="#firebird.driver.fbapi.PerformanceInfo" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">PerformanceInfo</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#PerformanceInfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.PerformanceInfo"></a><a class="headerlink" href="#firebird.driver.fbapi.PerformanceInfo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performance info</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.PerformanceInfo.count">
@@ -1492,8 +1467,7 @@ Firebird client library (<code class="xref py py-obj docutils literal notranslat
 </dd></dl>
 </dd></dl>
 </section>
-</section>
-<section id="variables">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Variables"></a><section id="variables">
 <h2>Variables<a class="headerlink" href="#variables" title="Permalink to this heading">¶</a></h2>
 <dl class="py data">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.err_encoding">
@@ -1501,41 +1475,36 @@ Firebird client library (<code class="xref py py-obj docutils literal notranslat
 <dd><p>Encoding used to decode error messages from Firebird.</p>
 </dd></dl>
 </section>
-<section id="functions">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Functions"></a><section id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Permalink to this heading">¶</a></h2>
-<section id="has-api">
-<h3>has_api<a class="headerlink" href="#has-api" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.has_api">
-<span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">has_api</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.driver.fbapi.has_api"></a><a class="headerlink" href="#firebird.driver.fbapi.has_api" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">has_api</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#has_api"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.driver.fbapi.has_api"></a><a class="headerlink" href="#firebird.driver.fbapi.has_api" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reaturns True if Firebird API is already loaded.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
-</section>
-<section id="load-api">
-<h3>load_api<a class="headerlink" href="#load-api" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.load_api">
-<span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">load_api</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.driver.fbapi.load_api"></a><a class="headerlink" href="#firebird.driver.fbapi.load_api" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">load_api</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><span class="pre">Path</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#load_api"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.driver.fbapi.load_api"></a><a class="headerlink" href="#firebird.driver.fbapi.load_api" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initializes bindings to Firebird Client Library unless they are already initialized.
 Called automatically by <a class="reference internal" href="#firebird.driver.fbapi.get_api" title="firebird.driver.fbapi.get_api"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_api()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>]) – Path to Firebird Client Library.</p></li>
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><em>Union</em></a><em>[</em><em>None</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><em>Path</em></a><em>]</em>) – Path to Firebird Client Library.</p></li>
 <li><p><strong>specified</strong> (<em>When it's not</em>) – </p></li>
 <li><p><strong>library.</strong> (<em>driver does its best to locate appropriate client</em>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><a class="reference internal" href="#firebird.driver.fbapi.FirebirdAPI" title="firebird.driver.fbapi.FirebirdAPI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FirebirdAPI</span></code></a> instance.</p>
 </dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#firebird.driver.fbapi.FirebirdAPI" title="firebird.driver.fbapi.FirebirdAPI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FirebirdAPI</span></code></a> instance.</p>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None</p>
 </dd>
 </dl>
 <dl class="simple">
@@ -1545,35 +1514,29 @@ hook is ignored.</p>
 </dd>
 </dl>
 </dd></dl>
-</section>
-<section id="get-api">
-<h3>get_api<a class="headerlink" href="#get-api" title="Permalink to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.get_api">
-<span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">get_api</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.driver.fbapi.get_api"></a><a class="headerlink" href="#firebird.driver.fbapi.get_api" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">get_api</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference internal" href="#firebird.driver.fbapi.FirebirdAPI" title="firebird.driver.fbapi.FirebirdAPI"><span class="pre">FirebirdAPI</span></a></span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#get_api"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.driver.fbapi.get_api"></a><a class="headerlink" href="#firebird.driver.fbapi.get_api" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns Firebird API. Loads the API if needed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#firebird.driver.fbapi.FirebirdAPI" title="firebird.driver.fbapi.FirebirdAPI"><code class="xref py py-class docutils literal notranslate"><span class="pre">FirebirdAPI</span></code></a></p>
+<dd class="field-odd"><p><a class="reference internal" href="#firebird.driver.fbapi.FirebirdAPI" title="firebird.driver.fbapi.FirebirdAPI"><em>FirebirdAPI</em></a></p>
 </dd>
 </dl>
 </dd></dl>
 </section>
-</section>
-<section id="classes">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Classes"></a><section id="classes">
 <h2>Classes<a class="headerlink" href="#classes" title="Permalink to this heading">¶</a></h2>
-<section id="firebirdapi">
-<h3>FirebirdAPI<a class="headerlink" href="#firebirdapi" title="Permalink to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.FirebirdAPI">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">FirebirdAPI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.FirebirdAPI"></a><a class="headerlink" href="#firebird.driver.fbapi.FirebirdAPI" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">FirebirdAPI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><span class="pre">Path</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#FirebirdAPI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.FirebirdAPI"></a><a class="headerlink" href="#firebird.driver.fbapi.FirebirdAPI" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Firebird Client API interface object. Loads Firebird Client Library and
 exposes <a class="reference internal" href="#firebird.driver.fbapi.FirebirdAPI.fb_get_master_interface" title="firebird.driver.fbapi.FirebirdAPI.fb_get_master_interface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fb_get_master_interface()</span></code></a>. Uses <a class="reference external" href="https://docs.python.org/3/whatsnew/2.5.html#module-ctypes" title="(in Python v3.10)"><span class="xref std std-ref">ctypes</span></a>
 for bindings.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Path</span></code></a>) – Firebird client library to be loaded. If it’s not provided,
+<dd class="field-odd"><p><strong>filename</strong> (:class:<code class="docutils literal notranslate"><span class="pre">~pathlib.Path</span></code>) – Firebird client library to be loaded. If it’s not provided,
 the driver uses <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.util.find_library" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">find_library()</span></code></a> to locate the library.</p>
 </dd>
 </dl>
@@ -1583,7 +1546,7 @@ the driver uses <a class="reference external" href="https://docs.python.org/3/li
 <dd><p>Loaded Firebird client library <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#module-ctypes" title="(in Python v3.10)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ctypes</span></code></a> handler</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CDLL</span></code></p>
+<dd class="field-odd"><p>:class:<code class="docutils literal notranslate"><span class="pre">~ctypes.ctypes.CDLL</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1593,7 +1556,7 @@ the driver uses <a class="reference external" href="https://docs.python.org/3/li
 <dd><p>Path to loaded Firebird client library</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Path</span></code></a></p>
+<dd class="field-odd"><p>:class:<code class="docutils literal notranslate"><span class="pre">~pathlib.Path</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1603,7 +1566,7 @@ the driver uses <a class="reference external" href="https://docs.python.org/3/li
 <dd><p>Firebird API IMaster interface</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="ref-intf.html#firebird.driver.interfaces.iMaster" title="firebird.driver.interfaces.iMaster">iMaster</a></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">iMaster</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1613,7 +1576,7 @@ the driver uses <a class="reference external" href="https://docs.python.org/3/li
 <dd><p>Firebird API IUtil interface</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="ref-intf.html#firebird.driver.interfaces.iUtil" title="firebird.driver.interfaces.iUtil">iUtil</a></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">iUtil</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1635,9 +1598,9 @@ to access all the rest of interfaces. Has no parameters and always succeeds.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>status</strong> (<a class="reference internal" href="#firebird.driver.fbapi.ISC_STATUS_PTR" title="firebird.driver.fbapi.ISC_STATUS_PTR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ISC_STATUS_PTR</span></code></a>) – :ISC status</p></li>
-<li><p><strong>db_handle</strong> (<a class="reference internal" href="#firebird.driver.fbapi.FB_API_HANDLE_PTR" title="firebird.driver.fbapi.FB_API_HANDLE_PTR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FB_API_HANDLE_PTR</span></code></a>) – database handle</p></li>
-<li><p><strong>att</strong> (<a class="reference internal" href="ref-intf.html#firebird.driver.interfaces.iAttachment" title="firebird.driver.interfaces.iAttachment"><em>iAttachment</em></a>) – attachment</p></li>
+<li><p><strong>status</strong> (:class:<code class="docutils literal notranslate"><span class="pre">ISC_STATUS_PTR</span></code>) – :ISC status</p></li>
+<li><p><strong>db_handle</strong> (:class:<code class="docutils literal notranslate"><span class="pre">FB_API_HANDLE_PTR</span></code>) – database handle</p></li>
+<li><p><strong>att</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">iAttachment</span></code>) – attachment</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -1652,9 +1615,9 @@ to access all the rest of interfaces. Has no parameters and always succeeds.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>status</strong> (<a class="reference internal" href="#firebird.driver.fbapi.ISC_STATUS_PTR" title="firebird.driver.fbapi.ISC_STATUS_PTR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ISC_STATUS_PTR</span></code></a>) – ISC status</p></li>
-<li><p><strong>tra_handle</strong> (<a class="reference internal" href="#firebird.driver.fbapi.FB_API_HANDLE_PTR" title="firebird.driver.fbapi.FB_API_HANDLE_PTR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FB_API_HANDLE_PTR</span></code></a>) – Transaction handle</p></li>
-<li><p><strong>att</strong> (<a class="reference internal" href="ref-intf.html#firebird.driver.interfaces.iTransaction" title="firebird.driver.interfaces.iTransaction"><em>iTransaction</em></a>) – Transaction</p></li>
+<li><p><strong>status</strong> (:class:<code class="docutils literal notranslate"><span class="pre">ISC_STATUS_PTR</span></code>) – ISC status</p></li>
+<li><p><strong>tra_handle</strong> (:class:<code class="docutils literal notranslate"><span class="pre">FB_API_HANDLE_PTR</span></code>) – Transaction handle</p></li>
+<li><p><strong>att</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">iTransaction</span></code>) – Transaction</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -1669,8 +1632,8 @@ to access all the rest of interfaces. Has no parameters and always succeeds.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>buffer</strong> (<a class="reference internal" href="#firebird.driver.fbapi.STRING" title="firebird.driver.fbapi.STRING"><code class="xref py py-obj docutils literal notranslate"><span class="pre">STRING</span></code></a>) – Buffer for message</p></li>
-<li><p><strong>buf_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Buffer size</p></li>
+<li><p><strong>buffer</strong> (:class:<code class="docutils literal notranslate"><span class="pre">STRING</span></code>) – Buffer for message</p></li>
+<li><p><strong>buf_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Buffer size</p></li>
 <li><p><strong>status_ptr</strong> – Pointer to <a class="reference internal" href="#firebird.driver.fbapi.ISC_STATUS_PTR" title="firebird.driver.fbapi.ISC_STATUS_PTR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ISC_STATUS_PTR</span></code></a></p></li>
 </ul>
 </dd>
@@ -1685,7 +1648,7 @@ to access all the rest of interfaces. Has no parameters and always succeeds.</p>
 <dd><p>Helper function that returns SQLSTATE for ISC_STATUS.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>status</strong> (<a class="reference internal" href="#firebird.driver.fbapi.ISC_STATUS_PTR" title="firebird.driver.fbapi.ISC_STATUS_PTR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ISC_STATUS_PTR</span></code></a>) – ISC status</p>
+<dd class="field-odd"><p><strong>status</strong> (:class:<code class="docutils literal notranslate"><span class="pre">ISC_STATUS_PTR</span></code>) – ISC status</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><a class="reference internal" href="#firebird.driver.fbapi.STRING" title="firebird.driver.fbapi.STRING"><code class="xref py py-obj docutils literal notranslate"><span class="pre">STRING</span></code></a> - 5 characters of SQLSTATE</p>
@@ -1698,7 +1661,7 @@ to access all the rest of interfaces. Has no parameters and always succeeds.</p>
 <dd><p>Helper function that returns SQLCODE for ISC_STATUS.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>status</strong> (<a class="reference internal" href="#firebird.driver.fbapi.ISC_STATUS_PTR" title="firebird.driver.fbapi.ISC_STATUS_PTR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ISC_STATUS_PTR</span></code></a>) – ISC status</p>
+<dd class="field-odd"><p><strong>status</strong> (:class:<code class="docutils literal notranslate"><span class="pre">ISC_STATUS_PTR</span></code>) – ISC status</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><a class="reference internal" href="#firebird.driver.fbapi.ISC_LONG" title="firebird.driver.fbapi.ISC_LONG"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ISC_LONG</span></code></a></p>
@@ -1737,23 +1700,28 @@ to access all the rest of interfaces. Has no parameters and always succeeds.</p>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.FirebirdAPI.isc_event_block">
-<span class="sig-name descname"><span class="pre">isc_event_block</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_buffer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_buffer</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.driver.fbapi.FirebirdAPI.isc_event_block"></a><a class="headerlink" href="#firebird.driver.fbapi.FirebirdAPI.isc_event_block" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">isc_event_block</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_buffer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_buffer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#FirebirdAPI.isc_event_block"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.driver.fbapi.FirebirdAPI.isc_event_block"></a><a class="headerlink" href="#firebird.driver.fbapi.FirebirdAPI.isc_event_block" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convenience wrapper for isc_event_block() API function. Injects variable
 number of parameters into <code class="xref py py-obj docutils literal notranslate"><span class="pre">C_isc_event_block</span></code> call.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>event_buffer</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><em>bytes</em></a>) – </p></li>
+<li><p><strong>result_buffer</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><em>bytes</em></a>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
 </dd></dl>
 </section>
-</section>
-<section id="firebird-api-interface-definitions">
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Firebird API Interface definitions"></a><section id="firebird-api-interface-definitions">
 <h2>Firebird API Interface definitions<a class="headerlink" href="#firebird-api-interface-definitions" title="Permalink to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IVersioned_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IVersioned_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IVersioned_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IVersioned_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IVersioned_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IVersioned_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IVersioned_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IVersioned_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interface virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IVersioned_VTable.dummy">
@@ -1768,7 +1736,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IVersioned_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IVersioned_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IVersioned_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IVersioned_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IVersioned_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IVersioned_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IVersioned_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IVersioned_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fiebird Interface data structure</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IVersioned_struct.dummy">
@@ -1783,7 +1751,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IReferenceCounted_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IReferenceCounted_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IReferenceCounted_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IReferenceCounted_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IReferenceCounted_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IReferenceCounted_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IReferenceCounted_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IReferenceCounted_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IReferenceCounted virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IReferenceCounted_VTable.addRef">
@@ -1808,7 +1776,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IReferenceCounted_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IReferenceCounted_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IReferenceCounted_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IReferenceCounted_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IReferenceCounted_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IReferenceCounted_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IReferenceCounted_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IReferenceCounted_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IReferenceCounted data structure</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IReferenceCounted_struct.dummy">
@@ -1823,7 +1791,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IDisposable_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IDisposable_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IDisposable_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IDisposable_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IDisposable_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IDisposable_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IDisposable_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IDisposable_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IDisposable virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IDisposable_VTable.dispose">
@@ -1843,7 +1811,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IDisposable_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IDisposable_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IDisposable_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IDisposable_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IDisposable_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IDisposable_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IDisposable_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IDisposable_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IDisposable data structure</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IDisposable_struct.dummy">
@@ -1858,7 +1826,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IStatus_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IStatus_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IStatus_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IStatus_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IStatus_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IStatus_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IStatus_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IStatus_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IStatus VTable</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IStatus_VTable.clone">
@@ -1923,7 +1891,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IStatus_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IStatus_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IStatus_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IStatus_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IStatus_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IStatus_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IStatus_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IStatus_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IStatus interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IStatus_struct.dummy">
@@ -1938,7 +1906,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IMaster_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IMaster_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IMaster_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IMaster_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IMaster_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IMaster_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IMaster_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IMaster_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IMaster virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IMaster_VTable.dummy">
@@ -2013,7 +1981,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IMaster_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IMaster_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IMaster_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IMaster_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IMaster_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IMaster_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IMaster_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IMaster_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IMaster interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IMaster_struct.dummy">
@@ -2028,7 +1996,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IPluginBase_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IPluginBase_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IPluginBase_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IPluginBase_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IPluginBase_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IPluginBase_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IPluginBase_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IPluginBase_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IPluginBase virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IPluginBase_VTable.addRef">
@@ -2063,7 +2031,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IPluginBase_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IPluginBase_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IPluginBase_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IPluginBase_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IPluginBase_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IPluginBase_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IPluginBase_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IPluginBase_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IPluginBase interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IPluginBase_struct.dummy">
@@ -2078,12 +2046,12 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IPluginSet_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IPluginSet_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IPluginSet_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IPluginSet_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IPluginSet_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IPluginSet_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IPluginSet_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IPluginSet_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IPluginSet virtual method table</p>
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IPluginSet_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IPluginSet_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IPluginSet_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IPluginSet_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IPluginSet_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IPluginSet_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IPluginSet_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IPluginSet_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IPluginSet interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IPluginSet_struct.dummy">
@@ -2098,7 +2066,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IConfigEntry_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IConfigEntry_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IConfigEntry_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IConfigEntry_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IConfigEntry_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IConfigEntry_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IConfigEntry_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IConfigEntry_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IConfigEntry virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IConfigEntry_VTable.addRef">
@@ -2148,7 +2116,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IConfigEntry_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IConfigEntry_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IConfigEntry_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IConfigEntry_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IConfigEntry_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IConfigEntry_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IConfigEntry_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IConfigEntry_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IConfigEntry interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IConfigEntry_struct.dummy">
@@ -2163,7 +2131,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IConfig_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IConfig_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IConfig_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IConfig_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IConfig_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IConfig_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IConfig_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IConfig_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IConfig virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IConfig_VTable.addRef">
@@ -2203,7 +2171,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IConfig_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IConfig_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IConfig_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IConfig_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IConfig_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IConfig_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IConfig_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IConfig_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IConfig interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IConfig_struct.dummy">
@@ -2218,7 +2186,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IFirebirdConf_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IFirebirdConf_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IFirebirdConf_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IFirebirdConf_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IFirebirdConf_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IFirebirdConf_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IFirebirdConf_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IFirebirdConf_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IFirebirdConf virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IFirebirdConf_VTable.addRef">
@@ -2268,7 +2236,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IFirebirdConf_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IFirebirdConf_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IFirebirdConf_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IFirebirdConf_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IFirebirdConf_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IFirebirdConf_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IFirebirdConf_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IFirebirdConf_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IFirebirdConf interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IFirebirdConf_struct.dummy">
@@ -2283,12 +2251,12 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IPluginManager_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IPluginManager_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IPluginManager_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IPluginManager_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IPluginManager_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IPluginManager_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IPluginManager_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IPluginManager_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IPluginManager virtual method table</p>
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IPluginManager_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IPluginManager_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IPluginManager_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IPluginManager_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IPluginManager_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IPluginManager_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IPluginManager_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IPluginManager_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IPluginManager interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IPluginManager_struct.dummy">
@@ -2303,7 +2271,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IConfigManager_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IConfigManager_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IConfigManager_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IConfigManager_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IConfigManager_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IConfigManager_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IConfigManager_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IConfigManager_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IConfigManager virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IConfigManager_VTable.dummy">
@@ -2353,7 +2321,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IConfigManager_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IConfigManager_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IConfigManager_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IConfigManager_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IConfigManager_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IConfigManager_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IConfigManager_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IConfigManager_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IConfigManager interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IConfigManager_struct.dummy">
@@ -2368,7 +2336,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IEventCallback_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IEventCallback_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IEventCallback_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IEventCallback_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IEventCallback_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IEventCallback_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IEventCallback_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IEventCallback_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IEventCallback virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IEventCallback_VTable.addRef">
@@ -2398,7 +2366,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IEventCallback_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IEventCallback_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IEventCallback_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IEventCallback_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IEventCallback_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IEventCallback_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IEventCallback_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IEventCallback_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IEventCallback interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IEventCallback_struct.dummy">
@@ -2413,7 +2381,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IBlob_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IBlob_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IBlob_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IBlob_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IBlob_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IBlob_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IBlob_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IBlob_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IBlob virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IBlob_VTable.addRef">
@@ -2428,6 +2396,16 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IBlob_VTable.close">
 <span class="sig-name descname"><span class="pre">close</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.IBlob_VTable.close"></a><a class="headerlink" href="#firebird.driver.fbapi.IBlob_VTable.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure/Union member</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.fbapi.IBlob_VTable.deprecatedCancel">
+<span class="sig-name descname"><span class="pre">deprecatedCancel</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.IBlob_VTable.deprecatedCancel"></a><a class="headerlink" href="#firebird.driver.fbapi.IBlob_VTable.deprecatedCancel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure/Union member</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.fbapi.IBlob_VTable.deprecatedClose">
+<span class="sig-name descname"><span class="pre">deprecatedClose</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.IBlob_VTable.deprecatedClose"></a><a class="headerlink" href="#firebird.driver.fbapi.IBlob_VTable.deprecatedClose" title="Permalink to this definition">¶</a></dt>
 <dd><p>Structure/Union member</p>
 </dd></dl>
 <dl class="py attribute">
@@ -2468,7 +2446,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IBlob_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IBlob_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IBlob_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IBlob_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IBlob_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IBlob_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IBlob_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IBlob_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IBlob interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IBlob_struct.dummy">
@@ -2483,7 +2461,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ITransaction_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ITransaction_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ITransaction_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.ITransaction_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ITransaction_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#ITransaction_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ITransaction_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.ITransaction_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>ITransaction virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ITransaction_VTable.addRef">
@@ -2498,6 +2476,21 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ITransaction_VTable.commitRetaining">
 <span class="sig-name descname"><span class="pre">commitRetaining</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.ITransaction_VTable.commitRetaining"></a><a class="headerlink" href="#firebird.driver.fbapi.ITransaction_VTable.commitRetaining" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure/Union member</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.fbapi.ITransaction_VTable.deprecatedCommit">
+<span class="sig-name descname"><span class="pre">deprecatedCommit</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.ITransaction_VTable.deprecatedCommit"></a><a class="headerlink" href="#firebird.driver.fbapi.ITransaction_VTable.deprecatedCommit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure/Union member</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.fbapi.ITransaction_VTable.deprecatedDisconnect">
+<span class="sig-name descname"><span class="pre">deprecatedDisconnect</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.ITransaction_VTable.deprecatedDisconnect"></a><a class="headerlink" href="#firebird.driver.fbapi.ITransaction_VTable.deprecatedDisconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure/Union member</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.fbapi.ITransaction_VTable.deprecatedRollback">
+<span class="sig-name descname"><span class="pre">deprecatedRollback</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.ITransaction_VTable.deprecatedRollback"></a><a class="headerlink" href="#firebird.driver.fbapi.ITransaction_VTable.deprecatedRollback" title="Permalink to this definition">¶</a></dt>
 <dd><p>Structure/Union member</p>
 </dd></dl>
 <dl class="py attribute">
@@ -2558,7 +2551,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ITransaction_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ITransaction_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ITransaction_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.ITransaction_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ITransaction_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#ITransaction_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ITransaction_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.ITransaction_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>ITransaction interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ITransaction_struct.dummy">
@@ -2573,7 +2566,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IMessageMetadata_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IMessageMetadata_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IMessageMetadata_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IMessageMetadata_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IMessageMetadata_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IMessageMetadata_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IMessageMetadata_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IMessageMetadata_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IMessageMetadata virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IMessageMetadata_VTable.addRef">
@@ -2683,7 +2676,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IMessageMetadata_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IMessageMetadata_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IMessageMetadata_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IMessageMetadata_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IMessageMetadata_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IMessageMetadata_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IMessageMetadata_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IMessageMetadata_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IMessageMetadata interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IMessageMetadata_struct.dummy">
@@ -2698,7 +2691,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IMetadataBuilder_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IMetadataBuilder_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IMetadataBuilder_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IMetadataBuilder_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IMetadataBuilder_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IMetadataBuilder_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IMetadataBuilder_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IMetadataBuilder_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IMetadataBuilder virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IMetadataBuilder_VTable.addField">
@@ -2793,7 +2786,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IMetadataBuilder_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IMetadataBuilder_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IMetadataBuilder_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IMetadataBuilder_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IMetadataBuilder_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IMetadataBuilder_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IMetadataBuilder_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IMetadataBuilder_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IMetadataBuilder interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IMetadataBuilder_struct.dummy">
@@ -2808,7 +2801,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IResultSet_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IResultSet_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IResultSet_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IResultSet_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IResultSet_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IResultSet_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IResultSet_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IResultSet_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IResultSet virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IResultSet_VTable.addRef">
@@ -2818,6 +2811,11 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IResultSet_VTable.close">
 <span class="sig-name descname"><span class="pre">close</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.IResultSet_VTable.close"></a><a class="headerlink" href="#firebird.driver.fbapi.IResultSet_VTable.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure/Union member</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.fbapi.IResultSet_VTable.deprecatedClose">
+<span class="sig-name descname"><span class="pre">deprecatedClose</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.IResultSet_VTable.deprecatedClose"></a><a class="headerlink" href="#firebird.driver.fbapi.IResultSet_VTable.deprecatedClose" title="Permalink to this definition">¶</a></dt>
 <dd><p>Structure/Union member</p>
 </dd></dl>
 <dl class="py attribute">
@@ -2888,7 +2886,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IResultSet_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IResultSet_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IResultSet_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IResultSet_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IResultSet_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IResultSet_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IResultSet_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IResultSet_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IResultSet interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IResultSet_struct.dummy">
@@ -2903,7 +2901,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IStatement_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IStatement_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IStatement_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IStatement_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IStatement_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IStatement_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IStatement_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IStatement_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IStatement virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IStatement_VTable.addRef">
@@ -2913,6 +2911,11 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IStatement_VTable.createBatch">
 <span class="sig-name descname"><span class="pre">createBatch</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.IStatement_VTable.createBatch"></a><a class="headerlink" href="#firebird.driver.fbapi.IStatement_VTable.createBatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure/Union member</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.fbapi.IStatement_VTable.deprecatedFree">
+<span class="sig-name descname"><span class="pre">deprecatedFree</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.IStatement_VTable.deprecatedFree"></a><a class="headerlink" href="#firebird.driver.fbapi.IStatement_VTable.deprecatedFree" title="Permalink to this definition">¶</a></dt>
 <dd><p>Structure/Union member</p>
 </dd></dl>
 <dl class="py attribute">
@@ -2998,7 +3001,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IStatement_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IStatement_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IStatement_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IStatement_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IStatement_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IStatement_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IStatement_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IStatement_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IStatement interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IStatement_struct.dummy">
@@ -3013,7 +3016,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IBatch_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IBatch_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IBatch_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IBatch_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IBatch_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IBatch_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IBatch_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IBatch_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IBatch virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IBatch_VTable.add">
@@ -3046,6 +3049,16 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 <dd><p>Structure/Union member</p>
 </dd></dl>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.fbapi.IBatch_VTable.close">
+<span class="sig-name descname"><span class="pre">close</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.IBatch_VTable.close"></a><a class="headerlink" href="#firebird.driver.fbapi.IBatch_VTable.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure/Union member</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.fbapi.IBatch_VTable.deprecatedClose">
+<span class="sig-name descname"><span class="pre">deprecatedClose</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.IBatch_VTable.deprecatedClose"></a><a class="headerlink" href="#firebird.driver.fbapi.IBatch_VTable.deprecatedClose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure/Union member</p>
+</dd></dl>
+<dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IBatch_VTable.dummy">
 <span class="sig-name descname"><span class="pre">dummy</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.IBatch_VTable.dummy"></a><a class="headerlink" href="#firebird.driver.fbapi.IBatch_VTable.dummy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Structure/Union member</p>
@@ -3058,6 +3071,11 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IBatch_VTable.getBlobAlignment">
 <span class="sig-name descname"><span class="pre">getBlobAlignment</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.IBatch_VTable.getBlobAlignment"></a><a class="headerlink" href="#firebird.driver.fbapi.IBatch_VTable.getBlobAlignment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure/Union member</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.fbapi.IBatch_VTable.getInfo">
+<span class="sig-name descname"><span class="pre">getInfo</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.IBatch_VTable.getInfo"></a><a class="headerlink" href="#firebird.driver.fbapi.IBatch_VTable.getInfo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Structure/Union member</p>
 </dd></dl>
 <dl class="py attribute">
@@ -3088,7 +3106,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IBatch_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IBatch_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IBatch_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IBatch_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IBatch_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IBatch_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IBatch_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IBatch_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IBatch interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IBatch_struct.dummy">
@@ -3103,7 +3121,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IBatchCompletionState_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IBatchCompletionState_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IBatchCompletionState_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IBatchCompletionState_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IBatchCompletionState_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IBatchCompletionState_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IBatchCompletionState_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IBatchCompletionState_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IBatchCompletionState virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IBatchCompletionState_VTable.dispose">
@@ -3143,7 +3161,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IBatchCompletionState_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IBatchCompletionState_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IBatchCompletionState_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IBatchCompletionState_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IBatchCompletionState_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IBatchCompletionState_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IBatchCompletionState_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IBatchCompletionState_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IBatchCompletionState interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IBatchCompletionState_struct.dummy">
@@ -3158,11 +3176,16 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IRequest_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IRequest_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IRequest_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IRequest_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IRequest_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IRequest_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IRequest_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IRequest_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IRequest virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IRequest_VTable.addRef">
 <span class="sig-name descname"><span class="pre">addRef</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.IRequest_VTable.addRef"></a><a class="headerlink" href="#firebird.driver.fbapi.IRequest_VTable.addRef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure/Union member</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.fbapi.IRequest_VTable.deprecatedFree">
+<span class="sig-name descname"><span class="pre">deprecatedFree</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.IRequest_VTable.deprecatedFree"></a><a class="headerlink" href="#firebird.driver.fbapi.IRequest_VTable.deprecatedFree" title="Permalink to this definition">¶</a></dt>
 <dd><p>Structure/Union member</p>
 </dd></dl>
 <dl class="py attribute">
@@ -3218,7 +3241,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IRequest_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IRequest_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IRequest_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IRequest_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IRequest_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IRequest_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IRequest_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IRequest_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IRequest interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IRequest_struct.dummy">
@@ -3233,7 +3256,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IEvents_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IEvents_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IEvents_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IEvents_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IEvents_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IEvents_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IEvents_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IEvents_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IEvents virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IEvents_VTable.addRef">
@@ -3243,6 +3266,11 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IEvents_VTable.cancel">
 <span class="sig-name descname"><span class="pre">cancel</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.IEvents_VTable.cancel"></a><a class="headerlink" href="#firebird.driver.fbapi.IEvents_VTable.cancel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure/Union member</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.fbapi.IEvents_VTable.deprecatedCancel">
+<span class="sig-name descname"><span class="pre">deprecatedCancel</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.IEvents_VTable.deprecatedCancel"></a><a class="headerlink" href="#firebird.driver.fbapi.IEvents_VTable.deprecatedCancel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Structure/Union member</p>
 </dd></dl>
 <dl class="py attribute">
@@ -3263,7 +3291,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IEvents_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IEvents_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IEvents_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IEvents_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IEvents_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IEvents_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IEvents_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IEvents_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IEvents interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IEvents_struct.dummy">
@@ -3278,7 +3306,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IAttachment_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IAttachment_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IAttachment_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IAttachment_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IAttachment_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IAttachment_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IAttachment_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IAttachment_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IAttachment virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IAttachment_VTable.addRef">
@@ -3308,6 +3336,16 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IAttachment_VTable.createReplicator">
 <span class="sig-name descname"><span class="pre">createReplicator</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.IAttachment_VTable.createReplicator"></a><a class="headerlink" href="#firebird.driver.fbapi.IAttachment_VTable.createReplicator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure/Union member</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.fbapi.IAttachment_VTable.deprecatedDetach">
+<span class="sig-name descname"><span class="pre">deprecatedDetach</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.IAttachment_VTable.deprecatedDetach"></a><a class="headerlink" href="#firebird.driver.fbapi.IAttachment_VTable.deprecatedDetach" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure/Union member</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.fbapi.IAttachment_VTable.deprecatedDropDatabase">
+<span class="sig-name descname"><span class="pre">deprecatedDropDatabase</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.IAttachment_VTable.deprecatedDropDatabase"></a><a class="headerlink" href="#firebird.driver.fbapi.IAttachment_VTable.deprecatedDropDatabase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Structure/Union member</p>
 </dd></dl>
 <dl class="py attribute">
@@ -3423,7 +3461,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IAttachment_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IAttachment_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IAttachment_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IAttachment_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IAttachment_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IAttachment_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IAttachment_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IAttachment_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IAttachment interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IAttachment_struct.dummy">
@@ -3438,11 +3476,21 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IService_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IService_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IService_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IService_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IService_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IService_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IService_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IService_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IService virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IService_VTable.addRef">
 <span class="sig-name descname"><span class="pre">addRef</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.IService_VTable.addRef"></a><a class="headerlink" href="#firebird.driver.fbapi.IService_VTable.addRef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure/Union member</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.fbapi.IService_VTable.cancel">
+<span class="sig-name descname"><span class="pre">cancel</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.IService_VTable.cancel"></a><a class="headerlink" href="#firebird.driver.fbapi.IService_VTable.cancel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure/Union member</p>
+</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.fbapi.IService_VTable.deprecatedDetach">
+<span class="sig-name descname"><span class="pre">deprecatedDetach</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.IService_VTable.deprecatedDetach"></a><a class="headerlink" href="#firebird.driver.fbapi.IService_VTable.deprecatedDetach" title="Permalink to this definition">¶</a></dt>
 <dd><p>Structure/Union member</p>
 </dd></dl>
 <dl class="py attribute">
@@ -3478,7 +3526,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IService_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IService_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IService_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IService_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IService_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IService_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IService_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IService_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IService interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IService_struct.dummy">
@@ -3493,7 +3541,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IProvider_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IProvider_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IProvider_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IProvider_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IProvider_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IProvider_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IProvider_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IProvider_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IProvider virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IProvider_VTable.addRef">
@@ -3553,7 +3601,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IProvider_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IProvider_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IProvider_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IProvider_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IProvider_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IProvider_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IProvider_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IProvider_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IProvider interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IProvider_struct.dummy">
@@ -3568,7 +3616,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IDtcStart_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IDtcStart_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IDtcStart_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IDtcStart_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IDtcStart_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IDtcStart_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IDtcStart_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IDtcStart_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IDtcStart virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IDtcStart_VTable.addAttachment">
@@ -3603,7 +3651,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IDtcStart_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IDtcStart_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IDtcStart_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IDtcStart_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IDtcStart_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IDtcStart_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IDtcStart_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IDtcStart_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IDtcStart interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IDtcStart_struct.dummy">
@@ -3618,7 +3666,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IDtc_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IDtc_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IDtc_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IDtc_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IDtc_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IDtc_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IDtc_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IDtc_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IDtc virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IDtc_VTable.dummy">
@@ -3643,7 +3691,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IDtc_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IDtc_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IDtc_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IDtc_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IDtc_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IDtc_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IDtc_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IDtc_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IDtc interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IDtc_struct.dummy">
@@ -3658,7 +3706,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ICryptKeyCallback_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ICryptKeyCallback_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ICryptKeyCallback_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.ICryptKeyCallback_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ICryptKeyCallback_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#ICryptKeyCallback_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ICryptKeyCallback_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.ICryptKeyCallback_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>ICryptKeyCallback virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ICryptKeyCallback_VTable.callback">
@@ -3678,7 +3726,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ICryptKeyCallback_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ICryptKeyCallback_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ICryptKeyCallback_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.ICryptKeyCallback_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ICryptKeyCallback_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#ICryptKeyCallback_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ICryptKeyCallback_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.ICryptKeyCallback_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>ICryptKeyCallback interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ICryptKeyCallback_struct.dummy">
@@ -3693,7 +3741,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ITimer_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ITimer_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ITimer_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.ITimer_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ITimer_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#ITimer_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ITimer_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.ITimer_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>ITimer virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ITimer_VTable.addRef">
@@ -3723,7 +3771,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ITimer_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ITimer_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ITimer_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.ITimer_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ITimer_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#ITimer_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ITimer_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.ITimer_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>ITimer interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ITimer_struct.dummy">
@@ -3738,7 +3786,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ITimerControl_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ITimerControl_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ITimerControl_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.ITimerControl_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ITimerControl_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#ITimerControl_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ITimerControl_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.ITimerControl_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>ITimerControl virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ITimerControl_VTable.dummy">
@@ -3763,7 +3811,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ITimerControl_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ITimerControl_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ITimerControl_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.ITimerControl_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ITimerControl_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#ITimerControl_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.ITimerControl_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.ITimerControl_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>ITimerControl interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ITimerControl_struct.dummy">
@@ -3778,7 +3826,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IVersionCallback_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IVersionCallback_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IVersionCallback_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IVersionCallback_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IVersionCallback_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IVersionCallback_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IVersionCallback_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IVersionCallback_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IVersionCallback virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IVersionCallback_VTable.callback">
@@ -3798,7 +3846,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IVersionCallback_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IVersionCallback_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IVersionCallback_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IVersionCallback_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IVersionCallback_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IVersionCallback_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IVersionCallback_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IVersionCallback_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IVersionCallback interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IVersionCallback_struct.dummy">
@@ -3813,7 +3861,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IUtil_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IUtil_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IUtil_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IUtil_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IUtil_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IUtil_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IUtil_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IUtil_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IUtil virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IUtil_VTable.decodeDate">
@@ -3938,7 +3986,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IUtil_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IUtil_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IUtil_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IUtil_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IUtil_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IUtil_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IUtil_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IUtil_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IUtil interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IUtil_struct.dummy">
@@ -3953,7 +4001,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IOffsetsCallback_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IOffsetsCallback_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IOffsetsCallback_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IOffsetsCallback_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IOffsetsCallback_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IOffsetsCallback_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IOffsetsCallback_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IOffsetsCallback_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IOffsetsCallback virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IOffsetsCallback_VTable.dummy">
@@ -3973,7 +4021,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IOffsetsCallback_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IOffsetsCallback_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IOffsetsCallback_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IOffsetsCallback_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IOffsetsCallback_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IOffsetsCallback_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IOffsetsCallback_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IOffsetsCallback_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IOffsetsCallback interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IOffsetsCallback_struct.dummy">
@@ -3988,7 +4036,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IXpbBuilder_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IXpbBuilder_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IXpbBuilder_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IXpbBuilder_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IXpbBuilder_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IXpbBuilder_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IXpbBuilder_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IXpbBuilder_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IXpbBuilder virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IXpbBuilder_VTable.clear">
@@ -4108,7 +4156,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IXpbBuilder_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IXpbBuilder_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IXpbBuilder_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IXpbBuilder_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IXpbBuilder_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IXpbBuilder_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IXpbBuilder_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IXpbBuilder_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IXpbBuilder interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IXpbBuilder_struct.dummy">
@@ -4123,7 +4171,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IDecFloat16_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IDecFloat16_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IDecFloat16_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IDecFloat16_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IDecFloat16_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IDecFloat16_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IDecFloat16_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IDecFloat16_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IDecFloat16 virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IDecFloat16_VTable.dummy">
@@ -4158,7 +4206,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IDecFloat16_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IDecFloat16_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IDecFloat16_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IDecFloat16_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IDecFloat16_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IDecFloat16_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IDecFloat16_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IDecFloat16_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IDecFloat16 interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IDecFloat16_struct.dummy">
@@ -4173,7 +4221,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IDecFloat34_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IDecFloat34_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IDecFloat34_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IDecFloat34_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IDecFloat34_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IDecFloat34_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IDecFloat34_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IDecFloat34_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IDecFloat34 virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IDecFloat34_VTable.dummy">
@@ -4208,7 +4256,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IDecFloat34_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IDecFloat34_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IDecFloat34_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IDecFloat34_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IDecFloat34_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IDecFloat34_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IDecFloat34_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IDecFloat34_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IDecFloat34 interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IDecFloat34_struct.dummy">
@@ -4223,7 +4271,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IInt128_VTable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IInt128_VTable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IInt128_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IInt128_VTable" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IInt128_VTable</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IInt128_VTable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IInt128_VTable"></a><a class="headerlink" href="#firebird.driver.fbapi.IInt128_VTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>IInt128 virtual method table</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IInt128_VTable.dummy">
@@ -4248,7 +4296,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IInt128_struct">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IInt128_struct</span></span><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IInt128_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IInt128_struct" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">IInt128_struct</span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#IInt128_struct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.IInt128_struct"></a><a class="headerlink" href="#firebird.driver.fbapi.IInt128_struct" title="Permalink to this definition">¶</a></dt>
 <dd><p>IInt128 interface</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IInt128_struct.dummy">
@@ -4273,7 +4321,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </p>
 <p>
         © Copyright 2020-2022, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.2.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br/>
 </p>
 </div>
 </footer>

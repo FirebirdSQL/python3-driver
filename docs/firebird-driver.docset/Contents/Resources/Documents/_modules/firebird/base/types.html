@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>firebird.base.types &#8212; firebird-driver 1.5.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../../../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../../../_static/bootstrap-2.3.2/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+
+        <a class="brand" href="../../../index.html">
+          firebird-driver</a>
+        <span class="navbar-text pull-left"><b>1.5.3</b></span>
+
+        <div class="nav-collapse">
+          <ul class="nav">
+            <li class="divider-vertical"></li>
+            
+                <li><a href="../../../usage-guide.html">Usage Guide</a></li>
+                <li><a href="../../../reference.html">Reference</a></li>
+                <li><a href="../../../genindex.html">Index</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../index.html">Content <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting-started.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../getting-started.html#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../getting-started.html#installation-from-pypi">Installation from PYPI</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../getting-started.html#quick-start-guide">Quick-start Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../getting-started.html#driver-configuration">Driver configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../getting-started.html#connecting-to-a-database">Connecting to a Database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../getting-started.html#creating-a-database">Creating a Database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../getting-started.html#executing-sql-statements">Executing SQL Statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../getting-started.html#calling-stored-procedures">Calling Stored Procedures</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage-guide.html">Usage Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#driver-structure">Driver structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#configuration">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#the-driver-config-object">The ‘driver_config’ object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#server-and-database-configuration">Server and database configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#databases">Databases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#using-connect">Using connect()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#using-create-database">Using create_database()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#deleting-databases">Deleting databases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#connection-object">Connection object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#closing-the-connection">Closing the connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#getting-information-about-connection">Getting information about connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#getting-information-about-database">Getting information about database</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#executing-sql-statements">Executing SQL Statements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#cursor-object">Cursor object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#sql-execution-basics">SQL Execution Basics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#fetching-data-from-server">Fetching data from server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#index-13">Scrollable cursors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#id3">Parameterized statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#id5">Prepared Statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#named-cursors">Named Cursors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#working-with-stored-procedures">Working with stored procedures</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#data-handling-and-conversions">Data handling and conversions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#implicit-conversion-of-input-parameters-from-strings">Implicit Conversion of Input Parameters from Strings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#automatic-conversion-from-to-unicode">Automatic conversion from/to Unicode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#working-with-blobs">Working with BLOBs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#firebird-array-type">Firebird ARRAY type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#transanction-management">Transanction management</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#basics">Basics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#auto-commit">Auto-commit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#transaction-parameters">Transaction parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#getting-information-about-transaction">Getting information about transaction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#retaining-transactions">Retaining transactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#savepoints">Savepoints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#using-multiple-transactions-with-the-same-connection">Using multiple transactions with the same connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#distributed-transactions">Distributed Transactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#transaction-context-manager">Transaction Context Manager</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#database-events">Database Events</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#what-they-are">What they are</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#why-use-them">Why use them</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#how-events-are-exposed">How events are exposed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#api-for-python-developers">API for Python developers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#working-with-services">Working with Services</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#services-api-connections">Services API Connections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#text-output-from-services">Text output from Services</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#server-configuration-and-state-information">Server Configuration and State information</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#database-options">Database options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#database-maintenance">Database maintenance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#user-maintenance">User maintenance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#trace-sessions">Trace sessions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#logging-driver-activities">Logging driver activities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#index-43">Driver hooks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#apihook">APIHook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#connectionhook">ConnectionHook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#serverhook">ServerHook</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../python-db-api-compliance.html">Compliance to PyDB API 2.0</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../python-db-api-compliance.html#unsupported-optional-features">Unsupported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../python-db-api-compliance.html#supported-optional-features">Supported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../python-db-api-compliance.html#nominally-supported-optional-features">Nominally Supported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../python-db-api-compliance.html#extensions-and-caveats">Extensions and Caveats</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference.html">Firebird-driver Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../reference.html#driver-modules">Driver modules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../ref-main.html">Main driver namespace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ref-types.html">firebird.driver.types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ref-config.html">firebird.driver.config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ref-core.html">firebird.driver.core</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ref-hooks.html">firebird.driver.hooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ref-intf.html">firebird.driver.interfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ref-fbapi.html">firebird.driver.fbapi</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-5-3">Version 1.5.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-5-2">Version 1.5.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-5-1">Version 1.5.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-5-0">Version 1.5.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../changelog.html#potentially-breaking-changes">Potentially breaking changes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-4-3">Version 1.4.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-4-2">Version 1.4.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-4-1">Version 1.4.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-4-0">Version 1.4.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../changelog.html#improvements">Improvements:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../changelog.html#backward-incompatible-changes">Backward incompatible changes:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-3-4">Version 1.3.4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-3-3">Version 1.3.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-3-2">Version 1.3.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-3-1">Version 1.3.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-3-0">Version 1.3.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-2-1">Version 1.2.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-2-0">Version 1.2.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-1-0">Version 1.1.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-0-0">Version 1.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-0-8-0">Version 0.8.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-0-7-0">Version 0.7.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-0-6-0">Version 0.6.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-0-5-0">Version 0.5.0</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body span12 content" role="main">
+      
+  <h1>Source code for firebird.base.types</h1><div class="highlight"><pre>
+<span></span><span class="c1">#coding:utf-8</span>
+<span class="c1">#</span>
+<span class="c1"># PROGRAM/MODULE: firebird-base</span>
+<span class="c1"># FILE:           firebird/base/types.py</span>
+<span class="c1"># DESCRIPTION:    Types</span>
+<span class="c1"># CREATED:        14.5.2020</span>
+<span class="c1">#</span>
+<span class="c1"># The contents of this file are subject to the MIT License</span>
+<span class="c1">#</span>
+<span class="c1"># Permission is hereby granted, free of charge, to any person obtaining a copy</span>
+<span class="c1"># of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
+<span class="c1"># in the Software without restriction, including without limitation the rights</span>
+<span class="c1"># to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span>
+<span class="c1"># copies of the Software, and to permit persons to whom the Software is</span>
+<span class="c1"># furnished to do so, subject to the following conditions:</span>
+<span class="c1">#</span>
+<span class="c1"># The above copyright notice and this permission notice shall be included in all</span>
+<span class="c1"># copies or substantial portions of the Software.</span>
+<span class="c1">#</span>
+<span class="c1"># THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span>
+<span class="c1"># IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span>
+<span class="c1"># FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span>
+<span class="c1"># AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span>
+<span class="c1"># LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span>
+<span class="c1"># OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span>
+<span class="c1"># SOFTWARE.</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2020 Firebird Project (www.firebirdsql.org)</span>
+<span class="c1"># All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Contributor(s): Pavel Císař (original code)</span>
+<span class="c1">#                 ______________________________________</span>
+
+<span class="sd">&quot;&quot;&quot;Firebird Base - Types</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">AnyStr</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">Type</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">IntEnum</span>
+<span class="kn">from</span> <span class="nn">weakref</span> <span class="kn">import</span> <span class="n">WeakValueDictionary</span>
+
+<span class="c1"># Exceptions</span>
+
+<div class="viewcode-block" id="Error"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.Error">[docs]</a><span class="k">class</span> <span class="nc">Error</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Exception that is intended to be used as a base class of all **application-related**</span>
+<span class="sd">    errors. The important difference from `Exception` class is that `Error` accepts keyword</span>
+<span class="sd">    arguments, that are stored into instance attributes with the same name.</span>
+
+<span class="sd">    Important:</span>
+<span class="sd">        Attribute lookup on this class never fails, as all attributes that are not actually</span>
+<span class="sd">        set, have `None` value.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        try:</span>
+<span class="sd">            if condition:</span>
+<span class="sd">                raise Error(&quot;Error message&quot;, err_code=1)</span>
+<span class="sd">            else:</span>
+<span class="sd">                raise Error(&quot;Unknown error&quot;)</span>
+<span class="sd">        except Error as e:</span>
+<span class="sd">            if e.err_code is None:</span>
+<span class="sd">                ...</span>
+<span class="sd">            elif e.err_code == 1:</span>
+<span class="sd">                ...</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Warnings are not considered errors and thus should not use this class as base.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<span class="c1"># Singletons</span>
+
+<span class="n">_singletons_</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="k">class</span> <span class="nc">SingletonMeta</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Metaclass for `Singleton` classes.</span>
+
+<span class="sd">    Manages internal cache of class instances. If instance for a class is in cache, it&#39;s</span>
+<span class="sd">    returned without calling the constructor, otherwise the instance is created normally</span>
+<span class="sd">    and stored in cache for later use.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Singleton</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__module__</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__qualname__</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">_singletons_</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">_singletons_</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span>
+        <span class="k">return</span> <span class="n">obj</span>
+
+<span class="k">class</span> <span class="nc">Singleton</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">SingletonMeta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class for singletons.</span>
+
+<span class="sd">    Important:</span>
+<span class="sd">        If you create a descendant class that uses constructor arguments, these arguments</span>
+<span class="sd">        are meaningful ONLY on first call, because all subsequent calls simply return</span>
+<span class="sd">        an instance stored in cache without calling the constructor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<span class="c1"># Sentinels</span>
+
+<span class="k">class</span> <span class="nc">SentinelMeta</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Metaclass for `Sentinel`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Sentinel</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span>
+        <span class="k">return</span> <span class="n">obj</span>
+
+<span class="k">class</span> <span class="nc">Sentinel</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">SentinelMeta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Simple sentinel object.</span>
+
+<span class="sd">    Important:</span>
+<span class="sd">      All sentinels have name, that is **always in capital letters**. Sentinels with</span>
+<span class="sd">      the same name are singletons.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#: Class attribute with defined sentinels. There is no need to access or manipulate it.</span>
+    <span class="n">instances</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Arguments:</span>
+<span class="sd">            name: Sentinel name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#: Sentinel name.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns Sentinel(&#39;name&#39;).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Sentinel(&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;)&quot;</span>
+
+<span class="c1"># Useful sentinel objects</span>
+
+<span class="c1">#: Sentinel that denotes default value</span>
+<span class="n">DEFAULT</span><span class="p">:</span> <span class="n">Sentinel</span> <span class="o">=</span> <span class="n">Sentinel</span><span class="p">(</span><span class="s1">&#39;DEFAULT&#39;</span><span class="p">)</span>
+<span class="c1">#: Sentinel that denotes infinity value</span>
+<span class="n">INFINITY</span><span class="p">:</span> <span class="n">Sentinel</span> <span class="o">=</span> <span class="n">Sentinel</span><span class="p">(</span><span class="s1">&#39;INFINITY&#39;</span><span class="p">)</span>
+<span class="c1">#: Sentinel that denotes unlimited value</span>
+<span class="n">UNLIMITED</span><span class="p">:</span> <span class="n">Sentinel</span> <span class="o">=</span> <span class="n">Sentinel</span><span class="p">(</span><span class="s1">&#39;UNLIMITED&#39;</span><span class="p">)</span>
+<span class="c1">#: Sentinel that denotes unknown value</span>
+<span class="n">UNKNOWN</span><span class="p">:</span> <span class="n">Sentinel</span> <span class="o">=</span> <span class="n">Sentinel</span><span class="p">(</span><span class="s1">&#39;UNKNOWN&#39;</span><span class="p">)</span>
+<span class="c1">#: Sentinel that denotes a condition when value was not found</span>
+<span class="n">NOT_FOUND</span><span class="p">:</span> <span class="n">Sentinel</span> <span class="o">=</span> <span class="n">Sentinel</span><span class="p">(</span><span class="s1">&#39;NOT_FOUND&#39;</span><span class="p">)</span>
+<span class="c1">#: Sentinel that denotes explicitly undefined value</span>
+<span class="n">UNDEFINED</span><span class="p">:</span> <span class="n">Sentinel</span> <span class="o">=</span> <span class="n">Sentinel</span><span class="p">(</span><span class="s1">&#39;UNDEFINED&#39;</span><span class="p">)</span>
+<span class="c1">#: Sentinel that denotes any value</span>
+<span class="n">ANY</span><span class="p">:</span> <span class="n">Sentinel</span> <span class="o">=</span> <span class="n">Sentinel</span><span class="p">(</span><span class="s1">&#39;ANY&#39;</span><span class="p">)</span>
+<span class="c1">#: Sentinel that denotes all possible values</span>
+<span class="n">ALL</span><span class="p">:</span> <span class="n">Sentinel</span> <span class="o">=</span> <span class="n">Sentinel</span><span class="p">(</span><span class="s1">&#39;ALL&#39;</span><span class="p">)</span>
+<span class="c1">#: Sentinel that denotes suspend request (in message queue)</span>
+<span class="n">SUSPEND</span><span class="p">:</span> <span class="n">Sentinel</span> <span class="o">=</span> <span class="n">Sentinel</span><span class="p">(</span><span class="s1">&#39;SUSPEND&#39;</span><span class="p">)</span>
+<span class="c1">#: Sentinel that denotes resume request (in message queue)</span>
+<span class="n">RESUME</span><span class="p">:</span> <span class="n">Sentinel</span> <span class="o">=</span> <span class="n">Sentinel</span><span class="p">(</span><span class="s1">&#39;RESUME&#39;</span><span class="p">)</span>
+<span class="c1">#: Sentinel that denotes stop request (in message queue)</span>
+<span class="n">STOP</span><span class="p">:</span> <span class="n">Sentinel</span> <span class="o">=</span> <span class="n">Sentinel</span><span class="p">(</span><span class="s1">&#39;STOP&#39;</span><span class="p">)</span>
+
+<span class="c1"># Distinct objects</span>
+<span class="k">class</span> <span class="nc">Distinct</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class for classes (incl. dataclasses) with distinct instances.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">get_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Hashable</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns instance key.</span>
+
+<span class="sd">        Important:</span>
+<span class="sd">            The key is used for instance hash computation that by default uses the `hash`</span>
+<span class="sd">            function. If the key is not suitable argument for `hash`, you must provide your</span>
+<span class="sd">            own `__hash__` implementation as well!</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="fm">__hash__</span> <span class="o">=</span> <span class="k">lambda</span> <span class="bp">self</span><span class="p">:</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_key</span><span class="p">())</span> <span class="c1"># pylint: disable=[C3001]</span>
+
+<span class="k">class</span> <span class="nc">CachedDistinctMeta</span><span class="p">(</span><span class="n">ABCMeta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Metaclass for CachedDistinct.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">CachedDistinct</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">extract_key</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instances_</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_instances_</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span>
+        <span class="k">return</span> <span class="n">obj</span>
+
+<span class="k">class</span> <span class="nc">CachedDistinct</span><span class="p">(</span><span class="n">Distinct</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">CachedDistinctMeta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract `Distinct` descendant that caches instances.</span>
+
+<span class="sd">    All created instances are cached in `~weakref.WeakValueDictionary`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;_instances_&#39;</span><span class="p">,</span> <span class="n">WeakValueDictionary</span><span class="p">())</span>
+    <span class="nd">@classmethod</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">extract_key</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Hashable</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns key from arguments passed to `__init__()`.</span>
+
+<span class="sd">        Important:</span>
+<span class="sd">            The key is used to store instance in cache. It should be the same as key</span>
+<span class="sd">            returned by instance `Distinct.get_key()`!</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+<span class="c1"># Enums</span>
+<span class="k">class</span> <span class="nc">ByteOrder</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Byte order for storing numbers in binary `.MemoryBuffer`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">LITTLE</span> <span class="o">=</span> <span class="s1">&#39;little&#39;</span>
+    <span class="n">BIG</span> <span class="o">=</span> <span class="s1">&#39;big&#39;</span>
+    <span class="n">NETWORK</span> <span class="o">=</span> <span class="n">BIG</span>
+
+<span class="k">class</span> <span class="nc">ZMQTransport</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;ZeroMQ transport protocol.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">UNKNOWN</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Not a valid option, defined only to handle undefined values</span>
+    <span class="n">INPROC</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">IPC</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">TCP</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">PGM</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">EPGM</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">VMCI</span> <span class="o">=</span> <span class="mi">6</span>
+
+<span class="k">class</span> <span class="nc">ZMQDomain</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;ZeroMQ address domain.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">UNKNOWN</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Not a valid option, defined only to handle undefined values</span>
+    <span class="n">LOCAL</span> <span class="o">=</span> <span class="mi">1</span>    <span class="c1"># Within process (inproc)</span>
+    <span class="n">NODE</span> <span class="o">=</span> <span class="mi">2</span>     <span class="c1"># On single node (ipc or tcp loopback)</span>
+    <span class="n">NETWORK</span> <span class="o">=</span> <span class="mi">3</span>  <span class="c1"># Network-wide (ip address or domain name)</span>
+
+<span class="c1"># Enhanced string types</span>
+<span class="k">class</span> <span class="nc">ZMQAddress</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;ZeroMQ endpoint address.</span>
+
+<span class="sd">    It behaves like `str`, but checks that value is valid ZMQ endpoint address, has</span>
+<span class="sd">    additional R/O properties and meaningful `repr()`.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: When string value passed to constructor is not a valid ZMQ endpoint address.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">AnyStr</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf8&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;://&#39;</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+            <span class="n">protocol</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;://&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">protocol</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ZMQTransport</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown protocol &#39;</span><span class="si">{</span><span class="n">protocol</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">protocol</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;UNKNOWN&#39;</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid protocol&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Protocol specification required&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;ZMQAddress(&#39;</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">&#39;)&quot;</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ZMQTransport</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Transport protocol.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">protocol</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;://&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ZMQTransport</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">[</span><span class="n">protocol</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">address</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Endpoint address.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">address</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;://&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">address</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">domain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ZMQDomain</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Endpoint address domain.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="o">==</span> <span class="n">ZMQTransport</span><span class="o">.</span><span class="n">INPROC</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ZMQDomain</span><span class="o">.</span><span class="n">LOCAL</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="o">==</span> <span class="n">ZMQTransport</span><span class="o">.</span><span class="n">IPC</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ZMQDomain</span><span class="o">.</span><span class="n">NODE</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="o">==</span> <span class="n">ZMQTransport</span><span class="o">.</span><span class="n">TCP</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;127.0.0.1&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;localhost&#39;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">ZMQDomain</span><span class="o">.</span><span class="n">NODE</span>
+            <span class="k">return</span> <span class="n">ZMQDomain</span><span class="o">.</span><span class="n">NETWORK</span>
+        <span class="c1"># PGM, EPGM and VMCI</span>
+        <span class="k">return</span> <span class="n">ZMQDomain</span><span class="o">.</span><span class="n">NETWORK</span>
+
+<span class="k">class</span> <span class="nc">MIME</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;MIME type specification.</span>
+
+<span class="sd">    It behaves like `str`, but checks that value is valid MIME type specification, has</span>
+<span class="sd">    additional R/O properties and meaningful `repr()`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#: Supported MIME types</span>
+    <span class="n">MIME_TYPES</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">,</span> <span class="s1">&#39;image&#39;</span><span class="p">,</span> <span class="s1">&#39;audio&#39;</span><span class="p">,</span> <span class="s1">&#39;video&#39;</span><span class="p">,</span> <span class="s1">&#39;application&#39;</span><span class="p">,</span> <span class="s1">&#39;multipart&#39;</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">]</span>
+    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">AnyStr</span><span class="p">):</span>
+        <span class="n">dfm</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">))</span>
+        <span class="n">mime_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">dfm</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">:=</span> <span class="n">mime_type</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">))</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;MIME type specification must be &#39;type/subtype[;param=value;...]&#39;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mime_type</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">MIME_TYPES</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;MIME type &#39;</span><span class="si">{</span><span class="n">mime_type</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39; not supported&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">dfm</span> <span class="k">if</span> <span class="s1">&#39;=&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">i</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wrong specification of MIME type parameters&quot;</span><span class="p">)</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="nb">str</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_bs_</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_fp_</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">obj</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;MIME(&#39;</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">&#39;)&quot;</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mime_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;MIME type specification: &lt;type&gt;/&lt;subtype&gt;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fp_</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">_fp_</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;MIME type.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">_bs_</span><span class="p">]</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">subtype</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;MIME subtype.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fp_</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_bs_</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_fp_</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_bs_</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;MIME parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fp_</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span> <span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span>
+                    <span class="ow">in</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_fp_</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">))}</span>
+        <span class="k">return</span> <span class="p">{}</span>
+
+<span class="k">class</span> <span class="nc">PyExpr</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Source code for Python expression.</span>
+
+<span class="sd">    It behaves like `str`, but checks that value is a valid Python expression, and provides</span>
+<span class="sd">    direct access to compiled code.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        SyntaxError: When string value is not a valid Python expression.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_expr_</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="nb">compile</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;PyExpr&quot;</span><span class="p">,</span> <span class="s1">&#39;eval&#39;</span><span class="p">)</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="nb">str</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="n">new</span><span class="o">.</span><span class="n">_expr_</span> <span class="o">=</span> <span class="n">expr</span>
+        <span class="k">return</span> <span class="n">new</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;PyExpr(&#39;</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">&#39;)&quot;</span>
+    <span class="k">def</span> <span class="nf">get_callable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arguments</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">namespace</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns expression as callable function ready for execution.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            arguments: String with arguments (names separated by coma) for returned function.</span>
+<span class="sd">            namespace: Dictionary with namespace elements available for expression.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ns</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">namespace</span><span class="p">:</span>
+            <span class="n">ns</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">namespace</span><span class="p">)</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="nb">compile</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;def expr(</span><span class="si">{</span><span class="n">arguments</span><span class="si">}</span><span class="s2">):</span><span class="se">\n</span><span class="s2">    return </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                       <span class="s2">&quot;PyExpr&quot;</span><span class="p">,</span> <span class="s1">&#39;exec&#39;</span><span class="p">)</span>
+        <span class="nb">eval</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">ns</span><span class="p">)</span> <span class="c1"># pylint: disable=[W0123]</span>
+        <span class="k">return</span> <span class="n">ns</span><span class="p">[</span><span class="s1">&#39;expr&#39;</span><span class="p">]</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">expr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;Expression code ready to be appased to `eval`.&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expr_</span>
+
+<span class="k">class</span> <span class="nc">PyCode</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Python source code.</span>
+
+<span class="sd">    It behaves like `str`, but checks that value is a valid Python code block, and provides</span>
+<span class="sd">    direct access to compiled code.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        SyntaxError: When string value is not a valid Python code block.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_code_</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="nb">compile</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;PyCode&quot;</span><span class="p">,</span> <span class="s1">&#39;exec&#39;</span><span class="p">)</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="nb">str</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="n">new</span><span class="o">.</span><span class="n">_code_</span> <span class="o">=</span> <span class="n">code</span>
+        <span class="k">return</span> <span class="n">new</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">code</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Python code ready to be appased to `exec`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_code_</span>
+
+<span class="k">class</span> <span class="nc">PyCallable</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Source code for Python callable.</span>
+
+<span class="sd">    It behaves like `str`, but checks that value is a valid Python callable (function of class</span>
+<span class="sd">    definition), and acts like a callable (i.e. you can directly call the PyCallable value).</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: When string value does not contains the function or class definition.</span>
+<span class="sd">        SyntaxError: When string value is not a valid Python callable.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_callable_</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1">#: Name of the callable (function).</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">callable_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;def &#39;</span><span class="p">):</span>
+                <span class="n">callable_name</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="n">callable_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;class &#39;</span><span class="p">):</span>
+                    <span class="n">callable_name</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="k">break</span>
+        <span class="k">if</span> <span class="n">callable_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Python function or class definition not found&quot;</span><span class="p">)</span>
+        <span class="n">ns</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="nb">eval</span><span class="p">(</span><span class="nb">compile</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;PyCallable&quot;</span><span class="p">,</span> <span class="s1">&#39;exec&#39;</span><span class="p">),</span> <span class="n">ns</span><span class="p">)</span> <span class="c1"># pylint: disable=[W0123]</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="nb">str</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="n">new</span><span class="o">.</span><span class="n">_callable_</span> <span class="o">=</span> <span class="n">ns</span><span class="p">[</span><span class="n">callable_name</span><span class="p">]</span>
+        <span class="n">new</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">callable_name</span>
+        <span class="k">return</span> <span class="n">new</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_callable_</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<span class="c1"># Metaclasses</span>
+<span class="k">def</span> <span class="nf">Conjunctive</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a metaclass that is conjunctive descendant of all metaclasses used by parent</span>
+<span class="sd">    classes.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">        class A(type): pass</span>
+
+<span class="sd">        class B(type): pass</span>
+
+<span class="sd">        class AA(metaclass=A):pass</span>
+
+<span class="sd">        class BB(metaclass=B):pass</span>
+
+<span class="sd">        class CC(AA, BB, metaclass=Conjunctive): pass</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">basemetaclasses</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">:</span>
+        <span class="n">metacls</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metacls</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="n">metacls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">type</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">metacls</span> <span class="ow">in</span> <span class="n">basemetaclasses</span><span class="p">:</span>
+            <span class="n">basemetaclasses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metacls</span><span class="p">)</span>
+    <span class="n">dynamic</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">basemetaclasses</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">basemetaclasses</span><span class="p">),</span> <span class="p">{})</span>
+    <span class="k">return</span> <span class="n">dynamic</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
+
+<span class="c1"># Functions</span>
+<span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">spec</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Return object from module. Module is imported if necessary.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        spec: Object specification in format `module[.submodule...]:object_name[.object_name...]`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">module_spec</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">module_spec</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">module_spec</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="n">module_spec</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">module</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+<span class="c1"># Next two functions are copied from stdlib enum module, as they were removed in Python 3.11</span>
+
+<span class="k">def</span> <span class="nf">_decompose</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract all members from the value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># _decompose is only called if the value is not named</span>
+    <span class="n">not_covered</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="n">negative</span> <span class="o">=</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mi">0</span>
+    <span class="c1"># issue29167: wrap accesses to _value2member_map_ in a list to avoid race</span>
+    <span class="c1">#             conditions between iterating over it and having more pseudo-</span>
+    <span class="c1">#             members added to it</span>
+    <span class="k">if</span> <span class="n">negative</span><span class="p">:</span>
+        <span class="c1"># only check for named flags</span>
+        <span class="n">flags_to_check</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">flag</span><span class="o">.</span><span class="n">_value2member_map_</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+                <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># check for named flags and powers-of-two flags</span>
+        <span class="n">flags_to_check</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">flag</span><span class="o">.</span><span class="n">_value2member_map_</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+                <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">_power_of_two</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                <span class="p">]</span>
+    <span class="n">members</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">member</span><span class="p">,</span> <span class="n">member_value</span> <span class="ow">in</span> <span class="n">flags_to_check</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">member_value</span> <span class="ow">and</span> <span class="n">member_value</span> <span class="o">&amp;</span> <span class="n">value</span> <span class="o">==</span> <span class="n">member_value</span><span class="p">:</span>
+            <span class="n">members</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">member</span><span class="p">)</span>
+            <span class="n">not_covered</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="n">member_value</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">members</span> <span class="ow">and</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">flag</span><span class="o">.</span><span class="n">_value2member_map_</span><span class="p">:</span>
+        <span class="n">members</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">flag</span><span class="o">.</span><span class="n">_value2member_map_</span><span class="p">[</span><span class="n">value</span><span class="p">])</span>
+    <span class="n">members</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">_value_</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">members</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">members</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
+        <span class="c1"># we have the breakdown, don&#39;t need the value member itself</span>
+        <span class="n">members</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">members</span><span class="p">,</span> <span class="n">not_covered</span>
+
+<span class="k">def</span> <span class="nf">_power_of_two</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">value</span> <span class="o">==</span> <span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2020-2022, The Firebird Project.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

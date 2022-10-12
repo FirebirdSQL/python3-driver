@@ -44,7 +44,7 @@ from firebird.base.config import Config, StrOption, IntOption, BoolOption, EnumO
      ConfigListOption, ListOption
 from .types import NetProtocol, DecfloatRound, DecfloatTraps
 
-class ServerConfig(Config):
+class ServerConfig(Config): # pylint: disable=R0902
     """Server configuration.
     """
     def __init__(self, name: str, *, optional: bool=False, description: str=None):
@@ -79,7 +79,7 @@ class ServerConfig(Config):
         self.encoding_errors: StrOption = \
             StrOption('encoding_errors', "Handler used for encoding errors", default='strict')
 
-class DatabaseConfig(Config):
+class DatabaseConfig(Config): # pylint: disable=R0902
     """Database configuration.
     """
     def __init__(self, name: str, *, optional: bool=False, description: str=None):

@@ -23,10 +23,10 @@ copyright = '2020-2022, The Firebird Project'
 author = 'Pavel Císař'
 
 # The short X.Y version
-version = '1.5.2'
+version = '1.6.0'
 
 # The full version, including alpha/beta/rc tags
-release = '1.5.2'
+release = '1.6.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -35,11 +35,14 @@ release = '1.5.2'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
+    'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
-    'sphinx_autodoc_typehints',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.autosectionlabel',
+    #'sphinx_autodoc_typehints',
     'sphinx.ext.todo',
+    #'sphinx.ext.coverage',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -157,6 +160,8 @@ html_static_path = ['_static']
 
 # -- Extension configuration -------------------------------------------------
 
+autosectionlabel_prefix_document = True
+
 # Autodoc options
 # ---------------
 autodoc_default_options = {
@@ -167,9 +172,14 @@ autodoc_default_options = {
     'exclude-members': '__weakref__',
     'show-inheritance': True,
     'no-inherited-members': True,
+    'no-private-members': True,
 }
 set_type_checking_flag = True
-#always_document_param_types = True
+autodoc_class_signature = 'mixed'
+always_document_param_types = True
+autodoc_typehints = 'both' # default 'signature'
+autodoc_typehints_format = 'short'
+autodoc_typehints_description_target = 'all'
 
 # Napoleon options
 # ----------------
@@ -181,13 +191,18 @@ napoleon_use_admonition_for_notes = True
 napoleon_use_admonition_for_references = True
 napoleon_use_ivar = False
 napoleon_use_rtype = True
+napoleon_use_param = True
+napoleon_use_keyword = True
 napoleon_attr_annotations = True
+napoleon_preprocess_types = True
 
 # -- Options for intersphinx extension ---------------------------------------
 
 # intersphinx
 intersphinx_mapping = {'python': ('https://docs.python.org/3', None),
-                       'base': ('https://firebird-base.rtfd.io/en/latest', None)}
+                       'base': ('https://firebird-base.rtfd.io/en/latest', None),
+                       'lib': ('https://firebird-lib.rtfd.io/en/latest', None),
+                       }
 
 # -- Options for todo extension ----------------------------------------------
 

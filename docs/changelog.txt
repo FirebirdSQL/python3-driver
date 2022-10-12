@@ -2,6 +2,14 @@
 Changelog
 #########
 
+Version 1.6.0
+=============
+
+* Further code optimizations.
+* Addressing issues reported by pylint.
+* Updated Firebird OO API (interface extensions between 3.0.7->3.0.10, 4.0.0->4.0.2)
+* Improved documentation.
+
 Version 1.5.2
 =============
 
@@ -16,8 +24,8 @@ Version 1.5.1
 Version 1.5.0
 =============
 
-* Fix: `.create_database()` now use server configuration user/password if either is not
-  specified in database configuration (like `.connect()`)
+* Fix: `~firebird.driver.core.create_database()` now use server configuration user/password
+  if either is not specified in database configuration (like `.connect()`)
 * Fix: Problem in `.Server` processing incomplete LINE responses.
 * New: `verbint` parameter for `.ServerDbServices3.backup()` and `.ServerDbServices3.restore()`
 
@@ -59,12 +67,13 @@ Version 1.4.0
 Improvements:
 -------------
 
-* Added `role` parameter to `.connect_server` and `.SPB_ATTACH`.
-* Added `encoding` parameter to `.SPB_ATTACH` with default value `ascii` - used to encode
-  `config`, `user`, `password` and `expected_db` values.
-* Added `encoding` parameter to `.TPB` with default value `ascii` - used to encode table names.
-* `.DPB` parameter `charset` is now used to determine encoding for `config`, `user`,
-  `password` and `role` values.
+* Added `role` parameter to `.connect_server` and `~firebird.driver.core.SPB_ATTACH`.
+* Added `encoding` parameter to `~firebird.driver.core.SPB_ATTACH` with default value
+  `ascii` - used to encode `config`, `user`, `password` and `expected_db` values.
+* Added `encoding` parameter to `~firebird.driver.core.TPB` with default value `ascii`
+  - used to encode table names.
+* `~firebird.driver.core..DPB` parameter `charset` is now used to determine encoding for
+  `config`, `user`, `password` and `role` values.
 * `.connect_server` has new `encoding` parameter with default value `ascii` that is passed
   to new `.Server.encoding` attribute. `.Server.encoding` is used to encode/decode various
   string values passed between client and server in parameter buffers (see below), and text
@@ -97,9 +106,12 @@ Version 1.3.4
 * User-defined encoding for string parameter and response values exchanged between driver
   and Firebird engine. This includes TPB, DPB, SPB and various service values:
 
-  - `.TPB`: New `encoding` constructor parameter & attribute. Used for `table names` in table reservation.
-  - `.DPB`: Encoding based on connection charset for `config`, `user name`, `password` and `role`.
-  - `.SPB`: New `encoding` constructor parameter & attribute. Used for `config`, `user name`, `password` and `expected database`.
+  - `~firebird.driver.core.TPB`: New `encoding` constructor parameter & attribute. Used
+    for `table names` in table reservation.
+  - `~firebird.driver.core.DPB`: Encoding based on connection charset for `config`,
+    `user name`, `password` and `role`.
+  - `~firebird.driver.core..SPB`: New `encoding` constructor parameter & attribute. Used
+    for `config`, `user name`, `password` and `expected database`.
   - Connection-related providers: Encoding based on connection charset.
   - Server and Service providers: New `.Server.encoding` attribute.
 * Fixed bug in `.ServerDbServices3.get_statistics` when `tables` are specified.
@@ -152,14 +164,14 @@ Version 1.3.0
     connected server.
   - New `.DatabaseConfig` options `session_time_zone`, `set_bind`, `decfloat_round` and
     `decfloat_traps`.
-  - New `.DPB` parameters `session_time_zone`, `set_db_replica`, `set_bind`, `decfloat_round`
-    and `decfloat_traps`.
+  - New `~firebird.driver.core.DPB` parameters `session_time_zone`, `set_db_replica`,
+    `set_bind`, `decfloat_round` and `decfloat_traps`.
   - New `session_time_zone` keyword parameter for `.connect()`.
   - Added explicit support for READ COMMITTED READ CONSISTENCY isolation (when disabled in
     Firebird configuration).
   - Support for transactions started at specified snapshot number.
     New `.TransactionInfoProvider.snapshot_number` property.
-    The `.TPB` has new `at_snapshot_number` parameter.
+    The `~firebird.driver.core.TPB` has new `at_snapshot_number` parameter.
   - `.backup()` and `.local_backup()` have new optional keyword-only arguments
     `include_data`, `keyhoder`, `keyname` and `crypt`, and `ZIP` value was added to `SrvBackupFlag`.
   - `.restore()` and `.local_restore()` have new optional keyword-only
@@ -180,7 +192,8 @@ Version 1.2.1
 Version 1.2.0
 =============
 
-* Fix unregistered bug: `sql_dialect` is used instead `db_sql_dialect` in `.create_database`.
+* Fix unregistered bug: `sql_dialect` is used instead `db_sql_dialect` in
+  `~firebird.driver.core.create_database`.
 * Fix (#2): error when handling input parameters with value None
 * Added `.Server.mode` attribute to allow fetching service output using LINE or TO_EOF method.
   Default mode is TO_EOF.

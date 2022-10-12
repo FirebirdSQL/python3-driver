@@ -10,138 +10,87 @@ This is the main code module of the Firebird driver.
 Constants and variables
 =======================
 
+C integer limit constants
+-------------------------
+
+.. hlist::
+    :columns: 4
+
+    - SHRT_MIN
+    - SHRT_MAX
+    - USHRT_MAX
+    - INT_MIN
+    - INT_MAX
+    - UINT_MAX
+    - LONG_MIN
+    - LONG_MAX
+
 Translation dictionaries
 ------------------------
 
 .. autodata:: CHARSET_MAP
-   :annotation:
+   :no-value:
+
+Other constants and variables
+-----------------------------
+
+.. autodata:: MAX_BLOB_SEGMENT_SIZE
+
+.. autodata:: FS_ENCODING
+   :no-value:
+
+.. autodata:: _master
+   :no-value:
+
+.. autodata:: _util
+   :no-value:
 
 Context managers
 ================
 
-transaction
------------
 .. autofunction:: transaction
-
-temp_database
--------------
 .. autofunction:: temp_database
 
 Functions
 =========
 
-connect
--------
 .. autofunction:: connect
-
-create_database
----------------
 .. autofunction:: create_database
-
-connect_server
---------------
 .. autofunction:: connect_server
-
-tpb
----
 .. autofunction:: tpb
 
 Managers for parameter buffers
 ==============================
 
-TPB
----
 .. autoclass:: TPB
-
-DPB
----
 .. autoclass:: DPB
-
-SPB_ATTACH
-----------
 .. autoclass:: SPB_ATTACH
-
-Buffer
-------
 .. autoclass:: Buffer
-
-CBuffer
--------
 .. autoclass:: CBuffer
 
 Classes
 =======
 
-Connection
-----------
 .. autoclass:: Connection
-
-TransactionManager
-------------------
 .. autoclass:: TransactionManager
-
-DistributedTransactionManager
------------------------------
 .. autoclass:: DistributedTransactionManager
-
-Statement
----------
 .. autoclass:: Statement
-
-Cursor
-------
 .. autoclass:: Cursor
-
-Server
-------
 .. autoclass:: Server
-
-ServerServiceProvider
----------------------
 .. autoclass:: ServerServiceProvider
-
-ServerDbServices3
------------------
 .. autoclass:: ServerDbServices3
-
-ServerDbServices
-----------------
 .. autoclass:: ServerDbServices
-
-ServerUserServices
-------------------
 .. autoclass:: ServerUserServices
-
-ServerTraceServices
--------------------
 .. autoclass:: ServerTraceServices
-
-InfoProvider
-------------
 .. autoclass:: InfoProvider
-
-DatabaseInfoProvider
---------------------
+.. autoclass:: DatabaseInfoProvider3
 .. autoclass:: DatabaseInfoProvider
-
-TransactionInfoProvider
------------------------
+.. autoclass:: TransactionInfoProvider3
 .. autoclass:: TransactionInfoProvider
-
-ServerInfoProvider
-------------------
 .. autoclass:: ServerInfoProvider
-
-EventCollector
---------------
 .. autoclass:: EventCollector
-
-EventBlock
-----------
 .. autoclass:: EventBlock
-
-BlobReader
-----------
 .. autoclass:: BlobReader
+.. autoclass:: EngineVersionProvider
 
 

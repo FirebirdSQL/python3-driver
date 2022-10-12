@@ -845,12 +845,16 @@ IBlob_getInfo = CFUNCTYPE(None, IBlob, IStatus, Cardinal, BytePtr, Cardinal, Byt
 IBlob_getSegment = CFUNCTYPE(c_int, IBlob, IStatus, Cardinal, c_void_p, CardinalPtr)
 # procedure putSegment(this: IBlob; status: IStatus; length: Cardinal; buffer: Pointer)
 IBlob_putSegment = CFUNCTYPE(None, IBlob, IStatus, Cardinal, c_void_p)
+# procedure deprecatedCancel(this: IBlob; status: IStatus); cdecl;
+IBlob_deprecatedCancel = CFUNCTYPE(None, IBlob, IStatus)
+# procedure deprecatedClose(this: IBlob; status: IStatus); cdecl;
+IBlob_deprecatedClose = CFUNCTYPE(None, IBlob, IStatus)
+# function seek(this: IBlob; status: IStatus; mode: Integer; offset: Integer): Integer
+IBlob_seek = CFUNCTYPE(c_int, IBlob, IStatus, c_int, c_int)
 # procedure cancel(this: IBlob; status: IStatus)
 IBlob_cancel = CFUNCTYPE(None, IBlob, IStatus)
 # procedure close(this: IBlob; status: IStatus)
 IBlob_close = CFUNCTYPE(None, IBlob, IStatus)
-# function seek(this: IBlob; status: IStatus; mode: Integer; offset: Integer): Integer
-IBlob_seek = CFUNCTYPE(c_int, IBlob, IStatus, c_int, c_int)
 #
 # ITransaction(3) : ReferenceCounted
 # ----------------------------------
@@ -858,22 +862,28 @@ IBlob_seek = CFUNCTYPE(c_int, IBlob, IStatus, c_int, c_int)
 ITransaction_getInfo = CFUNCTYPE(None, ITransaction, IStatus, Cardinal, BytePtr, Cardinal, BytePtr)
 # procedure prepare(this: ITransaction; status: IStatus; msgLength: Cardinal; message: BytePtr)
 ITransaction_prepare = CFUNCTYPE(None, ITransaction, IStatus, Cardinal, BytePtr)
-# procedure commit(this: ITransaction; status: IStatus)
-ITransaction_commit = CFUNCTYPE(None, ITransaction, IStatus)
+# procedure deprecatedCommit(this: ITransaction; status: IStatus); cdecl;
+ITransaction_deprecatedCommit = CFUNCTYPE(None, ITransaction, IStatus)
 # procedure commitRetaining(this: ITransaction; status: IStatus)
 ITransaction_commitRetaining = CFUNCTYPE(None, ITransaction, IStatus)
-# procedure rollback(this: ITransaction; status: IStatus)
-ITransaction_rollback = CFUNCTYPE(None, ITransaction, IStatus)
+# procedure deprecatedRollback(this: ITransaction; status: IStatus); cdecl;
+ITransaction_deprecatedRollback = CFUNCTYPE(None, ITransaction, IStatus)
 # procedure rollbackRetaining(this: ITransaction; status: IStatus)
 ITransaction_rollbackRetaining = CFUNCTYPE(None, ITransaction, IStatus)
-# procedure disconnect(this: ITransaction; status: IStatus)
-ITransaction_disconnect = CFUNCTYPE(None, ITransaction, IStatus)
+# procedure deprecatedDisconnect(this: ITransaction; status: IStatus); cdecl;
+ITransaction_deprecatedDisconnect = CFUNCTYPE(None, ITransaction, IStatus)
 # function join(this: ITransaction; status: IStatus; transaction: ITransaction): ITransaction
 ITransaction_join = CFUNCTYPE(ITransaction, ITransaction, IStatus, ITransaction)
 # function validate(this: ITransaction; status: IStatus; attachment: IAttachment): ITransaction
 ITransaction_validate = CFUNCTYPE(ITransaction, ITransaction, IStatus, IAttachment)
 # function enterDtc(this: ITransaction; status: IStatus): ITransaction
 ITransaction_enterDtc = CFUNCTYPE(ITransaction, ITransaction, IStatus)
+# procedure commit(this: ITransaction; status: IStatus)
+ITransaction_commit = CFUNCTYPE(None, ITransaction, IStatus)
+# procedure rollback(this: ITransaction; status: IStatus)
+ITransaction_rollback = CFUNCTYPE(None, ITransaction, IStatus)
+# procedure disconnect(this: ITransaction; status: IStatus)
+ITransaction_disconnect = CFUNCTYPE(None, ITransaction, IStatus)
 #
 # IMessageMetadata(3) : ReferenceCounted
 # --------------------------------------
@@ -967,10 +977,12 @@ IResultSet_isEof = CFUNCTYPE(c_bool, IResultSet, IStatus)
 IResultSet_isBof = CFUNCTYPE(c_bool, IResultSet, IStatus)
 # function getMetadata(this: IResultSet; status: IStatus): IMessageMetadata
 IResultSet_getMetadata = CFUNCTYPE(IMessageMetadata, IResultSet, IStatus)
-# procedure close(this: IResultSet; status: IStatus)
-IResultSet_close = CFUNCTYPE(None, IResultSet, IStatus)
+# procedure deprecatedClose(this: IResultSet; status: IStatus)
+IResultSet_deprecatedClose = CFUNCTYPE(None, IResultSet, IStatus)
 # procedure setDelayedOutputFormat(this: IResultSet; status: IStatus; format: IMessageMetadata)
 IResultSet_setDelayedOutputFormat = CFUNCTYPE(None, IResultSet, IStatus, IMessageMetadata)
+# procedure close(this: IResultSet; status: IStatus)
+IResultSet_close = CFUNCTYPE(None, IResultSet, IStatus)
 #
 # IStatement(3) : ReferenceCounted
 # --------------------------------
@@ -992,8 +1004,8 @@ IStatement_execute = CFUNCTYPE(ITransaction, IStatement, IStatus, ITransaction, 
 IStatement_openCursor = CFUNCTYPE(IResultSet, IStatement, IStatus, ITransaction, IMessageMetadata, c_void_p, IMessageMetadata, Cardinal)
 # procedure setCursorName(this: IStatement; status: IStatus; name: PAnsiChar)
 IStatement_setCursorName = CFUNCTYPE(None, IStatement, IStatus, c_char_p)
-# procedure free(this: IStatement; status: IStatus)
-IStatement_free = CFUNCTYPE(None, IStatement, IStatus)
+# procedure deprecatedFree(this: IStatement; status: IStatus)
+IStatement_deprecatedFree = CFUNCTYPE(None, IStatement, IStatus)
 # function getFlags(this: IStatement; status: IStatus): Cardinal
 IStatement_getFlags = CFUNCTYPE(Cardinal, IStatement, IStatus)
 # >>> Firebird 4
@@ -1004,6 +1016,8 @@ IStatement_getTimeout = CFUNCTYPE(Cardinal, IStatement, IStatus)
 IStatement_setTimeout = CFUNCTYPE(None, IStatement, IStatus, Cardinal)
 # function(this: IStatement; status: IStatus; inMetadata: IMessageMetadata; parLength: Cardinal; par: BytePtr): IBatch
 IStatement_createBatch = CFUNCTYPE(IBatch, IStatement, IStatus, IMessageMetadata, Cardinal, BytePtr)
+# procedure free(this: IStatement; status: IStatus)
+IStatement_free = CFUNCTYPE(None, IStatement, IStatus)
 #
 # IBatch(3) : ReferenceCounted
 # ----------------------------
@@ -1027,6 +1041,12 @@ IBatch_getBlobAlignment = CFUNCTYPE(Cardinal, IBatch, IStatus)
 IBatch_getMetadata = CFUNCTYPE(IMessageMetadata, IBatch, IStatus)
 # procedure setDefaultBpb(this: IBatch; status: IStatus; parLength: Cardinal; par: BytePtr)
 IBatch_setDefaultBpb = CFUNCTYPE(None, IBatch, IStatus, Cardinal, BytePtr)
+# procedure deprecatedClose(status: IStatus);
+IBatch_deprecatedClose = CFUNCTYPE(None, IBatch, IStatus)
+# procedure(this: IBatch; status: IStatus); cdecl;
+IBatch_close = CFUNCTYPE(None, IBatch, IStatus)
+# procedure(this: IBatch; status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); cdecl;
+IBatch_getInfo = CFUNCTYPE(None, IBatch, IStatus, Cardinal, BytePtr, Cardinal, BytePtr)
 #
 # IBatchCompletionState(3) : Disposable
 # -------------------------------------
@@ -1053,11 +1073,15 @@ IRequest_start = CFUNCTYPE(None, IRequest, IStatus, ITransaction, c_int)
 IRequest_startAndSend = CFUNCTYPE(None, IRequest, IStatus, ITransaction, c_int, Cardinal, Cardinal, c_void_p)
 # procedure unwind(this: IRequest; status: IStatus; level: Integer)
 IRequest_unwind = CFUNCTYPE(None, IRequest, IStatus, c_int)
+# procedure deprecatedFree(this: IRequest; status: IStatus)
+IRequest_deprecatedFree = CFUNCTYPE(None, IRequest, IStatus)
 # procedure free(this: IRequest; status: IStatus)
 IRequest_free = CFUNCTYPE(None, IRequest, IStatus)
 #
 # IEvents(3) : ReferenceCounted
 # -----------------------------
+# procedure deprecatedCancel(this: IEvents; status: IStatus)
+IEvents_deprecatedCancel = CFUNCTYPE(None, IEvents, IStatus)
 # procedure cancel(this: IEvents; status: IStatus)
 IEvents_cancel = CFUNCTYPE(None, IEvents, IStatus)
 #
@@ -1103,10 +1127,10 @@ IAttachment_queEvents = CFUNCTYPE(IEvents, IAttachment, IStatus, IEventCallback,
 IAttachment_cancelOperation = CFUNCTYPE(None, IAttachment, IStatus, c_int)
 # procedure ping(this: IAttachment; status: IStatus)
 IAttachment_ping = CFUNCTYPE(None, IAttachment, IStatus)
-# procedure detach(this: IAttachment; status: IStatus)
-IAttachment_detach = CFUNCTYPE(None, IAttachment, IStatus)
-# procedure dropDatabase(this: IAttachment; status: IStatus)
-IAttachment_dropDatabase = CFUNCTYPE(None, IAttachment, IStatus)
+# procedure deprecatedDetach(this: IAttachment; status: IStatus)
+IAttachment_deprecatedDetach = CFUNCTYPE(None, IAttachment, IStatus)
+# procedure deprecatedDropDatabase(this: IAttachment; status: IStatus)
+IAttachment_deprecatedDropDatabase = CFUNCTYPE(None, IAttachment, IStatus)
 # >>> Firebird 4
 # IAttachment(4) : IAttachment(3)
 # function getIdleTimeout(this: IAttachment; status: IStatus): Cardinal
@@ -1121,16 +1145,24 @@ IAttachment_setStatementTimeout = CFUNCTYPE(None, IAttachment, IStatus, Cardinal
 IAttachment_createBatch = CFUNCTYPE(IBatch, IAttachment, IStatus, ITransaction, Cardinal, c_char_p, Cardinal, IMessageMetadata, Cardinal, c_void_p)
 # function createReplicator(this: IAttachment; status: IStatus): IReplicator
 # NOT SURFACED IN DRIVER
+# procedure detach(this: IAttachment; status: IStatus)
+IAttachment_detach = CFUNCTYPE(None, IAttachment, IStatus)
+# procedure dropDatabase(this: IAttachment; status: IStatus)
+IAttachment_dropDatabase = CFUNCTYPE(None, IAttachment, IStatus)
 #
 # IService(3) : ReferenceCounted
 # ------------------------------
-# procedure detach(this: IService; status: IStatus)
-IService_detach = CFUNCTYPE(None, IService, IStatus)
+# procedure deprecatedDetach(this: IService; status: IStatus)
+IService_deprecatedDetach = CFUNCTYPE(None, IService, IStatus)
 # procedure query(this: IService; status: IStatus; sendLength: Cardinal; sendItems: BytePtr; receiveLength: Cardinal; receiveItems: BytePtr; bufferLength: Cardinal; buffer: BytePtr)
 IService_query = CFUNCTYPE(None, IService, IStatus, Cardinal, BytePtr, Cardinal,
                            BytePtr, Cardinal, BytePtr)
 # procedure start(this: IService; status: IStatus; spbLength: Cardinal; spb: BytePtr)
 IService_start = CFUNCTYPE(None, IService, IStatus, Cardinal, BytePtr)
+# procedure detach(this: IService; status: IStatus)
+IService_detach = CFUNCTYPE(None, IService, IStatus)
+# procedure cancel(status: IStatus);
+IService_cancel = CFUNCTYPE(None, IStatus)
 #
 # IProvider(4) : PluginBase
 # -------------------------
@@ -1388,7 +1420,7 @@ IConfig_VTable._fields_ = [
     ('findPos', IConfig_findPos)]
 # >>> Firebird 4
 # IFirebirdConf(4) : ReferenceCounted
-IFirebirdConf_VTable._fields_ = [
+IFirebirdConf_VTable._fields_ = [ # v3 - initial
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
@@ -1397,7 +1429,7 @@ IFirebirdConf_VTable._fields_ = [
     ('asInteger', IFirebirdConf_asInteger),
     ('asString', IFirebirdConf_asString),
     ('asBoolean', IFirebirdConf_asBoolean),
-    ('getVersion', IFirebirdConf_getVersion)]
+    ('getVersion', IFirebirdConf_getVersion)] # v4
 # IPluginConfig(3) : ReferenceCounted
 # IPluginFactory(2) : Versioned
 # IPluginModule(3) : Versioned
@@ -1431,28 +1463,33 @@ IBlob_VTable._fields_ = [
     ('getInfo', IBlob_getInfo),
     ('getSegment', IBlob_getSegment),
     ('putSegment', IBlob_putSegment),
-    ('cancel', IBlob_cancel),
-    ('close', IBlob_close),
-    ('seek', IBlob_seek)]
-# ITransaction(3) : ReferenceCounted
-ITransaction_VTable._fields_ = [
+    ('deprecatedCancel', IBlob_deprecatedCancel), # deprecated since v4
+    ('deprecatedClose', IBlob_deprecatedClose),   # deprecated since v4
+    ('seek', IBlob_seek),
+    ('cancel', IBlob_cancel), # v4: 3.0.7 => 3.0.8, 4.0.0 => 4.0.1
+    ('close', IBlob_close)]
+# ITransaction(4) : ReferenceCounted
+ITransaction_VTable._fields_ = [ # v3 - initial
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
     ('release', IReferenceCounted_release),
     ('getInfo', ITransaction_getInfo),
     ('prepare', ITransaction_prepare),
-    ('commit', ITransaction_commit),
+    ('deprecatedCommit', ITransaction_deprecatedCommit),
     ('commitRetaining', ITransaction_commitRetaining),
-    ('rollback', ITransaction_rollback),
+    ('deprecatedRollback', ITransaction_deprecatedRollback),
     ('rollbackRetaining', ITransaction_rollbackRetaining),
-    ('disconnect', ITransaction_disconnect),
+    ('deprecatedDisconnect', ITransaction_deprecatedDisconnect),
     ('join', ITransaction_join),
     ('validate', ITransaction_validate),
-    ('enterDtc', ITransaction_enterDtc)]
+    ('enterDtc', ITransaction_enterDtc),
+    ('commit', ITransaction_commit), # v4: 3.0.7 => 3.0.8, 4.0.0 => 4.0.1
+    ('rollback', ITransaction_rollback),
+    ('disconnect', ITransaction_disconnect)]
 # >>> Firebird 4
 # IMessageMetadata(4) : ReferenceCounted
-IMessageMetadata_VTable._fields_ = [
+IMessageMetadata_VTable._fields_ = [ # v3 - initial
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
@@ -1472,11 +1509,11 @@ IMessageMetadata_VTable._fields_ = [
     ('getNullOffset', IMessageMetadata_getNullOffset),
     ('getBuilder', IMessageMetadata_getBuilder),
     ('getMessageLength', IMessageMetadata_getMessageLength),
-    ('getAlignment', IMessageMetadata_getAlignment),
+    ('getAlignment', IMessageMetadata_getAlignment), # v4
     ('getAlignedLength', IMessageMetadata_getAlignedLength)]
 # >>> Firebird 4
 # IMetadataBuilder(4) : ReferenceCounted
-IMetadataBuilder_VTable._fields_ = [
+IMetadataBuilder_VTable._fields_ = [ # v3 - initial
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
@@ -1491,12 +1528,12 @@ IMetadataBuilder_VTable._fields_ = [
     ('remove', IMetadataBuilder_remove),
     ('addField', IMetadataBuilder_addField),
     ('getMetadata', IMetadataBuilder_getMetadata),
-    ('setField', IMetadataBuilder_setField),
+    ('setField', IMetadataBuilder_setField), # v4
     ('setRelation', IMetadataBuilder_setRelation),
     ('setOwner', IMetadataBuilder_setOwner),
     ('setAlias', IMetadataBuilder_setAlias)]
-# IResultSet(3) : ReferenceCounted
-IResultSet_VTable._fields_ = [
+# IResultSet(4) : ReferenceCounted
+IResultSet_VTable._fields_ = [ # v3 - initial
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
@@ -1510,11 +1547,12 @@ IResultSet_VTable._fields_ = [
     ('isEof', IResultSet_isEof),
     ('isBof', IResultSet_isBof),
     ('getMetadata', IResultSet_getMetadata),
-    ('close', IResultSet_close),
-    ('setDelayedOutputFormat', IResultSet_setDelayedOutputFormat)]
+    ('deprecatedClose', IResultSet_deprecatedClose),
+    ('setDelayedOutputFormat', IResultSet_setDelayedOutputFormat),
+    ('close', IResultSet_close)] # v4: 3.0.7 => 3.0.8, 4.0.0 => 4.0.1
 # >>> Firebird 4
-# IStatement(4) : ReferenceCounted
-IStatement_VTable._fields_ = [
+# IStatement(5) : ReferenceCounted
+IStatement_VTable._fields_ = [ # v3 - initial
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
@@ -1528,13 +1566,14 @@ IStatement_VTable._fields_ = [
     ('execute', IStatement_execute),
     ('openCursor', IStatement_openCursor),
     ('setCursorName', IStatement_setCursorName),
-    ('free', IStatement_free),
+    ('deprecatedFree', IStatement_free),
     ('getFlags', IStatement_getFlags),
-    ('getTimeout', IStatement_getTimeout),
+    ('getTimeout', IStatement_getTimeout), # v4
     ('setTimeout', IStatement_setTimeout),
-    ('createBatch', IStatement_createBatch)]
-# IBatch(3) : ReferenceCounted
-IBatch_VTable._fields_ = [
+    ('createBatch', IStatement_createBatch),
+    ('free', IStatement_free)] # v5: 3.0.7 => 3.0.8, 4.0.0 => 4.0.1
+# IBatch(4) : ReferenceCounted
+IBatch_VTable._fields_ = [ # v3 - initial
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
@@ -1548,7 +1587,10 @@ IBatch_VTable._fields_ = [
     ('cancel', IBatch_cancel),
     ('getBlobAlignment', IBatch_getBlobAlignment),
     ('getMetadata', IBatch_getMetadata),
-    ('setDefaultBpb', IBatch_setDefaultBpb)]
+    ('setDefaultBpb', IBatch_setDefaultBpb),
+    ('deprecatedClose', IBatch_deprecatedClose),
+    ('close', IBatch_close), # v4: 4.0.0 => 4.0.1
+    ('getInfo', IBatch_getInfo)]
 # IBatchCompletionState(3) : Disposable
 IBatchCompletionState_VTable._fields_ = [
     ('dummy', c_void_p),
@@ -1559,8 +1601,8 @@ IBatchCompletionState_VTable._fields_ = [
     ('findError', IBatchCompletionState_findError),
     ('getStatus', IBatchCompletionState_getStatus)]
 # ? IReplicator(3) : ReferenceCounted
-# IRequest(3) : ReferenceCounted
-IRequest_VTable._fields_ = [
+# IRequest(4) : ReferenceCounted
+IRequest_VTable._fields_ = [ # v3 - initial
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
@@ -1571,17 +1613,19 @@ IRequest_VTable._fields_ = [
     ('start', IRequest_start),
     ('startAndSend', IRequest_startAndSend),
     ('unwind', IRequest_unwind),
-    ('free', IRequest_free)]
-# IEvents(3) : ReferenceCounted
-IEvents_VTable._fields_ = [
+    ('deprecatedFree', IRequest_deprecatedFree),
+    ('free', IRequest_free)] # v4: 3.0.7 => 3.0.8, 4.0.0 => 4.0.1
+# IEvents(4) : ReferenceCounted
+IEvents_VTable._fields_ = [ # v3 - initial
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
     ('release', IReferenceCounted_release),
-    ('cancel', IEvents_cancel)]
+    ('deprecatedCancel', IEvents_deprecatedCancel),
+    ('cancel', IEvents_cancel)] # v4: 3.0.7 => 3.0.8, 4.0.0 => 4.0.1
 # >>> Firebird 4
-# IAttachment(4) : ReferenceCounted
-IAttachment_VTable._fields_ = [
+# IAttachment(5) : ReferenceCounted
+IAttachment_VTable._fields_ = [ # v3 - initial
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
@@ -1602,23 +1646,28 @@ IAttachment_VTable._fields_ = [
     ('queEvents', IAttachment_queEvents),
     ('cancelOperation', IAttachment_cancelOperation),
     ('ping', IAttachment_ping),
-    ('detach', IAttachment_detach),
-    ('dropDatabase', IAttachment_dropDatabase),
-    ('getIdleTimeout', IAttachment_getIdleTimeout),
+    ('deprecatedDetach', IAttachment_deprecatedDetach),
+    ('deprecatedDropDatabase', IAttachment_deprecatedDropDatabase),
+    ('getIdleTimeout', IAttachment_getIdleTimeout), # v4
     ('setIdleTimeout', IAttachment_setIdleTimeout),
     ('getStatementTimeout', IAttachment_getStatementTimeout),
     ('setStatementTimeout', IAttachment_setStatementTimeout),
     ('createBatch', IAttachment_createBatch),
-    ('createReplicator', c_void_p)]
-# IService(3) : ReferenceCounted
-IService_VTable._fields_ = [
+    ('createReplicator', c_void_p),
+    ('detach', IAttachment_detach), # v5: 3.0.7 => 3.0.8, 4.0.0 => 4.0.1
+    ('dropDatabase', IAttachment_dropDatabase),
+    ]
+# IService(5) : ReferenceCounted
+IService_VTable._fields_ = [ # v3 - initial
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
     ('release', IReferenceCounted_release),
-    ('detach', IService_detach),
+    ('deprecatedDetach', IService_deprecatedDetach),
     ('query', IService_query),
-    ('start', IService_start)]
+    ('start', IService_start),
+    ('detach', IService_detach), # v4: 3.0.7 => 3.0.8, 4.0.0 => 4.0.1
+    ('cancel', IService_cancel)] # v5: 3.0.9 => 3.0.10, 4.0.1 => 4.0.2
 # IProvider(4) : PluginBase
 IProvider_VTable._fields_ = [
     ('dummy', c_void_p),
@@ -1696,7 +1745,7 @@ IVersionCallback_VTable._fields_ = [
     ('callback', IVersionCallback_callback)]
 # >>> Firebird 4
 # IUtil(4) : Versioned
-IUtil_VTable._fields_ = [
+IUtil_VTable._fields_ = [ # v2 - initial
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('getFbVersion', IUtil_getFbVersion),
@@ -1711,7 +1760,7 @@ IUtil_VTable._fields_ = [
     ('formatStatus', IUtil_formatStatus),
     ('getClientVersion', IUtil_getClientVersion),
     ('getXpbBuilder', IUtil_getXpbBuilder),
-    ('setOffsets', IUtil_setOffsets),
+    ('setOffsets', IUtil_setOffsets), # v4 (v3 was interim version during FB4 development)
     ('getDecFloat16', IUtil_getDecFloat16),
     ('getDecFloat34', IUtil_getDecFloat34),
     ('decodeTimeTz', IUtil_decodeTimeTz),
@@ -1803,19 +1852,19 @@ IInt128_VTable._fields_ = [
 err_encoding = getpreferredencoding()
 
 def db_api_error(status: ISC_STATUS_ARRAY) -> bool:
-    "Returns True if status_vector contains error"
+    "Returns True if `status` contains error"
     return status[0] == 1 and status[1] > 0
 
 
 def exception_from_status(error, status: ISC_STATUS_ARRAY, preamble: str = None) -> Exception:
-    "Returns exception assembled from error information stored is `status`."
+    "Returns exception assembled from error information stored in `status`."
     msglist = []
     msg = create_string_buffer(1024)
     if preamble:
         msglist.append(preamble)
     sqlcode = api.isc_sqlcode(status)
     error_code = status[1]
-    msglist.append('- SQLCODE: %i' % sqlcode)
+    msglist.append(f'- SQLCODE: {sqlcode}')
 
     pvector = cast(addressof(status), ISC_STATUS_PTR)
     sqlstate = create_string_buffer(6)

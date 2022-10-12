@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>firebird.driver.config &#8212; firebird-driver 1.5.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../../../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../../../_static/bootstrap-2.3.2/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+
+        <a class="brand" href="../../../index.html">
+          firebird-driver</a>
+        <span class="navbar-text pull-left"><b>1.5.3</b></span>
+
+        <div class="nav-collapse">
+          <ul class="nav">
+            <li class="divider-vertical"></li>
+            
+                <li><a href="../../../usage-guide.html">Usage Guide</a></li>
+                <li><a href="../../../reference.html">Reference</a></li>
+                <li><a href="../../../genindex.html">Index</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../index.html">Content <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting-started.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../getting-started.html#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../getting-started.html#installation-from-pypi">Installation from PYPI</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../getting-started.html#quick-start-guide">Quick-start Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../getting-started.html#driver-configuration">Driver configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../getting-started.html#connecting-to-a-database">Connecting to a Database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../getting-started.html#creating-a-database">Creating a Database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../getting-started.html#executing-sql-statements">Executing SQL Statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../getting-started.html#calling-stored-procedures">Calling Stored Procedures</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage-guide.html">Usage Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#driver-structure">Driver structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#configuration">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#the-driver-config-object">The ‘driver_config’ object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#server-and-database-configuration">Server and database configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#databases">Databases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#using-connect">Using connect()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#using-create-database">Using create_database()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#deleting-databases">Deleting databases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#connection-object">Connection object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#closing-the-connection">Closing the connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#getting-information-about-connection">Getting information about connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#getting-information-about-database">Getting information about database</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#executing-sql-statements">Executing SQL Statements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#cursor-object">Cursor object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#sql-execution-basics">SQL Execution Basics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#fetching-data-from-server">Fetching data from server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#index-13">Scrollable cursors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#id3">Parameterized statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#id5">Prepared Statements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#named-cursors">Named Cursors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#working-with-stored-procedures">Working with stored procedures</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#data-handling-and-conversions">Data handling and conversions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#implicit-conversion-of-input-parameters-from-strings">Implicit Conversion of Input Parameters from Strings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#automatic-conversion-from-to-unicode">Automatic conversion from/to Unicode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#working-with-blobs">Working with BLOBs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#firebird-array-type">Firebird ARRAY type</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#transanction-management">Transanction management</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#basics">Basics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#auto-commit">Auto-commit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#transaction-parameters">Transaction parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#getting-information-about-transaction">Getting information about transaction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#retaining-transactions">Retaining transactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#savepoints">Savepoints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#using-multiple-transactions-with-the-same-connection">Using multiple transactions with the same connection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#distributed-transactions">Distributed Transactions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#transaction-context-manager">Transaction Context Manager</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#database-events">Database Events</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#what-they-are">What they are</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#why-use-them">Why use them</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#how-events-are-exposed">How events are exposed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#api-for-python-developers">API for Python developers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#working-with-services">Working with Services</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#services-api-connections">Services API Connections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#text-output-from-services">Text output from Services</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#server-configuration-and-state-information">Server Configuration and State information</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#database-options">Database options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#database-maintenance">Database maintenance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#user-maintenance">User maintenance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#trace-sessions">Trace sessions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#logging-driver-activities">Logging driver activities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage-guide.html#index-43">Driver hooks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#apihook">APIHook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#connectionhook">ConnectionHook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage-guide.html#serverhook">ServerHook</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../python-db-api-compliance.html">Compliance to PyDB API 2.0</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../python-db-api-compliance.html#unsupported-optional-features">Unsupported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../python-db-api-compliance.html#supported-optional-features">Supported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../python-db-api-compliance.html#nominally-supported-optional-features">Nominally Supported Optional Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../python-db-api-compliance.html#extensions-and-caveats">Extensions and Caveats</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference.html">Firebird-driver Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../reference.html#driver-modules">Driver modules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../ref-main.html">Main driver namespace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ref-types.html">firebird.driver.types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ref-config.html">firebird.driver.config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ref-core.html">firebird.driver.core</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ref-hooks.html">firebird.driver.hooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ref-intf.html">firebird.driver.interfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../ref-fbapi.html">firebird.driver.fbapi</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-5-3">Version 1.5.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-5-2">Version 1.5.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-5-1">Version 1.5.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-5-0">Version 1.5.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../changelog.html#potentially-breaking-changes">Potentially breaking changes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-4-3">Version 1.4.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-4-2">Version 1.4.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-4-1">Version 1.4.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-4-0">Version 1.4.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../changelog.html#improvements">Improvements:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../changelog.html#backward-incompatible-changes">Backward incompatible changes:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-3-4">Version 1.3.4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-3-3">Version 1.3.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-3-2">Version 1.3.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-3-1">Version 1.3.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-3-0">Version 1.3.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-2-1">Version 1.2.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-2-0">Version 1.2.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-1-0">Version 1.1.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-0-0">Version 1.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-0-8-0">Version 0.8.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-0-7-0">Version 0.7.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-0-6-0">Version 0.6.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-0-5-0">Version 0.5.0</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body span12 content" role="main">
+      
+  <h1>Source code for firebird.driver.config</h1><div class="highlight"><pre>
+<span></span><span class="c1">#coding:utf-8</span>
+<span class="c1">#</span>
+<span class="c1"># PROGRAM/MODULE: firebird-driver</span>
+<span class="c1"># FILE:           firebird/driver/config.py</span>
+<span class="c1"># DESCRIPTION:    Driver configuration</span>
+<span class="c1"># CREATED:        1.6.2020</span>
+<span class="c1">#</span>
+<span class="c1"># The contents of this file are subject to the MIT License</span>
+<span class="c1">#</span>
+<span class="c1"># Permission is hereby granted, free of charge, to any person obtaining a copy</span>
+<span class="c1"># of this software and associated documentation files (the &quot;Software&quot;), to deal</span>
+<span class="c1"># in the Software without restriction, including without limitation the rights</span>
+<span class="c1"># to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span>
+<span class="c1"># copies of the Software, and to permit persons to whom the Software is</span>
+<span class="c1"># furnished to do so, subject to the following conditions:</span>
+<span class="c1">#</span>
+<span class="c1"># The above copyright notice and this permission notice shall be included in all</span>
+<span class="c1"># copies or substantial portions of the Software.</span>
+<span class="c1">#</span>
+<span class="c1"># THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span>
+<span class="c1"># IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span>
+<span class="c1"># FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span>
+<span class="c1"># AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span>
+<span class="c1"># LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span>
+<span class="c1"># OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span>
+<span class="c1"># SOFTWARE.</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (c) 2020 Firebird Project (www.firebirdsql.org)</span>
+<span class="c1"># All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Contributor(s): Pavel Císař (original code)</span>
+<span class="c1">#                 ______________________________________</span>
+
+<span class="sd">&quot;&quot;&quot;firebird-driver - Driver configuration</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Iterable</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">configparser</span> <span class="kn">import</span> <span class="n">ConfigParser</span><span class="p">,</span> <span class="n">ExtendedInterpolation</span>
+<span class="kn">from</span> <span class="nn">firebird.base.config</span> <span class="kn">import</span> <span class="n">Config</span><span class="p">,</span> <span class="n">StrOption</span><span class="p">,</span> <span class="n">IntOption</span><span class="p">,</span> <span class="n">BoolOption</span><span class="p">,</span> <span class="n">EnumOption</span><span class="p">,</span> \
+     <span class="n">ConfigListOption</span><span class="p">,</span> <span class="n">ListOption</span>
+<span class="kn">from</span> <span class="nn">.types</span> <span class="kn">import</span> <span class="n">NetProtocol</span><span class="p">,</span> <span class="n">DecfloatRound</span><span class="p">,</span> <span class="n">DecfloatTraps</span>
+
+<div class="viewcode-block" id="ServerConfig"><a class="viewcode-back" href="../../../ref-config.html#firebird.driver.config.ServerConfig">[docs]</a><span class="k">class</span> <span class="nc">ServerConfig</span><span class="p">(</span><span class="n">Config</span><span class="p">):</span> <span class="c1"># pylint: disable=R0902</span>
+    <span class="sd">&quot;&quot;&quot;Server configuration.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">optional</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="n">optional</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">)</span>
+        <span class="c1">#: Server host machine specification</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">:</span> <span class="n">StrOption</span> <span class="o">=</span> \
+            <span class="n">StrOption</span><span class="p">(</span><span class="s1">&#39;host&#39;</span><span class="p">,</span> <span class="s2">&quot;Server host machine specification&quot;</span><span class="p">)</span>
+        <span class="c1">#: Port used by Firebird server</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">:</span> <span class="n">StrOption</span> <span class="o">=</span> \
+            <span class="n">StrOption</span><span class="p">(</span><span class="s1">&#39;port&#39;</span><span class="p">,</span> <span class="s2">&quot;Port used by Firebird server&quot;</span><span class="p">)</span>
+        <span class="c1">#: Defaul user name, default is envar ISC_USER or None if not specified</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="p">:</span> <span class="n">StrOption</span> <span class="o">=</span> \
+            <span class="n">StrOption</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="s2">&quot;Defaul user name&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ISC_USER&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="c1">#: Default user password, default is envar ISC_PASSWORD or None if not specified</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">:</span> <span class="n">StrOption</span> <span class="o">=</span> \
+            <span class="n">StrOption</span><span class="p">(</span><span class="s1">&#39;password&#39;</span><span class="p">,</span> <span class="s2">&quot;Default user password&quot;</span><span class="p">,</span>
+                      <span class="n">default</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ISC_PASSWORD&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="c1">#: Configuration override</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">:</span> <span class="n">StrOption</span> <span class="o">=</span> \
+            <span class="n">StrOption</span><span class="p">(</span><span class="s1">&#39;config&#39;</span><span class="p">,</span> <span class="s2">&quot;Configuration override&quot;</span><span class="p">)</span>
+        <span class="c1">#: List of authentication plugins override</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auth_plugin_list</span><span class="p">:</span> <span class="n">StrOption</span> <span class="o">=</span> \
+            <span class="n">StrOption</span><span class="p">(</span><span class="s1">&#39;auth_plugin_list&#39;</span><span class="p">,</span> <span class="s2">&quot;List of authentication plugins override&quot;</span><span class="p">)</span>
+        <span class="c1">#: Use trusted authentication, default: False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trusted_auth</span><span class="p">:</span> <span class="n">BoolOption</span> <span class="o">=</span> \
+            <span class="n">BoolOption</span><span class="p">(</span><span class="s1">&#39;trusted_auth&#39;</span><span class="p">,</span> <span class="s2">&quot;Use trusted authentication&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="c1">#: Encoding used for text data exchange with server</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoding</span><span class="p">:</span> <span class="n">StrOption</span> <span class="o">=</span> \
+            <span class="n">StrOption</span><span class="p">(</span><span class="s1">&#39;encoding&#39;</span><span class="p">,</span> <span class="s2">&quot;Encoding used for text data exchange with server&quot;</span><span class="p">,</span>
+                      <span class="n">default</span><span class="o">=</span><span class="s1">&#39;ascii&#39;</span><span class="p">)</span>
+        <span class="c1">#: Handler used for encoding errors. See `codecs error handlers &lt;codecs&gt;` for details.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoding_errors</span><span class="p">:</span> <span class="n">StrOption</span> <span class="o">=</span> \
+            <span class="n">StrOption</span><span class="p">(</span><span class="s1">&#39;encoding_errors&#39;</span><span class="p">,</span> <span class="s2">&quot;Handler used for encoding errors&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;strict&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DatabaseConfig"><a class="viewcode-back" href="../../../ref-config.html#firebird.driver.config.DatabaseConfig">[docs]</a><span class="k">class</span> <span class="nc">DatabaseConfig</span><span class="p">(</span><span class="n">Config</span><span class="p">):</span> <span class="c1"># pylint: disable=R0902</span>
+    <span class="sd">&quot;&quot;&quot;Database configuration.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">optional</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="n">optional</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">)</span>
+        <span class="c1">#: Name of server where database is located</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">:</span> <span class="n">StrOption</span> <span class="o">=</span> \
+            <span class="n">StrOption</span><span class="p">(</span><span class="s1">&#39;server&#39;</span><span class="p">,</span> <span class="s2">&quot;Name of server where database is located&quot;</span><span class="p">)</span>
+        <span class="c1">#: Database connection string</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dsn</span><span class="p">:</span> <span class="n">StrOption</span> <span class="o">=</span> \
+            <span class="n">StrOption</span><span class="p">(</span><span class="s1">&#39;dsn&#39;</span><span class="p">,</span> <span class="s2">&quot;Database connection string&quot;</span><span class="p">)</span>
+        <span class="c1">#: Database file specification or alias</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">:</span> <span class="n">StrOption</span> <span class="o">=</span> \
+            <span class="n">StrOption</span><span class="p">(</span><span class="s1">&#39;database&#39;</span><span class="p">,</span> <span class="s2">&quot;Database file specification or alias&quot;</span><span class="p">)</span>
+        <span class="c1">#: Database filename should be passed in UTF8</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">utf8filename</span><span class="p">:</span> <span class="n">BoolOption</span> <span class="o">=</span> \
+            <span class="n">BoolOption</span><span class="p">(</span><span class="s1">&#39;utf8filename&#39;</span><span class="p">,</span> <span class="s2">&quot;Database filename should be passed in UTF8&quot;</span><span class="p">)</span>
+        <span class="c1">#: Protocol to be used for databasem value is `.NetProtocol`</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span><span class="p">:</span> <span class="n">EnumOption</span> <span class="o">=</span> \
+            <span class="n">EnumOption</span><span class="p">(</span><span class="s1">&#39;protocol&#39;</span><span class="p">,</span> <span class="n">NetProtocol</span><span class="p">,</span> <span class="s2">&quot;Protocol to be used for database&quot;</span><span class="p">)</span>
+        <span class="c1">#: Defaul user name, default is envar ISC_USER or None if not specified</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="p">:</span> <span class="n">StrOption</span> <span class="o">=</span> \
+            <span class="n">StrOption</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="s2">&quot;Defaul user name&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ISC_USER&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="c1">#: Default user password, default is envar ISC_PASSWORD or None if not specified</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">:</span> <span class="n">StrOption</span> <span class="o">=</span> \
+            <span class="n">StrOption</span><span class="p">(</span><span class="s1">&#39;password&#39;</span><span class="p">,</span> <span class="s2">&quot;Default user password&quot;</span><span class="p">,</span>
+                      <span class="n">default</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ISC_PASSWORD&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="c1">#: Use trusted authentication, default: False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trusted_auth</span><span class="p">:</span> <span class="n">BoolOption</span> <span class="o">=</span> \
+            <span class="n">BoolOption</span><span class="p">(</span><span class="s1">&#39;trusted_auth&#39;</span><span class="p">,</span> <span class="s2">&quot;Use trusted authentication&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="c1">#: User role</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">role</span><span class="p">:</span> <span class="n">StrOption</span> <span class="o">=</span> \
+            <span class="n">StrOption</span><span class="p">(</span><span class="s1">&#39;role&#39;</span><span class="p">,</span> <span class="s2">&quot;User role&quot;</span><span class="p">)</span>
+        <span class="c1">#: Character set for database connection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">charset</span><span class="p">:</span> <span class="n">StrOption</span> <span class="o">=</span> \
+            <span class="n">StrOption</span><span class="p">(</span><span class="s1">&#39;charset&#39;</span><span class="p">,</span> <span class="s2">&quot;Character set for database connection&quot;</span><span class="p">)</span>
+        <span class="c1">#: SQL Dialect for database connection, default: 3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sql_dialect</span><span class="p">:</span> <span class="n">IntOption</span> <span class="o">=</span> \
+            <span class="n">IntOption</span><span class="p">(</span><span class="s1">&#39;sql_dialect&#39;</span><span class="p">,</span> <span class="s2">&quot;SQL Dialect for database connection&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="c1">#: Connection timeout</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">:</span> <span class="n">IntOption</span> <span class="o">=</span> \
+            <span class="n">IntOption</span><span class="p">(</span><span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="s2">&quot;Connection timeout&quot;</span><span class="p">)</span>
+        <span class="c1">#: Do not use linger for database connection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">no_linger</span><span class="p">:</span> <span class="n">BoolOption</span> <span class="o">=</span> \
+            <span class="n">BoolOption</span><span class="p">(</span><span class="s1">&#39;no_linger&#39;</span><span class="p">,</span> <span class="s2">&quot;Do not use linger for database connection&quot;</span><span class="p">)</span>
+        <span class="c1">#: Page cache size override for database connection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache_size</span><span class="p">:</span> <span class="n">IntOption</span> <span class="o">=</span> \
+            <span class="n">IntOption</span><span class="p">(</span><span class="s1">&#39;cache_size&#39;</span><span class="p">,</span> <span class="s2">&quot;Page cache size override for database connection&quot;</span><span class="p">)</span>
+        <span class="c1">#: Dummy packet interval for this database connection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dummy_packet_interval</span><span class="p">:</span> <span class="n">IntOption</span> <span class="o">=</span> \
+            <span class="n">IntOption</span><span class="p">(</span><span class="s1">&#39;dummy_packet_interval&#39;</span><span class="p">,</span>
+                      <span class="s2">&quot;Dummy packet interval&quot;</span><span class="p">)</span>
+        <span class="c1">#: Configuration override</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">:</span> <span class="n">StrOption</span> <span class="o">=</span> \
+            <span class="n">StrOption</span><span class="p">(</span><span class="s1">&#39;config&#39;</span><span class="p">,</span> <span class="s2">&quot;Configuration override&quot;</span><span class="p">)</span>
+        <span class="c1">#: List of authentication plugins override</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auth_plugin_list</span><span class="p">:</span> <span class="n">StrOption</span> <span class="o">=</span> \
+            <span class="n">StrOption</span><span class="p">(</span><span class="s1">&#39;auth_plugin_list&#39;</span><span class="p">,</span> <span class="s2">&quot;List of authentication plugins override&quot;</span><span class="p">)</span>
+        <span class="c1">#: Session time zone [Firebird 4]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session_time_zone</span><span class="p">:</span> <span class="n">StrOption</span> <span class="o">=</span> \
+            <span class="n">StrOption</span><span class="p">(</span><span class="s1">&#39;session_time_zone&#39;</span><span class="p">,</span> <span class="s2">&quot;Session time zone&quot;</span><span class="p">)</span>
+        <span class="c1">#: Set BIND [Firebird 4]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_bind</span><span class="p">:</span> <span class="n">StrOption</span> <span class="o">=</span> \
+            <span class="n">StrOption</span><span class="p">(</span><span class="s1">&#39;set_bind&#39;</span><span class="p">,</span> <span class="s2">&quot;Set BIND - sets up columns coercion rules in session&quot;</span><span class="p">)</span>
+        <span class="c1">#: Set DECFLOAT ROUND [Firebird 4], value is `.DecfloatRound`</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decfloat_round</span><span class="p">:</span> <span class="n">EnumOption</span> <span class="o">=</span> \
+            <span class="n">EnumOption</span><span class="p">(</span><span class="s1">&#39;decfloat_round&#39;</span><span class="p">,</span> <span class="n">DecfloatRound</span><span class="p">,</span> <span class="s2">&quot;DECFLOAT round mode&quot;</span><span class="p">)</span>
+        <span class="c1">#: Set DECFLOAT TRAPS [Firebird 4], values are `.DecfloatTraps`</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decfloat_traps</span><span class="p">:</span> <span class="n">ListOption</span> <span class="o">=</span> \
+            <span class="n">ListOption</span><span class="p">(</span><span class="s1">&#39;decfloat_traps&#39;</span><span class="p">,</span> <span class="n">DecfloatTraps</span><span class="p">,</span>
+                       <span class="s2">&quot;Which DECFLOAT exceptional conditions cause a trap&quot;</span><span class="p">)</span>
+        <span class="c1"># Create options</span>
+        <span class="c1">#: Database create option. Page size to be used.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">page_size</span><span class="p">:</span> <span class="n">IntOption</span> <span class="o">=</span> \
+            <span class="n">IntOption</span><span class="p">(</span><span class="s1">&#39;page_size&#39;</span><span class="p">,</span> <span class="s2">&quot;Page size to be used for created database.&quot;</span><span class="p">)</span>
+        <span class="c1">#: Database create option. Write mode (True = sync/False = async).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">forced_writes</span><span class="p">:</span> <span class="n">BoolOption</span> <span class="o">=</span> \
+            <span class="n">BoolOption</span><span class="p">(</span><span class="s1">&#39;forced_writes&#39;</span><span class="p">,</span> <span class="s2">&quot;Write mode for created database (True = sync, False = async)&quot;</span><span class="p">)</span>
+        <span class="c1">#: Database create option. Character set for the database.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_charset</span><span class="p">:</span> <span class="n">StrOption</span> <span class="o">=</span> \
+            <span class="n">StrOption</span><span class="p">(</span><span class="s1">&#39;db_charset&#39;</span><span class="p">,</span> <span class="s2">&quot;Character set for created database&quot;</span><span class="p">)</span>
+        <span class="c1">#: Database create option. SQL dialect for the database.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_sql_dialect</span><span class="p">:</span> <span class="n">IntOption</span> <span class="o">=</span> \
+            <span class="n">IntOption</span><span class="p">(</span><span class="s1">&#39;db_sql_dialect&#39;</span><span class="p">,</span> <span class="s2">&quot;SQL dialect for created database&quot;</span><span class="p">)</span>
+        <span class="c1">#: Database create option. Page cache size override for database.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_cache_size</span><span class="p">:</span> <span class="n">IntOption</span> <span class="o">=</span> \
+            <span class="n">IntOption</span><span class="p">(</span><span class="s1">&#39;db_cache_size&#39;</span><span class="p">,</span> <span class="s2">&quot;Page cache size override for created database&quot;</span><span class="p">)</span>
+        <span class="c1">#: Database create option. Sweep interval for the database.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sweep_interval</span><span class="p">:</span> <span class="n">IntOption</span> <span class="o">=</span> \
+            <span class="n">IntOption</span><span class="p">(</span><span class="s1">&#39;sweep_interval&#39;</span><span class="p">,</span> <span class="s2">&quot;Sweep interval for created database&quot;</span><span class="p">)</span>
+        <span class="c1">#: Database create option. Data page space usage (True = reserve space, False = Use all space).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reserve_space</span><span class="p">:</span> <span class="n">BoolOption</span> <span class="o">=</span> \
+            <span class="n">BoolOption</span><span class="p">(</span><span class="s1">&#39;reserve_space&#39;</span><span class="p">,</span>
+                       <span class="s2">&quot;Data page space usage for created database (True = reserve space, False = Use all space)&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DriverConfig"><a class="viewcode-back" href="../../../ref-config.html#firebird.driver.config.DriverConfig">[docs]</a><span class="k">class</span> <span class="nc">DriverConfig</span><span class="p">(</span><span class="n">Config</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Firebird driver configuration.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="c1">#: Path to Firebird client library</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fb_client_library</span><span class="p">:</span> <span class="n">StrOption</span> <span class="o">=</span> \
+            <span class="n">StrOption</span><span class="p">(</span><span class="s1">&#39;fb_client_library&#39;</span><span class="p">,</span> <span class="s2">&quot;Path to Firebird client library&quot;</span><span class="p">)</span>
+        <span class="c1">#: BLOB size threshold. Bigger BLOB will be returned as stream BLOBs.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stream_blob_threshold</span><span class="p">:</span> <span class="n">IntOption</span> <span class="o">=</span> \
+            <span class="n">IntOption</span><span class="p">(</span><span class="s1">&#39;stream_blob_threshold&#39;</span><span class="p">,</span>
+                      <span class="s2">&quot;BLOB size threshold. Bigger BLOB will be returned as stream BLOBs.&quot;</span><span class="p">,</span>
+                      <span class="n">default</span><span class="o">=</span><span class="mi">65536</span><span class="p">)</span>
+        <span class="c1">#: Default database configuration (&#39;firebird.db.defaults&#39;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_defaults</span><span class="p">:</span> <span class="n">DatabaseConfig</span> <span class="o">=</span> <span class="n">DatabaseConfig</span><span class="p">(</span><span class="s1">&#39;firebird.db.defaults&#39;</span><span class="p">,</span>
+                                                          <span class="n">optional</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                                          <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Default database configuration.&quot;</span><span class="p">)</span>
+        <span class="c1">#: Default server configuration (&#39;firebird.server.defaults&#39;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_defaults</span><span class="p">:</span> <span class="n">ServerConfig</span> <span class="o">=</span> <span class="n">ServerConfig</span><span class="p">(</span><span class="s1">&#39;firebird.server.defaults&#39;</span><span class="p">,</span>
+                                                          <span class="n">optional</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                                          <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Default server configuration.&quot;</span><span class="p">)</span>
+        <span class="c1">#: Registered servers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="p">:</span> <span class="n">ConfigListOption</span> <span class="o">=</span> \
+            <span class="n">ConfigListOption</span><span class="p">(</span><span class="s1">&#39;servers&#39;</span><span class="p">,</span> <span class="s2">&quot;Registered servers&quot;</span><span class="p">,</span> <span class="n">ServerConfig</span><span class="p">)</span>
+        <span class="c1">#: Registered databases</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">databases</span><span class="p">:</span> <span class="n">ConfigListOption</span> <span class="o">=</span> \
+            <span class="n">ConfigListOption</span><span class="p">(</span><span class="s1">&#39;databases&#39;</span><span class="p">,</span> <span class="s2">&quot;Registered databases&quot;</span><span class="p">,</span> <span class="n">DatabaseConfig</span><span class="p">)</span>
+<div class="viewcode-block" id="DriverConfig.read"><a class="viewcode-back" href="../../../ref-config.html#firebird.driver.config.DriverConfig.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filenames</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">],</span> <span class="n">encoding</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read configuration from a filename or an iterable of filenames.</span>
+
+<span class="sd">        Files that cannot be opened are silently ignored; this is</span>
+<span class="sd">        designed so that you can specify an iterable of potential</span>
+<span class="sd">        configuration file locations (e.g. current directory, user&#39;s</span>
+<span class="sd">        home directory, systemwide directory), and all existing</span>
+<span class="sd">        configuration files in the iterable will be read.  A single</span>
+<span class="sd">        filename may also be given.</span>
+
+<span class="sd">        Return list of successfully read files.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">(</span><span class="n">interpolation</span><span class="o">=</span><span class="n">ExtendedInterpolation</span><span class="p">())</span>
+        <span class="n">read_ok</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">filenames</span><span class="p">,</span> <span class="n">encoding</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">read_ok</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">read_ok</span></div>
+<div class="viewcode-block" id="DriverConfig.read_file"><a class="viewcode-back" href="../../../ref-config.html#firebird.driver.config.DriverConfig.read_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read configuration from a file-like object.</span>
+
+<span class="sd">        The `f` argument must be iterable, returning one line at a time.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">(</span><span class="n">interpolation</span><span class="o">=</span><span class="n">ExtendedInterpolation</span><span class="p">())</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span></div>
+<div class="viewcode-block" id="DriverConfig.read_string"><a class="viewcode-back" href="../../../ref-config.html#firebird.driver.config.DriverConfig.read_string">[docs]</a>    <span class="k">def</span> <span class="nf">read_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">string</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Read configuration from a given string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">(</span><span class="n">interpolation</span><span class="o">=</span><span class="n">ExtendedInterpolation</span><span class="p">())</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">read_string</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span></div>
+<div class="viewcode-block" id="DriverConfig.read_dict"><a class="viewcode-back" href="../../../ref-config.html#firebird.driver.config.DriverConfig.read_dict">[docs]</a>    <span class="k">def</span> <span class="nf">read_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dictionary</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Read configuration from a dictionary.</span>
+
+<span class="sd">        Keys are section names, values are dictionaries with keys and values</span>
+<span class="sd">        that should be present in the section. If the used dictionary type</span>
+<span class="sd">        preserves order, sections and their keys will be added in order.</span>
+
+<span class="sd">        All types held in the dictionary are converted to strings during</span>
+<span class="sd">        reading, including section names, option names and keys.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">(</span><span class="n">interpolation</span><span class="o">=</span><span class="n">ExtendedInterpolation</span><span class="p">())</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">read_dict</span><span class="p">(</span><span class="n">dictionary</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_config</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span></div>
+<div class="viewcode-block" id="DriverConfig.get_server"><a class="viewcode-back" href="../../../ref-config.html#firebird.driver.config.DriverConfig.get_server">[docs]</a>    <span class="k">def</span> <span class="nf">get_server</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ServerConfig</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns server configuration.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">srv</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">srv</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">srv</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+<div class="viewcode-block" id="DriverConfig.get_database"><a class="viewcode-back" href="../../../ref-config.html#firebird.driver.config.DriverConfig.get_database">[docs]</a>    <span class="k">def</span> <span class="nf">get_database</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DatabaseConfig</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns database configuration.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">db</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">databases</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">db</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">db</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+<div class="viewcode-block" id="DriverConfig.register_server"><a class="viewcode-back" href="../../../ref-config.html#firebird.driver.config.DriverConfig.register_server">[docs]</a>    <span class="k">def</span> <span class="nf">register_server</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ServerConfig</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Register server.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            name: Server name.</span>
+<span class="sd">            config: Optional server configuration string in ConfigParser format in [name] section.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">           ServerConfig: For newly registered server</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If server is already registered.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_server</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Server &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; already registered.&quot;</span><span class="p">)</span>
+        <span class="n">srv_config</span> <span class="o">=</span> <span class="n">ServerConfig</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">servers</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">srv_config</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">config</span><span class="p">:</span>
+            <span class="n">parser</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">(</span><span class="n">interpolation</span><span class="o">=</span><span class="n">ExtendedInterpolation</span><span class="p">())</span>
+            <span class="n">parser</span><span class="o">.</span><span class="n">read_string</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+            <span class="n">srv_config</span><span class="o">.</span><span class="n">load_config</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">srv_config</span></div>
+<div class="viewcode-block" id="DriverConfig.register_database"><a class="viewcode-back" href="../../../ref-config.html#firebird.driver.config.DriverConfig.register_database">[docs]</a>    <span class="k">def</span> <span class="nf">register_database</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DatabaseConfig</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Register database.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            name: Database name.</span>
+<span class="sd">            config: Optional database configuration string in ConfigParser format in [name] section.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">           DatabaseConfig: For newly registered database</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If database is already registered.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_database</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Database &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; already registered.&quot;</span><span class="p">)</span>
+        <span class="n">db_config</span> <span class="o">=</span> <span class="n">DatabaseConfig</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">databases</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">db_config</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">config</span><span class="p">:</span>
+            <span class="n">parser</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">(</span><span class="n">interpolation</span><span class="o">=</span><span class="n">ExtendedInterpolation</span><span class="p">())</span>
+            <span class="n">parser</span><span class="o">.</span><span class="n">read_string</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+            <span class="n">db_config</span><span class="o">.</span><span class="n">load_config</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">db_config</span></div></div>
+
+<span class="c1"># Configuration</span>
+
+<span class="n">driver_config</span><span class="p">:</span> <span class="n">DriverConfig</span> <span class="o">=</span> <span class="n">DriverConfig</span><span class="p">(</span><span class="s1">&#39;firebird.driver&#39;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2020-2022, The Firebird Project.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
