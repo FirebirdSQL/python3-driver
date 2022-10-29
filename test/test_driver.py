@@ -1060,6 +1060,11 @@ class TestCursor(DriverTestBase):
             d2 = cur.to_dict(row, d)
             self.assertDictEqual(d2, sample)
             self.assertIs(d, d2)
+            with self.assertRaises(AssertionError) as cm:
+                cur.to_dict([1])
+                cur.to_dict([1, 2, 3])
+            self.assertTupleEqual(cm.exception.args, ('Length of data must match number of fields',))
+
 
 class TestScrollableCursor(DriverTestBase):
     def setUp(self):
