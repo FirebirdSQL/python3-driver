@@ -2655,13 +2655,16 @@ class Statement(LoggingIdMixin):
         self._out_cnt: int = meta.get_count()
         self._out_buffer: bytes = None
         self._out_desc: List[ItemMetadata] = None
+        self._names: List[str] = None
         if self._out_cnt == 0:
             meta.release()
             self._out_desc = []
+            self._names = []
         else:
             self._out_meta = meta
             self._out_buffer = create_string_buffer(meta.get_message_length())
             self._out_desc = create_meta_descriptors(meta)
+            self._names = [meta.field if meta.field == meta.alias else meta.alias for meta in self._out_desc]
     def __enter__(self) -> Statement:
         return self
     def __exit__(self, exc_type, exc_value, traceback) -> None:
@@ -3888,6 +3891,21 @@ class Cursor(LoggingIdMixin):
         """
         assert self._result is not None
         return self._result.is_bof()
+    def to_dict(self, row: Tuple, into: Dict=None) -> Dict:
+        """Return row tuple as dictionary with field names as keys. Returns new dictionary
+        if `into` argument is not provided, otherwise returns `into` dictionary updated
+        with row data.
+
+        Arguments:
+            row:  Row data returned by fetch_* method.
+            into: Dictionary that shouold be updated with row data.
+        """
+        assert len(self._stmt._names) == len(row), "Length of data must match number of fields"
+        if into is None:
+            into = dict(zip(self._stmt._names, row))
+        else:
+            into.update(zip(self._stmt._names, row))
+        return into
     # Properties
     @property
     def connection(self) -> Connection:

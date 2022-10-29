@@ -2,6 +2,12 @@
 Changelog
 #########
 
+Development Version 1.7.0 [unreleased]
+======================================
+
+* New: `.Cursor.to_dict` method.
+
+
 Version 1.6.0
 =============
 
