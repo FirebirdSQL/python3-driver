@@ -1,3 +1,45 @@
 [build-system]
-requires = ["setuptools >= 61.0"]
+requires = ["setuptools >= 65.0.0","wheel"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "firebird-driver"
+description = "Firebird driver for Python"
+readme = "README.rst"
+requires-python = ">=3.8"
+license = { file = "LICENSE" }
+authors = [{ name = "Pavel Císař", email = "pcisar@users.sourceforge.net"}]
+keywords = ["Firebird", "RDBMS", "driver"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: MacOS",
+    "Topic :: Software Development",
+    "Topic :: Database",
+    ]
+dependencies = [
+    "firebird-base>=1.5.0",
+    "python-dateutil>=2.8",
+    ]
+dynamic = ["version"]
+
+[project.urls]
+Home = "https://github.com/FirebirdSQL/python3-base"
+Documentation = "https://firebird-base.rtfd.io"
+"Bug Reports" = "https://github.com/FirebirdSQL/python3-base/issues"
+Funding = "https://www.firebirdsql.org/en/donate/"
+Source = "https://github.com/FirebirdSQL/python3-base"
+
+[tool.setuptools]
+zip-safe = true
+
+[tool.setuptools.dynamic]
+version = {attr = "firebird.driver.__VERSION__"}

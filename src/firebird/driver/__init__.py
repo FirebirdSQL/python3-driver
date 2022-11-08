@@ -59,4 +59,4 @@ from .core import (connect, create_database, connect_server, transaction, temp_d
      Server, Statement)
 
 #: Current driver version, SEMVER string.
-__VERSION__ = '1.6.0'
+__VERSION__ = '1.7.0'

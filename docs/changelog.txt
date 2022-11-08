@@ -6,7 +6,7 @@ Development Version 1.7.0 [unreleased]
 ======================================
 
 * New: `.Cursor.to_dict` method.
-
+* Move away from setup.cfg to pyproject.toml, changed source three layout.
 
 Version 1.6.0
 =============
