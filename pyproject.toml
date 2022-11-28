@@ -8,7 +8,7 @@ description = "Firebird driver for Python"
 readme = "README.rst"
 requires-python = ">=3.8"
 license = { file = "LICENSE" }
-authors = [{ name = "Pavel Císař", email = "pcisar@users.sourceforge.net"}]
+authors = [{ name = "Pavel Cisar", email = "pcisar@users.sourceforge.net"}]
 keywords = ["Firebird", "RDBMS", "driver"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -32,11 +32,11 @@ dependencies = [
 dynamic = ["version"]
 
 [project.urls]
-Home = "https://github.com/FirebirdSQL/python3-base"
+Home = "https://github.com/FirebirdSQL/python3-driver"
 Documentation = "https://firebird-base.rtfd.io"
 "Bug Reports" = "https://github.com/FirebirdSQL/python3-base/issues"
 Funding = "https://www.firebirdsql.org/en/donate/"
-Source = "https://github.com/FirebirdSQL/python3-base"
+Source = "https://github.com/FirebirdSQL/python3-driver"
 
 [tool.setuptools]
 zip-safe = true
