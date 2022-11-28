@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
-<title>firebird.driver.fbapi — firebird-driver 1.6.0 documentation</title>
+<title>firebird.driver.fbapi — firebird-driver 1.7.0 documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
 <link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
 <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -37,7 +37,7 @@
 </button>
 <a class="brand" href="index.html">
           firebird-driver</a>
-<span class="navbar-text pull-left"><b>1.6.0</b></span>
+<span class="navbar-text pull-left"><b>1.7.0</b></span>
 <div class="nav-collapse">
 <ul class="nav">
 <li class="divider-vertical"></li>
@@ -157,6 +157,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-7-0">Version 1.7.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-6-0">Version 1.6.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-2">Version 1.5.2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-1">Version 1.5.1</a></li>
@@ -1020,7 +1021,7 @@
 <div class="body span12 content" role="main">
 <span class="target" id="module-firebird.driver.fbapi"></span><a class="dashAnchor" name="//apple_ref/cpp/Section/firebird.driver.fbapi"></a><section id="firebird-driver-fbapi">
 <a class="dashAnchor" name="//apple_ref/cpp/Module/firebird.driver.fbapi"></a><h1>firebird.driver.fbapi<a class="headerlink" href="#firebird-driver-fbapi" title="Permalink to this heading">¶</a></h1>
-<p>This module contains low-level <a class="reference external" href="https://docs.python.org/3/whatsnew/2.5.html#module-ctypes" title="(in Python v3.10)"><span class="xref std std-ref">ctypes</span></a> interface to
+<p>This module contains low-level <a class="reference external" href="https://docs.python.org/3/whatsnew/2.5.html#module-ctypes" title="(in Python v3.11)"><span class="xref std std-ref">ctypes</span></a> interface to
 Firebird client library (<code class="xref py py-obj docutils literal notranslate"><span class="pre">fbclient.so/dll</span></code>).</p>
 <a class="dashAnchor" name="//apple_ref/cpp/Section/Constants"></a><section id="constants">
 <h2>Constants<a class="headerlink" href="#constants" title="Permalink to this heading">¶</a></h2>
@@ -1112,7 +1113,7 @@ Firebird client library (<code class="xref py py-obj docutils literal notranslat
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.Int">
 <span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">Int</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.Int"></a><a class="headerlink" href="#firebird.driver.fbapi.Int" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_int</span></code></a></p>
+<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_int</span></code></a></p>
 </dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.IntPtr">
@@ -1122,7 +1123,7 @@ Firebird client library (<code class="xref py py-obj docutils literal notranslat
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.Int64">
 <span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">Int64</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.Int64"></a><a class="headerlink" href="#firebird.driver.fbapi.Int64" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_long" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_long</span></code></a></p>
+<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_long" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_long</span></code></a></p>
 </dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.Int64Ptr">
@@ -1132,17 +1133,17 @@ Firebird client library (<code class="xref py py-obj docutils literal notranslat
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.QWord">
 <span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">QWord</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.QWord"></a><a class="headerlink" href="#firebird.driver.fbapi.QWord" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_ulong" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_ulong</span></code></a></p>
+<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_ulong" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_ulong</span></code></a></p>
 </dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.STRING">
 <span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">STRING</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.STRING"></a><a class="headerlink" href="#firebird.driver.fbapi.STRING" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_char_p" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_char_p</span></code></a></p>
+<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_char_p" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_char_p</span></code></a></p>
 </dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_LONG">
 <span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ISC_LONG</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.ISC_LONG"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_LONG" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_int</span></code></a></p>
+<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_int</span></code></a></p>
 </dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_LONG_PTR">
@@ -1152,47 +1153,47 @@ Firebird client library (<code class="xref py py-obj docutils literal notranslat
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_ULONG">
 <span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ISC_ULONG</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.ISC_ULONG"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_ULONG" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_uint" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_uint</span></code></a></p>
+<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_uint" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_uint</span></code></a></p>
 </dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_SHORT">
 <span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ISC_SHORT</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.ISC_SHORT"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_SHORT" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_short" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_short</span></code></a></p>
+<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_short" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_short</span></code></a></p>
 </dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_USHORT">
 <span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ISC_USHORT</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.ISC_USHORT"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_USHORT" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_ushort" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_ushort</span></code></a></p>
+<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_ushort" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_ushort</span></code></a></p>
 </dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_UCHAR">
 <span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ISC_UCHAR</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.ISC_UCHAR"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_UCHAR" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_ubyte" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_ubyte</span></code></a></p>
+<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_ubyte" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_ubyte</span></code></a></p>
 </dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_INT64">
 <span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ISC_INT64</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.ISC_INT64"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_INT64" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_long" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_long</span></code></a></p>
+<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_long" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_long</span></code></a></p>
 </dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_UINT64">
 <span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ISC_UINT64</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.ISC_UINT64"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_UINT64" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_ulong" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_ulong</span></code></a></p>
+<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_ulong" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_ulong</span></code></a></p>
 </dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_DATE">
 <span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ISC_DATE</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.ISC_DATE"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_DATE" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_int</span></code></a></p>
+<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_int</span></code></a></p>
 </dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_TIME">
 <span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ISC_TIME</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.ISC_TIME"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_TIME" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_uint" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_uint</span></code></a></p>
+<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_uint" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_uint</span></code></a></p>
 </dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.FB_DEC16">
 <span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">FB_DEC16</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.FB_DEC16"></a><a class="headerlink" href="#firebird.driver.fbapi.FB_DEC16" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_ulong" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_ulong</span></code></a></p>
+<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_ulong" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_ulong</span></code></a></p>
 </dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.FB_DEC16Ptr">
@@ -1241,7 +1242,7 @@ Firebird client library (<code class="xref py py-obj docutils literal notranslat
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.FB_API_HANDLE">
 <span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">FB_API_HANDLE</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.FB_API_HANDLE"></a><a class="headerlink" href="#firebird.driver.fbapi.FB_API_HANDLE" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_uint" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_uint</span></code></a></p>
+<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_uint" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_uint</span></code></a></p>
 </dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.FB_API_HANDLE_PTR">
@@ -1251,7 +1252,7 @@ Firebird client library (<code class="xref py py-obj docutils literal notranslat
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_STATUS">
 <span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">ISC_STATUS</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.ISC_STATUS"></a><a class="headerlink" href="#firebird.driver.fbapi.ISC_STATUS" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_long" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_long</span></code></a></p>
+<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.c_long" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">c_long</span></code></a></p>
 </dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.ISC_STATUS_PTR">
@@ -1479,23 +1480,23 @@ Firebird client library (<code class="xref py py-obj docutils literal notranslat
 <h2>Functions<a class="headerlink" href="#functions" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.has_api">
-<span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">has_api</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#has_api"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.driver.fbapi.has_api"></a><a class="headerlink" href="#firebird.driver.fbapi.has_api" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">has_api</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#has_api"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.driver.fbapi.has_api"></a><a class="headerlink" href="#firebird.driver.fbapi.has_api" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reaturns True if Firebird API is already loaded.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.load_api">
-<span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">load_api</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><span class="pre">Path</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#load_api"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.driver.fbapi.load_api"></a><a class="headerlink" href="#firebird.driver.fbapi.load_api" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">load_api</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><span class="pre">Path</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#load_api"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.driver.fbapi.load_api"></a><a class="headerlink" href="#firebird.driver.fbapi.load_api" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initializes bindings to Firebird Client Library unless they are already initialized.
 Called automatically by <a class="reference internal" href="#firebird.driver.fbapi.get_api" title="firebird.driver.fbapi.get_api"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_api()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><em>Union</em></a><em>[</em><em>None</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><em>Path</em></a><em>]</em>) – Path to Firebird Client Library.</p></li>
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a><em>[</em><em>None</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><em>Path</em></a><em>]</em>) – Path to Firebird Client Library.</p></li>
 <li><p><strong>specified</strong> (<em>When it's not</em>) – </p></li>
 <li><p><strong>library.</strong> (<em>driver does its best to locate appropriate client</em>) – </p></li>
 </ul>
@@ -1529,21 +1530,21 @@ hook is ignored.</p>
 <h2>Classes<a class="headerlink" href="#classes" title="Permalink to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.FirebirdAPI">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">FirebirdAPI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><span class="pre">Path</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#FirebirdAPI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.FirebirdAPI"></a><a class="headerlink" href="#firebird.driver.fbapi.FirebirdAPI" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.fbapi.</span></span><span class="sig-name descname"><span class="pre">FirebirdAPI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.11)"><span class="pre">Path</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#FirebirdAPI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.fbapi.FirebirdAPI"></a><a class="headerlink" href="#firebird.driver.fbapi.FirebirdAPI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Firebird Client API interface object. Loads Firebird Client Library and
-exposes <a class="reference internal" href="#firebird.driver.fbapi.FirebirdAPI.fb_get_master_interface" title="firebird.driver.fbapi.FirebirdAPI.fb_get_master_interface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fb_get_master_interface()</span></code></a>. Uses <a class="reference external" href="https://docs.python.org/3/whatsnew/2.5.html#module-ctypes" title="(in Python v3.10)"><span class="xref std std-ref">ctypes</span></a>
+exposes <a class="reference internal" href="#firebird.driver.fbapi.FirebirdAPI.fb_get_master_interface" title="firebird.driver.fbapi.FirebirdAPI.fb_get_master_interface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fb_get_master_interface()</span></code></a>. Uses <a class="reference external" href="https://docs.python.org/3/whatsnew/2.5.html#module-ctypes" title="(in Python v3.11)"><span class="xref std std-ref">ctypes</span></a>
 for bindings.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (:class:<code class="docutils literal notranslate"><span class="pre">~pathlib.Path</span></code>) – Firebird client library to be loaded. If it’s not provided,
-the driver uses <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.util.find_library" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">find_library()</span></code></a> to locate the library.</p>
+the driver uses <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#ctypes.util.find_library" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">find_library()</span></code></a> to locate the library.</p>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.FirebirdAPI.client_library">
 <span class="sig-name descname"><span class="pre">client_library</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.fbapi.FirebirdAPI.client_library"></a><a class="headerlink" href="#firebird.driver.fbapi.FirebirdAPI.client_library" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loaded Firebird client library <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#module-ctypes" title="(in Python v3.10)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ctypes</span></code></a> handler</p>
+<dd><p>Loaded Firebird client library <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#module-ctypes" title="(in Python v3.11)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ctypes</span></code></a> handler</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>:class:<code class="docutils literal notranslate"><span class="pre">~ctypes.ctypes.CDLL</span></code></p>
@@ -1633,7 +1634,7 @@ to access all the rest of interfaces. Has no parameters and always succeeds.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>buffer</strong> (:class:<code class="docutils literal notranslate"><span class="pre">STRING</span></code>) – Buffer for message</p></li>
-<li><p><strong>buf_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Buffer size</p></li>
+<li><p><strong>buf_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Buffer size</p></li>
 <li><p><strong>status_ptr</strong> – Pointer to <a class="reference internal" href="#firebird.driver.fbapi.ISC_STATUS_PTR" title="firebird.driver.fbapi.ISC_STATUS_PTR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ISC_STATUS_PTR</span></code></a></p></li>
 </ul>
 </dd>
@@ -1700,18 +1701,18 @@ to access all the rest of interfaces. Has no parameters and always succeeds.</p>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.driver.fbapi.FirebirdAPI.isc_event_block">
-<span class="sig-name descname"><span class="pre">isc_event_block</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_buffer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_buffer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#FirebirdAPI.isc_event_block"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.driver.fbapi.FirebirdAPI.isc_event_block"></a><a class="headerlink" href="#firebird.driver.fbapi.FirebirdAPI.isc_event_block" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">isc_event_block</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_buffer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_buffer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></span><a class="reference internal" href="_modules/firebird/driver/fbapi.html#FirebirdAPI.isc_event_block"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.driver.fbapi.FirebirdAPI.isc_event_block"></a><a class="headerlink" href="#firebird.driver.fbapi.FirebirdAPI.isc_event_block" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convenience wrapper for isc_event_block() API function. Injects variable
 number of parameters into <code class="xref py py-obj docutils literal notranslate"><span class="pre">C_isc_event_block</span></code> call.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>event_buffer</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><em>bytes</em></a>) – </p></li>
-<li><p><strong>result_buffer</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><em>bytes</em></a>) – </p></li>
+<li><p><strong>event_buffer</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><em>bytes</em></a>) – </p></li>
+<li><p><strong>result_buffer</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><em>bytes</em></a>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -4321,7 +4322,7 @@ number of parameters into <code class="xref py py-obj docutils literal notransla
 </p>
 <p>
         © Copyright 2020-2022, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
 </p>
 </div>
 </footer>

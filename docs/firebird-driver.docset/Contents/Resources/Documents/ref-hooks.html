@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
-<title>firebird.driver.hooks — firebird-driver 1.6.0 documentation</title>
+<title>firebird.driver.hooks — firebird-driver 1.7.0 documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
 <link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
 <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -37,7 +37,7 @@
 </button>
 <a class="brand" href="index.html">
           firebird-driver</a>
-<span class="navbar-text pull-left"><b>1.6.0</b></span>
+<span class="navbar-text pull-left"><b>1.7.0</b></span>
 <div class="nav-collapse">
 <ul class="nav">
 <li class="divider-vertical"></li>
@@ -157,6 +157,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-7-0">Version 1.7.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-6-0">Version 1.6.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-2">Version 1.5.2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-1">Version 1.5.1</a></li>
@@ -237,15 +238,15 @@
 <span class="target" id="module-firebird.driver.hooks"></span><a class="dashAnchor" name="//apple_ref/cpp/Section/firebird.driver.hooks"></a><section id="firebird-driver-hooks">
 <a class="dashAnchor" name="//apple_ref/cpp/Module/firebird.driver.hooks"></a><h1>firebird.driver.hooks<a class="headerlink" href="#firebird-driver-hooks" title="Permalink to this heading">¶</a></h1>
 <p>This module contains firebird-driver hooks. Uses hook mechanism from firebird-base package.</p>
-<p>Imports from <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#module-firebird.base.hooks" title="(in Firebird-base v1.4.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firebird.base.hooks</span></code></a>: <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#firebird.base.hooks.register_class" title="(in Firebird-base v1.4.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_class</span></code></a>,
-<a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#firebird.base.hooks.get_callbacks" title="(in Firebird-base v1.4.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_callbacks</span></code></a>, <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#firebird.base.hooks.add_hook" title="(in Firebird-base v1.4.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_hook</span></code></a> and
-<a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#firebird.base.hooks.hook_manager" title="(in Firebird-base v1.4.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hook_manager</span></code></a>.</p>
+<p>Imports from <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#module-firebird.base.hooks" title="(in Firebird-base v1.5.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firebird.base.hooks</span></code></a>: <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#firebird.base.hooks.register_class" title="(in Firebird-base v1.5.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_class</span></code></a>,
+<a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#firebird.base.hooks.get_callbacks" title="(in Firebird-base v1.5.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_callbacks</span></code></a>, <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#firebird.base.hooks.add_hook" title="(in Firebird-base v1.5.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_hook</span></code></a> and
+<a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#firebird.base.hooks.hook_manager" title="(in Firebird-base v1.5.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hook_manager</span></code></a>.</p>
 <a class="dashAnchor" name="//apple_ref/cpp/Section/Enums"></a><section id="enums">
 <h2>Enums<a class="headerlink" href="#enums" title="Permalink to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.hooks.APIHook">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.hooks.</span></span><span class="sig-name descname"><span class="pre">APIHook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/driver/hooks.html#APIHook"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.hooks.APIHook"></a><a class="headerlink" href="#firebird.driver.hooks.APIHook" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
 <p>Firebird API hooks.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.hooks.APIHook.LOADED">
@@ -255,7 +256,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.hooks.ConnectionHook">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.hooks.</span></span><span class="sig-name descname"><span class="pre">ConnectionHook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/driver/hooks.html#ConnectionHook"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.hooks.ConnectionHook"></a><a class="headerlink" href="#firebird.driver.hooks.ConnectionHook" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
 <p>Connection hooks.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.hooks.ConnectionHook.ATTACHED">
@@ -281,7 +282,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.hooks.ServerHook">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.hooks.</span></span><span class="sig-name descname"><span class="pre">ServerHook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/driver/hooks.html#ServerHook"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.hooks.ServerHook"></a><a class="headerlink" href="#firebird.driver.hooks.ServerHook" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
 <p>Server hooks.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.hooks.ServerHook.ATTACHED">
@@ -300,7 +301,7 @@
 </p>
 <p>
         © Copyright 2020-2022, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
 </p>
 </div>
 </footer>

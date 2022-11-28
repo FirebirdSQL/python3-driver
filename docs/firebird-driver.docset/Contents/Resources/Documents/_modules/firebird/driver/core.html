@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>firebird.driver.core &#8212; firebird-driver 1.6.0 documentation</title>
+    <title>firebird.driver.core &#8212; firebird-driver 1.7.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
@@ -38,7 +38,7 @@
 
         <a class="brand" href="../../../index.html">
           firebird-driver</a>
-        <span class="navbar-text pull-left"><b>1.6.0</b></span>
+        <span class="navbar-text pull-left"><b>1.7.0</b></span>
 
         <div class="nav-collapse">
           <ul class="nav">
@@ -168,6 +168,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-7-0">Version 1.7.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-6-0">Version 1.6.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-5-2">Version 1.5.2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-5-1">Version 1.5.1</a></li>
@@ -2898,13 +2899,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_out_cnt</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">get_count</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_out_buffer</span><span class="p">:</span> <span class="nb">bytes</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_out_desc</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">ItemMetadata</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_out_cnt</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">meta</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_out_desc</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_names</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_out_meta</span> <span class="o">=</span> <span class="n">meta</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_out_buffer</span> <span class="o">=</span> <span class="n">create_string_buffer</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">get_message_length</span><span class="p">())</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_out_desc</span> <span class="o">=</span> <span class="n">create_meta_descriptors</span><span class="p">(</span><span class="n">meta</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">meta</span><span class="o">.</span><span class="n">field</span> <span class="k">if</span> <span class="n">meta</span><span class="o">.</span><span class="n">field</span> <span class="o">==</span> <span class="n">meta</span><span class="o">.</span><span class="n">alias</span> <span class="k">else</span> <span class="n">meta</span><span class="o">.</span><span class="n">alias</span> <span class="k">for</span> <span class="n">meta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_out_desc</span><span class="p">]</span>
     <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Statement</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span>
     <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -4131,6 +4135,21 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_result</span><span class="o">.</span><span class="n">is_bof</span><span class="p">()</span></div>
+<div class="viewcode-block" id="Cursor.to_dict"><a class="viewcode-back" href="../../../ref-core.html#firebird.driver.core.Cursor.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">into</span><span class="p">:</span> <span class="n">Dict</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns row tuple as dictionary with field names as keys. Returns new dictionary</span>
+<span class="sd">        if `into` argument is not provided, otherwise returns `into` dictionary updated</span>
+<span class="sd">        with row data.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            row:  Row data returned by fetch_* method.</span>
+<span class="sd">            into: Dictionary that shouold be updated with row data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stmt</span><span class="o">.</span><span class="n">_names</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">),</span> <span class="s2">&quot;Length of data must match number of fields&quot;</span>
+        <span class="k">if</span> <span class="n">into</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">into</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stmt</span><span class="o">.</span><span class="n">_names</span><span class="p">,</span> <span class="n">row</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">into</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stmt</span><span class="o">.</span><span class="n">_names</span><span class="p">,</span> <span class="n">row</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">into</span></div>
     <span class="c1"># Properties</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">connection</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Connection</span><span class="p">:</span>
@@ -5752,7 +5771,7 @@
     </p>
     <p>
         &copy; Copyright 2020-2022, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
     </p>
   </div>
 </footer>

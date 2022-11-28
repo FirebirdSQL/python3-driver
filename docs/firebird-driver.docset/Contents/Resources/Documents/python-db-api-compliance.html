@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
-<title>Compliance to PyDB API 2.0 — firebird-driver 1.6.0 documentation</title>
+<title>Compliance to PyDB API 2.0 — firebird-driver 1.7.0 documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
 <link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
 <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -37,7 +37,7 @@
 </button>
 <a class="brand" href="index.html">
           firebird-driver</a>
-<span class="navbar-text pull-left"><b>1.6.0</b></span>
+<span class="navbar-text pull-left"><b>1.7.0</b></span>
 <div class="nav-collapse">
 <ul class="nav">
 <li class="divider-vertical"></li>
@@ -157,6 +157,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-7-0">Version 1.7.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-6-0">Version 1.6.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-2">Version 1.5.2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-1">Version 1.5.1</a></li>
@@ -352,7 +353,7 @@ the statement using one of the cursor’s execute methods.</p>
 <code class="xref py py-obj docutils literal notranslate"><span class="pre">rollback(retaining=False,</span> <span class="pre">savepoint=None)</span></code></p>
 <blockquote>
 <div><p>The <code class="xref py py-obj docutils literal notranslate"><span class="pre">commit</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">rollback</span></code> methods accept an optional boolean parameter <code class="xref py py-obj docutils literal notranslate"><span class="pre">retaining</span></code>
-(default <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>) that indicates whether the transactional context of the transaction
+(default <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>) that indicates whether the transactional context of the transaction
 being resolved should be recycled. For details, see the Advanced
 Transaction Control: Retaining Operations section of this document.
 The <code class="xref py py-obj docutils literal notranslate"><span class="pre">rollback</span></code> method accepts an optional string parameter <code class="xref py py-obj docutils literal notranslate"><span class="pre">savepoint</span></code>
@@ -367,7 +368,7 @@ Advanced Transaction Control: Savepoints section of this document.</p>
 <blockquote>
 <div><p>Firebird-driver makes absolutely no guarantees about <code class="xref py py-obj docutils literal notranslate"><span class="pre">description</span></code> except those
 required by the Python Database API Specification 2.0 (that is, <code class="xref py py-obj docutils literal notranslate"><span class="pre">description</span></code>
-is either <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> or a sequence of 7-element sequences). Therefore, client
+is either <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> or a sequence of 7-element sequences). Therefore, client
 programmers should <em>not</em> rely on <code class="xref py py-obj docutils literal notranslate"><span class="pre">description</span></code> being an instance of a particular
 class or type. Firebird-driver provides several named positional constants to be
 used as indices into a given element of <code class="xref py py-obj docutils literal notranslate"><span class="pre">description</span></code> . The contents
@@ -435,7 +436,7 @@ except that it is a sequence indexed by field position.</p>
 </p>
 <p>
         © Copyright 2020-2022, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
 </p>
 </div>
 </footer>
