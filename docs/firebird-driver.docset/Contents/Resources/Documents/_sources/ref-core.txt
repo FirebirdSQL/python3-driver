@@ -45,6 +45,9 @@ Other constants and variables
 .. autodata:: _util
    :no-value:
 
+.. autodata:: TIMEOUT
+   :no-value:
+
 Context managers
 ================
 

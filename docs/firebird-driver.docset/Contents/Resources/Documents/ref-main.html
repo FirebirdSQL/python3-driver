@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
-<title>Main driver namespace — firebird-driver 1.7.0 documentation</title>
+<title>Main driver namespace — firebird-driver 1.8.0 documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
 <link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
 <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -37,7 +37,7 @@
 </button>
 <a class="brand" href="index.html">
           firebird-driver</a>
-<span class="navbar-text pull-left"><b>1.7.0</b></span>
+<span class="navbar-text pull-left"><b>1.8.0</b></span>
 <div class="nav-collapse">
 <ul class="nav">
 <li class="divider-vertical"></li>
@@ -157,6 +157,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-8-0">Version 1.8.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-7-0">Version 1.7.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-6-0">Version 1.6.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-2">Version 1.5.2</a></li>
@@ -268,6 +269,8 @@ and <a class="reference internal" href="ref-types.html#firebird.driver.types.Not
 <a class="reference internal" href="ref-types.html#firebird.driver.types.DefaultAction" title="firebird.driver.types.DefaultAction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DefaultAction</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.StatementType" title="firebird.driver.types.StatementType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StatementType</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.BlobType" title="firebird.driver.types.BlobType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BlobType</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.DbAccessMode" title="firebird.driver.types.DbAccessMode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DbAccessMode</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.DbSpaceReservation" title="firebird.driver.types.DbSpaceReservation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DbSpaceReservation</span></code></a>,
 <a class="reference internal" href="ref-types.html#firebird.driver.types.DbWriteMode" title="firebird.driver.types.DbWriteMode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DbWriteMode</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.ShutdownMode" title="firebird.driver.types.ShutdownMode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ShutdownMode</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.OnlineMode" title="firebird.driver.types.OnlineMode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">OnlineMode</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.ShutdownMethod" title="firebird.driver.types.ShutdownMethod"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ShutdownMethod</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.CancelType" title="firebird.driver.types.CancelType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CancelType</span></code></a>,
 <a class="reference internal" href="ref-types.html#firebird.driver.types.DecfloatRound" title="firebird.driver.types.DecfloatRound"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DecfloatRound</span></code></a> and <a class="reference internal" href="ref-types.html#firebird.driver.types.DecfloatTraps" title="firebird.driver.types.DecfloatTraps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DecfloatTraps</span></code></a></p>
+</dd>
+<dt>Sentinels:</dt><dd><p><a class="reference internal" href="ref-core.html#firebird.driver.core.TIMEOUT" title="firebird.driver.core.TIMEOUT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TIMEOUT</span></code></a></p>
 </dd>
 <dt>Flags:</dt><dd><p><a class="reference internal" href="ref-types.html#firebird.driver.types.ServerCapability" title="firebird.driver.types.ServerCapability"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerCapability</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.SrvRepairFlag" title="firebird.driver.types.SrvRepairFlag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SrvRepairFlag</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.SrvStatFlag" title="firebird.driver.types.SrvStatFlag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SrvStatFlag</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.SrvBackupFlag" title="firebird.driver.types.SrvBackupFlag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SrvBackupFlag</span></code></a>,
 <a class="reference internal" href="ref-types.html#firebird.driver.types.SrvRestoreFlag" title="firebird.driver.types.SrvRestoreFlag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SrvRestoreFlag</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.SrvNBackupFlag" title="firebird.driver.types.SrvNBackupFlag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SrvNBackupFlag</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.ConnectionFlag" title="firebird.driver.types.ConnectionFlag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConnectionFlag</span></code></a> and <a class="reference internal" href="ref-types.html#firebird.driver.types.EncryptionFlag" title="firebird.driver.types.EncryptionFlag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EncryptionFlag</span></code></a></p>

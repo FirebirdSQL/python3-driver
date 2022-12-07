@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>firebird.driver.core &#8212; firebird-driver 1.7.0 documentation</title>
+    <title>firebird.driver.core &#8212; firebird-driver 1.8.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
@@ -38,7 +38,7 @@
 
         <a class="brand" href="../../../index.html">
           firebird-driver</a>
-        <span class="navbar-text pull-left"><b>1.7.0</b></span>
+        <span class="navbar-text pull-left"><b>1.8.0</b></span>
 
         <div class="nav-collapse">
           <ul class="nav">
@@ -168,6 +168,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-8-0">Version 1.8.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-7-0">Version 1.7.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-6-0">Version 1.6.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-5-2">Version 1.5.2</a></li>
@@ -361,6 +362,9 @@
                <span class="s1">&#39;GBK&#39;</span><span class="p">:</span> <span class="s1">&#39;gbk&#39;</span><span class="p">,</span> <span class="s1">&#39;KOI8R&#39;</span><span class="p">:</span> <span class="s1">&#39;koi8_r&#39;</span><span class="p">,</span> <span class="s1">&#39;KOI8U&#39;</span><span class="p">:</span> <span class="s1">&#39;koi8_u&#39;</span><span class="p">,</span>
                <span class="s1">&#39;WIN1258&#39;</span><span class="p">:</span> <span class="s1">&#39;cp1258&#39;</span><span class="p">,</span>
                <span class="p">}</span>
+
+<span class="c1">#: Sentinel that denotes timeout expiration</span>
+<span class="n">TIMEOUT</span><span class="p">:</span> <span class="n">Sentinel</span> <span class="o">=</span> <span class="n">Sentinel</span><span class="p">(</span><span class="s1">&#39;TIMEOUT&#39;</span><span class="p">)</span>
 
 <span class="c1"># Internal</span>
 <span class="c1">#: Firebird `.iMaster` interface</span>
@@ -5532,9 +5536,9 @@
     <span class="k">def</span> <span class="nf">_make_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">timeout</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">SrvInfoCode</span><span class="o">.</span><span class="n">TIMEOUT</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;little&#39;</span><span class="p">),</span>
-                         <span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;little&#39;</span><span class="p">),</span>
-                         <span class="n">timeout</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;little&#39;</span><span class="p">),</span> <span class="n">isc_info_end</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;little&#39;</span><span class="p">)])</span>
+        <span class="k">return</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">SrvInfoCode</span><span class="o">.</span><span class="n">TIMEOUT</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;little&#39;</span><span class="p">),</span>
+                         <span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;little&#39;</span><span class="p">),</span>
+                         <span class="n">timeout</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;little&#39;</span><span class="p">)])</span>
     <span class="k">def</span> <span class="nf">_fetch_complex_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">send</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_request</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
@@ -5553,12 +5557,11 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">get_tag</span><span class="p">()</span> <span class="o">!=</span> <span class="n">isc_info_end</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
             <span class="k">raise</span> <span class="n">InterfaceError</span><span class="p">(</span><span class="s2">&quot;Malformed result buffer (missing isc_info_end item)&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">result</span>
-    <span class="k">def</span> <span class="nf">_query_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_query_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_svc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_svc</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_request</span><span class="p">(</span><span class="n">timeout</span><span class="p">),</span> <span class="nb">bytes</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">raw</span><span class="p">)</span>
-        <span class="n">tag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">get_tag</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">tag</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">tag</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">get_tag</span><span class="p">())</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
             <span class="k">raise</span> <span class="n">InterfaceError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Service responded with error code: </span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">read_sized_string</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">encoding</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">encoding_errors</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">_read_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">init</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -5610,8 +5613,36 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_svc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">get_info</span><span class="p">(</span><span class="n">SrvInfoCode</span><span class="o">.</span><span class="n">RUNNING</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
+<div class="viewcode-block" id="Server.readline_timed"><a class="viewcode-back" href="../../../ref-core.html#firebird.driver.core.Server.readline_timed">[docs]</a>    <span class="k">def</span> <span class="nf">readline_timed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sentinel</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Get next line of textual output from last service query.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">          timeout: Time in seconds to wait for output.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">          Line of service output, `None` for EOF or `.TIMEOUT` sentinel for expired timeout.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">timeout</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_svc</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_request</span><span class="p">(</span><span class="n">timeout</span><span class="p">),</span> <span class="nb">bytes</span><span class="p">([</span><span class="n">SrvInfoCode</span><span class="o">.</span><span class="n">LINE</span><span class="p">]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">raw</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">tag</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">get_tag</span><span class="p">())</span> <span class="o">!=</span> <span class="n">SrvInfoCode</span><span class="o">.</span><span class="n">LINE</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="k">raise</span> <span class="n">InterfaceError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Service responded with error code: </span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">read_sized_string</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">encoding</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">encoding_errors</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">get_tag</span><span class="p">()</span> <span class="o">==</span> <span class="n">SrvInfoCode</span><span class="o">.</span><span class="n">TIMEOUT</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">TIMEOUT</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
 <div class="viewcode-block" id="Server.readline"><a class="viewcode-back" href="../../../ref-core.html#firebird.driver.core.Server.readline">[docs]</a>    <span class="k">def</span> <span class="nf">readline</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Get next line of textual output from last service query.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">          Line of service output or `None` for EOF.</span>
+
+<span class="sd">        Important:</span>
+<span class="sd">          This method blocks until any output is available from server. Bacuse this method</span>
+<span class="sd">          is used by iteration over `.Server` and `.readlines` method, they will block as</span>
+<span class="sd">          well.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eof</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__line_buffer</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>

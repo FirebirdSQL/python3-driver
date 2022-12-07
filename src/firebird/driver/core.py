@@ -118,6 +118,9 @@ CHARSET_MAP = {None: a.getpreferredencoding(), 'NONE': a.getpreferredencoding(),
                'WIN1258': 'cp1258',
                }
 
+#: Sentinel that denotes timeout expiration
+TIMEOUT: Sentinel = Sentinel('TIMEOUT')
+
 # Internal
 #: Firebird `.iMaster` interface
 _master = None
@@ -5288,9 +5291,9 @@ class Server(LoggingIdMixin):
     def _make_request(self, timeout: int) -> bytes:
         if timeout == -1:
             return None
-        return b''.join([SrvInfoCode.TIMEOUT.to_bytes(1, 'little'),
-                         (4).to_bytes(2, 'little'),
-                         timeout.to_bytes(4, 'little'), isc_info_end.to_bytes(1, 'little')])
+        return b''.join([SrvInfoCode.TIMEOUT.value.to_bytes(1, 'little'),
+                         (2).to_bytes(2, 'little'),
+                         timeout.to_bytes(2, 'little')])
     def _fetch_complex_info(self, request: bytes, timeout: int=-1) -> None:
         send = self._make_request(timeout)
         self.response.clear()
@@ -5309,12 +5312,11 @@ class Server(LoggingIdMixin):
         if self.response.get_tag() != isc_info_end:  # pragma: no cover
             raise InterfaceError("Malformed result buffer (missing isc_info_end item)")
         return result
-    def _query_output(self, timeout: int) -> None:
+    def _query_output(self, timeout: int) -> str:
         assert self._svc is not None
         self.response.clear()
         self._svc.query(self._make_request(timeout), bytes([self.mode]), self.response.raw)
-        tag = self.response.get_tag()
-        if tag != self.mode:  # pragma: no cover
+        if (tag := self.response.get_tag()) != self.mode:  # pragma: no cover
             raise InterfaceError(f"Service responded with error code: {tag}")
         return self.response.read_sized_string(encoding=self.encoding, errors=self.encoding_errors)
     def _read_output(self, *, init: str='', timeout: int=-1) -> None:
@@ -5366,8 +5368,36 @@ class Server(LoggingIdMixin):
         """
         assert self._svc is not None
         return self.info.get_info(SrvInfoCode.RUNNING) > 0
+    def readline_timed(self, timeout: int) -> Union[str, Sentinel, None]:
+        """Get next line of textual output from last service query.
+
+        Arguments:
+          timeout: Time in seconds to wait for output.
+
+        Returns:
+          Line of service output, `None` for EOF or `.TIMEOUT` sentinel for expired timeout.
+        """
+        assert timeout >= 0
+        self.response.clear()
+        self._svc.query(self._make_request(timeout), bytes([SrvInfoCode.LINE]), self.response.raw)
+        if (tag := self.response.get_tag()) != SrvInfoCode.LINE:  # pragma: no cover
+            raise InterfaceError(f"Service responded with error code: {tag}")
+        data = self.response.read_sized_string(encoding=self.encoding, errors=self.encoding_errors)
+        if self.response.get_tag() == SrvInfoCode.TIMEOUT:
+            return TIMEOUT
+        if data:
+            return data + '\n'
+        return None
     def readline(self) -> Optional[str]:
         """Get next line of textual output from last service query.
+
+        Returns:
+          Line of service output or `None` for EOF.
+
+        Important:
+          This method blocks until any output is available from server. Bacuse this method
+          is used by iteration over `.Server` and `.readlines` method, they will block as
+          well.
         """
         if self._eof and not self.__line_buffer:
             return None

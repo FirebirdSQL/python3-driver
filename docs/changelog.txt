@@ -2,6 +2,11 @@
 Changelog
 #########
 
+Version 1.8.0
+=============
+
+* New: `.Server.readline_timed` method.
+
 Version 1.7.0
 =============
 

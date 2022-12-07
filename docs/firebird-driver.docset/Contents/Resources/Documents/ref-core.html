@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
-<title>firebird.driver.core — firebird-driver 1.7.0 documentation</title>
+<title>firebird.driver.core — firebird-driver 1.8.0 documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
 <link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
 <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -37,7 +37,7 @@
 </button>
 <a class="brand" href="index.html">
           firebird-driver</a>
-<span class="navbar-text pull-left"><b>1.7.0</b></span>
+<span class="navbar-text pull-left"><b>1.8.0</b></span>
 <div class="nav-collapse">
 <ul class="nav">
 <li class="divider-vertical"></li>
@@ -157,6 +157,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-8-0">Version 1.8.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-7-0">Version 1.7.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-6-0">Version 1.6.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-2">Version 1.5.2</a></li>
@@ -207,6 +208,7 @@
 <li><a class="reference internal" href="#firebird.driver.core.FS_ENCODING"><code class="docutils literal notranslate"><span class="pre">FS_ENCODING</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.core._master"><code class="docutils literal notranslate"><span class="pre">_master</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.core._util"><code class="docutils literal notranslate"><span class="pre">_util</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.core.TIMEOUT"><code class="docutils literal notranslate"><span class="pre">TIMEOUT</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -410,6 +412,7 @@
 <li><a class="reference internal" href="#firebird.driver.core.Server.close"><code class="docutils literal notranslate"><span class="pre">Server.close()</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.core.Server.is_running"><code class="docutils literal notranslate"><span class="pre">Server.is_running()</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.core.Server.readline"><code class="docutils literal notranslate"><span class="pre">Server.readline()</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.core.Server.readline_timed"><code class="docutils literal notranslate"><span class="pre">Server.readline_timed()</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.core.Server.readlines"><code class="docutils literal notranslate"><span class="pre">Server.readlines()</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.core.Server.wait"><code class="docutils literal notranslate"><span class="pre">Server.wait()</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.core.Server.database"><code class="docutils literal notranslate"><span class="pre">Server.database</span></code></a></li>
@@ -687,6 +690,11 @@
 <dt class="sig sig-object py" id="firebird.driver.core._util">
 <span class="sig-prename descclassname"><span class="pre">firebird.driver.core.</span></span><span class="sig-name descname"><span class="pre">_util</span></span><a class="dashAnchor" name="//apple_ref/cpp/Value/firebird.driver.core._util"></a><a class="headerlink" href="#firebird.driver.core._util" title="Permalink to this definition">¶</a></dt>
 <dd><p>Firebird <a class="reference internal" href="ref-intf.html#firebird.driver.interfaces.iUtil" title="firebird.driver.interfaces.iUtil"><code class="xref py py-obj docutils literal notranslate"><span class="pre">iUtil</span></code></a> interface</p>
+</dd></dl>
+<dl class="py data">
+<dt class="sig sig-object py" id="firebird.driver.core.TIMEOUT">
+<span class="sig-prename descclassname"><span class="pre">firebird.driver.core.</span></span><span class="sig-name descname"><span class="pre">TIMEOUT</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/types.html#firebird.base.types.Sentinel" title="(in Firebird-base v1.5.0)"><span class="pre">Sentinel</span></a></em><a class="dashAnchor" name="//apple_ref/cpp/Value/firebird.driver.core.TIMEOUT"></a><a class="headerlink" href="#firebird.driver.core.TIMEOUT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sentinel that denotes timeout expiration</p>
 </dd></dl>
 </section>
 </section>
@@ -1329,7 +1337,7 @@ data like division by zero, numeric value out of range, etc.</p>
 <dl class="py exception">
 <dt class="sig sig-object py" id="firebird.driver.core.Connection.DatabaseError">
 <em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DatabaseError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Exception/firebird.driver.core.Connection.DatabaseError"></a><a class="headerlink" href="#firebird.driver.core.Connection.DatabaseError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ref-types.html#firebird.driver.types.Error" title="firebird.base.types.Error"><code class="xref py py-class docutils literal notranslate"><span class="pre">Error</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#firebird.driver.core.Connection.Error" title="firebird.base.types.Error"><code class="xref py py-class docutils literal notranslate"><span class="pre">Error</span></code></a></p>
 <p>Exception raised for all errors reported by Firebird.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.core.Connection.DatabaseError.gds_codes">
@@ -1349,7 +1357,7 @@ data like division by zero, numeric value out of range, etc.</p>
 </dd></dl>
 <dl class="py exception">
 <dt class="sig sig-object py" id="firebird.driver.core.Connection.Error">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Exception/firebird.driver.core.Connection.Error"></a><a class="headerlink" href="#firebird.driver.core.Connection.Error" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Exception/firebird.base.types.Error"></a><a class="dashAnchor" name="//apple_ref/cpp/Exception/firebird.driver.core.Connection.Error"></a><a class="headerlink" href="#firebird.driver.core.Connection.Error" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <p>Exception that is intended to be used as a base class of all <strong>application-related</strong>
 errors. The important difference from <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Exception</span></code></a> class is that <code class="xref py py-obj docutils literal notranslate"><span class="pre">Error</span></code> accepts keyword
@@ -1391,7 +1399,7 @@ e.g. a foreign key check fails.</p>
 <dl class="py exception">
 <dt class="sig sig-object py" id="firebird.driver.core.Connection.InterfaceError">
 <em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InterfaceError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="dashAnchor" name="//apple_ref/cpp/Exception/firebird.driver.core.Connection.InterfaceError"></a><a class="headerlink" href="#firebird.driver.core.Connection.InterfaceError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ref-types.html#firebird.driver.types.Error" title="firebird.base.types.Error"><code class="xref py py-class docutils literal notranslate"><span class="pre">Error</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#firebird.driver.core.Connection.Error" title="firebird.base.types.Error"><code class="xref py py-class docutils literal notranslate"><span class="pre">Error</span></code></a></p>
 <p>Exception raised for errors that are reported by the driver rather than
 the Firebird itself.</p>
 </dd></dl>
@@ -1823,7 +1831,7 @@ the <a class="reference internal" href="#firebird.driver.core.TransactionManager
 </ul>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="#firebird.driver.core.Connection.InterfaceError" title="firebird.driver.core.Connection.InterfaceError"><strong>InterfaceError</strong></a> – When both retaining and savepoint parameters are specified.</p>
+<dd class="field-even"><p><a class="reference internal" href="ref-types.html#firebird.driver.types.InterfaceError" title="firebird.driver.types.InterfaceError"><strong>InterfaceError</strong></a> – When both retaining and savepoint parameters are specified.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>None</p>
@@ -1937,7 +1945,7 @@ resources.</p>
 this distributed transaction manager.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#firebird.driver.core.Connection.InterfaceError" title="firebird.driver.core.Connection.InterfaceError"><strong>InterfaceError</strong></a> – When specified connection is not associated with distributed
+<dd class="field-odd"><p><a class="reference internal" href="ref-types.html#firebird.driver.types.InterfaceError" title="firebird.driver.types.InterfaceError"><strong>InterfaceError</strong></a> – When specified connection is not associated with distributed
     connection manager.</p>
 </dd>
 <dt class="field-even">Parameters</dt>
@@ -1989,7 +1997,7 @@ manually, it will be performed implicitly by <a class="reference internal" href=
 </ul>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="#firebird.driver.core.Connection.InterfaceError" title="firebird.driver.core.Connection.InterfaceError"><strong>InterfaceError</strong></a> – When both retaining and savepoint parameters are specified.</p>
+<dd class="field-even"><p><a class="reference internal" href="ref-types.html#firebird.driver.types.InterfaceError" title="firebird.driver.types.InterfaceError"><strong>InterfaceError</strong></a> – When both retaining and savepoint parameters are specified.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>None</p>
@@ -2592,7 +2600,7 @@ count figures are usually not available to the client.</p>
 <dt class="sig sig-object py" id="firebird.driver.core.Server.close">
 <span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/driver/core.html#Server.close"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.driver.core.Server.close"></a><a class="headerlink" href="#firebird.driver.core.Server.close" title="Permalink to this definition">¶</a></dt>
 <dd><p>Close the server connection now (rather than whenever <code class="xref py py-obj docutils literal notranslate"><span class="pre">__del__</span></code> is called).
-The instance will be unusable from this point forward; an <a class="reference internal" href="#firebird.driver.core.Connection.Error" title="firebird.driver.core.Connection.Error"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Error</span></code></a>
+The instance will be unusable from this point forward; an <a class="reference internal" href="ref-types.html#firebird.driver.types.Error" title="firebird.driver.types.Error"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Error</span></code></a>
 (or subclass) exception will be raised if any operation is attempted
 with the instance.</p>
 <dl class="field-list simple">
@@ -2622,8 +2630,33 @@ no other async service could be started.</p>
 <span class="sig-name descname"><span class="pre">readline</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/firebird/driver/core.html#Server.readline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.driver.core.Server.readline"></a><a class="headerlink" href="#firebird.driver.core.Server.readline" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get next line of textual output from last service query.</p>
 <dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Line of service output or <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> for EOF.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]</p>
+</dd>
+</dl>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>This method blocks until any output is available from server. Bacuse this method
+is used by iteration over <a class="reference internal" href="#firebird.driver.core.Server" title="firebird.driver.core.Server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server</span></code></a> and <a class="reference internal" href="#firebird.driver.core.Server.readlines" title="firebird.driver.core.Server.readlines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">readlines</span></code></a> method, they will block as
+well.</p>
+</div>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="firebird.driver.core.Server.readline_timed">
+<span class="sig-name descname"><span class="pre">readline_timed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/types.html#firebird.base.types.Sentinel" title="(in Firebird-base v1.5.0)"><span class="pre">Sentinel</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/firebird/driver/core.html#Server.readline_timed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.driver.core.Server.readline_timed"></a><a class="headerlink" href="#firebird.driver.core.Server.readline_timed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get next line of textual output from last service query.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>timeout</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – Time in seconds to wait for output.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Line of service output, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> for EOF or <a class="reference internal" href="#firebird.driver.core.TIMEOUT" title="firebird.driver.core.TIMEOUT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TIMEOUT</span></code></a> sentinel for expired timeout.</p>
+</dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/types.html#firebird.base.types.Sentinel" title="(in Firebird-base v1.5.0)"><em>Sentinel</em></a>]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3504,7 +3537,7 @@ with buffer of doubled size.</p>
 </ul>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="#firebird.driver.core.Connection.InterfaceError" title="firebird.driver.core.Connection.InterfaceError"><strong>InterfaceError</strong></a> – If information cannot be successfuly stored into buffer
+<dd class="field-even"><p><a class="reference internal" href="ref-types.html#firebird.driver.types.InterfaceError" title="firebird.driver.types.InterfaceError"><strong>InterfaceError</strong></a> – If information cannot be successfuly stored into buffer
     of <code class="xref py py-obj docutils literal notranslate"><span class="pre">max_size</span></code>, or response is ivalid.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
@@ -3939,7 +3972,7 @@ value(s) depend on INFO code passed as parameter.</p>
 <dd><p>Snapshot number for this transaction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#firebird.driver.core.Connection.NotSupportedError" title="firebird.driver.core.Connection.NotSupportedError"><strong>NotSupportedError</strong></a> – Requires Firebird 4+</p>
+<dd class="field-odd"><p><a class="reference internal" href="ref-types.html#firebird.driver.types.NotSupportedError" title="firebird.driver.types.NotSupportedError"><strong>NotSupportedError</strong></a> – Requires Firebird 4+</p>
 </dd>
 </dl>
 </dd></dl>
@@ -4208,7 +4241,7 @@ and return None. The default timeout is infinite.</p>
 at all.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#firebird.driver.core.Connection.InterfaceError" title="firebird.driver.core.Connection.InterfaceError"><strong>InterfaceError</strong></a> – When collector does not listen for events.</p>
+<dd class="field-odd"><p><a class="reference internal" href="ref-types.html#firebird.driver.types.InterfaceError" title="firebird.driver.types.InterfaceError"><strong>InterfaceError</strong></a> – When collector does not listen for events.</p>
 </dd>
 <dt class="field-even">Parameters</dt>
 <dd class="field-even"><p><strong>timeout</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><em>Union</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>]</em><em>]</em>) – </p>
@@ -4365,7 +4398,7 @@ will be read.</p>
 <p>Uses <a class="reference internal" href="#firebird.driver.core.BlobReader.newline" title="firebird.driver.core.BlobReader.newline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">newline</span></code></a> as the line terminator.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#firebird.driver.core.Connection.InterfaceError" title="firebird.driver.core.Connection.InterfaceError"><strong>InterfaceError</strong></a> – For non-textual BLOBs.</p>
+<dd class="field-odd"><p><a class="reference internal" href="ref-types.html#firebird.driver.types.InterfaceError" title="firebird.driver.types.InterfaceError"><strong>InterfaceError</strong></a> – For non-textual BLOBs.</p>
 </dd>
 <dt class="field-even">Parameters</dt>
 <dd class="field-even"><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p>
@@ -4388,7 +4421,7 @@ calling <a class="reference internal" href="#firebird.driver.core.BlobReader.rea
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#firebird.driver.core.Connection.InterfaceError" title="firebird.driver.core.Connection.InterfaceError"><strong>InterfaceError</strong></a> – For non-textual BLOBs.</p>
+<dd class="field-odd"><p><a class="reference internal" href="ref-types.html#firebird.driver.types.InterfaceError" title="firebird.driver.types.InterfaceError"><strong>InterfaceError</strong></a> – For non-textual BLOBs.</p>
 </dd>
 <dt class="field-even">Parameters</dt>
 <dd class="field-even"><p><strong>hint</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p>

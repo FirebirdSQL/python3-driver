@@ -55,6 +55,9 @@ Enums:
     `DbWriteMode`, `ShutdownMode`, `OnlineMode`, `ShutdownMethod`, `CancelType`,
     `DecfloatRound` and `DecfloatTraps`
 
+Sentinels:
+     `~firebird.driver.core.TIMEOUT`
+
 Flags:
     `ServerCapability`, `SrvRepairFlag`, `SrvStatFlag`, `SrvBackupFlag`,
     `SrvRestoreFlag`, `SrvNBackupFlag`, `ConnectionFlag` and `EncryptionFlag`

@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
-<title>Usage Guide — firebird-driver 1.7.0 documentation</title>
+<title>Usage Guide — firebird-driver 1.8.0 documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
 <link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
 <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -37,7 +37,7 @@
 </button>
 <a class="brand" href="index.html">
           firebird-driver</a>
-<span class="navbar-text pull-left"><b>1.7.0</b></span>
+<span class="navbar-text pull-left"><b>1.8.0</b></span>
 <div class="nav-collapse">
 <ul class="nav">
 <li class="divider-vertical"></li>
@@ -157,6 +157,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-8-0">Version 1.8.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-7-0">Version 1.7.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-6-0">Version 1.6.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-5-2">Version 1.5.2</a></li>
@@ -2429,6 +2430,7 @@ Rather than return the whole text as single string value by methods that provide
 to these services, firebird-driver isolated the transfer process to separate methods:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.Server.readline" title="firebird.driver.core.Server.readline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">readline()</span></code></a> - Similar to <code class="xref py py-obj docutils literal notranslate"><span class="pre">file.readline</span></code>, returns next line of output from Service.</p></li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.Server.readline_timed" title="firebird.driver.core.Server.readline_timed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">readline_timed()</span></code></a> - Like <a class="reference internal" href="ref-core.html#firebird.driver.core.Server.readline" title="firebird.driver.core.Server.readline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">readline()</span></code></a> but with timeout.</p></li>
 <li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.Server.readlines" title="firebird.driver.core.Server.readlines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">readlines()</span></code></a> - Like <code class="xref py py-obj docutils literal notranslate"><span class="pre">file.readlines</span></code>, returns list of output lines.</p></li>
 <li><p>Iteration over <a class="reference internal" href="ref-core.html#firebird.driver.core.Server" title="firebird.driver.core.Server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server</span></code></a> object, because <a class="reference internal" href="ref-core.html#firebird.driver.core.Server" title="firebird.driver.core.Server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server</span></code></a> has built-in support for <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#typeiter" title="(in Python v3.11)"><span class="xref std std-ref">iterator protocol</span></a>.</p></li>
 <li><p>Using <code class="xref py py-obj docutils literal notranslate"><span class="pre">callback</span></code> method provided by developer. Each <a class="reference internal" href="ref-core.html#firebird.driver.core.Server" title="firebird.driver.core.Server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server</span></code></a> method that returns its result
@@ -2461,6 +2463,17 @@ service will fail with exception! This constraint is set by Firebird Service API
 <p>You may check the status of asynchronous Services using <a class="reference internal" href="ref-core.html#firebird.driver.core.Server.is_running" title="firebird.driver.core.Server.is_running"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server.is_running()</span></code></a> method.</p>
 <p>In cases when you’re not interested in output produced by Service, call <a class="reference internal" href="ref-core.html#firebird.driver.core.Server.wait" title="firebird.driver.core.Server.wait"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wait()</span></code></a>
 to wait for service to complete.</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Normally, requesting output with <a class="reference internal" href="ref-core.html#firebird.driver.core.Server.readline" title="firebird.driver.core.Server.readline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">readline()</span></code></a> blocks until any output is
+available from server. Bacuse this method is used by iteration over <a class="reference internal" href="ref-core.html#firebird.driver.core.Server" title="firebird.driver.core.Server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server</span></code></a> and
+<a class="reference internal" href="ref-core.html#firebird.driver.core.Server.readlines" title="firebird.driver.core.Server.readlines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">readlines()</span></code></a> method, they will block as well. Most services produce output
+continuously and without (much) delay, so this is usually not a problem. However, some
+services (eg trace) can produce output at significantly slower intervals (if at all),
+which complicates the creation of responsive applications. In this case, it is necessary
+to use the <a class="reference internal" href="ref-core.html#firebird.driver.core.Server.readline_timed" title="firebird.driver.core.Server.readline_timed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">readline_timed()</span></code></a> method, which allows you to limit the waiting
+time for the output.</p>
 </div>
 <p><strong>Examples:</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firebird.driver</span> <span class="kn">import</span> <span class="n">connect_server</span>

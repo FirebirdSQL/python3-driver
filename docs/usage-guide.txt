@@ -2423,6 +2423,7 @@ Rather than return the whole text as single string value by methods that provide
 to these services, firebird-driver isolated the transfer process to separate methods:
 
 * `~.Server.readline()` - Similar to `file.readline`, returns next line of output from Service.
+* `~.Server.readline_timed()` - Like `~.Server.readline()` but with timeout.
 * `~.Server.readlines()` - Like `file.readlines`, returns list of output lines.
 * Iteration over `.Server` object, because `.Server` has built-in support for :ref:`iterator protocol <python:typeiter>`.
 * Using `callback` method provided by developer. Each `.Server` method that returns its result
@@ -2457,6 +2458,17 @@ to these services, firebird-driver isolated the transfer process to separate met
 
    In cases when you're not interested in output produced by Service, call `~.Server.wait()`
    to wait for service to complete.
+
+.. important::
+
+   Normally, requesting output with `~.Server.readline()` blocks until any output is
+   available from server. Bacuse this method is used by iteration over `.Server` and
+   `~.Server.readlines()` method, they will block as well. Most services produce output
+   continuously and without (much) delay, so this is usually not a problem. However, some
+   services (eg trace) can produce output at significantly slower intervals (if at all),
+   which complicates the creation of responsive applications. In this case, it is necessary
+   to use the `~.Server.readline_timed()` method, which allows you to limit the waiting
+   time for the output.
 
 **Examples:**
 
