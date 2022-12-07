@@ -33,7 +33,7 @@ dynamic = ["version"]
 
 [project.urls]
 Home = "https://github.com/FirebirdSQL/python3-driver"
-Documentation = "https://firebird-base.rtfd.io"
+Documentation = "https://firebird-driver.rtfd.io"
 "Bug Reports" = "https://github.com/FirebirdSQL/python3-base/issues"
 Funding = "https://www.firebirdsql.org/en/donate/"
 Source = "https://github.com/FirebirdSQL/python3-driver"
