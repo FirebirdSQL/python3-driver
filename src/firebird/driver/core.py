@@ -3932,7 +3932,7 @@ class Cursor(LoggingIdMixin):
         (name, type_code, display_size, internal_size, precision, scale, null_ok)
         """
         if self._stmt is None:
-            return []
+            return None
         if self._stmt._desc is None:
             desc = []
             for meta in self._stmt._out_desc:
@@ -3994,7 +3994,7 @@ class Cursor(LoggingIdMixin):
                 desc.append(tuple([meta.field if meta.field == meta.alias else meta.alias,
                                   vtype, dispsize, meta.length, precision,
                                   scale, meta.nullable]))
-            self._stmt._desc = tuple(desc)
+            self._stmt._desc = tuple(desc) if desc else None
         return self._stmt._desc
     @property
     def affected_rows(self) -> int:
