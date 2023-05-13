@@ -42,15 +42,24 @@ from io import StringIO, BytesIO
 
 FB30 = '3.0'
 FB40 = '4.0'
+FB50 = '5.0'
+
+# Default client library
+FBTEST_CLIENT_LIBRARY = os.environ.get('FBTEST_CLIENT_LIBRARY', None)
+if FBTEST_CLIENT_LIBRARY is None:
+    raise Exception("You must inform a database client library using FBTEST_CLIENT_LIBRARY environment variable.")
+FBTEST_CLIENT_LIBRARY = os.path.expandvars(FBTEST_CLIENT_LIBRARY)
 
 # Default server host
-#FBTEST_HOST = ''
-FBTEST_HOST = 'localhost'
-# Default user
-FBTEST_USER = 'SYSDBA'
-# Default user password
-FBTEST_PASSWORD = 'masterkey'
+FBTEST_HOST = None
 
+# Default user
+FBTEST_USER = os.environ.get('FBTEST_USER', 'SYSDBA')
+
+# Default user password
+FBTEST_PASSWORD = os.environ.get('FBTEST_PASSWORD', 'masterkey')
+
+driver_config.fb_client_library.value = FBTEST_CLIENT_LIBRARY
 cfg = driver_config.register_server('FBTEST_HOST')
 cfg.host.value = FBTEST_HOST
 cfg.user.value = FBTEST_USER
@@ -117,13 +126,19 @@ class DriverTestBase(unittest.TestCase, LoggingIdMixin):
         with connect_server(FBTEST_HOST, user=FBTEST_USER, password=FBTEST_PASSWORD) as svc:
             self.version = svc.info.version
         if self.version.startswith(FB30):
-            self.FBTEST_DB = 'fbtest30.fdb'
             self.version = FB30
         elif self.version.startswith(FB40):
-            self.FBTEST_DB = 'fbtest40.fdb'
             self.version = FB40
+        elif self.version.startswith(FB50):
+            self.version = FB50
         else:
             raise Exception("Unsupported Firebird version (%s)" % self.version)
+
+        self.FBTEST_DB = os.environ.get('FBTEST_DATABASE', None)
+        if self.FBTEST_DB is None:
+            raise Exception("You must inform a database file via FBTEST_DATABASE environment variable.")
+        self.FBTEST_DB = os.path.expandvars(self.FBTEST_DB)
+
         #
         self.cwd = os.getcwd()
         self.dbpath = self.cwd if os.path.split(self.cwd)[1] == 'test' \
