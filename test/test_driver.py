@@ -46,18 +46,18 @@ FB50 = '5.0'
 
 # Default client library
 FBTEST_CLIENT_LIBRARY = os.environ.get('FBTEST_CLIENT_LIBRARY', None)
-if FBTEST_CLIENT_LIBRARY is None:
-    raise Exception("You must inform a database client library using FBTEST_CLIENT_LIBRARY environment variable.")
-FBTEST_CLIENT_LIBRARY = os.path.expandvars(FBTEST_CLIENT_LIBRARY)
+FBTEST_CLIENT_LIBRARY = os.path.expandvars(FBTEST_CLIENT_LIBRARY) if FBTEST_CLIENT_LIBRARY is not None else None
 
 # Default server host
 FBTEST_HOST = None
+if FBTEST_CLIENT_LIBRARY is None: 
+    FBTEST_HOST = os.environ.get('FBTEST_HOST', 'localhost')
 
 # Default user
-FBTEST_USER = os.environ.get('FBTEST_USER', 'SYSDBA')
+FBTEST_USER = os.environ.get('ISC_USER', 'SYSDBA')
 
 # Default user password
-FBTEST_PASSWORD = os.environ.get('FBTEST_PASSWORD', 'masterkey')
+FBTEST_PASSWORD = os.environ.get('ISC_PASSWORD', 'masterkey')
 
 driver_config.fb_client_library.value = FBTEST_CLIENT_LIBRARY
 cfg = driver_config.register_server('FBTEST_HOST')
@@ -136,7 +136,8 @@ class DriverTestBase(unittest.TestCase, LoggingIdMixin):
 
         self.FBTEST_DB = os.environ.get('FBTEST_DATABASE', None)
         if self.FBTEST_DB is None:
-            raise Exception("You must inform a database file via FBTEST_DATABASE environment variable.")
+            engine = "FB" + self.version.replace(".", "")
+            self.FBTEST_DB = f"%TEMP%/firebird-driver-tests/FIREBIRD-DRIVER.{engine}.FDB"
         self.FBTEST_DB = os.path.expandvars(self.FBTEST_DB)
 
         #

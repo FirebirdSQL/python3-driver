@@ -1,2 +1,0 @@
-FBTEST_CLIENT_LIBRARY=%TEMP%/firebird-driver-tests/fb50/fbclient.dll
-FBTEST_DATABASE=%TEMP%/firebird-driver-tests/FIREBIRD-DRIVER.FB50.FDB
