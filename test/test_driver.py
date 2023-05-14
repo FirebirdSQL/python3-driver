@@ -458,7 +458,10 @@ class TestConnection(DriverTestBase):
             self.assertEqual(con.info.page_size, 8192)
             self.assertGreater(con.info.id, 0)
             self.assertEqual(con.info.sql_dialect, 3)
-            self.assertEqual(con.info.name.upper(), self.dbfile.upper())
+            self.assertEqual(
+                os.path.realpath(con.info.name), 
+                os.path.realpath(self.dbfile)
+            )
             self.assertIsInstance(con.info.site, str)
             self.assertIsInstance(con.info.implementation, driver.types.Implementation)
             self.assertIsInstance(con.info.provider, driver.types.DbProvider)
@@ -524,7 +527,10 @@ class TestConnection(DriverTestBase):
             self.assertIsInstance(con.info.get_info(DbInfoCode.BASE_LEVEL), int)
             res = con.info.get_info(DbInfoCode.DB_ID)
             self.assertIsInstance(res, list)
-            self.assertEqual(res[0].upper(), self.dbfile.upper())
+            self.assertEqual(
+                os.path.realpath(res[0]), 
+                os.path.realpath(self.dbfile)
+            )
             res = con.info.get_info(DbInfoCode.IMPLEMENTATION)
             self.assertIsInstance(res, tuple)
             self.assertEqual(len(res), 4)
@@ -1575,10 +1581,8 @@ class TestServerStandard(DriverTestBase):
             x = svc.info.home_directory
             # On Windows it returns 'security.db', a bug?
             #self.assertIn('security.db', svc.info.security_database)
-            if self.version == FB40:
-                self.assertIn('security4.fdb'.upper(), svc.info.security_database.upper())
-            else:
-                self.assertIn('security3.fdb', svc.info.security_database)
+            security_database = f"security{self.version[0]}.fdb"
+            self.assertIn(security_database.casefold(), svc.info.security_database.casefold())
             x = svc.info.lock_directory
             x = svc.info.capabilities
             self.assertIn(ServerCapability.REMOTE_HOP, x)
@@ -1590,8 +1594,8 @@ class TestServerStandard(DriverTestBase):
                     con2._logging_id_ = self.__class__.__name__
                     self.assertGreaterEqual(len(svc.info.attached_databases), 2,
                                             "Should work for Superserver, may fail with value 0 for Classic")
-                    self.assertIn(self.dbfile.upper(),
-                                  [s.upper() for s in svc.info.attached_databases])
+                    self.assertIn(os.path.realpath(self.dbfile),
+                                  [os.path.realpath(s) for s in svc.info.attached_databases])
                     self.assertGreaterEqual(svc.info.connection_count, 2)
             # BAD request code
             with self.assertRaises(Error) as cm:
