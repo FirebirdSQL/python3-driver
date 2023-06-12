@@ -1596,7 +1596,8 @@ class Connection(LoggingIdMixin):
     def __init__(self, att: iAttachment, dsn: str, dpb: bytes=None, sql_dialect: int=3,
                  charset: str=None) -> None:
         self._att: iAttachment = att
-        self.__str: str = f'Connection[{self._get_db_handle()}]'
+        self.__handle: a.FB_API_HANDLE = None
+        self.__str: str = f'Connection[{self._get_handle().value}]'
         self.__charset: str = charset
         self.__precision_cache = {}
         self.__sqlsubtype_cache = {}
@@ -1639,16 +1640,16 @@ class Connection(LoggingIdMixin):
         self.close()
     def __repr__(self):
         return self.__str
-    def _get_db_handle(self) -> int:
-        isc_status = a.ISC_STATUS_ARRAY()
-        db_handle = a.FB_API_HANDLE(0)
-        api = a.get_api()
-        api.fb_get_database_handle(isc_status, db_handle, self._att)
-        if a.db_api_error(isc_status):  # pragma: no cover
-            raise a.exception_from_status(DatabaseError,
-                                          isc_status,
-                                          "Error in Cursor._unpack_output:fb_get_database_handle()")
-        return db_handle.value
+    def _get_handle(self) -> a.FB_API_HANDLE:
+        if self.__handle is None:
+            isc_status = a.ISC_STATUS_ARRAY()
+            self.__handle = a.FB_API_HANDLE(0)
+            a.get_api().fb_get_database_handle(isc_status, self.__handle, self._att)
+            if a.db_api_error(isc_status):  # pragma: no cover
+                raise a.exception_from_status(DatabaseError,
+                                              isc_status,
+                                              "Error in Connection._get_handle:fb_get_database_handle()")
+        return self.__handle
     def __stmt_deleted(self, stmt) -> None:
         self._statements.remove(stmt)
     def _close(self) -> None:
@@ -1791,14 +1792,7 @@ class Connection(LoggingIdMixin):
         Arguments:
             event_names: Sequence of database event names to whom the collector should be subscribed.
         """
-        isc_status = a.ISC_STATUS_ARRAY()
-        db_handle = a.FB_API_HANDLE(0)
-        a.api.fb_get_database_handle(isc_status, db_handle, self._att)
-        if a.db_api_error(isc_status):  # pragma: no cover
-            raise a.exception_from_status(DatabaseError,
-                                          isc_status,
-                                          "Error in Connection.get_events:fb_get_database_handle()")
-        conduit = EventCollector(db_handle, event_names)
+        conduit = EventCollector(self._get_handle(), event_names)
         self.__ecollectors.append(conduit)
         return conduit
     def close(self) -> None:
@@ -2343,6 +2337,7 @@ class TransactionManager(LoggingIdMixin):
         self.default_tpb: bytes = default_tpb
         #: Default action (commit/rollback) to be performed when transaction is closed.
         self.default_action: DefaultAction = default_action
+        self.__handle: a.FB_API_HANDLE = None
         self.__info: Union[TransactionInfoProvider, TransactionInfoProvider3] = None
         self._cursors: List = []  # Weak references to cursors
         self._tra: iTransaction = None
@@ -2377,6 +2372,16 @@ class TransactionManager(LoggingIdMixin):
                     self.rollback()
         finally:
             self._tra = None
+    def _get_handle(self) -> a.FB_API_HANDLE:
+        if self.__handle is None:
+            isc_status = a.ISC_STATUS_ARRAY()
+            self.__handle = a.FB_API_HANDLE(0)
+            a.get_api().fb_get_transaction_handle(isc_status, self.__handle, self._tra)
+            if a.db_api_error(isc_status):  # pragma: no cover
+                raise a.exception_from_status(DatabaseError,
+                                              isc_status,
+                                              "Error in TransactionManager._get_handle:fb_get_transaction_handle()")
+        return self.__handle
     def close(self) -> None:
         """Close the transaction manager and release all associated resources.
 
@@ -2667,7 +2672,7 @@ class Statement(LoggingIdMixin):
             self._out_meta = meta
             self._out_buffer = create_string_buffer(meta.get_message_length())
             self._out_desc = create_meta_descriptors(meta)
-            self._names = [meta.field if meta.field == meta.alias else meta.alias for meta in self._out_desc]
+            self._names = [m.field if m.field == m.alias else m.alias for m in self._out_desc]
     def __enter__(self) -> Statement:
         return self
     def __exit__(self, exc_type, exc_value, traceback) -> None:
@@ -3371,21 +3376,11 @@ class Cursor(LoggingIdMixin):
                     arrayid_ptr = pointer(arrayid)
                     arraydesc = a.ISC_ARRAY_DESC(0)
                     isc_status = a.ISC_STATUS_ARRAY()
-                    db_handle = a.FB_API_HANDLE(0)
-                    tr_handle = a.FB_API_HANDLE(0)
+                    db_handle = self._connection._get_handle()
+                    tr_handle = self._transaction._get_handle()
                     relname = in_meta.get_relation(i).encode(self._encoding)
                     sqlname = in_meta.get_field(i).encode(self._encoding)
                     api = a.get_api()
-                    api.fb_get_database_handle(isc_status, db_handle, self._connection._att)
-                    if a.db_api_error(isc_status):  # pragma: no cover
-                        raise a.exception_from_status(DatabaseError,
-                                                      isc_status,
-                                                      "Error in Cursor._pack_input:fb_get_database_handle()")
-                    api.fb_get_transaction_handle(isc_status, tr_handle, self._transaction._tra)
-                    if a.db_api_error(isc_status):  # pragma: no cover
-                        raise a.exception_from_status(DatabaseError,
-                                                      isc_status,
-                                                      "Error in Cursor._pack_input:fb_get_transaction_handle()")
                     sqlsubtype = self._connection._get_array_sqlsubtype(relname, sqlname)
                     api.isc_array_lookup_bounds(isc_status, db_handle, tr_handle,
                                                 relname, sqlname, arraydesc)
@@ -3525,21 +3520,11 @@ class Cursor(LoggingIdMixin):
                                          (0).from_bytes(val[4:], 'little'))
                     arraydesc = a.ISC_ARRAY_DESC(0)
                     isc_status = a.ISC_STATUS_ARRAY()
-                    db_handle = a.FB_API_HANDLE(0)
-                    tr_handle = a.FB_API_HANDLE(0)
+                    db_handle = self._connection._get_handle()
+                    tr_handle = self._transaction._get_handle()
                     relname = desc.relation.encode(self._encoding)
                     sqlname = desc.field.encode(self._encoding)
                     api = a.get_api()
-                    api.fb_get_database_handle(isc_status, db_handle, self._connection._att)
-                    if a.db_api_error(isc_status):  # pragma: no cover
-                        raise a.exception_from_status(DatabaseError,
-                                                      isc_status,
-                                                      "Error in Cursor._unpack_output:fb_get_database_handle()")
-                    api.fb_get_transaction_handle(isc_status, tr_handle, self._transaction._tra)
-                    if a.db_api_error(isc_status):  # pragma: no cover
-                        raise a.exception_from_status(DatabaseError,
-                                                      isc_status,
-                                                      "Error in Cursor._unpack_output:fb_get_transaction_handle()")
                     sqlsubtype = self._connection._get_array_sqlsubtype(relname, sqlname)
                     api.isc_array_lookup_bounds(isc_status, db_handle, tr_handle,
                                                 relname, sqlname, arraydesc)
