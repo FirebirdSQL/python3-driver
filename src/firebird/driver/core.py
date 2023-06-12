@@ -4565,6 +4565,7 @@ class ServerDbServices3(ServerServiceProvider):
                 spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             spb.insert_int(SrvPropertiesOption.PAGE_BUFFERS, size)
             self._srv()._svc.start(spb.get_buffer())
+        self._srv().wait()
     def set_sweep_interval(self, *, database: FILESPEC, interval: int, role: str=None) -> None:
         """Set database sweep interval.
 
@@ -4581,6 +4582,7 @@ class ServerDbServices3(ServerServiceProvider):
                 spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             spb.insert_int(SrvPropertiesOption.SWEEP_INTERVAL, interval)
             self._srv()._svc.start(spb.get_buffer())
+        self._srv().wait()
     def set_space_reservation(self, *, database: FILESPEC, mode: DbSpaceReservation,
                               role: str=None) -> None:
         """Set space reservation for database.
@@ -4599,6 +4601,7 @@ class ServerDbServices3(ServerServiceProvider):
             spb.insert_bytes(SrvPropertiesOption.RESERVE_SPACE,
                              bytes([mode]))
             self._srv()._svc.start(spb.get_buffer())
+        self._srv().wait()
     def set_write_mode(self, *, database: FILESPEC, mode: DbWriteMode, role: str=None) -> None:
         """Set database write mode (SYNC/ASYNC).
 
@@ -4616,6 +4619,7 @@ class ServerDbServices3(ServerServiceProvider):
             spb.insert_bytes(SrvPropertiesOption.WRITE_MODE,
                              bytes([mode]))
             self._srv()._svc.start(spb.get_buffer())
+        self._srv().wait()
     def set_access_mode(self, *, database: FILESPEC, mode: DbAccessMode, role: str=None) -> None:
         """Set database access mode (R/W or R/O).
 
@@ -4632,6 +4636,7 @@ class ServerDbServices3(ServerServiceProvider):
                 spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             spb.insert_bytes(SrvPropertiesOption.ACCESS_MODE, bytes([mode]))
             self._srv()._svc.start(spb.get_buffer())
+        self._srv().wait()
     def set_sql_dialect(self, *, database: FILESPEC, dialect: int, role: str=None) -> None:
         """Set database SQL dialect.
 
@@ -4648,6 +4653,7 @@ class ServerDbServices3(ServerServiceProvider):
                 spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             spb.insert_int(SrvPropertiesOption.SET_SQL_DIALECT, dialect)
             self._srv()._svc.start(spb.get_buffer())
+        self._srv().wait()
     def activate_shadow(self, *, database: FILESPEC, role: str=None) -> None:
         """Activate database shadow.
 
@@ -4663,6 +4669,7 @@ class ServerDbServices3(ServerServiceProvider):
                 spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             spb.insert_int(SPBItem.OPTIONS, SrvPropertiesFlag.ACTIVATE)
             self._srv()._svc.start(spb.get_buffer())
+        self._srv().wait()
     def no_linger(self, *, database: FILESPEC, role: str=None) -> None:
         """Set one-off override for database linger.
 
@@ -4678,6 +4685,7 @@ class ServerDbServices3(ServerServiceProvider):
                 spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             spb.insert_int(SPBItem.OPTIONS, SrvPropertiesFlag.NOLINGER)
             self._srv()._svc.start(spb.get_buffer())
+        self._srv().wait()
     def shutdown(self, *, database: FILESPEC, mode: ShutdownMode,
                  method: ShutdownMethod, timeout: int, role: str=None) -> None:
         """Database shutdown.
@@ -4698,6 +4706,7 @@ class ServerDbServices3(ServerServiceProvider):
             spb.insert_bytes(SrvPropertiesOption.SHUTDOWN_MODE, bytes([mode]))
             spb.insert_int(method, timeout)
             self._srv()._svc.start(spb.get_buffer())
+        self._srv().wait()
     def bring_online(self, *, database: FILESPEC, mode: OnlineMode=OnlineMode.NORMAL,
                      role: str=None) -> None:
         """Bring previously shut down database back online.
@@ -4715,6 +4724,7 @@ class ServerDbServices3(ServerServiceProvider):
                 spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
             spb.insert_bytes(SrvPropertiesOption.ONLINE_MODE, bytes([mode]))
             self._srv()._svc.start(spb.get_buffer())
+        self._srv().wait()
     def sweep(self, *, database: FILESPEC, role: str=None) -> None:
         """Perform database sweep operation.
 
