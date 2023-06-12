@@ -1047,7 +1047,7 @@ class TestCursor(DriverTestBase):
             with self.assertRaises(InterfaceError) as cm:
                 cur.fetchone()
             self.assertTupleEqual(cm.exception.args, ('Cannot fetch from cursor that did not executed a statement.',))
-    def to_dict(self):
+    def test_to_dict(self):
         cmd = 'select * from country'
         sample = {'COUNTRY': 'USA', 'CURRENCY': 'Dollar'}
         with self.con.cursor() as cur:
