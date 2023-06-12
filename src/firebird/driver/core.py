@@ -2372,6 +2372,7 @@ class TransactionManager(LoggingIdMixin):
                     self.rollback()
         finally:
             self._tra = None
+            self.__handle = None
     def _get_handle(self) -> a.FB_API_HANDLE:
         if self.__handle is None:
             isc_status = a.ISC_STATUS_ARRAY()
