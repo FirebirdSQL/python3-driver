@@ -42,15 +42,24 @@ from io import StringIO, BytesIO
 
 FB30 = '3.0'
 FB40 = '4.0'
+FB50 = '5.0'
+
+# Default client library
+FBTEST_CLIENT_LIBRARY = os.environ.get('FBTEST_CLIENT_LIBRARY', None)
+FBTEST_CLIENT_LIBRARY = os.path.expandvars(FBTEST_CLIENT_LIBRARY) if FBTEST_CLIENT_LIBRARY is not None else None
 
 # Default server host
-#FBTEST_HOST = ''
-FBTEST_HOST = 'localhost'
-# Default user
-FBTEST_USER = 'SYSDBA'
-# Default user password
-FBTEST_PASSWORD = 'masterkey'
+FBTEST_HOST = None
+if FBTEST_CLIENT_LIBRARY is None: 
+    FBTEST_HOST = os.environ.get('FBTEST_HOST', 'localhost')
 
+# Default user
+FBTEST_USER = os.environ.get('ISC_USER', 'SYSDBA')
+
+# Default user password
+FBTEST_PASSWORD = os.environ.get('ISC_PASSWORD', 'masterkey')
+
+driver_config.fb_client_library.value = FBTEST_CLIENT_LIBRARY
 cfg = driver_config.register_server('FBTEST_HOST')
 cfg.host.value = FBTEST_HOST
 cfg.user.value = FBTEST_USER
@@ -117,13 +126,20 @@ class DriverTestBase(unittest.TestCase, LoggingIdMixin):
         with connect_server(FBTEST_HOST, user=FBTEST_USER, password=FBTEST_PASSWORD) as svc:
             self.version = svc.info.version
         if self.version.startswith(FB30):
-            self.FBTEST_DB = 'fbtest30.fdb'
             self.version = FB30
         elif self.version.startswith(FB40):
-            self.FBTEST_DB = 'fbtest40.fdb'
             self.version = FB40
+        elif self.version.startswith(FB50):
+            self.version = FB50
         else:
             raise Exception("Unsupported Firebird version (%s)" % self.version)
+
+        self.FBTEST_DB = os.environ.get('FBTEST_DATABASE', None)
+        if self.FBTEST_DB is None:
+            engine = "FB" + self.version.replace(".", "")
+            self.FBTEST_DB = f"%TEMP%/firebird-driver-tests/FIREBIRD-DRIVER.{engine}.FDB"
+        self.FBTEST_DB = os.path.expandvars(self.FBTEST_DB)
+
         #
         self.cwd = os.getcwd()
         self.dbpath = self.cwd if os.path.split(self.cwd)[1] == 'test' \
@@ -442,7 +458,10 @@ class TestConnection(DriverTestBase):
             self.assertEqual(con.info.page_size, 8192)
             self.assertGreater(con.info.id, 0)
             self.assertEqual(con.info.sql_dialect, 3)
-            self.assertEqual(con.info.name.upper(), self.dbfile.upper())
+            self.assertEqual(
+                os.path.realpath(con.info.name), 
+                os.path.realpath(self.dbfile)
+            )
             self.assertIsInstance(con.info.site, str)
             self.assertIsInstance(con.info.implementation, driver.types.Implementation)
             self.assertIsInstance(con.info.provider, driver.types.DbProvider)
@@ -508,7 +527,10 @@ class TestConnection(DriverTestBase):
             self.assertIsInstance(con.info.get_info(DbInfoCode.BASE_LEVEL), int)
             res = con.info.get_info(DbInfoCode.DB_ID)
             self.assertIsInstance(res, list)
-            self.assertEqual(res[0].upper(), self.dbfile.upper())
+            self.assertEqual(
+                os.path.realpath(res[0]), 
+                os.path.realpath(self.dbfile)
+            )
             res = con.info.get_info(DbInfoCode.IMPLEMENTATION)
             self.assertIsInstance(res, tuple)
             self.assertEqual(len(res), 4)
@@ -1559,10 +1581,8 @@ class TestServerStandard(DriverTestBase):
             x = svc.info.home_directory
             # On Windows it returns 'security.db', a bug?
             #self.assertIn('security.db', svc.info.security_database)
-            if self.version == FB40:
-                self.assertIn('security4.fdb'.upper(), svc.info.security_database.upper())
-            else:
-                self.assertIn('security3.fdb', svc.info.security_database)
+            security_database = f"security{self.version[0]}.fdb"
+            self.assertIn(security_database.casefold(), svc.info.security_database.casefold())
             x = svc.info.lock_directory
             x = svc.info.capabilities
             self.assertIn(ServerCapability.REMOTE_HOP, x)
@@ -1574,8 +1594,8 @@ class TestServerStandard(DriverTestBase):
                     con2._logging_id_ = self.__class__.__name__
                     self.assertGreaterEqual(len(svc.info.attached_databases), 2,
                                             "Should work for Superserver, may fail with value 0 for Classic")
-                    self.assertIn(self.dbfile.upper(),
-                                  [s.upper() for s in svc.info.attached_databases])
+                    self.assertIn(os.path.realpath(self.dbfile),
+                                  [os.path.realpath(s) for s in svc.info.attached_databases])
                     self.assertGreaterEqual(svc.info.connection_count, 2)
             # BAD request code
             with self.assertRaises(Error) as cm:
