@@ -113,6 +113,7 @@ Enums
 .. autoclass:: SrvInfoCode
 .. autoclass:: BlobInfoCode
 .. autoclass:: DbInfoCode
+.. autoclass:: ResultSetInfoCode
 .. autoclass:: Features
 .. autoclass:: ReplicaMode
 .. autoclass:: StmtInfoCode

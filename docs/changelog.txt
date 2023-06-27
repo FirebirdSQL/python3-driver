@@ -2,6 +2,30 @@
 Changelog
 #########
 
+Version 1.9.0
+=============
+
+* New: Initial (as for Beta 1) support for Firebird 5.0 API and features.
+
+  - New and extended types: Extended `.DbInfoCode`, `.StmtInfoCode`, `.DPBItem`,
+    `.SrvRepairOption`, `.SrvBackupOption`, `.SrvNBackupOption`, `.Implementation`,
+    `.SrvRepairFlag`, `.SrvBackupFlag` and new `.ResultSetInfoCode`.
+  - API: `.iResultSet.get_info` method available for FB5 attachments.
+  - Parallel workers: Added `.DatabaseConfig.parallel_workers` configuration option, added
+    `parallel_workers` parameter to `.ServerDbServices3.backup`, `.ServerDbServices3.restore`
+    and `.ServerDbServices3.sweep`, added `parallel_workers` to `.DPB`
+  - New `.ServerDbServices.upgrade` method (in-place minor ODS upgrades)
+
+
+* Test: Fix name for `to_dict()` test.
+* Add: Classic API functions for BLR and BLOB manipulation to `.FirebirdAPI`.
+* Fix: Wait for completion of `.ServerDbServices` services that do not return data.
+  Otherwise subsequent service calls may end with "Service is currently busy" error.
+* Improvement: Internal handling of attachment and trasansaction handles.
+* Fix: Documentation link for the driver, provided by @mariuz
+* Fix #20: Cursor.description returning () instead of None when the cursor has no rows,
+  which is violation of PEP 249. Fix provided by @fdcastel
+
 Version 1.8.0
 =============
 
