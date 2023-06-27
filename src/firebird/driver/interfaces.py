@@ -715,8 +715,8 @@ parameter (this is the only way to obtain message format in this case)"""
         self.vtable.setDelayedOutputFormat(self, self.status, fmt)
         self._check()
 
-# IResultSet(3) : ReferenceCounted
-class iResultSet(iResultSet_v3):
+# IResultSet(4) : ReferenceCounted
+class iResultSet_v4(iResultSet_v3):
     "Class that wraps IResultSet interface for use from Python"
     VERSION = 4
     def close(self) -> None:
@@ -724,6 +724,15 @@ class iResultSet(iResultSet_v3):
         self.vtable.close(self, self.status)
         self._check()
         self._refcnt -= 1
+
+# IResultSet(5) : ReferenceCounted
+class iResultSet(iResultSet_v3):
+    "Class that wraps IResultSet interface for use from Python"
+    VERSION = 5
+    def get_info(self, items: bytes, buffer: bytes) -> None:
+        "Returns information about result set."
+        self.vtable.getInfo(self, self.status, len(items), items, len(buffer), buffer)
+        self._check()
 
 # IStatement(3) : ReferenceCounted
 class iStatement_v3(iReferenceCounted):

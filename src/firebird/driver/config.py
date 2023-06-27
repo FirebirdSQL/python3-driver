@@ -150,6 +150,9 @@ class DatabaseConfig(Config): # pylint: disable=R0902
         self.decfloat_traps: ListOption = \
             ListOption('decfloat_traps', DecfloatTraps,
                        "Which DECFLOAT exceptional conditions cause a trap")
+        #: Number of parallel workers
+        self.parallel_workers = \
+            IntOption('parallel_workers', "Number of parallel workers")
         # Create options
         #: Database create option. Page size to be used.
         self.page_size: IntOption = \

@@ -411,7 +411,8 @@ class DPB:
                  config: str=None, auth_plugin_list: str=None, session_time_zone: str=None,
                  set_db_replica: ReplicaMode=None, set_bind: str=None,
                  decfloat_round: DecfloatRound=None,
-                 decfloat_traps: List[DecfloatTraps]=None
+                 decfloat_traps: List[DecfloatTraps]=None,
+                 parallel_workers: int=None
                  ):
         # Available options:
         # AuthClient, WireCryptPlugin, Providers, ConnectionTimeout, WireCrypt,
@@ -482,6 +483,8 @@ class DPB:
         self.db_sql_dialect: Optional[int] = db_sql_dialect
         #: Character set for the database [db create only]
         self.db_charset: Optional[str] = db_charset
+        #: Number of parallel workers
+        self.parallel_workers: int = parallel_workers
     def clear(self) -> None:
         """Clear all information.
         """
@@ -586,6 +589,8 @@ class DPB:
                 elif tag == DPBItem.DECFLOAT_TRAPS:
                     self.decfloat_traps = [DecfloatTraps(v.strip())
                                            for v in dpb.get_string().split(',')]
+                elif tag == DPBItem.PARALLEL_WORKERS:
+                    self.parallel_workers = dpb.get_int()
     def get_buffer(self, *, for_create: bool = False) -> bytes:
         """Create DPB from stored information.
         """
@@ -637,6 +642,8 @@ class DPB:
             if self.decfloat_traps is not None:
                 dpb.insert_string(DPBItem.DECFLOAT_TRAPS, ','.join(e.value for e in
                                                                    self.decfloat_traps))
+            if self.parallel_workers is not None:
+                dpb.insert_int(DPBItem.PARALLEL_WORKERS, self.parallel_workers)
             if for_create:
                 if self.page_size is not None:
                     dpb.insert_int(DPBItem.PAGE_SIZE, self.page_size)
@@ -2118,7 +2125,8 @@ def connect(database: str, *, user: str=None, password: str=None, role: str=None
               config=db_config.config.value, auth_plugin_list=auth_plugin_list,
               session_time_zone=session_time_zone, set_bind=db_config.set_bind.value,
               decfloat_round=db_config.decfloat_round.value,
-              decfloat_traps=db_config.decfloat_traps.value)
+              decfloat_traps=db_config.decfloat_traps.value,
+              parallel_workers=db_config.parallel_workers.value)
     return __make_connection(False, dsn, db_config.utf8filename.value, dpb.get_buffer(),
                              db_config.sql_dialect.value, charset, crypt_callback)
 
@@ -4222,7 +4230,7 @@ class ServerDbServices3(ServerServiceProvider):
                callback: CB_OUTPUT_LINE=None, stats: str=None,
                verbose: bool=False, verbint: int=None, skip_data: str=None,
                include_data: str=None, keyhoder: str=None, keyname: str=None,
-               crypt: str=None) -> None:
+               crypt: str=None, parallel_workers: int=None) -> None:
         """Request logical (GBAK) database backup. **(ASYNC service)**
 
         Arguments:
@@ -4240,6 +4248,7 @@ class ServerDbServices3(ServerServiceProvider):
             keyholder: Keyholder name [Firebird 4]
             keyname: Key name [Firebird 4]
             crypt: Encryption specification [Firebird 4]
+            parallel_workers: Number of parallel workers [Firebird 5]
         """
         if isinstance(backup, (str, Path)):
             backup = [backup]
@@ -4267,6 +4276,8 @@ class ServerDbServices3(ServerServiceProvider):
                 spb.insert_string(SrvBackupOption.KEYNAME, keyname)
             if crypt is not None:
                 spb.insert_string(SrvBackupOption.CRYPT, crypt)
+            if parallel_workers is not None:
+                spb.insert_int(SrvBackupOption.PARALLEL_WORKERS, parallel_workers)
             spb.insert_int(SPBItem.OPTIONS, flags)
             if verbose:
                 spb.insert_tag(SPBItem.VERBOSE)
@@ -4287,7 +4298,7 @@ class ServerDbServices3(ServerServiceProvider):
                 page_size: int=None, buffers: int=None,
                 access_mode: DbAccessMode=DbAccessMode.READ_WRITE, include_data: str=None,
                 keyhoder: str=None, keyname: str=None, crypt: str=None,
-                replica_mode: ReplicaMode=None) -> None:
+                replica_mode: ReplicaMode=None, parallel_workers: int=None) -> None:
         """Request database restore from logical (GBAK) backup. **(ASYNC service)**
 
         Arguments:
@@ -4309,6 +4320,7 @@ class ServerDbServices3(ServerServiceProvider):
             keyname: Key name [Firebird 4]
             crypt: Encryption specification [Firebird 4]
             replica_mode: Replica mode for restored database [Firebird 4]
+            parallel_workers: Number of parallel workers [Firebird 5]
         """
         if isinstance(backup, (str, Path)):
             backup = [backup]
@@ -4346,6 +4358,8 @@ class ServerDbServices3(ServerServiceProvider):
                 spb.insert_string(SrvRestoreOption.CRYPT, crypt)
             if replica_mode is not None:
                 spb.insert_int(SrvRestoreOption.REPLICA_MODE, replica_mode.value)
+            if parallel_workers is not None:
+                spb.insert_int(SrvRestoreOption.PARALLEL_WORKERS, parallel_workers)
             spb.insert_int(SPBItem.OPTIONS, flags)
             if verbose:
                 spb.insert_tag(SPBItem.VERBOSE)
@@ -4725,12 +4739,13 @@ class ServerDbServices3(ServerServiceProvider):
             spb.insert_bytes(SrvPropertiesOption.ONLINE_MODE, bytes([mode]))
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
-    def sweep(self, *, database: FILESPEC, role: str=None) -> None:
+    def sweep(self, *, database: FILESPEC, role: str=None, parallel_workers: int=None) -> None:
         """Perform database sweep operation.
 
         Arguments:
             database: Database specification or alias.
             role: SQL ROLE name passed to gfix.
+            parallel_workers: Number of parallel workers [Firebird 5]
         """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
@@ -4738,11 +4753,13 @@ class ServerDbServices3(ServerServiceProvider):
             spb.insert_string(SPBItem.DBNAME, str(database), encoding=self._srv().encoding)
             if role is not None:
                 spb.insert_string(SPBItem.SQL_ROLE_NAME, role, encoding=self._srv().encoding)
+            if parallel_workers is not None:
+                spb.insert_int(SrvRepairOption.PARALLEL_WORKERS, parallel_workers)
             spb.insert_int(SPBItem.OPTIONS, SrvRepairFlag.SWEEP_DB)
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
     def repair(self, *, database: FILESPEC, flags: SrvRepairFlag=SrvRepairFlag.REPAIR,
-               role: str=None) -> bytes:
+               role: str=None) -> None:
         """Perform database repair operation.  **(SYNC service)**
 
         Arguments:
@@ -4903,7 +4920,7 @@ class ServerDbServices3(ServerServiceProvider):
             self._srv()._svc.start(spb.get_buffer())
         self._srv()._read_all_binary_output()
 
-class ServerDbServices(ServerDbServices3):
+class ServerDbServices4(ServerDbServices3):
     """Database-related actions and services [Firebird 4+].
     """
     def nfix_database(self, *, database: FILESPEC, role: str=None,
@@ -4941,6 +4958,26 @@ class ServerDbServices(ServerDbServices3):
             spb.insert_bytes(SrvPropertiesOption.REPLICA_MODE, bytes([mode]))
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
+
+class ServerDbServices(ServerDbServices4):
+    """Database-related actions and services [Firebird 5+].
+    """
+    def upgrade(self, *, database: FILESPEC) -> bytes:
+        """Perform database repair operation.  **(SYNC service)**
+
+        Arguments:
+            database: Database specification or alias.
+            flags: Repair flags.
+            role: SQL ROLE name passed to gfix.
+        """
+        self._srv()._reset_output()
+        with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
+            spb.insert_tag(ServerAction.REPAIR)
+            spb.insert_string(SPBItem.DBNAME, str(database), encoding=self._srv().encoding)
+            spb.insert_int(SPBItem.OPTIONS, SrvRepairFlag.UPGRADE_DB)
+            self._srv()._svc.start(spb.get_buffer())
+        self._srv().wait()
+
 
 class ServerUserServices(ServerServiceProvider):
     """User-related actions and services.
@@ -5457,8 +5494,12 @@ class Server(LoggingIdMixin):
         """Access to various database-related actions and services.
         """
         if self.__dbsvc is None:
-            cls = ServerDbServices if self._engine_version() >= 4.0 \
-                else ServerDbServices3
+            if self._engine_version() >= 5.0:
+                cls = ServerDbServices
+            elif self._engine_version() == 4.0:
+                cls = ServerDbServices4
+            else:
+                cls = ServerDbServices3
             self.__dbsvc = cls(self)
         return self.__dbsvc
     @property

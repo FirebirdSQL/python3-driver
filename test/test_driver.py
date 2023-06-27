@@ -42,6 +42,7 @@ from io import StringIO, BytesIO
 
 FB30 = '3.0'
 FB40 = '4.0'
+FB50 = '5.0'
 
 # Default server host
 #FBTEST_HOST = ''
@@ -122,6 +123,9 @@ class DriverTestBase(unittest.TestCase, LoggingIdMixin):
         elif self.version.startswith(FB40):
             self.FBTEST_DB = 'fbtest40.fdb'
             self.version = FB40
+        elif self.version.startswith(FB50):
+            self.FBTEST_DB = 'fbtest50.fdb'
+            self.version = FB50
         else:
             raise Exception("Unsupported Firebird version (%s)" % self.version)
         #
@@ -620,7 +624,7 @@ class TestTransaction(DriverTestBase):
         tpb_buffer = tpb.get_buffer()
         with self.con.transaction_manager(tpb_buffer) as tr:
             info = tr.info.get_info(TraInfoCode.ISOLATION)
-            if self.version == FB40:
+            if self.version in [FB40, FB50]:
                 self.assertIn(info, [Isolation.READ_COMMITTED_READ_CONSISTENCY,
                                      Isolation.READ_COMMITTED_RECORD_VERSION])
             else:
@@ -1067,43 +1071,70 @@ class TestCursor(DriverTestBase):
 
 
 class TestScrollableCursor(DriverTestBase):
-    def setUp(self):
-        super().setUp()
-        self.dbfile = os.path.join(self.dbpath, self.FBTEST_DB)
-        self.con = connect(database=self.dbfile,
-                           user=FBTEST_USER, password=FBTEST_PASSWORD)
-        self.con._logging_id_ = self.__class__.__name__
-        #self.con.execute_immediate("recreate table t (c1 integer primary key)")
-        #self.con.execute_immediate("delete from t")
-        #self.con.commit()
-    def tearDown(self):
-        self.con.close()
-    def test_scrollable(self):
+    def test_embed_scrollable(self):
         if sys.platform == 'win32':
             self.skipTest('Does not work on Windows')
+        self.dbfile = os.path.join(self.dbpath, self.FBTEST_DB)
         rows = [('USA', 'Dollar'), ('England', 'Pound'), ('Canada', 'CdnDlr'),
                 ('Switzerland', 'SFranc'), ('Japan', 'Yen'), ('Italy', 'Euro'),
                 ('France', 'Euro'), ('Germany', 'Euro'), ('Australia', 'ADollar'),
                 ('Hong Kong', 'HKDollar'), ('Netherlands', 'Euro'),
                 ('Belgium', 'Euro'), ('Austria', 'Euro'), ('Fiji', 'FDollar'),
                 ('Russia', 'Ruble'), ('Romania', 'RLeu')]
-        with self.con.cursor() as cur:
-            cur.open('select * from country')
-            self.assertTrue(cur.is_bof())
-            self.assertFalse(cur.is_eof())
-            self.assertTupleEqual(cur.fetch_first(), rows[0])
-            self.assertTupleEqual(cur.fetch_next(), rows[1])
-            self.assertTupleEqual(cur.fetch_prior(), rows[0])
-            self.assertTupleEqual(cur.fetch_last(), rows[-1])
-            self.assertFalse(cur.is_bof())
-            self.assertIsNone(cur.fetch_next())
-            self.assertTrue(cur.is_eof())
-            self.assertTupleEqual(cur.fetch_absolute(7), rows[6])
-            self.assertTupleEqual(cur.fetch_relative(-1), rows[5])
-            self.assertTupleEqual(cur.fetchone(), rows[6])
-            self.assertListEqual(cur.fetchall(), rows[7:])
-            cur.fetch_absolute(7)
-            self.assertListEqual(cur.fetchall(), rows[7:])
+        with connect(database=self.dbfile, user=FBTEST_USER, password=FBTEST_PASSWORD) as con:
+            with con.cursor() as cur:
+                cur.open('select * from country')
+                self.assertTrue(cur.is_bof())
+                self.assertFalse(cur.is_eof())
+                self.assertTupleEqual(cur.fetch_first(), rows[0])
+                self.assertTupleEqual(cur.fetch_next(), rows[1])
+                self.assertTupleEqual(cur.fetch_prior(), rows[0])
+                self.assertTupleEqual(cur.fetch_last(), rows[-1])
+                self.assertFalse(cur.is_bof())
+                self.assertIsNone(cur.fetch_next())
+                self.assertTrue(cur.is_eof())
+                self.assertTupleEqual(cur.fetch_absolute(7), rows[6])
+                self.assertTupleEqual(cur.fetch_relative(-1), rows[5])
+                self.assertTupleEqual(cur.fetchone(), rows[6])
+                self.assertListEqual(cur.fetchall(), rows[7:])
+                cur.fetch_absolute(7)
+                self.assertListEqual(cur.fetchall(), rows[7:])
+    def test_remote_scrollable(self):
+        self.dbfile = os.path.join(self.dbpath, self.FBTEST_DB)
+        db_config = f"""
+        [remote_scrollable]
+        database = {self.dbfile}
+        server = FBTEST_HOST
+        """
+        driver_config.register_database('remote_scrollable', db_config)
+        #
+        rows = [('USA', 'Dollar'), ('England', 'Pound'), ('Canada', 'CdnDlr'),
+                ('Switzerland', 'SFranc'), ('Japan', 'Yen'), ('Italy', 'Euro'),
+                ('France', 'Euro'), ('Germany', 'Euro'), ('Australia', 'ADollar'),
+                ('Hong Kong', 'HKDollar'), ('Netherlands', 'Euro'),
+                ('Belgium', 'Euro'), ('Austria', 'Euro'), ('Fiji', 'FDollar'),
+                ('Russia', 'Ruble'), ('Romania', 'RLeu')]
+        with connect('remote_scrollable') as con:
+            if con.info.engine_version < 5.0:
+                self.skipTest('Requires Firebird 5.0+')
+            #
+            with con.cursor() as cur:
+                cur.open('select * from country')
+                self.assertTrue(cur.is_bof())
+                self.assertFalse(cur.is_eof())
+                self.assertTupleEqual(cur.fetch_first(), rows[0])
+                self.assertTupleEqual(cur.fetch_next(), rows[1])
+                self.assertTupleEqual(cur.fetch_prior(), rows[0])
+                self.assertTupleEqual(cur.fetch_last(), rows[-1])
+                self.assertFalse(cur.is_bof())
+                self.assertIsNone(cur.fetch_next())
+                self.assertTrue(cur.is_eof())
+                self.assertTupleEqual(cur.fetch_absolute(7), rows[6])
+                self.assertTupleEqual(cur.fetch_relative(-1), rows[5])
+                self.assertTupleEqual(cur.fetchone(), rows[6])
+                self.assertListEqual(cur.fetchall(), rows[7:])
+                cur.fetch_absolute(7)
+                self.assertListEqual(cur.fetchall(), rows[7:])
 
 class TestPreparedStatement(DriverTestBase):
     def setUp(self):
@@ -1561,6 +1592,8 @@ class TestServerStandard(DriverTestBase):
             #self.assertIn('security.db', svc.info.security_database)
             if self.version == FB40:
                 self.assertIn('security4.fdb'.upper(), svc.info.security_database.upper())
+            elif self.version == FB50:
+                self.assertIn('security5.fdb'.upper(), svc.info.security_database.upper())
             else:
                 self.assertIn('security3.fdb', svc.info.security_database)
             x = svc.info.lock_directory

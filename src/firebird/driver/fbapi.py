@@ -981,8 +981,14 @@ IResultSet_getMetadata = CFUNCTYPE(IMessageMetadata, IResultSet, IStatus)
 IResultSet_deprecatedClose = CFUNCTYPE(None, IResultSet, IStatus)
 # procedure setDelayedOutputFormat(this: IResultSet; status: IStatus; format: IMessageMetadata)
 IResultSet_setDelayedOutputFormat = CFUNCTYPE(None, IResultSet, IStatus, IMessageMetadata)
+# IResultSet(4) : IResultSet(3)
 # procedure close(this: IResultSet; status: IStatus)
 IResultSet_close = CFUNCTYPE(None, IResultSet, IStatus)
+# >>> Firebird 5
+# IResultSet(5) : IResultSet(4)
+# procedure(this: IResultSet; status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); cdecl;
+IResultSet_getInfo = CFUNCTYPE(None, IResultSet, IStatus, Cardinal, BytePtr, Cardinal, BytePtr)
+
 #
 # IStatement(3) : ReferenceCounted
 # --------------------------------
@@ -1549,7 +1555,9 @@ IResultSet_VTable._fields_ = [ # v3 - initial
     ('getMetadata', IResultSet_getMetadata),
     ('deprecatedClose', IResultSet_deprecatedClose),
     ('setDelayedOutputFormat', IResultSet_setDelayedOutputFormat),
-    ('close', IResultSet_close)] # v4: 3.0.7 => 3.0.8, 4.0.0 => 4.0.1
+    ('close', IResultSet_close), # v4: 3.0.7 => 3.0.8, 4.0.0 => 4.0.1
+    ('getInfo', IResultSet_getInfo),  # v5: 5.0.0
+    ]
 # >>> Firebird 4
 # IStatement(5) : ReferenceCounted
 IStatement_VTable._fields_ = [ # v3 - initial
@@ -1955,22 +1963,59 @@ class FirebirdAPI:
                 `ISC_LONG`
 
         isc_array_lookup_bounds():
-            Old API function isc_array_lookup_bounds()
+            Old API function.
 
         isc_array_put_slice():
-            Old API function isc_array_put_slice()
+            Old API function.
 
         isc_array_get_slice():
-            Old API function isc_array_get_slice()
+            Old API function.
 
         isc_que_events():
-            Old API function isc_que_events()
+            Old API function.
 
         isc_event_counts():
-            Old API function isc_event_counts()
+            Old API function.
 
         isc_cancel_events():
-            Old API function isc_cancel_events()
+            Old API function.
+
+        isc_compile_request()
+            Old API function.
+
+        isc_start_request()
+            Old API function.
+
+        isc_release_request()
+            Old API function.
+
+        isc_receive()
+            Old API function.
+
+        isc_start_and_send()
+            Old API function.
+
+        isc_send()
+            Old API function.
+
+        isc_open_blob2()
+            Old API function.
+
+        isc_blob_info()
+            Old API function.
+
+        isc_create_blob2()
+            Old API function.
+
+        isc_get_segment()
+            Old API function.
+
+        isc_put_segment()
+            Old API function.
+
+        isc_close_blob():
+            Old API function.
+
     """
     def __init__(self, filename: Path = None):
         decimal.getcontext().prec = 34

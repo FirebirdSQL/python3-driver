@@ -343,6 +343,8 @@ class DbInfoCode(IntEnum):
     DB_GUID = 144
     DB_FILE_ID = 145
     REPLICA_MODE = 146
+    USER_NAME = 147
+    SQL_ROLE = 148
 
 class Features(IntEnum):
     """Firebird features (Response to DbInfoCode.FEATURES).
@@ -394,6 +396,14 @@ class StmtInfoCode(IntEnum):
     TIMEOUT_USER = 28
     TIMEOUT_RUN = 29
     BLOB_ALIGN = 30
+    # Firebird 5
+    EXEC_PATH_BLR_BYTES = 31
+    EXEC_PATH_BLR_TEXT = 32
+
+class ResultSetInfoCode(IntEnum):
+    """Result set information codes.
+    """
+    RECORD_COUNT = 10
 
 class TraInfoCode(IntEnum):
     """Transaction information (isc_info_tra_*) codes.
@@ -582,6 +592,11 @@ class DPBItem(IntEnum):
     SET_BIND = 93
     DECFLOAT_ROUND = 94
     DECFLOAT_TRAPS = 95
+    CLEAR_MAP = 96
+    # Firebird 5
+    UPGRADE_DB = 97
+    PARALLEL_WORKERS = 100
+    WORKER_ATTACH = 101
 
 class TPBItem(IntEnum):
     """isc_tpb_* items.
@@ -699,6 +714,7 @@ class SrvRepairOption(IntEnum):
     COMMIT_TRANS_64 = 49
     ROLLBACK_TRANS_64 = 50
     RECOVER_TWO_PHASE_64 = 51
+    PARALLEL_WORKERS = 52 # Firebird 5
 
 class SrvBackupOption(IntEnum):
     """Parameters for ServerAction.BACKUP.
@@ -713,6 +729,7 @@ class SrvBackupOption(IntEnum):
     KEYNAME = 17
     CRYPT = 18
     INCLUDE_DATA = 19
+    PARALLEL_WORKERS = 21 # Firebird 5
 
 class SrvRestoreOption(IntEnum):
     """Parameters for ServerAction.RESTORE.
@@ -732,6 +749,7 @@ class SrvRestoreOption(IntEnum):
     CRYPT = 18
     INCLUDE_DATA = 19
     REPLICA_MODE = 20
+    PARALLEL_WORKERS = 21 # Firebird 5
 
 class SrvNBackupOption(IntEnum):
     """Parameters for ServerAction.NBAK.
@@ -739,8 +757,11 @@ class SrvNBackupOption(IntEnum):
     LEVEL = 5
     FILE = 6
     DIRECT = 7
-    # Firebird 4
-    GUID = 8
+    GUID = 8 # Firebird 4
+    # Firebird 5
+    CLEAN_HISTORY = 9
+    KEEP_DAYS = 10
+    KEEP_ROWS = 11
 
 class SrvTraceOption(IntEnum):
     """Parameters for ServerAction.TRACE_*.
@@ -937,6 +958,10 @@ class Implementation(IntEnum):
     LINUX_PPC64 = 86
     LINUX_M68K = 87
     LINUX_RISCV64 = 88
+    FREEBSD_PPC64EL = 89
+    LINUX_MIPS64EL = 90
+    FREEBSD_PPC64 = 91
+    FREEBSD_PPC = 92
 
 class ImpCPU(IntEnum):
     """Implementation - CPU.
@@ -1089,6 +1114,7 @@ class SrvRepairFlag(IntFlag):
     KILL_SHADOWS = 0x40
     FULL = 0x80
     ICU = 0x0800
+    UPGRADE_DB = 0x1000 # Firebird 5
     #
     CORRUPTION_CHECK = VALIDATE_DB | CHECK_DB | FULL | IGNORE_CHECKSUM
     REPAIR = MEND_DB | FULL | IGNORE_CHECKSUM
@@ -1121,6 +1147,7 @@ class SrvBackupFlag(IntFlag):
     EXPAND = 0x80
     NO_TRIGGERS = 0x8000
     ZIP = 0x010000 # Firebird 4
+    DIRECT_IO = 0x020000 # Firebird 5
 
 class SrvRestoreFlag(IntFlag):
     """isc_spb_res_* flags for ServerAction.RESTORE.
@@ -1134,6 +1161,7 @@ class SrvRestoreFlag(IntFlag):
     CREATE = 0x2000
     USE_ALL_SPACE = 0x4000
     NO_TRIGGERS = 0x8000
+    DIRECT_IO = 0x020000 # Firebird 5
 
 class SrvNBackupFlag(IntFlag):
     """isc_spb_nbk_* flags for ServerAction.NBAK.
