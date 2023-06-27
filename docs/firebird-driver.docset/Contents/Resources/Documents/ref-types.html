@@ -3,14 +3,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
-<title>firebird.driver.types — firebird-driver 1.8.0 documentation</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.19: https://docutils.sourceforge.io/" name="generator"/>
+<title>firebird.driver.types — firebird-driver 1.9.0 documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
 <link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
 <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-<script src="_static/jquery.js"></script>
-<script src="_static/underscore.js"></script>
-<script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
 <script src="_static/doctools.js"></script>
 <script src="_static/sphinx_highlight.js"></script>
 <link href="genindex.html" rel="index" title="Index"/>
@@ -37,7 +34,7 @@
 </button>
 <a class="brand" href="index.html">
           firebird-driver</a>
-<span class="navbar-text pull-left"><b>1.8.0</b></span>
+<span class="navbar-text pull-left"><b>1.9.0</b></span>
 <div class="nav-collapse">
 <ul class="nav">
 <li class="divider-vertical"></li>
@@ -157,6 +154,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-9-0">Version 1.9.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-8-0">Version 1.8.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-7-0">Version 1.7.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-6-0">Version 1.6.0</a></li>
@@ -426,16 +424,22 @@
 <li><a class="reference internal" href="#firebird.driver.types.DbInfoCode.SES_IDLE_TIMEOUT_DB"><code class="docutils literal notranslate"><span class="pre">DbInfoCode.SES_IDLE_TIMEOUT_DB</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DbInfoCode.SES_IDLE_TIMEOUT_RUN"><code class="docutils literal notranslate"><span class="pre">DbInfoCode.SES_IDLE_TIMEOUT_RUN</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DbInfoCode.SET_PAGE_BUFFERS"><code class="docutils literal notranslate"><span class="pre">DbInfoCode.SET_PAGE_BUFFERS</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.types.DbInfoCode.SQL_ROLE"><code class="docutils literal notranslate"><span class="pre">DbInfoCode.SQL_ROLE</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DbInfoCode.STMT_TIMEOUT_ATT"><code class="docutils literal notranslate"><span class="pre">DbInfoCode.STMT_TIMEOUT_ATT</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DbInfoCode.STMT_TIMEOUT_DB"><code class="docutils literal notranslate"><span class="pre">DbInfoCode.STMT_TIMEOUT_DB</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DbInfoCode.SWEEP_INTERVAL"><code class="docutils literal notranslate"><span class="pre">DbInfoCode.SWEEP_INTERVAL</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DbInfoCode.TPAGE_ERRORS"><code class="docutils literal notranslate"><span class="pre">DbInfoCode.TPAGE_ERRORS</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DbInfoCode.TPAGE_WARNS"><code class="docutils literal notranslate"><span class="pre">DbInfoCode.TPAGE_WARNS</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DbInfoCode.UPDATE_COUNT"><code class="docutils literal notranslate"><span class="pre">DbInfoCode.UPDATE_COUNT</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.types.DbInfoCode.USER_NAME"><code class="docutils literal notranslate"><span class="pre">DbInfoCode.USER_NAME</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DbInfoCode.USER_NAMES"><code class="docutils literal notranslate"><span class="pre">DbInfoCode.USER_NAMES</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DbInfoCode.VERSION"><code class="docutils literal notranslate"><span class="pre">DbInfoCode.VERSION</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DbInfoCode.WIRE_CRYPT"><code class="docutils literal notranslate"><span class="pre">DbInfoCode.WIRE_CRYPT</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DbInfoCode.WRITES"><code class="docutils literal notranslate"><span class="pre">DbInfoCode.WRITES</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#firebird.driver.types.ResultSetInfoCode"><code class="docutils literal notranslate"><span class="pre">ResultSetInfoCode</span></code></a><ul>
+<li><a class="reference internal" href="#firebird.driver.types.ResultSetInfoCode.RECORD_COUNT"><code class="docutils literal notranslate"><span class="pre">ResultSetInfoCode.RECORD_COUNT</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#firebird.driver.types.Features"><code class="docutils literal notranslate"><span class="pre">Features</span></code></a><ul>
@@ -461,6 +465,8 @@
 <li><a class="reference internal" href="#firebird.driver.types.StmtInfoCode.BLOB_ALIGN"><code class="docutils literal notranslate"><span class="pre">StmtInfoCode.BLOB_ALIGN</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.StmtInfoCode.DESCRIBE_END"><code class="docutils literal notranslate"><span class="pre">StmtInfoCode.DESCRIBE_END</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.StmtInfoCode.DESCRIBE_VARS"><code class="docutils literal notranslate"><span class="pre">StmtInfoCode.DESCRIBE_VARS</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.types.StmtInfoCode.EXEC_PATH_BLR_BYTES"><code class="docutils literal notranslate"><span class="pre">StmtInfoCode.EXEC_PATH_BLR_BYTES</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.types.StmtInfoCode.EXEC_PATH_BLR_TEXT"><code class="docutils literal notranslate"><span class="pre">StmtInfoCode.EXEC_PATH_BLR_TEXT</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.StmtInfoCode.EXPLAIN_PLAN"><code class="docutils literal notranslate"><span class="pre">StmtInfoCode.EXPLAIN_PLAN</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.StmtInfoCode.FIELD"><code class="docutils literal notranslate"><span class="pre">StmtInfoCode.FIELD</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.StmtInfoCode.FLAGS"><code class="docutils literal notranslate"><span class="pre">StmtInfoCode.FLAGS</span></code></a></li>
@@ -610,6 +616,7 @@
 <li><a class="reference internal" href="#firebird.driver.types.DPBItem.AUTH_BLOCK"><code class="docutils literal notranslate"><span class="pre">DPBItem.AUTH_BLOCK</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DPBItem.AUTH_PLUGIN_LIST"><code class="docutils literal notranslate"><span class="pre">DPBItem.AUTH_PLUGIN_LIST</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DPBItem.AUTH_PLUGIN_NAME"><code class="docutils literal notranslate"><span class="pre">DPBItem.AUTH_PLUGIN_NAME</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.types.DPBItem.CLEAR_MAP"><code class="docutils literal notranslate"><span class="pre">DPBItem.CLEAR_MAP</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DPBItem.CLIENT_VERSION"><code class="docutils literal notranslate"><span class="pre">DPBItem.CLIENT_VERSION</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DPBItem.CONFIG"><code class="docutils literal notranslate"><span class="pre">DPBItem.CONFIG</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DPBItem.CONNECT_TIMEOUT"><code class="docutils literal notranslate"><span class="pre">DPBItem.CONNECT_TIMEOUT</span></code></a></li>
@@ -631,6 +638,7 @@
 <li><a class="reference internal" href="#firebird.driver.types.DPBItem.OS_USER"><code class="docutils literal notranslate"><span class="pre">DPBItem.OS_USER</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DPBItem.OVERWRITE"><code class="docutils literal notranslate"><span class="pre">DPBItem.OVERWRITE</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DPBItem.PAGE_SIZE"><code class="docutils literal notranslate"><span class="pre">DPBItem.PAGE_SIZE</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.types.DPBItem.PARALLEL_WORKERS"><code class="docutils literal notranslate"><span class="pre">DPBItem.PARALLEL_WORKERS</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DPBItem.PASSWORD"><code class="docutils literal notranslate"><span class="pre">DPBItem.PASSWORD</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DPBItem.PROCESS_ID"><code class="docutils literal notranslate"><span class="pre">DPBItem.PROCESS_ID</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DPBItem.PROCESS_NAME"><code class="docutils literal notranslate"><span class="pre">DPBItem.PROCESS_NAME</span></code></a></li>
@@ -650,8 +658,10 @@
 <li><a class="reference internal" href="#firebird.driver.types.DPBItem.SWEEP_INTERVAL"><code class="docutils literal notranslate"><span class="pre">DPBItem.SWEEP_INTERVAL</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DPBItem.TRUSTED_AUTH"><code class="docutils literal notranslate"><span class="pre">DPBItem.TRUSTED_AUTH</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DPBItem.TRUSTED_ROLE"><code class="docutils literal notranslate"><span class="pre">DPBItem.TRUSTED_ROLE</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.types.DPBItem.UPGRADE_DB"><code class="docutils literal notranslate"><span class="pre">DPBItem.UPGRADE_DB</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DPBItem.USER_NAME"><code class="docutils literal notranslate"><span class="pre">DPBItem.USER_NAME</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DPBItem.UTF8_FILENAME"><code class="docutils literal notranslate"><span class="pre">DPBItem.UTF8_FILENAME</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.types.DPBItem.WORKER_ATTACH"><code class="docutils literal notranslate"><span class="pre">DPBItem.WORKER_ATTACH</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.DPBItem.WORKING_DIRECTORY"><code class="docutils literal notranslate"><span class="pre">DPBItem.WORKING_DIRECTORY</span></code></a></li>
 </ul>
 </li>
@@ -741,6 +751,7 @@
 <li><a class="reference internal" href="#firebird.driver.types.SrvRepairOption.COMMIT_TRANS_64"><code class="docutils literal notranslate"><span class="pre">SrvRepairOption.COMMIT_TRANS_64</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvRepairOption.MULTI_TRA_ID"><code class="docutils literal notranslate"><span class="pre">SrvRepairOption.MULTI_TRA_ID</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvRepairOption.MULTI_TRA_ID_64"><code class="docutils literal notranslate"><span class="pre">SrvRepairOption.MULTI_TRA_ID_64</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.types.SrvRepairOption.PARALLEL_WORKERS"><code class="docutils literal notranslate"><span class="pre">SrvRepairOption.PARALLEL_WORKERS</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvRepairOption.RECOVER_TWO_PHASE"><code class="docutils literal notranslate"><span class="pre">SrvRepairOption.RECOVER_TWO_PHASE</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvRepairOption.RECOVER_TWO_PHASE_64"><code class="docutils literal notranslate"><span class="pre">SrvRepairOption.RECOVER_TWO_PHASE_64</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvRepairOption.ROLLBACK_TRANS"><code class="docutils literal notranslate"><span class="pre">SrvRepairOption.ROLLBACK_TRANS</span></code></a></li>
@@ -771,6 +782,7 @@
 <li><a class="reference internal" href="#firebird.driver.types.SrvBackupOption.KEYHOLDER"><code class="docutils literal notranslate"><span class="pre">SrvBackupOption.KEYHOLDER</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvBackupOption.KEYNAME"><code class="docutils literal notranslate"><span class="pre">SrvBackupOption.KEYNAME</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvBackupOption.LENGTH"><code class="docutils literal notranslate"><span class="pre">SrvBackupOption.LENGTH</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.types.SrvBackupOption.PARALLEL_WORKERS"><code class="docutils literal notranslate"><span class="pre">SrvBackupOption.PARALLEL_WORKERS</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvBackupOption.SKIP_DATA"><code class="docutils literal notranslate"><span class="pre">SrvBackupOption.SKIP_DATA</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvBackupOption.STAT"><code class="docutils literal notranslate"><span class="pre">SrvBackupOption.STAT</span></code></a></li>
 </ul>
@@ -787,15 +799,19 @@
 <li><a class="reference internal" href="#firebird.driver.types.SrvRestoreOption.KEYNAME"><code class="docutils literal notranslate"><span class="pre">SrvRestoreOption.KEYNAME</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvRestoreOption.LENGTH"><code class="docutils literal notranslate"><span class="pre">SrvRestoreOption.LENGTH</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvRestoreOption.PAGE_SIZE"><code class="docutils literal notranslate"><span class="pre">SrvRestoreOption.PAGE_SIZE</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.types.SrvRestoreOption.PARALLEL_WORKERS"><code class="docutils literal notranslate"><span class="pre">SrvRestoreOption.PARALLEL_WORKERS</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvRestoreOption.REPLICA_MODE"><code class="docutils literal notranslate"><span class="pre">SrvRestoreOption.REPLICA_MODE</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvRestoreOption.SKIP_DATA"><code class="docutils literal notranslate"><span class="pre">SrvRestoreOption.SKIP_DATA</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvRestoreOption.STAT"><code class="docutils literal notranslate"><span class="pre">SrvRestoreOption.STAT</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvNBackupOption"><code class="docutils literal notranslate"><span class="pre">SrvNBackupOption</span></code></a><ul>
+<li><a class="reference internal" href="#firebird.driver.types.SrvNBackupOption.CLEAN_HISTORY"><code class="docutils literal notranslate"><span class="pre">SrvNBackupOption.CLEAN_HISTORY</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvNBackupOption.DIRECT"><code class="docutils literal notranslate"><span class="pre">SrvNBackupOption.DIRECT</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvNBackupOption.FILE"><code class="docutils literal notranslate"><span class="pre">SrvNBackupOption.FILE</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvNBackupOption.GUID"><code class="docutils literal notranslate"><span class="pre">SrvNBackupOption.GUID</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.types.SrvNBackupOption.KEEP_DAYS"><code class="docutils literal notranslate"><span class="pre">SrvNBackupOption.KEEP_DAYS</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.types.SrvNBackupOption.KEEP_ROWS"><code class="docutils literal notranslate"><span class="pre">SrvNBackupOption.KEEP_ROWS</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvNBackupOption.LEVEL"><code class="docutils literal notranslate"><span class="pre">SrvNBackupOption.LEVEL</span></code></a></li>
 </ul>
 </li>
@@ -917,6 +933,9 @@
 <li><a class="reference internal" href="#firebird.driver.types.Implementation.DG_X86"><code class="docutils literal notranslate"><span class="pre">Implementation.DG_X86</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.Implementation.FREEBSD"><code class="docutils literal notranslate"><span class="pre">Implementation.FREEBSD</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.Implementation.FREEBSD_AMD64"><code class="docutils literal notranslate"><span class="pre">Implementation.FREEBSD_AMD64</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.types.Implementation.FREEBSD_PPC"><code class="docutils literal notranslate"><span class="pre">Implementation.FREEBSD_PPC</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.types.Implementation.FREEBSD_PPC64"><code class="docutils literal notranslate"><span class="pre">Implementation.FREEBSD_PPC64</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.types.Implementation.FREEBSD_PPC64EL"><code class="docutils literal notranslate"><span class="pre">Implementation.FREEBSD_PPC64EL</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.Implementation.I386"><code class="docutils literal notranslate"><span class="pre">Implementation.I386</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.Implementation.ISC_APL_68K"><code class="docutils literal notranslate"><span class="pre">Implementation.ISC_APL_68K</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.Implementation.ISC_CRAY"><code class="docutils literal notranslate"><span class="pre">Implementation.ISC_CRAY</span></code></a></li>
@@ -953,6 +972,7 @@
 <li><a class="reference internal" href="#firebird.driver.types.Implementation.LINUX_IA64"><code class="docutils literal notranslate"><span class="pre">Implementation.LINUX_IA64</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.Implementation.LINUX_M68K"><code class="docutils literal notranslate"><span class="pre">Implementation.LINUX_M68K</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.Implementation.LINUX_MIPS"><code class="docutils literal notranslate"><span class="pre">Implementation.LINUX_MIPS</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.types.Implementation.LINUX_MIPS64EL"><code class="docutils literal notranslate"><span class="pre">Implementation.LINUX_MIPS64EL</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.Implementation.LINUX_MIPSEL"><code class="docutils literal notranslate"><span class="pre">Implementation.LINUX_MIPSEL</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.Implementation.LINUX_PPC"><code class="docutils literal notranslate"><span class="pre">Implementation.LINUX_PPC</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.Implementation.LINUX_PPC64"><code class="docutils literal notranslate"><span class="pre">Implementation.LINUX_PPC64</span></code></a></li>
@@ -1119,6 +1139,7 @@
 <li><a class="reference internal" href="#firebird.driver.types.SrvRepairFlag.MEND_DB"><code class="docutils literal notranslate"><span class="pre">SrvRepairFlag.MEND_DB</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvRepairFlag.REPAIR"><code class="docutils literal notranslate"><span class="pre">SrvRepairFlag.REPAIR</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvRepairFlag.SWEEP_DB"><code class="docutils literal notranslate"><span class="pre">SrvRepairFlag.SWEEP_DB</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.types.SrvRepairFlag.UPGRADE_DB"><code class="docutils literal notranslate"><span class="pre">SrvRepairFlag.UPGRADE_DB</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvRepairFlag.VALIDATE_DB"><code class="docutils literal notranslate"><span class="pre">SrvRepairFlag.VALIDATE_DB</span></code></a></li>
 </ul>
 </li>
@@ -1137,6 +1158,7 @@
 </li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvBackupFlag"><code class="docutils literal notranslate"><span class="pre">SrvBackupFlag</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.driver.types.SrvBackupFlag.CONVERT"><code class="docutils literal notranslate"><span class="pre">SrvBackupFlag.CONVERT</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.types.SrvBackupFlag.DIRECT_IO"><code class="docutils literal notranslate"><span class="pre">SrvBackupFlag.DIRECT_IO</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvBackupFlag.EXPAND"><code class="docutils literal notranslate"><span class="pre">SrvBackupFlag.EXPAND</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvBackupFlag.IGNORE_CHECKSUMS"><code class="docutils literal notranslate"><span class="pre">SrvBackupFlag.IGNORE_CHECKSUMS</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvBackupFlag.IGNORE_LIMBO"><code class="docutils literal notranslate"><span class="pre">SrvBackupFlag.IGNORE_LIMBO</span></code></a></li>
@@ -1152,6 +1174,7 @@
 <li><a class="reference internal" href="#firebird.driver.types.SrvRestoreFlag"><code class="docutils literal notranslate"><span class="pre">SrvRestoreFlag</span></code></a><ul>
 <li><a class="reference internal" href="#firebird.driver.types.SrvRestoreFlag.CREATE"><code class="docutils literal notranslate"><span class="pre">SrvRestoreFlag.CREATE</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvRestoreFlag.DEACTIVATE_IDX"><code class="docutils literal notranslate"><span class="pre">SrvRestoreFlag.DEACTIVATE_IDX</span></code></a></li>
+<li><a class="reference internal" href="#firebird.driver.types.SrvRestoreFlag.DIRECT_IO"><code class="docutils literal notranslate"><span class="pre">SrvRestoreFlag.DIRECT_IO</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvRestoreFlag.METADATA_ONLY"><code class="docutils literal notranslate"><span class="pre">SrvRestoreFlag.METADATA_ONLY</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvRestoreFlag.NO_SHADOW"><code class="docutils literal notranslate"><span class="pre">SrvRestoreFlag.NO_SHADOW</span></code></a></li>
 <li><a class="reference internal" href="#firebird.driver.types.SrvRestoreFlag.NO_TRIGGERS"><code class="docutils literal notranslate"><span class="pre">SrvRestoreFlag.NO_TRIGGERS</span></code></a></li>
@@ -1266,10 +1289,10 @@
 <a class="dashAnchor" name="//apple_ref/cpp/Section/Exceptions"></a><section id="exceptions">
 <h2>Exceptions<a class="headerlink" href="#exceptions" title="Permalink to this heading">¶</a></h2>
 <p>Next exceptions are required by Python DB API 2.0</p>
-<p><a class="reference internal" href="#firebird.driver.types.Error" title="firebird.driver.types.Error"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Error</span></code></a> is imported from <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/types.html#module-firebird.base.types" title="(in Firebird-base v1.5.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firebird.base.types</span></code></a>.</p>
+<p><a class="reference internal" href="#firebird.driver.types.Error" title="firebird.driver.types.Error"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Error</span></code></a> is imported from <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/types.html#module-firebird.base.types" title="(in Firebird-base v1.6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firebird.base.types</span></code></a>.</p>
 <dl class="py exception">
 <dt class="sig sig-object py" id="firebird.driver.types.Error">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.types.</span></span><span class="sig-name descname"><span class="pre">Error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/types.html#Error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Exception/firebird.driver.types.Error"></a><a class="headerlink" href="#firebird.driver.types.Error" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.types.</span></span><span class="sig-name descname"><span class="pre">Error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/base/types.html#Error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Exception/firebird.base.types.Error"></a><a class="dashAnchor" name="//apple_ref/cpp/Exception/firebird.driver.types.Error"></a><a class="headerlink" href="#firebird.driver.types.Error" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <p>Exception that is intended to be used as a base class of all <strong>application-related</strong>
 errors. The important difference from <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Exception</span></code></a> class is that <a class="reference internal" href="#firebird.driver.types.Error" title="firebird.driver.types.Error"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Error</span></code></a> accepts keyword
@@ -1517,10 +1540,10 @@ the interface. <code class="xref py py-obj docutils literal notranslate"><span c
 <dd><p>Constructs an object holding a date value from the given ticks value
 (number of seconds since the epoch).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>ticks</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – </p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.11)"><em>date</em></a></p>
 </dd>
 </dl>
@@ -1531,10 +1554,10 @@ the interface. <code class="xref py py-obj docutils literal notranslate"><span c
 <dd><p>Constructs an object holding a time value from the given ticks value
 (number of seconds since the epoch).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>ticks</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – </p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.time" title="(in Python v3.11)"><em>time</em></a></p>
 </dd>
 </dl>
@@ -1545,10 +1568,10 @@ the interface. <code class="xref py py-obj docutils literal notranslate"><span c
 <dd><p>Constructs an object holding a time stamp value from the given ticks value
 (number of seconds since the epoch).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>ticks</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – </p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.11)"><em>datetime</em></a></p>
 </dd>
 </dl>
@@ -1581,13 +1604,13 @@ the interface. <code class="xref py py-obj docutils literal notranslate"><span c
 <p>Protocol type for object that supports transactional processing.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.driver.types.Transactional.begin">
-<span class="sig-name descname"><span class="pre">begin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tpb</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/driver/types.html#Transactional.begin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.driver.types.Transactional.begin"></a><a class="headerlink" href="#firebird.driver.types.Transactional.begin" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">begin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tpb</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/driver/types.html#Transactional.begin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.driver.types.Transactional.begin"></a><a class="headerlink" href="#firebird.driver.types.Transactional.begin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Begin transaction.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>tpb</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><em>bytes</em></a><em>]</em>) – </p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tpb</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><em>bytes</em></a><em> | </em><em>None</em>) – </p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
@@ -1597,10 +1620,10 @@ the interface. <code class="xref py py-obj docutils literal notranslate"><span c
 <span class="sig-name descname"><span class="pre">commit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retaining</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/driver/types.html#Transactional.commit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.driver.types.Transactional.commit"></a><a class="headerlink" href="#firebird.driver.types.Transactional.commit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Commit transaction.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>retaining</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
@@ -1610,23 +1633,23 @@ the interface. <code class="xref py py-obj docutils literal notranslate"><span c
 <span class="sig-name descname"><span class="pre">is_active</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/firebird/driver/types.html#Transactional.is_active"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.driver.types.Transactional.is_active"></a><a class="headerlink" href="#firebird.driver.types.Transactional.is_active" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns True if transaction is active.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="firebird.driver.types.Transactional.rollback">
-<span class="sig-name descname"><span class="pre">rollback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retaining</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/driver/types.html#Transactional.rollback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.driver.types.Transactional.rollback"></a><a class="headerlink" href="#firebird.driver.types.Transactional.rollback" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">rollback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retaining</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savepoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/firebird/driver/types.html#Transactional.rollback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Method/firebird.driver.types.Transactional.rollback"></a><a class="headerlink" href="#firebird.driver.types.Transactional.rollback" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rollback transaction.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>retaining</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – </p></li>
-<li><p><strong>savepoint</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – </p></li>
+<li><p><strong>savepoint</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> | </em><em>None</em>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
@@ -2263,6 +2286,10 @@ the interface. <code class="xref py py-obj docutils literal notranslate"><span c
 <span class="sig-name descname"><span class="pre">SET_PAGE_BUFFERS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">61</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.DbInfoCode.SET_PAGE_BUFFERS"></a><a class="headerlink" href="#firebird.driver.types.DbInfoCode.SET_PAGE_BUFFERS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.types.DbInfoCode.SQL_ROLE">
+<span class="sig-name descname"><span class="pre">SQL_ROLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">148</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.DbInfoCode.SQL_ROLE"></a><a class="headerlink" href="#firebird.driver.types.DbInfoCode.SQL_ROLE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.types.DbInfoCode.STMT_TIMEOUT_ATT">
 <span class="sig-name descname"><span class="pre">STMT_TIMEOUT_ATT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">136</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.DbInfoCode.STMT_TIMEOUT_ATT"></a><a class="headerlink" href="#firebird.driver.types.DbInfoCode.STMT_TIMEOUT_ATT" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -2287,6 +2314,10 @@ the interface. <code class="xref py py-obj docutils literal notranslate"><span c
 <span class="sig-name descname"><span class="pre">UPDATE_COUNT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">26</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.DbInfoCode.UPDATE_COUNT"></a><a class="headerlink" href="#firebird.driver.types.DbInfoCode.UPDATE_COUNT" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.types.DbInfoCode.USER_NAME">
+<span class="sig-name descname"><span class="pre">USER_NAME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">147</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.DbInfoCode.USER_NAME"></a><a class="headerlink" href="#firebird.driver.types.DbInfoCode.USER_NAME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.types.DbInfoCode.USER_NAMES">
 <span class="sig-name descname"><span class="pre">USER_NAMES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">53</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.DbInfoCode.USER_NAMES"></a><a class="headerlink" href="#firebird.driver.types.DbInfoCode.USER_NAMES" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -2301,6 +2332,16 @@ the interface. <code class="xref py py-obj docutils literal notranslate"><span c
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.types.DbInfoCode.WRITES">
 <span class="sig-name descname"><span class="pre">WRITES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.DbInfoCode.WRITES"></a><a class="headerlink" href="#firebird.driver.types.DbInfoCode.WRITES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="firebird.driver.types.ResultSetInfoCode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.types.</span></span><span class="sig-name descname"><span class="pre">ResultSetInfoCode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/driver/types.html#ResultSetInfoCode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.types.ResultSetInfoCode"></a><a class="headerlink" href="#firebird.driver.types.ResultSetInfoCode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a></p>
+<p>Result set information codes.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.types.ResultSetInfoCode.RECORD_COUNT">
+<span class="sig-name descname"><span class="pre">RECORD_COUNT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.ResultSetInfoCode.RECORD_COUNT"></a><a class="headerlink" href="#firebird.driver.types.ResultSetInfoCode.RECORD_COUNT" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 </dd></dl>
 <dl class="py class">
@@ -2384,6 +2425,14 @@ DPBItem.SET_DB_REPLICA.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.types.StmtInfoCode.DESCRIBE_VARS">
 <span class="sig-name descname"><span class="pre">DESCRIBE_VARS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.StmtInfoCode.DESCRIBE_VARS"></a><a class="headerlink" href="#firebird.driver.types.StmtInfoCode.DESCRIBE_VARS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.types.StmtInfoCode.EXEC_PATH_BLR_BYTES">
+<span class="sig-name descname"><span class="pre">EXEC_PATH_BLR_BYTES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">31</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.StmtInfoCode.EXEC_PATH_BLR_BYTES"></a><a class="headerlink" href="#firebird.driver.types.StmtInfoCode.EXEC_PATH_BLR_BYTES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.types.StmtInfoCode.EXEC_PATH_BLR_TEXT">
+<span class="sig-name descname"><span class="pre">EXEC_PATH_BLR_TEXT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.StmtInfoCode.EXEC_PATH_BLR_TEXT"></a><a class="headerlink" href="#firebird.driver.types.StmtInfoCode.EXEC_PATH_BLR_TEXT" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.types.StmtInfoCode.EXPLAIN_PLAN">
@@ -2892,6 +2941,10 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">AUTH_PLUGIN_NAME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">86</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.DPBItem.AUTH_PLUGIN_NAME"></a><a class="headerlink" href="#firebird.driver.types.DPBItem.AUTH_PLUGIN_NAME" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.types.DPBItem.CLEAR_MAP">
+<span class="sig-name descname"><span class="pre">CLEAR_MAP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">96</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.DPBItem.CLEAR_MAP"></a><a class="headerlink" href="#firebird.driver.types.DPBItem.CLEAR_MAP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.types.DPBItem.CLIENT_VERSION">
 <span class="sig-name descname"><span class="pre">CLIENT_VERSION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">80</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.DPBItem.CLIENT_VERSION"></a><a class="headerlink" href="#firebird.driver.types.DPBItem.CLIENT_VERSION" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -2976,6 +3029,10 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">PAGE_SIZE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.DPBItem.PAGE_SIZE"></a><a class="headerlink" href="#firebird.driver.types.DPBItem.PAGE_SIZE" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.types.DPBItem.PARALLEL_WORKERS">
+<span class="sig-name descname"><span class="pre">PARALLEL_WORKERS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">100</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.DPBItem.PARALLEL_WORKERS"></a><a class="headerlink" href="#firebird.driver.types.DPBItem.PARALLEL_WORKERS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.types.DPBItem.PASSWORD">
 <span class="sig-name descname"><span class="pre">PASSWORD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">29</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.DPBItem.PASSWORD"></a><a class="headerlink" href="#firebird.driver.types.DPBItem.PASSWORD" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -3052,12 +3109,20 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">TRUSTED_ROLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">75</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.DPBItem.TRUSTED_ROLE"></a><a class="headerlink" href="#firebird.driver.types.DPBItem.TRUSTED_ROLE" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.types.DPBItem.UPGRADE_DB">
+<span class="sig-name descname"><span class="pre">UPGRADE_DB</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">97</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.DPBItem.UPGRADE_DB"></a><a class="headerlink" href="#firebird.driver.types.DPBItem.UPGRADE_DB" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.types.DPBItem.USER_NAME">
 <span class="sig-name descname"><span class="pre">USER_NAME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">28</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.DPBItem.USER_NAME"></a><a class="headerlink" href="#firebird.driver.types.DPBItem.USER_NAME" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.types.DPBItem.UTF8_FILENAME">
 <span class="sig-name descname"><span class="pre">UTF8_FILENAME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">77</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.DPBItem.UTF8_FILENAME"></a><a class="headerlink" href="#firebird.driver.types.DPBItem.UTF8_FILENAME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.types.DPBItem.WORKER_ATTACH">
+<span class="sig-name descname"><span class="pre">WORKER_ATTACH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">101</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.DPBItem.WORKER_ATTACH"></a><a class="headerlink" href="#firebird.driver.types.DPBItem.WORKER_ATTACH" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.types.DPBItem.WORKING_DIRECTORY">
@@ -3368,6 +3433,10 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">MULTI_TRA_ID_64</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">48</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.SrvRepairOption.MULTI_TRA_ID_64"></a><a class="headerlink" href="#firebird.driver.types.SrvRepairOption.MULTI_TRA_ID_64" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.types.SrvRepairOption.PARALLEL_WORKERS">
+<span class="sig-name descname"><span class="pre">PARALLEL_WORKERS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">52</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.SrvRepairOption.PARALLEL_WORKERS"></a><a class="headerlink" href="#firebird.driver.types.SrvRepairOption.PARALLEL_WORKERS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.types.SrvRepairOption.RECOVER_TWO_PHASE">
 <span class="sig-name descname"><span class="pre">RECOVER_TWO_PHASE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">17</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.SrvRepairOption.RECOVER_TWO_PHASE"></a><a class="headerlink" href="#firebird.driver.types.SrvRepairOption.RECOVER_TWO_PHASE" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -3482,6 +3551,10 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">LENGTH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.SrvBackupOption.LENGTH"></a><a class="headerlink" href="#firebird.driver.types.SrvBackupOption.LENGTH" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.types.SrvBackupOption.PARALLEL_WORKERS">
+<span class="sig-name descname"><span class="pre">PARALLEL_WORKERS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">21</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.SrvBackupOption.PARALLEL_WORKERS"></a><a class="headerlink" href="#firebird.driver.types.SrvBackupOption.PARALLEL_WORKERS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.types.SrvBackupOption.SKIP_DATA">
 <span class="sig-name descname"><span class="pre">SKIP_DATA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.SrvBackupOption.SKIP_DATA"></a><a class="headerlink" href="#firebird.driver.types.SrvBackupOption.SKIP_DATA" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -3540,6 +3613,10 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">PAGE_SIZE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.SrvRestoreOption.PAGE_SIZE"></a><a class="headerlink" href="#firebird.driver.types.SrvRestoreOption.PAGE_SIZE" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.types.SrvRestoreOption.PARALLEL_WORKERS">
+<span class="sig-name descname"><span class="pre">PARALLEL_WORKERS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">21</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.SrvRestoreOption.PARALLEL_WORKERS"></a><a class="headerlink" href="#firebird.driver.types.SrvRestoreOption.PARALLEL_WORKERS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.types.SrvRestoreOption.REPLICA_MODE">
 <span class="sig-name descname"><span class="pre">REPLICA_MODE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.SrvRestoreOption.REPLICA_MODE"></a><a class="headerlink" href="#firebird.driver.types.SrvRestoreOption.REPLICA_MODE" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -3558,6 +3635,10 @@ DPBItem.SET_DB_REPLICA.</p>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a></p>
 <p>Parameters for ServerAction.NBAK.</p>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.types.SrvNBackupOption.CLEAN_HISTORY">
+<span class="sig-name descname"><span class="pre">CLEAN_HISTORY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.SrvNBackupOption.CLEAN_HISTORY"></a><a class="headerlink" href="#firebird.driver.types.SrvNBackupOption.CLEAN_HISTORY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.types.SrvNBackupOption.DIRECT">
 <span class="sig-name descname"><span class="pre">DIRECT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.SrvNBackupOption.DIRECT"></a><a class="headerlink" href="#firebird.driver.types.SrvNBackupOption.DIRECT" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -3568,6 +3649,14 @@ DPBItem.SET_DB_REPLICA.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.types.SrvNBackupOption.GUID">
 <span class="sig-name descname"><span class="pre">GUID</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.SrvNBackupOption.GUID"></a><a class="headerlink" href="#firebird.driver.types.SrvNBackupOption.GUID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.types.SrvNBackupOption.KEEP_DAYS">
+<span class="sig-name descname"><span class="pre">KEEP_DAYS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.SrvNBackupOption.KEEP_DAYS"></a><a class="headerlink" href="#firebird.driver.types.SrvNBackupOption.KEEP_DAYS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.types.SrvNBackupOption.KEEP_ROWS">
+<span class="sig-name descname"><span class="pre">KEEP_ROWS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">11</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.SrvNBackupOption.KEEP_ROWS"></a><a class="headerlink" href="#firebird.driver.types.SrvNBackupOption.KEEP_ROWS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.types.SrvNBackupOption.LEVEL">
@@ -3970,6 +4059,18 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">FREEBSD_AMD64</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">67</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.Implementation.FREEBSD_AMD64"></a><a class="headerlink" href="#firebird.driver.types.Implementation.FREEBSD_AMD64" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.types.Implementation.FREEBSD_PPC">
+<span class="sig-name descname"><span class="pre">FREEBSD_PPC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">92</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.Implementation.FREEBSD_PPC"></a><a class="headerlink" href="#firebird.driver.types.Implementation.FREEBSD_PPC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.types.Implementation.FREEBSD_PPC64">
+<span class="sig-name descname"><span class="pre">FREEBSD_PPC64</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">91</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.Implementation.FREEBSD_PPC64"></a><a class="headerlink" href="#firebird.driver.types.Implementation.FREEBSD_PPC64" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.types.Implementation.FREEBSD_PPC64EL">
+<span class="sig-name descname"><span class="pre">FREEBSD_PPC64EL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">89</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.Implementation.FREEBSD_PPC64EL"></a><a class="headerlink" href="#firebird.driver.types.Implementation.FREEBSD_PPC64EL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.types.Implementation.I386">
 <span class="sig-name descname"><span class="pre">I386</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">60</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.Implementation.I386"></a><a class="headerlink" href="#firebird.driver.types.Implementation.I386" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -4112,6 +4213,10 @@ DPBItem.SET_DB_REPLICA.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.types.Implementation.LINUX_MIPS">
 <span class="sig-name descname"><span class="pre">LINUX_MIPS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">72</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.Implementation.LINUX_MIPS"></a><a class="headerlink" href="#firebird.driver.types.Implementation.LINUX_MIPS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.types.Implementation.LINUX_MIPS64EL">
+<span class="sig-name descname"><span class="pre">LINUX_MIPS64EL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">90</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.Implementation.LINUX_MIPS64EL"></a><a class="headerlink" href="#firebird.driver.types.Implementation.LINUX_MIPS64EL" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.types.Implementation.LINUX_MIPSEL">
@@ -4685,6 +4790,10 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">SWEEP_DB</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.SrvRepairFlag.SWEEP_DB"></a><a class="headerlink" href="#firebird.driver.types.SrvRepairFlag.SWEEP_DB" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.types.SrvRepairFlag.UPGRADE_DB">
+<span class="sig-name descname"><span class="pre">UPGRADE_DB</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4096</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.SrvRepairFlag.UPGRADE_DB"></a><a class="headerlink" href="#firebird.driver.types.SrvRepairFlag.UPGRADE_DB" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.types.SrvRepairFlag.VALIDATE_DB">
 <span class="sig-name descname"><span class="pre">VALIDATE_DB</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.SrvRepairFlag.VALIDATE_DB"></a><a class="headerlink" href="#firebird.driver.types.SrvRepairFlag.VALIDATE_DB" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -4745,6 +4854,10 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">CONVERT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">64</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.SrvBackupFlag.CONVERT"></a><a class="headerlink" href="#firebird.driver.types.SrvBackupFlag.CONVERT" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.types.SrvBackupFlag.DIRECT_IO">
+<span class="sig-name descname"><span class="pre">DIRECT_IO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">131072</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.SrvBackupFlag.DIRECT_IO"></a><a class="headerlink" href="#firebird.driver.types.SrvBackupFlag.DIRECT_IO" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.types.SrvBackupFlag.EXPAND">
 <span class="sig-name descname"><span class="pre">EXPAND</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">128</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.SrvBackupFlag.EXPAND"></a><a class="headerlink" href="#firebird.driver.types.SrvBackupFlag.EXPAND" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -4797,6 +4910,10 @@ DPBItem.SET_DB_REPLICA.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.types.SrvRestoreFlag.DEACTIVATE_IDX">
 <span class="sig-name descname"><span class="pre">DEACTIVATE_IDX</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">256</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.SrvRestoreFlag.DEACTIVATE_IDX"></a><a class="headerlink" href="#firebird.driver.types.SrvRestoreFlag.DEACTIVATE_IDX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firebird.driver.types.SrvRestoreFlag.DIRECT_IO">
+<span class="sig-name descname"><span class="pre">DIRECT_IO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">131072</span></em><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.SrvRestoreFlag.DIRECT_IO"></a><a class="headerlink" href="#firebird.driver.types.SrvRestoreFlag.DIRECT_IO" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="firebird.driver.types.SrvRestoreFlag.METADATA_ONLY">
@@ -4891,7 +5008,7 @@ DPBItem.SET_DB_REPLICA.</p>
 <p>Information for single item from <code class="xref py py-obj docutils literal notranslate"><span class="pre">iMessageMetadata</span></code>.</p>
 <p>This <code class="xref py py-obj docutils literal notranslate"><span class="pre">dataclass</span></code> is used internally, and it’s not intended for general use.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 <li><p><strong>relation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
@@ -4913,7 +5030,7 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">field</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.ItemMetadata.field"></a><a class="headerlink" href="#firebird.driver.types.ItemMetadata.field" title="Permalink to this definition">¶</a></dt>
 <dd><p>Field name</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
 </dd>
 </dl>
@@ -4923,7 +5040,7 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">relation</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.ItemMetadata.relation"></a><a class="headerlink" href="#firebird.driver.types.ItemMetadata.relation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Relation name</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
 </dd>
 </dl>
@@ -4933,7 +5050,7 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">owner</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.ItemMetadata.owner"></a><a class="headerlink" href="#firebird.driver.types.ItemMetadata.owner" title="Permalink to this definition">¶</a></dt>
 <dd><p>Owner name</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
 </dd>
 </dl>
@@ -4943,7 +5060,7 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">alias</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.ItemMetadata.alias"></a><a class="headerlink" href="#firebird.driver.types.ItemMetadata.alias" title="Permalink to this definition">¶</a></dt>
 <dd><p>Field alias</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
 </dd>
 </dl>
@@ -4953,7 +5070,7 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">datatype</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.ItemMetadata.datatype"></a><a class="headerlink" href="#firebird.driver.types.ItemMetadata.datatype" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data type</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#firebird.driver.types.SQLDataType" title="firebird.driver.types.SQLDataType"><code class="xref py py-class docutils literal notranslate"><span class="pre">SQLDataType</span></code></a></p>
 </dd>
 </dl>
@@ -4963,7 +5080,7 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">nullable</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.ItemMetadata.nullable"></a><a class="headerlink" href="#firebird.driver.types.ItemMetadata.nullable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Whether NULLs are allowed</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></p>
 </dd>
 </dl>
@@ -4973,7 +5090,7 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">subtype</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.ItemMetadata.subtype"></a><a class="headerlink" href="#firebird.driver.types.ItemMetadata.subtype" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data sub-type</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
 </dd>
 </dl>
@@ -4983,7 +5100,7 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">length</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.ItemMetadata.length"></a><a class="headerlink" href="#firebird.driver.types.ItemMetadata.length" title="Permalink to this definition">¶</a></dt>
 <dd><p>Size of raw field data in message buffer</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
 </dd>
 </dl>
@@ -4993,7 +5110,7 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">scale</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.ItemMetadata.scale"></a><a class="headerlink" href="#firebird.driver.types.ItemMetadata.scale" title="Permalink to this definition">¶</a></dt>
 <dd><p>Field scale</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
 </dd>
 </dl>
@@ -5003,7 +5120,7 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">charset</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.ItemMetadata.charset"></a><a class="headerlink" href="#firebird.driver.types.ItemMetadata.charset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Character set</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
 </dd>
 </dl>
@@ -5013,7 +5130,7 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">offset</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.ItemMetadata.offset"></a><a class="headerlink" href="#firebird.driver.types.ItemMetadata.offset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Offset of raw field data in message buffer</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
 </dd>
 </dl>
@@ -5023,7 +5140,7 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">null_offset</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.ItemMetadata.null_offset"></a><a class="headerlink" href="#firebird.driver.types.ItemMetadata.null_offset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Offset of null flag in message buffer</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
 </dd>
 </dl>
@@ -5031,12 +5148,12 @@ DPBItem.SET_DB_REPLICA.</p>
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.types.TableAccessStats">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.types.</span></span><span class="sig-name descname"><span class="pre">TableAccessStats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequential</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indexed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inserts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">updates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deletes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backouts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">purges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expunges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/driver/types.html#TableAccessStats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.types.TableAccessStats"></a><a class="headerlink" href="#firebird.driver.types.TableAccessStats" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.types.</span></span><span class="sig-name descname"><span class="pre">TableAccessStats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequential</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indexed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inserts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">updates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deletes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backouts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">purges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expunges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/driver/types.html#TableAccessStats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.types.TableAccessStats"></a><a class="headerlink" href="#firebird.driver.types.TableAccessStats" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Table access statistics.</p>
 <p>Data structure returned by <code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection.get_table_access_stats()</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>table_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
 <li><p><strong>sequential</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
@@ -5055,7 +5172,7 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">table_id</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.TableAccessStats.table_id"></a><a class="headerlink" href="#firebird.driver.types.TableAccessStats.table_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Relation ID</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
 </dd>
 </dl>
@@ -5065,7 +5182,7 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">sequential</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.TableAccessStats.sequential"></a><a class="headerlink" href="#firebird.driver.types.TableAccessStats.sequential" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of sequential table scans (row reads)</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
 </dd>
 </dl>
@@ -5075,7 +5192,7 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">indexed</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.TableAccessStats.indexed"></a><a class="headerlink" href="#firebird.driver.types.TableAccessStats.indexed" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of reads done via an index</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
 </dd>
 </dl>
@@ -5085,7 +5202,7 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">inserts</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.TableAccessStats.inserts"></a><a class="headerlink" href="#firebird.driver.types.TableAccessStats.inserts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of inserts</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
 </dd>
 </dl>
@@ -5095,7 +5212,7 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">updates</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.TableAccessStats.updates"></a><a class="headerlink" href="#firebird.driver.types.TableAccessStats.updates" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of updates</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
 </dd>
 </dl>
@@ -5105,7 +5222,7 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">deletes</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.TableAccessStats.deletes"></a><a class="headerlink" href="#firebird.driver.types.TableAccessStats.deletes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of deleted</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
 </dd>
 </dl>
@@ -5115,7 +5232,7 @@ DPBItem.SET_DB_REPLICA.</p>
 <span class="sig-name descname"><span class="pre">backouts</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.TableAccessStats.backouts"></a><a class="headerlink" href="#firebird.driver.types.TableAccessStats.backouts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of removals of a version of a record</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
 </dd>
 </dl>
@@ -5126,7 +5243,7 @@ DPBItem.SET_DB_REPLICA.</p>
 <dd><p>Number of removals of old versions of fully mature records (records that
 are committed, so that older ancestor versions are no longer needed)</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
 </dd>
 </dl>
@@ -5137,7 +5254,7 @@ are committed, so that older ancestor versions are no longer needed)</p>
 <dd><p>Number of removals of a record and all of its ancestors, for records
 whose deletions have been committed</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
 </dd>
 </dl>
@@ -5145,12 +5262,12 @@ whose deletions have been committed</p>
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="firebird.driver.types.UserInfo">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.types.</span></span><span class="sig-name descname"><span class="pre">UserInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">middle_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">admin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/driver/types.html#UserInfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.types.UserInfo"></a><a class="headerlink" href="#firebird.driver.types.UserInfo" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firebird.driver.types.</span></span><span class="sig-name descname"><span class="pre">UserInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">middle_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">admin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/firebird/driver/types.html#UserInfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Class/firebird.driver.types.UserInfo"></a><a class="headerlink" href="#firebird.driver.types.UserInfo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Information about Firebird user.</p>
 <p>Data structure returned by <code class="xref py py-obj docutils literal notranslate"><span class="pre">Service.get_user()</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">Service.get_users()</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>user_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
 <li><p><strong>password</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
@@ -5169,7 +5286,7 @@ whose deletions have been committed</p>
 <span class="sig-name descname"><span class="pre">user_name</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.UserInfo.user_name"></a><a class="headerlink" href="#firebird.driver.types.UserInfo.user_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>User (login) name</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
 </dd>
 </dl>
@@ -5179,7 +5296,7 @@ whose deletions have been committed</p>
 <span class="sig-name descname"><span class="pre">password</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.UserInfo.password"></a><a class="headerlink" href="#firebird.driver.types.UserInfo.password" title="Permalink to this definition">¶</a></dt>
 <dd><p>User password</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
 </dd>
 </dl>
@@ -5189,7 +5306,7 @@ whose deletions have been committed</p>
 <span class="sig-name descname"><span class="pre">first_name</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.UserInfo.first_name"></a><a class="headerlink" href="#firebird.driver.types.UserInfo.first_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>First name</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
 </dd>
 </dl>
@@ -5199,7 +5316,7 @@ whose deletions have been committed</p>
 <span class="sig-name descname"><span class="pre">middle_name</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.UserInfo.middle_name"></a><a class="headerlink" href="#firebird.driver.types.UserInfo.middle_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Middle name</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
 </dd>
 </dl>
@@ -5209,7 +5326,7 @@ whose deletions have been committed</p>
 <span class="sig-name descname"><span class="pre">last_name</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.UserInfo.last_name"></a><a class="headerlink" href="#firebird.driver.types.UserInfo.last_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Last name</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
 </dd>
 </dl>
@@ -5219,7 +5336,7 @@ whose deletions have been committed</p>
 <span class="sig-name descname"><span class="pre">user_id</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.UserInfo.user_id"></a><a class="headerlink" href="#firebird.driver.types.UserInfo.user_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>User ID</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
 </dd>
 </dl>
@@ -5229,7 +5346,7 @@ whose deletions have been committed</p>
 <span class="sig-name descname"><span class="pre">group_id</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.UserInfo.group_id"></a><a class="headerlink" href="#firebird.driver.types.UserInfo.group_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>User Group ID</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
 </dd>
 </dl>
@@ -5239,7 +5356,7 @@ whose deletions have been committed</p>
 <span class="sig-name descname"><span class="pre">group_name</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.UserInfo.group_name"></a><a class="headerlink" href="#firebird.driver.types.UserInfo.group_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Group name</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
 </dd>
 </dl>
@@ -5249,7 +5366,7 @@ whose deletions have been committed</p>
 <span class="sig-name descname"><span class="pre">admin</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.UserInfo.admin"></a><a class="headerlink" href="#firebird.driver.types.UserInfo.admin" title="Permalink to this definition">¶</a></dt>
 <dd><p>True is user has admin priviledges</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></p>
 </dd>
 </dl>
@@ -5261,7 +5378,7 @@ whose deletions have been committed</p>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>BCD number.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>sign</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
 <li><p><strong>number</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><em>bytes</em></a>) – </p></li>
@@ -5274,7 +5391,7 @@ whose deletions have been committed</p>
 <span class="sig-name descname"><span class="pre">sign</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.BCD.sign"></a><a class="headerlink" href="#firebird.driver.types.BCD.sign" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sign</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
 </dd>
 </dl>
@@ -5284,7 +5401,7 @@ whose deletions have been committed</p>
 <span class="sig-name descname"><span class="pre">number</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.BCD.number"></a><a class="headerlink" href="#firebird.driver.types.BCD.number" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></p>
 </dd>
 </dl>
@@ -5294,7 +5411,7 @@ whose deletions have been committed</p>
 <span class="sig-name descname"><span class="pre">exp</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.BCD.exp"></a><a class="headerlink" href="#firebird.driver.types.BCD.exp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Exponent</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
 </dd>
 </dl>
@@ -5306,7 +5423,7 @@ whose deletions have been committed</p>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Information about active trace session.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – </p></li>
 <li><p><strong>user</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – </p></li>
@@ -5321,7 +5438,7 @@ whose deletions have been committed</p>
 <span class="sig-name descname"><span class="pre">id</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.TraceSession.id"></a><a class="headerlink" href="#firebird.driver.types.TraceSession.id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Session ID number</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
 </dd>
 </dl>
@@ -5331,7 +5448,7 @@ whose deletions have been committed</p>
 <span class="sig-name descname"><span class="pre">user</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.TraceSession.user"></a><a class="headerlink" href="#firebird.driver.types.TraceSession.user" title="Permalink to this definition">¶</a></dt>
 <dd><p>User name</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
 </dd>
 </dl>
@@ -5341,7 +5458,7 @@ whose deletions have been committed</p>
 <span class="sig-name descname"><span class="pre">timestamp</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.TraceSession.timestamp"></a><a class="headerlink" href="#firebird.driver.types.TraceSession.timestamp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Session start timestamp</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a></p>
 </dd>
 </dl>
@@ -5351,7 +5468,7 @@ whose deletions have been committed</p>
 <span class="sig-name descname"><span class="pre">name</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.TraceSession.name"></a><a class="headerlink" href="#firebird.driver.types.TraceSession.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Session name (if defined)</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
 </dd>
 </dl>
@@ -5361,7 +5478,7 @@ whose deletions have been committed</p>
 <span class="sig-name descname"><span class="pre">flags</span></span><a class="dashAnchor" name="//apple_ref/cpp/Attribute/firebird.driver.types.TraceSession.flags"></a><a class="headerlink" href="#firebird.driver.types.TraceSession.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>List with session flag names</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a></p>
 </dd>
 </dl>
@@ -5372,7 +5489,7 @@ whose deletions have been committed</p>
 <h2>Helper functions<a class="headerlink" href="#helper-functions" title="Permalink to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="firebird.driver.types.get_timezone">
-<span class="sig-prename descclassname"><span class="pre">firebird.driver.types.</span></span><span class="sig-name descname"><span class="pre">get_timezone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timezone</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.tzinfo" title="(in Python v3.11)"><span class="pre">tzinfo</span></a></span></span><a class="reference internal" href="_modules/firebird/driver/types.html#get_timezone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.driver.types.get_timezone"></a><a class="headerlink" href="#firebird.driver.types.get_timezone" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">firebird.driver.types.</span></span><span class="sig-name descname"><span class="pre">get_timezone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timezone</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.tzinfo" title="(in Python v3.11)"><span class="pre">tzinfo</span></a></span></span><a class="reference internal" href="_modules/firebird/driver/types.html#get_timezone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="dashAnchor" name="//apple_ref/cpp/Function/firebird.driver.types.get_timezone"></a><a class="headerlink" href="#firebird.driver.types.get_timezone" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.tzinfo" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">datetime.tzinfo</span></code></a> for specified time zone.</p>
 <p>This is preferred method to obtain timezone information for construction of timezone-aware
 <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.time" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">datetime.time</span></code></a> objects. Current implementation uses <code class="xref py py-obj docutils literal notranslate"><span class="pre">dateutil.tz</span></code>
@@ -5380,10 +5497,10 @@ for timezone tzinfo objects, but adds metadata neccessary to store timezone regi
 database instead zoned time, and to handle offset-based timezones in format required by
 Firebird.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>timezone</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em>) – </p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>timezone</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> | </em><em>None</em>) – </p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.tzinfo" title="(in Python v3.11)"><em>tzinfo</em></a></p>
 </dd>
 </dl>
@@ -5399,8 +5516,8 @@ Firebird.</p>
 <a href="#">Back to top</a>
 </p>
 <p>
-        © Copyright 2020-2022, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+        © Copyright 2020-2023, The Firebird Project.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.0.1.<br/>
 </p>
 </div>
 </footer>

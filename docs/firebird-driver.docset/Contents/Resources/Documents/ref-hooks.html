@@ -3,14 +3,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
-<title>firebird.driver.hooks — firebird-driver 1.8.0 documentation</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.19: https://docutils.sourceforge.io/" name="generator"/>
+<title>firebird.driver.hooks — firebird-driver 1.9.0 documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
 <link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
 <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-<script src="_static/jquery.js"></script>
-<script src="_static/underscore.js"></script>
-<script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
 <script src="_static/doctools.js"></script>
 <script src="_static/sphinx_highlight.js"></script>
 <link href="genindex.html" rel="index" title="Index"/>
@@ -37,7 +34,7 @@
 </button>
 <a class="brand" href="index.html">
           firebird-driver</a>
-<span class="navbar-text pull-left"><b>1.8.0</b></span>
+<span class="navbar-text pull-left"><b>1.9.0</b></span>
 <div class="nav-collapse">
 <ul class="nav">
 <li class="divider-vertical"></li>
@@ -157,6 +154,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-9-0">Version 1.9.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-8-0">Version 1.8.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-7-0">Version 1.7.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-6-0">Version 1.6.0</a></li>
@@ -239,9 +237,9 @@
 <span class="target" id="module-firebird.driver.hooks"></span><a class="dashAnchor" name="//apple_ref/cpp/Section/firebird.driver.hooks"></a><section id="firebird-driver-hooks">
 <a class="dashAnchor" name="//apple_ref/cpp/Module/firebird.driver.hooks"></a><h1>firebird.driver.hooks<a class="headerlink" href="#firebird-driver-hooks" title="Permalink to this heading">¶</a></h1>
 <p>This module contains firebird-driver hooks. Uses hook mechanism from firebird-base package.</p>
-<p>Imports from <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#module-firebird.base.hooks" title="(in Firebird-base v1.5.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firebird.base.hooks</span></code></a>: <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#firebird.base.hooks.register_class" title="(in Firebird-base v1.5.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_class</span></code></a>,
-<a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#firebird.base.hooks.get_callbacks" title="(in Firebird-base v1.5.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_callbacks</span></code></a>, <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#firebird.base.hooks.add_hook" title="(in Firebird-base v1.5.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_hook</span></code></a> and
-<a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#firebird.base.hooks.hook_manager" title="(in Firebird-base v1.5.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hook_manager</span></code></a>.</p>
+<p>Imports from <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#module-firebird.base.hooks" title="(in Firebird-base v1.6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firebird.base.hooks</span></code></a>: <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#firebird.base.hooks.register_class" title="(in Firebird-base v1.6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_class</span></code></a>,
+<a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#firebird.base.hooks.get_callbacks" title="(in Firebird-base v1.6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_callbacks</span></code></a>, <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#firebird.base.hooks.add_hook" title="(in Firebird-base v1.6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_hook</span></code></a> and
+<a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#firebird.base.hooks.hook_manager" title="(in Firebird-base v1.6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hook_manager</span></code></a>.</p>
 <a class="dashAnchor" name="//apple_ref/cpp/Section/Enums"></a><section id="enums">
 <h2>Enums<a class="headerlink" href="#enums" title="Permalink to this heading">¶</a></h2>
 <dl class="py class">
@@ -301,8 +299,8 @@
 <a href="#">Back to top</a>
 </p>
 <p>
-        © Copyright 2020-2022, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+        © Copyright 2020-2023, The Firebird Project.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.0.1.<br/>
 </p>
 </div>
 </footer>

@@ -3,14 +3,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
-<title>Usage Guide — firebird-driver 1.8.0 documentation</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.19: https://docutils.sourceforge.io/" name="generator"/>
+<title>Usage Guide — firebird-driver 1.9.0 documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
 <link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
 <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-<script src="_static/jquery.js"></script>
-<script src="_static/underscore.js"></script>
-<script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
 <script src="_static/doctools.js"></script>
 <script src="_static/sphinx_highlight.js"></script>
 <link href="genindex.html" rel="index" title="Index"/>
@@ -37,7 +34,7 @@
 </button>
 <a class="brand" href="index.html">
           firebird-driver</a>
-<span class="navbar-text pull-left"><b>1.8.0</b></span>
+<span class="navbar-text pull-left"><b>1.9.0</b></span>
 <div class="nav-collapse">
 <ul class="nav">
 <li class="divider-vertical"></li>
@@ -157,6 +154,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-9-0">Version 1.9.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-8-0">Version 1.8.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-7-0">Version 1.7.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-6-0">Version 1.6.0</a></li>
@@ -349,7 +347,7 @@ Firebird maintenance releases).</p>
 </section>
 <a class="dashAnchor" name="//apple_ref/cpp/Section/Configuration"></a><section id="configuration">
 <span id="index-0"></span><h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this heading">¶</a></h2>
-<p>The driver uses configuration built on top of <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#module-firebird.base.config" title="(in Firebird-base v1.5.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration</span> <span class="pre">system</span></code></a>
+<p>The driver uses configuration built on top of <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/config.html#module-firebird.base.config" title="(in Firebird-base v1.6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">configuration</span> <span class="pre">system</span></code></a>
 provided by <a class="reference external" href="https://firebird-base.rtfd.io">firebird-base</a> package. In addition to global settings, the configuration
 also includes the definition of connection parameters to Firebird servers and databases.</p>
 <p>The default configuration connects to embedded server using direct/local connection method.
@@ -1306,7 +1304,7 @@ the values of parameters destined for storage in date/time fields, the resulting
 would be awkward. Consider the difference between the two Python snippets below, which
 insert a row containing an integer and a timestamp into a table defined with the following
 DDL statement:</p>
-<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">create</span><span class="w"> </span><span class="k">table</span><span class="w"> </span><span class="n">test_table</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="nb">integer</span><span class="p">,</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="k">timestamp</span><span class="p">)</span><span class="w"></span>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">create</span><span class="w"> </span><span class="k">table</span><span class="w"> </span><span class="n">test_table</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="nb">integer</span><span class="p">,</span><span class="w"> </span><span class="n">t</span><span class="w"> </span><span class="k">timestamp</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
@@ -2120,13 +2118,13 @@ or Trigger. The <code class="xref py py-obj docutils literal notranslate"><span 
 of the event to post. In the preceding example of the administrative
 message database, <code class="xref py py-obj docutils literal notranslate"><span class="pre">POST_EVENT</span></code> might be used from an <code class="xref py py-obj docutils literal notranslate"><span class="pre">after</span> <span class="pre">insert</span></code>
 trigger on the <code class="xref py py-obj docutils literal notranslate"><span class="pre">messages</span></code> table, like this:</p>
-<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">create</span><span class="w"> </span><span class="k">trigger</span><span class="w"> </span><span class="n">trig_messages_handle_insert</span><span class="w"></span>
-<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="n">messages</span><span class="w"></span>
-<span class="w">    </span><span class="k">after</span><span class="w"> </span><span class="k">insert</span><span class="w"></span>
-<span class="k">as</span><span class="w"></span>
-<span class="k">begin</span><span class="w"></span>
-<span class="w">  </span><span class="n">POST_EVENT</span><span class="w"> </span><span class="s1">'new_message'</span><span class="p">;</span><span class="w"></span>
-<span class="k">end</span><span class="w"></span>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">create</span><span class="w"> </span><span class="k">trigger</span><span class="w"> </span><span class="n">trig_messages_handle_insert</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="n">messages</span>
+<span class="w">    </span><span class="k">after</span><span class="w"> </span><span class="k">insert</span>
+<span class="k">as</span>
+<span class="k">begin</span>
+<span class="w">  </span><span class="n">POST_EVENT</span><span class="w"> </span><span class="s1">'new_message'</span><span class="p">;</span>
+<span class="k">end</span>
 </pre></div>
 </div>
 <div class="admonition note">
@@ -2822,8 +2820,8 @@ from validation could be read by one from many methods for <a class="reference i
 <li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.get_limbo_transaction_ids" title="firebird.driver.core.ServerDbServices3.get_limbo_transaction_ids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_limbo_transaction_ids()</span></code></a> - Returns list of transactions in limbo.</p></li>
 <li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.commit_limbo_transaction" title="firebird.driver.core.ServerDbServices3.commit_limbo_transaction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">commit_limbo_transaction()</span></code></a> - Resolves limbo transaction with commit.</p></li>
 <li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.rollback_limbo_transaction" title="firebird.driver.core.ServerDbServices3.rollback_limbo_transaction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rollback_limbo_transaction()</span></code></a> - Resolves limbo transaction with rollback.</p></li>
-<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices.nfix_database" title="firebird.driver.core.ServerDbServices.nfix_database"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nfix_database</span></code></a> - Fixup database after filesystem copy.</p></li>
-<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices.set_replica_mode" title="firebird.driver.core.ServerDbServices.set_replica_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_replica_mode</span></code></a> - Manage replica database.</p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">nfix_database</span></code> - Fixup database after filesystem copy.</p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_replica_mode</span></code> - Manage replica database.</p></li>
 </ul>
 </section>
 <a class="dashAnchor" name="//apple_ref/cpp/Section/User maintenance"></a><section id="user-maintenance">
@@ -2873,8 +2871,8 @@ that <a class="reference internal" href="ref-core.html#firebird.driver.core.Serv
 <span class="s2">    enabled = true</span>
 <span class="s2">    log_statement_finish = true</span>
 <span class="s2">    print_plan = true</span>
-<span class="s2">    include_filter = </span><span class="si">%%</span><span class="s2">SELECT</span><span class="si">%%</span><span class="s2"></span>
-<span class="s2">    exclude_filter = </span><span class="si">%%</span><span class="s2">RDB$</span><span class="si">%%</span><span class="s2"></span>
+<span class="s2">    include_filter = </span><span class="si">%%</span><span class="s2">SELECT</span><span class="si">%%</span>
+<span class="s2">    exclude_filter = </span><span class="si">%%</span><span class="s2">RDB$</span><span class="si">%%</span>
 <span class="s2">    time_threshold = 0</span>
 <span class="s2">    max_sql_length = 2048</span>
 <span class="s2">}</span>
@@ -2902,18 +2900,18 @@ that <a class="reference internal" href="ref-core.html#firebird.driver.core.Serv
 </section>
 <a class="dashAnchor" name="//apple_ref/cpp/Section/Logging driver activities"></a><section id="logging-driver-activities">
 <span id="index-42"></span><h2>Logging driver activities<a class="headerlink" href="#logging-driver-activities" title="Permalink to this heading">¶</a></h2>
-<p>The firebird-driver supports <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/logging.html#module-firebird.base.logging" title="(in Firebird-base v1.5.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">context-based</span> <span class="pre">logging</span> <span class="pre">system</span></code></a>
-provided by <a class="reference external" href="https://firebird-base.rtfd.io">firebird-base</a> package through use of <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/logging.html#firebird.base.logging.LoggingIdMixin" title="(in Firebird-base v1.5.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggingIdMixin</span></code></a>.</p>
-<p>Classes that use <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/logging.html#firebird.base.logging.LoggingIdMixin" title="(in Firebird-base v1.5.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggingIdMixin</span></code></a>:</p>
+<p>The firebird-driver supports <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/logging.html#module-firebird.base.logging" title="(in Firebird-base v1.6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">context-based</span> <span class="pre">logging</span> <span class="pre">system</span></code></a>
+provided by <a class="reference external" href="https://firebird-base.rtfd.io">firebird-base</a> package through use of <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/logging.html#firebird.base.logging.LoggingIdMixin" title="(in Firebird-base v1.6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggingIdMixin</span></code></a>.</p>
+<p>Classes that use <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/logging.html#firebird.base.logging.LoggingIdMixin" title="(in Firebird-base v1.6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggingIdMixin</span></code></a>:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a> - Internally used objects have <code class="xref py py-obj docutils literal notranslate"><span class="pre">_logging_id_</span></code> set to ‘Transaction.Main’,
 ‘Transaction.Query’ and ‘Cursor.internal’. The log context is not defined.</p></li>
 <li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionManager" title="firebird.driver.core.TransactionManager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TransactionManager</span></code></a> - The <code class="xref py py-obj docutils literal notranslate"><span class="pre">_logging_id_</span></code> is set to ‘Transaction’. The
 <a class="reference internal" href="ref-core.html#firebird.driver.core.TransactionManager.log_context" title="firebird.driver.core.TransactionManager.log_context"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log_context()</span></code></a> is the <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a>.</p></li>
 <li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.DistributedTransactionManager" title="firebird.driver.core.DistributedTransactionManager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DistributedTransactionManager</span></code></a> - The <code class="xref py py-obj docutils literal notranslate"><span class="pre">_logging_id_</span></code> is set to ‘DTransaction’. The
-<a class="reference internal" href="ref-core.html#firebird.driver.core.DistributedTransactionManager.log_context" title="firebird.driver.core.DistributedTransactionManager.log_context"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log_context()</span></code></a> is <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/types.html#firebird.base.types.UNDEFINED" title="(in Firebird-base v1.5.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UNDEFINED</span></code></a>.</p></li>
+<a class="reference internal" href="ref-core.html#firebird.driver.core.DistributedTransactionManager.log_context" title="firebird.driver.core.DistributedTransactionManager.log_context"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log_context()</span></code></a> is <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/types.html#firebird.base.types.UNDEFINED" title="(in Firebird-base v1.6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UNDEFINED</span></code></a>.</p></li>
 <li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.Statement" title="firebird.driver.core.Statement"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Statement</span></code></a> - The <a class="reference internal" href="ref-core.html#firebird.driver.core.Statement.log_context" title="firebird.driver.core.Statement.log_context"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log_context()</span></code></a> is <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a>.</p></li>
-<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.BlobReader" title="firebird.driver.core.BlobReader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BlobReader</span></code></a> - The <a class="reference internal" href="ref-core.html#firebird.driver.core.Statement.log_context" title="firebird.driver.core.Statement.log_context"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log_context()</span></code></a> is the owning object or <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/types.html#firebird.base.types.UNDEFINED" title="(in Firebird-base v1.5.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UNDEFINED</span></code></a>.</p></li>
+<li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.BlobReader" title="firebird.driver.core.BlobReader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BlobReader</span></code></a> - The <a class="reference internal" href="ref-core.html#firebird.driver.core.Statement.log_context" title="firebird.driver.core.Statement.log_context"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log_context()</span></code></a> is the owning object or <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/types.html#firebird.base.types.UNDEFINED" title="(in Firebird-base v1.6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UNDEFINED</span></code></a>.</p></li>
 <li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.Cursor" title="firebird.driver.core.Cursor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Cursor</span></code></a> - The <a class="reference internal" href="ref-core.html#firebird.driver.core.Cursor.log_context" title="firebird.driver.core.Cursor.log_context"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log_context()</span></code></a> is <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection" title="firebird.driver.core.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a>.</p></li>
 <li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.Server" title="firebird.driver.core.Server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Server</span></code></a> - The log context is not defined.</p></li>
 </ul>
@@ -2985,7 +2983,7 @@ provided by <a class="reference external" href="https://firebird-base.rtfd.io">f
 <span class="n">INFO</span>      <span class="p">:</span> <span class="p">[</span><span class="n">employee</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">UNDEFINED</span><span class="p">]</span> <span class="n">Stop</span>
 </pre></div>
 </div>
-<p>You can also trace the driver activities using <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/trace.html#module-firebird.base.trace" title="(in Firebird-base v1.5.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trace/audit</span> <span class="pre">for</span> <span class="pre">class</span> <span class="pre">instances</span></code></a>
+<p>You can also trace the driver activities using <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/trace.html#module-firebird.base.trace" title="(in Firebird-base v1.6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trace/audit</span> <span class="pre">for</span> <span class="pre">class</span> <span class="pre">instances</span></code></a>
 provided by <a class="reference external" href="https://firebird-base.rtfd.io">firebird-base</a> package.</p>
 <p><strong>Example:</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
@@ -3094,7 +3092,7 @@ provided by <a class="reference external" href="https://firebird-base.rtfd.io">f
 <a class="dashAnchor" name="//apple_ref/cpp/Section/driver-hooks"></a><span class="target" id="driver-hooks"></span></section>
 <a class="dashAnchor" name="//apple_ref/cpp/Section/Driver hooks"></a><section id="index-43">
 <span id="id11"></span><h2>Driver hooks<a class="headerlink" href="#index-43" title="Permalink to this heading">¶</a></h2>
-<p>The firebird-driver uses <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#module-firebird.base.hooks" title="(in Firebird-base v1.5.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hook</span> <span class="pre">manager</span></code></a> from <a class="reference external" href="https://firebird-base.rtfd.io">firebird-base</a> package
+<p>The firebird-driver uses <a class="reference external" href="https://firebird-base.readthedocs.io/en/latest/hooks.html#module-firebird.base.hooks" title="(in Firebird-base v1.6.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">hook</span> <span class="pre">manager</span></code></a> from <a class="reference external" href="https://firebird-base.rtfd.io">firebird-base</a> package
 to provide internal notification mechanism that allows installation of custom hooks into
 certain driver tasks.</p>
 <p>Driver hooks are divided into several types exposed as enums in <a class="reference internal" href="ref-hooks.html#module-firebird.driver.hooks" title="firebird.driver.hooks: Drivers hooks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firebird.driver.hooks</span></code></a> module.</p>
@@ -3157,8 +3155,8 @@ application.</p>
 <a href="#">Back to top</a>
 </p>
 <p>
-        © Copyright 2020-2022, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+        © Copyright 2020-2023, The Firebird Project.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.0.1.<br/>
 </p>
 </div>
 </footer>

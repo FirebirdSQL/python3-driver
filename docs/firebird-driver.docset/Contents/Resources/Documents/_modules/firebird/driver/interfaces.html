@@ -4,13 +4,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>firebird.driver.interfaces &#8212; firebird-driver 1.6.0 documentation</title>
+    <title>firebird.driver.interfaces &#8212; firebird-driver 1.9.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -38,7 +35,7 @@
 
         <a class="brand" href="../../../index.html">
           firebird-driver</a>
-        <span class="navbar-text pull-left"><b>1.6.0</b></span>
+        <span class="navbar-text pull-left"><b>1.9.0</b></span>
 
         <div class="nav-collapse">
           <ul class="nav">
@@ -168,6 +165,9 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-9-0">Version 1.9.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-8-0">Version 1.8.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-7-0">Version 1.7.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-6-0">Version 1.6.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-5-2">Version 1.5.2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-5-1">Version 1.5.1</a></li>
@@ -305,7 +305,7 @@
 <span class="c1"># Interface wrappers</span>
 <span class="c1"># ------------------------------------------------------------------------------</span>
 <div class="viewcode-block" id="iVersionedMeta"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iVersionedMeta">[docs]</a><span class="k">class</span> <span class="nc">iVersionedMeta</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Metaclass for iVersioned interfaces.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Metaclass for iVersioned interfaces.</span>
 
 <span class="sd">This metaclass uses MRO to instantiate wrapper interface with version that matches version</span>
 <span class="sd">of wrapped interface.</span>
@@ -418,7 +418,7 @@
 
 <span class="c1"># IStatus(3) : Disposable</span>
 <div class="viewcode-block" id="iStatus"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iStatus">[docs]</a><span class="k">class</span> <span class="nc">iStatus</span><span class="p">(</span><span class="n">iDisposable</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Class that wraps IStatus interface for use from Python</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class that wraps IStatus interface for use from Python</span>
 
 <span class="sd">    IStatus replaces ISC_STATUS_ARRAY. Functionality is extended – Status has separate</span>
 <span class="sd">    access to errors and warnings vectors, can hold vectors of unlimited length, itself</span>
@@ -502,7 +502,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">iConfigEntry</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
 <div class="viewcode-block" id="iConfig.find_pos"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iConfig.find_pos">[docs]</a>    <span class="k">def</span> <span class="nf">find_pos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pos</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">iConfigEntry</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Find entry by name and position.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find entry by name and position.</span>
 <span class="sd">If configuration file contains lines::</span>
 
 <span class="sd">  Db=DBA</span>
@@ -520,7 +520,7 @@
     <span class="s2">&quot;Class that wraps IFirebirdConf v3 interface for use from Python&quot;</span>
     <span class="n">VERSION</span> <span class="o">=</span> <span class="mi">3</span>
 <div class="viewcode-block" id="iFirebirdConf_v3.get_key"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iFirebirdConf_v3.get_key">[docs]</a>    <span class="k">def</span> <span class="nf">get_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns key for configuration parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns key for configuration parameter.</span>
 
 <span class="sd">Note:</span>
 <span class="sd">    If parameter with given name does not exists, returns 0xffffffff.</span>
@@ -566,7 +566,7 @@
         <span class="s2">&quot;Returns interface to access default configuration values (from firebird.conf)&quot;</span>
         <span class="k">return</span> <span class="n">iFirebirdConf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">getFirebirdConf</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span></div>
 <div class="viewcode-block" id="iConfigManager_v2.get_database_conf"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iConfigManager_v2.get_database_conf">[docs]</a>    <span class="k">def</span> <span class="nf">get_database_conf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">iFirebirdConf</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns interface to access db-specific configuration.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns interface to access db-specific configuration.</span>
 <span class="sd">Takes into an account firebird.conf and appropriate part of databases.conf.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">iFirebirdConf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">getDatabaseConf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database</span><span class="o">.</span><span class="n">encode</span><span class="p">()))</span></div>
 <div class="viewcode-block" id="iConfigManager_v2.get_plugin_config"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iConfigManager_v2.get_plugin_config">[docs]</a>    <span class="k">def</span> <span class="nf">get_plugin_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plugin</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">iConfig</span><span class="p">:</span>
@@ -597,7 +597,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">getInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">),</span> <span class="n">items</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">),</span> <span class="n">buffer</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span></div>
 <div class="viewcode-block" id="iBlob_v3.get_segment"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iBlob_v3.get_segment">[docs]</a>    <span class="k">def</span> <span class="nf">get_segment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="n">a</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">,</span> <span class="n">bytes_read</span><span class="p">:</span> <span class="n">a</span><span class="o">.</span><span class="n">Cardinal</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StateResult</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Replaces `isc_get_segment()`. Unlike it never returns `isc_segstr_eof`</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Replaces `isc_get_segment()`. Unlike it never returns `isc_segstr_eof`</span>
 <span class="sd">        and `isc_segment` errors (that are actually not errors), instead returns completion</span>
 <span class="sd">        codes `.StateResult.NO_DATA` and `.StateResult.SEGMENT`, normal return is `.StateResult.OK`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -687,7 +687,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">deprecatedDisconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span></div>
 <div class="viewcode-block" id="iTransaction_v3.join"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iTransaction_v3.join">[docs]</a>    <span class="k">def</span> <span class="nf">join</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transaction</span><span class="p">:</span> <span class="n">iTransaction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">iTransaction</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Joins current transaction and passed as parameter transaction into</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Joins current transaction and passed as parameter transaction into</span>
 <span class="sd">single distributed transaction (using Dtc). On success both current transaction</span>
 <span class="sd">and passed as parameter transaction are released and should not be used any more.&quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">transaction</span><span class="p">)</span>
@@ -728,7 +728,7 @@
     <span class="s2">&quot;Class that wraps IMessageMetadata v3 interface for use from Python&quot;</span>
     <span class="n">VERSION</span> <span class="o">=</span> <span class="mi">3</span>
 <div class="viewcode-block" id="iMessageMetadata_v3.get_count"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iMessageMetadata_v3.get_count">[docs]</a>    <span class="k">def</span> <span class="nf">get_count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns number of fields/parameters in a message. In all calls,</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns number of fields/parameters in a message. In all calls,</span>
 <span class="sd">containing index parameter, it&#39;s value should be: 0 &lt;= index &lt; getCount().&quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">getCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span>
@@ -810,13 +810,13 @@
     <span class="s2">&quot;Class that wraps IMessageMetadata v4 interface for use from Python&quot;</span>
     <span class="n">VERSION</span> <span class="o">=</span> <span class="mi">4</span>
 <div class="viewcode-block" id="iMessageMetadata.get_alignment"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iMessageMetadata.get_alignment">[docs]</a>    <span class="k">def</span> <span class="nf">get_alignment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns alignment required for message buffer.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns alignment required for message buffer.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">getAlignment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">result</span></div>
 <div class="viewcode-block" id="iMessageMetadata.get_aligned_length"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iMessageMetadata.get_aligned_length">[docs]</a>    <span class="k">def</span> <span class="nf">get_aligned_length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns length of message buffer taking into an account alignment requirements</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns length of message buffer taking into an account alignment requirements</span>
 <span class="sd">        (use it to allocate memory for an array of buffers and navigate through that array).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">getAlignedLength</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
@@ -897,7 +897,7 @@
     <span class="s2">&quot;Class that wraps IResultSet interface for use from Python&quot;</span>
     <span class="n">VERSION</span> <span class="o">=</span> <span class="mi">3</span>
 <div class="viewcode-block" id="iResultSet_v3.fetch_next"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iResultSet_v3.fetch_next">[docs]</a>    <span class="k">def</span> <span class="nf">fetch_next</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StateResult</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Fetch next record, replaces isc_dsql_fetch(). This method (and other</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch next record, replaces isc_dsql_fetch(). This method (and other</span>
 <span class="sd">fetch methods) returns completion code Status::RESULT_NO_DATA when EOF is reached,</span>
 <span class="sd">Status::RESULT_OK on success.&quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">fetchNext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
@@ -939,7 +939,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">result</span></div>
 <div class="viewcode-block" id="iResultSet_v3.get_metadata"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iResultSet_v3.get_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">get_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">iMessageMetadata</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Get metadata for messages in result set, specially useful when result</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get metadata for messages in result set, specially useful when result</span>
 <span class="sd">set is opened by IAttachment::openCursor() call with NULL output metadata format</span>
 <span class="sd">parameter (this is the only way to obtain message format in this case)&quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">getMetadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
@@ -951,22 +951,31 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_refcnt</span> <span class="o">-=</span> <span class="mi">1</span></div>
 <div class="viewcode-block" id="iResultSet_v3.set_delayed_output_format"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iResultSet_v3.set_delayed_output_format">[docs]</a>    <span class="k">def</span> <span class="nf">set_delayed_output_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="p">:</span> <span class="n">iMessageMetadata</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Important:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Important:</span>
 <span class="sd">             This item is for ISC API emulation only. It may be gone in future versions.</span>
 <span class="sd">             Please do not use it!</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">setDelayedOutputFormat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">fmt</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span></div></div>
 
-<span class="c1"># IResultSet(3) : ReferenceCounted</span>
-<div class="viewcode-block" id="iResultSet"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iResultSet">[docs]</a><span class="k">class</span> <span class="nc">iResultSet</span><span class="p">(</span><span class="n">iResultSet_v3</span><span class="p">):</span>
+<span class="c1"># IResultSet(4) : ReferenceCounted</span>
+<span class="k">class</span> <span class="nc">iResultSet_v4</span><span class="p">(</span><span class="n">iResultSet_v3</span><span class="p">):</span>
     <span class="s2">&quot;Class that wraps IResultSet interface for use from Python&quot;</span>
     <span class="n">VERSION</span> <span class="o">=</span> <span class="mi">4</span>
-<div class="viewcode-block" id="iResultSet.close"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iResultSet.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="s2">&quot;Close result set, releases interface on success&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_refcnt</span> <span class="o">-=</span> <span class="mi">1</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_refcnt</span> <span class="o">-=</span> <span class="mi">1</span>
+
+<span class="c1"># IResultSet(5) : ReferenceCounted</span>
+<div class="viewcode-block" id="iResultSet"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iResultSet">[docs]</a><span class="k">class</span> <span class="nc">iResultSet</span><span class="p">(</span><span class="n">iResultSet_v3</span><span class="p">):</span>
+    <span class="s2">&quot;Class that wraps IResultSet interface for use from Python&quot;</span>
+    <span class="n">VERSION</span> <span class="o">=</span> <span class="mi">5</span>
+<div class="viewcode-block" id="iResultSet.get_info"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iResultSet.get_info">[docs]</a>    <span class="k">def</span> <span class="nf">get_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="s2">&quot;Returns information about result set.&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">getInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">),</span> <span class="n">items</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">),</span> <span class="n">buffer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span></div></div>
 
 <span class="c1"># IStatement(3) : ReferenceCounted</span>
 <div class="viewcode-block" id="iStatement_v3"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iStatement_v3">[docs]</a><span class="k">class</span> <span class="nc">iStatement_v3</span><span class="p">(</span><span class="n">iReferenceCounted</span><span class="p">):</span>
@@ -1003,7 +1012,7 @@
         <span class="k">return</span> <span class="n">iMessageMetadata</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
 <div class="viewcode-block" id="iStatement_v3.execute"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iStatement_v3.execute">[docs]</a>    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transaction</span><span class="p">:</span> <span class="n">iTransaction</span><span class="p">,</span> <span class="n">in_meta</span><span class="p">:</span> <span class="n">iMessageMetadata</span><span class="p">,</span> <span class="n">in_buffer</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span>
                 <span class="n">out_meta</span><span class="p">:</span> <span class="n">iMessageMetadata</span><span class="p">,</span> <span class="n">out_buffer</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Executes any SQL statement except returning multiple rows of data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Executes any SQL statement except returning multiple rows of data.</span>
 <span class="sd">Partial analogue of `isc_dsql_execute2()` - in and out XSLQDAs replaced with input</span>
 <span class="sd">and output messages with appropriate buffers.&quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">transaction</span><span class="p">,</span> <span class="n">in_meta</span><span class="p">,</span> <span class="n">in_buffer</span><span class="p">,</span> <span class="n">out_meta</span><span class="p">,</span> <span class="n">out_buffer</span><span class="p">)</span>
@@ -1011,7 +1020,7 @@
         <span class="n">transaction</span><span class="o">.</span><span class="n">_as_parameter_</span> <span class="o">=</span> <span class="n">result</span></div>
 <div class="viewcode-block" id="iStatement_v3.open_cursor"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iStatement_v3.open_cursor">[docs]</a>    <span class="k">def</span> <span class="nf">open_cursor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transaction</span><span class="p">:</span> <span class="n">iTransaction</span><span class="p">,</span> <span class="n">in_meta</span><span class="p">:</span> <span class="n">iMessageMetadata</span><span class="p">,</span> <span class="n">in_buffer</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span>
                     <span class="n">out_meta</span><span class="p">:</span> <span class="n">iMessageMetadata</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="n">CursorFlag</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">iResultSet</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Executes SQL statement potentially returning multiple rows of data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Executes SQL statement potentially returning multiple rows of data.</span>
 <span class="sd">Returns ResultSet interface which should be used to fetch that data. Format of</span>
 <span class="sd">output data is defined by outMetadata parameter, leaving it NULL default format</span>
 <span class="sd">may be used. Parameter flags is needed to open bidirectional cursor setting it&#39;s</span>
@@ -1084,13 +1093,13 @@
     <span class="n">BLOB_STREAM</span> <span class="o">=</span> <span class="mi">3</span>
     <span class="n">BLOB_SEGHDR_ALIGN</span> <span class="o">=</span> <span class="mi">2</span>
 <div class="viewcode-block" id="iBatch_v3.add"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iBatch_v3.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">in_buffer</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Adds count messages from inBuffer to the batch. Total size of messages that can</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds count messages from inBuffer to the batch. Total size of messages that can</span>
 <span class="sd">        be added to the batch is limited by TAG_BUFFER_BYTES_SIZE parameter of batch creation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">in_buffer</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span></div>
 <div class="viewcode-block" id="iBatch_v3.add_blob"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iBatch_v3.add_blob">[docs]</a>    <span class="k">def</span> <span class="nf">add_blob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">in_buffer</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">id_</span><span class="p">:</span> <span class="n">a</span><span class="o">.</span><span class="n">ISC_QUAD</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Adds single blob having length bytes from `in_buffer` to the batch,</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds single blob having length bytes from `in_buffer` to the batch,</span>
 <span class="sd">        blob identifier is located at `id_` address. If blob should be created with</span>
 <span class="sd">        non-default parameters BPB may be passed (format matches one used in</span>
 <span class="sd">        `~.iAttachment_v3.create_blob`). Total size of inline blobs that can be added to the</span>
@@ -1101,12 +1110,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">addBlob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">in_buffer</span><span class="p">,</span> <span class="n">byref</span><span class="p">(</span><span class="n">id_</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">),</span> <span class="n">params</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span></div>
 <div class="viewcode-block" id="iBatch_v3.append_blob_data"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iBatch_v3.append_blob_data">[docs]</a>    <span class="k">def</span> <span class="nf">append_blob_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">in_buffer</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Extend last added blob: append length bytes taken from `in_buffer` to it.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extend last added blob: append length bytes taken from `in_buffer` to it.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">appendBlobData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">in_buffer</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span></div>
 <div class="viewcode-block" id="iBatch_v3.add_blob_stream"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iBatch_v3.add_blob_stream">[docs]</a>    <span class="k">def</span> <span class="nf">add_blob_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">in_buffer</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Adds blob data (this can be multiple objects or part of single blob) to the batch.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds blob data (this can be multiple objects or part of single blob) to the batch.</span>
 <span class="sd">        Header of each blob in the stream is aligned at `get_blob_alignment()` boundary</span>
 <span class="sd">        and contains 3 fields: first - 8-bytes blob identifier (in ISC_QUAD format),</span>
 <span class="sd">        second - 4-bytes length of blob, third – 4-bytes length of BPB. Blob header should</span>
@@ -1119,7 +1128,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">addBlobStream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">in_buffer</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span></div>
 <div class="viewcode-block" id="iBatch_v3.register_blob"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iBatch_v3.register_blob">[docs]</a>    <span class="k">def</span> <span class="nf">register_blob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">existing</span><span class="p">:</span> <span class="n">a</span><span class="o">.</span><span class="n">ISC_QUAD</span><span class="p">,</span> <span class="n">id_</span><span class="p">:</span> <span class="n">a</span><span class="o">.</span><span class="n">ISC_QUAD</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Makes it possible to use in batch blobs added using standard Blob interface.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Makes it possible to use in batch blobs added using standard Blob interface.</span>
 <span class="sd">        This function contains 2 ISC_QUAD* parameters, it’s important not to mix them –</span>
 <span class="sd">        first parameter (`existing`) is a blob identifier, already added out of batch scope,</span>
 <span class="sd">        second (`id_`) is blob identifier that will be placed in a message in this batch.</span>
@@ -1127,7 +1136,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">registerBlob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">byref</span><span class="p">(</span><span class="n">existing</span><span class="p">),</span> <span class="n">byref</span><span class="p">(</span><span class="n">id_</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span></div>
 <div class="viewcode-block" id="iBatch_v3.execute"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iBatch_v3.execute">[docs]</a>    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transaction</span><span class="p">:</span> <span class="n">iTransaction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">iBatchCompletionState</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Execute batch with parameters passed to it in the messages. If parameter</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Execute batch with parameters passed to it in the messages. If parameter</span>
 <span class="sd">        MULTIERROR is not set in parameters block when creating the batch execution will be</span>
 <span class="sd">        stopped after first error, in MULTIERROR mode an unlimited number of errors can</span>
 <span class="sd">        happen, after an error execution is continued from the next message. This function</span>
@@ -1138,7 +1147,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">iBatchCompletionState</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
 <div class="viewcode-block" id="iBatch_v3.cancel"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iBatch_v3.cancel">[docs]</a>    <span class="k">def</span> <span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Clear messages and blobs buffers, return batch to a state it had right after</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear messages and blobs buffers, return batch to a state it had right after</span>
 <span class="sd">        creation.</span>
 
 <span class="sd">        Note:</span>
@@ -1148,25 +1157,25 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span></div>
 <div class="viewcode-block" id="iBatch_v3.get_blob_alignment"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iBatch_v3.get_blob_alignment">[docs]</a>    <span class="k">def</span> <span class="nf">get_blob_alignment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns required alignment for the data placed into the buffer of `.add_blob_stream()`.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns required alignment for the data placed into the buffer of `.add_blob_stream()`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">getBlobAlignment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">result</span></div>
 <div class="viewcode-block" id="iBatch_v3.get_metadata"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iBatch_v3.get_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">get_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">iMessageMetadata</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns format of metadata used in batch’s messages.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns format of metadata used in batch’s messages.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">getMetadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">iMessageMetadata</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
 <div class="viewcode-block" id="iBatch_v3.set_default_bpb"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iBatch_v3.set_default_bpb">[docs]</a>    <span class="k">def</span> <span class="nf">set_default_bpb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bpb</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Sets BPB which will be used for all blobs missing non-default BPB. Must be called</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets BPB which will be used for all blobs missing non-default BPB. Must be called</span>
 <span class="sd">        before adding any message or blob to batch.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">setDefaultBpb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">bpb</span><span class="p">),</span> <span class="n">bpb</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span></div>
 <div class="viewcode-block" id="iBatch_v3.close"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iBatch_v3.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Sets BPB which will be used for all blobs missing non-default BPB. Must be called</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets BPB which will be used for all blobs missing non-default BPB. Must be called</span>
 <span class="sd">        before adding any message or blob to batch.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">deprecatedClose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
@@ -1177,13 +1186,13 @@
     <span class="s2">&quot;Class that wraps IBatch interface for use from Python&quot;</span>
     <span class="n">VERSION</span> <span class="o">=</span> <span class="mi">4</span>
 <div class="viewcode-block" id="iBatch.close"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iBatch.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Sets BPB which will be used for all blobs missing non-default BPB. Must be called</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets BPB which will be used for all blobs missing non-default BPB. Must be called</span>
 <span class="sd">        before adding any message or blob to batch.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span></div>
 <div class="viewcode-block" id="iBatch.get_info"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iBatch.get_info">[docs]</a>    <span class="k">def</span> <span class="nf">get_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Requests information about batch.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Requests information about batch.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">getInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">),</span> <span class="n">items</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">),</span> <span class="n">buffer</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span></div></div>
@@ -1196,13 +1205,13 @@
     <span class="n">SUCCESS_NO_INFO</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span>
     <span class="n">NO_MORE_ERRORS</span> <span class="o">=</span> <span class="mh">0xffffffff</span>
 <div class="viewcode-block" id="iBatchCompletionState.get_size"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iBatchCompletionState.get_size">[docs]</a>    <span class="k">def</span> <span class="nf">get_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the total number of processed messages.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the total number of processed messages.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">getSize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">result</span></div>
 <div class="viewcode-block" id="iBatchCompletionState.get_state"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iBatchCompletionState.get_state">[docs]</a>    <span class="k">def</span> <span class="nf">get_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the result of execution of message number `pos`. On any error with the</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the result of execution of message number `pos`. On any error with the</span>
 <span class="sd">        message this is `.EXECUTE_FAILED` constant, value returned on success depends upon</span>
 <span class="sd">        presence of `.RECORD_COUNTS` parameter of batch creation. When it present and has</span>
 <span class="sd">        non-zero value number of records inserted, updated or deleted during particular</span>
@@ -1212,7 +1221,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">result</span></div>
 <div class="viewcode-block" id="iBatchCompletionState.find_error"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iBatchCompletionState.find_error">[docs]</a>    <span class="k">def</span> <span class="nf">find_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Finds next (starting with pos) message which processing caused an error. When</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Finds next (starting with pos) message which processing caused an error. When</span>
 <span class="sd">        such message is missing NO_MORE_ERRORS constant is returned. Number of status vectors,</span>
 <span class="sd">        returned in this interface, is limited by the value of `.DETAILED_ERRORS` parameter</span>
 <span class="sd">        of batch creation.</span>
@@ -1221,7 +1230,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">result</span></div>
 <div class="viewcode-block" id="iBatchCompletionState.get_status"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iBatchCompletionState.get_status">[docs]</a>    <span class="k">def</span> <span class="nf">get_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">iStatus</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns detailed information (full status vector) about an error that took place</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns detailed information (full status vector) about an error that took place</span>
 <span class="sd">        when processing `pos` message.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">_master</span><span class="o">.</span><span class="n">get_status</span><span class="p">()</span>
@@ -1304,14 +1313,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">getInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">),</span> <span class="n">items</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">),</span> <span class="n">buffer</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span></div>
 <div class="viewcode-block" id="iAttachment_v3.start_transaction"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iAttachment_v3.start_transaction">[docs]</a>    <span class="k">def</span> <span class="nf">start_transaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tpb</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">iTransaction</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Partially replaces `isc_start_multiple()`, to start &gt;1 transaction</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Partially replaces `isc_start_multiple()`, to start &gt;1 transaction</span>
 <span class="sd">distributed transactions coordinator should be used, also possible to join 2</span>
 <span class="sd">transactions into single distributed transaction&quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">startTransaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">tpb</span><span class="p">),</span> <span class="n">tpb</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">iTransaction</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
 <div class="viewcode-block" id="iAttachment_v3.reconnect_transaction"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iAttachment_v3.reconnect_transaction">[docs]</a>    <span class="k">def</span> <span class="nf">reconnect_transaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">iTransaction</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Makes it possible to connect to a transaction in limbo. Id parameter</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Makes it possible to connect to a transaction in limbo. Id parameter</span>
 <span class="sd">contains transaction number in network format of given length.&quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">reconnectTransaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">id_</span><span class="p">),</span> <span class="n">id_</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span>
@@ -1357,7 +1366,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span></div>
 <div class="viewcode-block" id="iAttachment_v3.prepare"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iAttachment_v3.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transaction</span><span class="p">:</span> <span class="n">iTransaction</span><span class="p">,</span> <span class="n">stmt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dialect</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                 <span class="n">flags</span><span class="p">:</span> <span class="n">PreparePrefetchFlag</span> <span class="o">=</span> <span class="n">PreparePrefetchFlag</span><span class="o">.</span><span class="n">METADATA</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">iStatement</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Replaces `isc_dsql_prepare()`. Additional parameter flags makes it</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Replaces `isc_dsql_prepare()`. Additional parameter flags makes it</span>
 <span class="sd">possible to control what information will be preloaded from engine at once</span>
 <span class="sd">(i.e. in single network packet for remote operation).&quot;&quot;&quot;</span>
         <span class="n">b_stmt</span><span class="p">:</span> <span class="nb">bytes</span> <span class="o">=</span> <span class="n">stmt</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">encoding</span><span class="p">)</span>
@@ -1368,7 +1377,7 @@
 <div class="viewcode-block" id="iAttachment_v3.execute"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iAttachment_v3.execute">[docs]</a>    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transaction</span><span class="p">:</span> <span class="n">iTransaction</span><span class="p">,</span> <span class="n">stmt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dialect</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                 <span class="n">in_metadata</span><span class="p">:</span> <span class="n">iMessageMetadata</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">in_buffer</span><span class="p">:</span> <span class="nb">bytes</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="n">out_metadata</span><span class="p">:</span> <span class="n">iMessageMetadata</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">out_buffer</span><span class="p">:</span> <span class="nb">bytes</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Executes any SQL statement except returning multiple rows of data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Executes any SQL statement except returning multiple rows of data.</span>
 <span class="sd">Partial analogue of `isc_dsql_execute2()` - in and out XSLQDAs replaced with</span>
 <span class="sd">input and output messages with appropriate buffers.&quot;&quot;&quot;</span>
         <span class="n">b_stmt</span><span class="p">:</span> <span class="nb">bytes</span> <span class="o">=</span> <span class="n">stmt</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">encoding</span><span class="p">)</span>
@@ -1379,7 +1388,7 @@
 <div class="viewcode-block" id="iAttachment_v3.open_cursor"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iAttachment_v3.open_cursor">[docs]</a>    <span class="k">def</span> <span class="nf">open_cursor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transaction</span><span class="p">:</span> <span class="n">iTransaction</span><span class="p">,</span> <span class="n">stmt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dialect</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                     <span class="n">in_metadata</span><span class="p">:</span> <span class="n">iMessageMetadata</span><span class="p">,</span> <span class="n">in_buffer</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span>
                     <span class="n">out_metadata</span><span class="p">:</span> <span class="n">iMessageMetadata</span><span class="p">,</span> <span class="n">cursor_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">cursor_flags</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">iResultSet</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Executes SQL statement potentially returning multiple rows of data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Executes SQL statement potentially returning multiple rows of data.</span>
 <span class="sd">Returns iResultSet interface which should be used to fetch that data. Format of</span>
 <span class="sd">output data is defined by out_metadata parameter, leaving it NULL default format</span>
 <span class="sd">may be used. Parameter cursor_name specifies name of opened cursor (analogue of</span>
@@ -1392,7 +1401,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">iResultSet</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
 <div class="viewcode-block" id="iAttachment_v3.que_events"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iAttachment_v3.que_events">[docs]</a>    <span class="k">def</span> <span class="nf">que_events</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span> <span class="n">iEventCallbackImpl</span><span class="p">,</span> <span class="n">events</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">iEvents</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Replaces `isc_que_events()` call. Instead callback function with</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Replaces `isc_que_events()` call. Instead callback function with</span>
 <span class="sd">void* parameter callback interface is used.&quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">queEvents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">callback</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">events</span><span class="p">),</span> <span class="n">events</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span>
@@ -1402,7 +1411,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">cancelOperation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span></div>
 <div class="viewcode-block" id="iAttachment_v3.ping"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iAttachment_v3.ping">[docs]</a>    <span class="k">def</span> <span class="nf">ping</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Checks connection status. If test fails the only operation possible</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Checks connection status. If test fails the only operation possible</span>
 <span class="sd">with attachment is to close it.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">ping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span></div>
@@ -1442,7 +1451,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span></div>
 <div class="viewcode-block" id="iAttachment_v4.create_batch"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iAttachment_v4.create_batch">[docs]</a>    <span class="k">def</span> <span class="nf">create_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transaction</span><span class="p">:</span> <span class="n">iTransaction</span><span class="p">,</span> <span class="n">stmt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dialect</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                      <span class="n">in_metadata</span><span class="p">:</span> <span class="n">iMessageMetadata</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">iBatch</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Prepares `stmt` and creates `.iBatch` interface ready to accept multiple sets</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepares `stmt` and creates `.iBatch` interface ready to accept multiple sets</span>
 <span class="sd">        of input parameters in `in_metadata` format. Leaving `in_metadata` `None` makes</span>
 <span class="sd">        batch use default format for `stmt`. Parameters block may be passed to `create_batch`</span>
 <span class="sd">        making it possible to adjust batch behavior.</span>
@@ -1473,14 +1482,14 @@
     <span class="s2">&quot;Class that wraps IService interface for use from Python&quot;</span>
     <span class="n">VERSION</span> <span class="o">=</span> <span class="mi">3</span>
 <div class="viewcode-block" id="iService_v3.detach"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iService_v3.detach">[docs]</a>    <span class="k">def</span> <span class="nf">detach</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Close attachment to services manager, on success releases interface.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Close attachment to services manager, on success releases interface.</span>
 <span class="sd">        Replaces `isc_service_detach()`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">deprecatedDetach</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_refcnt</span> <span class="o">-=</span> <span class="mi">1</span></div>
 <div class="viewcode-block" id="iService_v3.query"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iService_v3.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">send</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">receive</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Send and request information to/from service, with different `receive`</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Send and request information to/from service, with different `receive`</span>
 <span class="sd">        may be used for both running services and to obtain various server-wide information.</span>
 <span class="sd">        Replaces `isc_service_query()`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1497,7 +1506,7 @@
     <span class="s2">&quot;Class that wraps IService interface for use from Python&quot;</span>
     <span class="n">VERSION</span> <span class="o">=</span> <span class="mi">4</span>
 <div class="viewcode-block" id="iService_v4.detach"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iService_v4.detach">[docs]</a>    <span class="k">def</span> <span class="nf">detach</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Close attachment to services manager, on success releases interface.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Close attachment to services manager, on success releases interface.</span>
 <span class="sd">        Replaces `isc_service_detach()`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">detach</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
@@ -1509,7 +1518,7 @@
     <span class="s2">&quot;Class that wraps IService interface for use from Python&quot;</span>
     <span class="n">VERSION</span> <span class="o">=</span> <span class="mi">5</span>
 <div class="viewcode-block" id="iService.cancel"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iService.cancel">[docs]</a>    <span class="k">def</span> <span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Cancel wait of current `query()` call. Supported only for embedded connections.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Cancel wait of current `query()` call. Supported only for embedded connections.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span>
@@ -1557,7 +1566,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">addWithTpb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">attachment</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">tpb</span><span class="p">),</span> <span class="n">tpb</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span></div>
 <div class="viewcode-block" id="iDtcStart.start"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iDtcStart.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">iTransaction</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Start distributed transaction for accumulated attachments.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start distributed transaction for accumulated attachments.</span>
 <span class="sd">On successful return DtcStart interface is disposed automatically.&quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span>
@@ -1569,7 +1578,7 @@
     <span class="s2">&quot;Class that wraps IDtc interface for use from Python&quot;</span>
     <span class="n">VERSION</span> <span class="o">=</span> <span class="mi">2</span>
 <div class="viewcode-block" id="iDtc.join"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iDtc.join">[docs]</a>    <span class="k">def</span> <span class="nf">join</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">one</span><span class="p">:</span> <span class="n">iTransaction</span><span class="p">,</span> <span class="n">two</span><span class="p">:</span> <span class="n">iTransaction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">iTransaction</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Joins 2 independent transactions into distributed transaction.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Joins 2 independent transactions into distributed transaction.</span>
 <span class="sd">On success both transactions passed to join() are released and pointers to them</span>
 <span class="sd">should not be used any more.&quot;&quot;&quot;</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">one</span><span class="p">,</span> <span class="n">two</span><span class="p">)</span>
@@ -1588,12 +1597,12 @@
     <span class="s2">&quot;Class that wraps ITimerControl interface for use from Python&quot;</span>
     <span class="n">VERSION</span> <span class="o">=</span> <span class="mi">2</span>
 <div class="viewcode-block" id="iTimerControl.start"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iTimerControl.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timer</span><span class="p">:</span> <span class="n">iTimerImpl</span><span class="p">,</span> <span class="n">microseconds</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Start ITimer to alarm after given delay (in microseconds, 10-6 seconds).</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start ITimer to alarm after given delay (in microseconds, 10-6 seconds).</span>
 <span class="sd">        Timer will be waked up only once after this call.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">timer</span><span class="p">,</span> <span class="n">microseconds</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span></div>
 <div class="viewcode-block" id="iTimerControl.stop"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iTimerControl.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timer</span><span class="p">:</span> <span class="n">iTimerImpl</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Stop ITimer. It&#39;s not an error to stop not started timer thus avoiding problems</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stop ITimer. It&#39;s not an error to stop not started timer thus avoiding problems</span>
 <span class="sd">        with races between stop() and timer alarm.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">timer</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span></div></div>
@@ -1703,7 +1712,7 @@
     <span class="s2">&quot;Class that wraps IUtil v2 interface for use from Python&quot;</span>
     <span class="n">VERSION</span> <span class="o">=</span> <span class="mi">2</span>
 <div class="viewcode-block" id="iUtil_v2.get_fb_version"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iUtil_v2.get_fb_version">[docs]</a>    <span class="k">def</span> <span class="nf">get_fb_version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attachment</span><span class="p">:</span> <span class="n">iAttachment</span><span class="p">,</span> <span class="n">callback</span><span class="p">:</span> <span class="n">iVersionCallbackImpl</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Produce long and beautiful report about firebird version used.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Produce long and beautiful report about firebird version used.</span>
 <span class="sd">It may be seen in ISQL when invoked with -Z switch.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">getFbVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">attachment</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span></div>
@@ -1727,7 +1736,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_check</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">result</span></div>
 <div class="viewcode-block" id="iUtil_v2.execute_create_database"><a class="viewcode-back" href="../../../ref-intf.html#firebird.driver.interfaces.iUtil_v2.execute_create_database">[docs]</a>    <span class="k">def</span> <span class="nf">execute_create_database</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stmt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dialect</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">iAttachment</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Execute “CREATE DATABASE ...” statement – ISC trick with NULL statement</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Execute “CREATE DATABASE ...” statement – ISC trick with NULL statement</span>
 <span class="sd">handle does not work with interfaces.&quot;&quot;&quot;</span>
         <span class="n">b_stmt</span><span class="p">:</span> <span class="nb">bytes</span> <span class="o">=</span> <span class="n">stmt</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vtable</span><span class="o">.</span><span class="n">executeCreateDatabase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">b_stmt</span><span class="p">),</span> <span class="n">b_stmt</span><span class="p">,</span>
@@ -2233,8 +2242,8 @@
       
     </p>
     <p>
-        &copy; Copyright 2020-2022, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br/>
+        &copy; Copyright 2020-2023, The Firebird Project.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.0.1.<br/>
     </p>
   </div>
 </footer>

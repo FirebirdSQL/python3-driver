@@ -3,14 +3,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
-<title>Compliance to PyDB API 2.0 — firebird-driver 1.8.0 documentation</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.19: https://docutils.sourceforge.io/" name="generator"/>
+<title>Compliance to PyDB API 2.0 — firebird-driver 1.9.0 documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
 <link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
 <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-<script src="_static/jquery.js"></script>
-<script src="_static/underscore.js"></script>
-<script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
 <script src="_static/doctools.js"></script>
 <script src="_static/sphinx_highlight.js"></script>
 <link href="genindex.html" rel="index" title="Index"/>
@@ -37,7 +34,7 @@
 </button>
 <a class="brand" href="index.html">
           firebird-driver</a>
-<span class="navbar-text pull-left"><b>1.8.0</b></span>
+<span class="navbar-text pull-left"><b>1.9.0</b></span>
 <div class="nav-collapse">
 <ul class="nav">
 <li class="divider-vertical"></li>
@@ -157,6 +154,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-9-0">Version 1.9.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-8-0">Version 1.8.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-7-0">Version 1.7.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-6-0">Version 1.6.0</a></li>
@@ -279,7 +277,7 @@ to warrant their own subsection elsewhere.</p>
 <div><p>This function supports the following optional keyword arguments in addition
 to those required by the spec:</p>
 <dl class="field-list simple">
-<dt class="field-odd">role</dt>
+<dt class="field-odd">role<span class="colon">:</span></dt>
 <dd class="field-odd"><p>For connecting to a database with a specific SQL role.</p>
 </dd>
 </dl>
@@ -288,7 +286,7 @@ to those required by the spec:</p>
 </pre></div>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">charset</dt>
+<dt class="field-odd">charset<span class="colon">:</span></dt>
 <dd class="field-odd"><p>For explicitly specifying the character set of the connection.
 See Firebird Documentation for a list of available character sets, and
 <code class="xref py py-obj docutils literal notranslate"><span class="pre">Unicode</span> <span class="pre">Fields</span> <span class="pre">and</span> <span class="pre">Firebird-driver</span></code> section for information on handling
@@ -300,7 +298,7 @@ extended character sets with Firebird-driver.</p>
 </pre></div>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">sql_dialect</dt>
+<dt class="field-odd">sql_dialect<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The SQL dialect is feature for backward compatibility with Interbase® 5.5
 or earlier. The default dialect is <code class="xref py py-obj docutils literal notranslate"><span class="pre">3</span></code> (the most featureful dialect, default
 for Firebird). If you want to connect to <code class="xref py py-obj docutils literal notranslate"><span class="pre">legacy</span></code> databases, you must
@@ -345,7 +343,7 @@ it is better to create a cursor using the connection’s <code class="xref py py
 the statement using one of the cursor’s execute methods.</p>
 <p>Arguments:</p>
 <dl class="field-list simple">
-<dt class="field-odd">sql</dt>
+<dt class="field-odd">sql<span class="colon">:</span></dt>
 <dd class="field-odd"><p>String containing the SQL statement to execute.</p>
 </dd>
 </dl>
@@ -436,8 +434,8 @@ except that it is a sequence indexed by field position.</p>
 <a href="#">Back to top</a>
 </p>
 <p>
-        © Copyright 2020-2022, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+        © Copyright 2020-2023, The Firebird Project.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.0.1.<br/>
 </p>
 </div>
 </footer>

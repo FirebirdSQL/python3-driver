@@ -3,14 +3,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.17: http://docutils.sourceforge.net/" name="generator"/>
-<title>Changelog — firebird-driver 1.8.0 documentation</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="Docutils 0.19: https://docutils.sourceforge.io/" name="generator"/>
+<title>Changelog — firebird-driver 1.9.0 documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
 <link href="_static/bootstrap-sphinx.css" rel="stylesheet" type="text/css"/>
 <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-<script src="_static/jquery.js"></script>
-<script src="_static/underscore.js"></script>
-<script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
 <script src="_static/doctools.js"></script>
 <script src="_static/sphinx_highlight.js"></script>
 <link href="genindex.html" rel="index" title="Index"/>
@@ -37,7 +34,7 @@
 </button>
 <a class="brand" href="index.html">
           firebird-driver</a>
-<span class="navbar-text pull-left"><b>1.8.0</b></span>
+<span class="navbar-text pull-left"><b>1.9.0</b></span>
 <div class="nav-collapse">
 <ul class="nav">
 <li class="divider-vertical"></li>
@@ -157,6 +154,7 @@
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-9-0">Version 1.9.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-1-8-0">Version 1.8.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-1-7-0">Version 1.7.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-1-6-0">Version 1.6.0</a></li>
@@ -197,6 +195,7 @@
 <a data-target="#" data-toggle="dropdown" href="#" id="dLabelLocalToc" role="button">Page <b class="caret"></b></a>
 <ul aria-labelledby="dLabelLocalToc" class="dropdown-menu localtoc" role="menu"><ul>
 <li><a class="reference internal" href="#">Changelog</a><ul>
+<li><a class="reference internal" href="#version-1-9-0">Version 1.9.0</a></li>
 <li><a class="reference internal" href="#version-1-8-0">Version 1.8.0</a></li>
 <li><a class="reference internal" href="#version-1-7-0">Version 1.7.0</a></li>
 <li><a class="reference internal" href="#version-1-6-0">Version 1.6.0</a></li>
@@ -249,6 +248,31 @@
 <div class="body span12 content" role="main">
 <a class="dashAnchor" name="//apple_ref/cpp/Section/Changelog"></a><section id="changelog">
 <h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this heading">¶</a></h1>
+<a class="dashAnchor" name="//apple_ref/cpp/Section/Version 1.9.0"></a><section id="version-1-9-0">
+<h2>Version 1.9.0<a class="headerlink" href="#version-1-9-0" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>New: Initial (as for Beta 1) support for Firebird 5.0 API and features.</p>
+<ul>
+<li><p>New and extended types: Extended <a class="reference internal" href="ref-types.html#firebird.driver.types.DbInfoCode" title="firebird.driver.types.DbInfoCode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DbInfoCode</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.StmtInfoCode" title="firebird.driver.types.StmtInfoCode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StmtInfoCode</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.DPBItem" title="firebird.driver.types.DPBItem"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DPBItem</span></code></a>,
+<a class="reference internal" href="ref-types.html#firebird.driver.types.SrvRepairOption" title="firebird.driver.types.SrvRepairOption"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SrvRepairOption</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.SrvBackupOption" title="firebird.driver.types.SrvBackupOption"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SrvBackupOption</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.SrvNBackupOption" title="firebird.driver.types.SrvNBackupOption"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SrvNBackupOption</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.Implementation" title="firebird.driver.types.Implementation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Implementation</span></code></a>,
+<a class="reference internal" href="ref-types.html#firebird.driver.types.SrvRepairFlag" title="firebird.driver.types.SrvRepairFlag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SrvRepairFlag</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.SrvBackupFlag" title="firebird.driver.types.SrvBackupFlag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SrvBackupFlag</span></code></a> and new <a class="reference internal" href="ref-types.html#firebird.driver.types.ResultSetInfoCode" title="firebird.driver.types.ResultSetInfoCode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ResultSetInfoCode</span></code></a>.</p></li>
+<li><p>API: <a class="reference internal" href="ref-intf.html#firebird.driver.interfaces.iResultSet.get_info" title="firebird.driver.interfaces.iResultSet.get_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">iResultSet.get_info</span></code></a> method available for FB5 attachments.</p></li>
+<li><p>Parallel workers: Added <a class="reference internal" href="ref-config.html#firebird.driver.config.DatabaseConfig.parallel_workers" title="firebird.driver.config.DatabaseConfig.parallel_workers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DatabaseConfig.parallel_workers</span></code></a> configuration option, added
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">parallel_workers</span></code> parameter to <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.backup" title="firebird.driver.core.ServerDbServices3.backup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerDbServices3.backup</span></code></a>, <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.restore" title="firebird.driver.core.ServerDbServices3.restore"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerDbServices3.restore</span></code></a>
+and <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.sweep" title="firebird.driver.core.ServerDbServices3.sweep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerDbServices3.sweep</span></code></a>, added <code class="xref py py-obj docutils literal notranslate"><span class="pre">parallel_workers</span></code> to <a class="reference internal" href="ref-core.html#firebird.driver.core.DPB" title="firebird.driver.core.DPB"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DPB</span></code></a></p></li>
+<li><p>New <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices.upgrade" title="firebird.driver.core.ServerDbServices.upgrade"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerDbServices.upgrade</span></code></a> method (in-place minor ODS upgrades)</p></li>
+</ul>
+</li>
+<li><p>Test: Fix name for <code class="xref py py-obj docutils literal notranslate"><span class="pre">to_dict()</span></code> test.</p></li>
+<li><p>Add: Classic API functions for BLR and BLOB manipulation to <a class="reference internal" href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI" title="firebird.driver.fbapi.FirebirdAPI"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FirebirdAPI</span></code></a>.</p></li>
+<li><p>Fix: Wait for completion of <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices" title="firebird.driver.core.ServerDbServices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerDbServices</span></code></a> services that do not return data.
+Otherwise subsequent service calls may end with “Service is currently busy” error.</p></li>
+<li><p>Improvement: Internal handling of attachment and trasansaction handles.</p></li>
+<li><p>Fix: Documentation link for the driver, provided by @mariuz</p></li>
+<li><p>Fix #20: Cursor.description returning () instead of None when the cursor has no rows,
+which is violation of PEP 249. Fix provided by @fdcastel</p></li>
+</ul>
+</section>
 <a class="dashAnchor" name="//apple_ref/cpp/Section/Version 1.8.0"></a><section id="version-1-8-0">
 <h2>Version 1.8.0<a class="headerlink" href="#version-1-8-0" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
@@ -281,7 +305,7 @@
 <a class="dashAnchor" name="//apple_ref/cpp/Section/Version 1.5.1"></a><section id="version-1-5-1">
 <h2>Version 1.5.1<a class="headerlink" href="#version-1-5-1" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
-<li><p>Fix: <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices.set_replica_mode" title="firebird.driver.core.ServerDbServices.set_replica_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerDbServices.set_replica_mode()</span></code></a> now works correctly.</p></li>
+<li><p>Fix: <code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerDbServices.set_replica_mode()</span></code> now works correctly.</p></li>
 </ul>
 </section>
 <a class="dashAnchor" name="//apple_ref/cpp/Section/Version 1.5.0"></a><section id="version-1-5-0">
@@ -452,7 +476,7 @@ The <a class="reference internal" href="ref-core.html#firebird.driver.core.TPB" 
 arguments <code class="xref py py-obj docutils literal notranslate"><span class="pre">include_data</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">keyhoder</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">keyname</span></code>, <a class="reference external" href="https://docs.python.org/3/library/crypt.html#module-crypt" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crypt</span></code></a> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">replica_mode</span></code>.</p></li>
 <li><p><a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices3.nbackup" title="firebird.driver.core.ServerDbServices3.nbackup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nbackup()</span></code></a> has new optional keyword-only parameter <code class="xref py py-obj docutils literal notranslate"><span class="pre">guid</span></code>.</p></li>
 <li><p>Support for new services.
-New methods <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices.nfix_database" title="firebird.driver.core.ServerDbServices.nfix_database"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerDbServices.nfix_database()</span></code></a> and <a class="reference internal" href="ref-core.html#firebird.driver.core.ServerDbServices.set_replica_mode" title="firebird.driver.core.ServerDbServices.set_replica_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_replica_mode()</span></code></a>.</p></li>
+New methods <code class="xref py py-obj docutils literal notranslate"><span class="pre">ServerDbServices.nfix_database()</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">set_replica_mode()</span></code>.</p></li>
 <li><p>Support for <a class="reference internal" href="ref-core.html#firebird.driver.core.Statement.timeout" title="firebird.driver.core.Statement.timeout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Statement.timeout</span></code></a>, and <code class="xref py py-obj docutils literal notranslate"><span class="pre">idle_timeout</span></code> and <code class="xref py py-obj docutils literal notranslate"><span class="pre">statement_timeout</span></code> in <a class="reference internal" href="ref-core.html#firebird.driver.core.Connection.info" title="firebird.driver.core.Connection.info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection.info</span></code></a>.</p></li>
 <li><p>New types: <a class="reference internal" href="ref-types.html#firebird.driver.types.Features" title="firebird.driver.types.Features"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Features</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.ReplicaMode" title="firebird.driver.types.ReplicaMode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ReplicaMode</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.CancelType" title="firebird.driver.types.CancelType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CancelType</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.DecfloatRound" title="firebird.driver.types.DecfloatRound"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DecfloatRound</span></code></a>, <a class="reference internal" href="ref-types.html#firebird.driver.types.DecfloatTraps" title="firebird.driver.types.DecfloatTraps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DecfloatTraps</span></code></a>,
 <a class="reference internal" href="ref-types.html#firebird.driver.types.ConnectionFlag" title="firebird.driver.types.ConnectionFlag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConnectionFlag</span></code></a> and <a class="reference internal" href="ref-types.html#firebird.driver.types.EncryptionFlag" title="firebird.driver.types.EncryptionFlag"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EncryptionFlag</span></code></a>. Firebird 4-related values added to some other
@@ -559,8 +583,8 @@ properties (relates to FB4+ support).</p></li>
 <a href="#">Back to top</a>
 </p>
 <p>
-        © Copyright 2020-2022, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+        © Copyright 2020-2023, The Firebird Project.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.0.1.<br/>
 </p>
 </div>
 </footer>

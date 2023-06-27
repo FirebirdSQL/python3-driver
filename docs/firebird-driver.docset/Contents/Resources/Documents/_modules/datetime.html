@@ -4,13 +4,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>datetime &#8212; firebird-driver 1.7.0 documentation</title>
+    <title>datetime &#8212; firebird-driver 1.9.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -38,7 +35,7 @@
 
         <a class="brand" href="../index.html">
           firebird-driver</a>
-        <span class="navbar-text pull-left"><b>1.7.0</b></span>
+        <span class="navbar-text pull-left"><b>1.9.0</b></span>
 
         <div class="nav-collapse">
           <ul class="nav">
@@ -168,6 +165,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../changelog.html#version-1-9-0">Version 1.9.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog.html#version-1-8-0">Version 1.8.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog.html#version-1-7-0">Version 1.7.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog.html#version-1-6-0">Version 1.6.0</a></li>
@@ -692,7 +690,7 @@
                     <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
 
 <span class="k">def</span> <span class="nf">_divide_and_round</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;divide a by b and round result to the nearest integer</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;divide a by b and round result to the nearest integer</span>
 
 <span class="sd">    When the ratio is exactly half-way between two integers,</span>
 <span class="sd">    the even integer is returned.</span>
@@ -712,7 +710,7 @@
 
 
 <span class="k">class</span> <span class="nc">timedelta</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Represent the difference between two datetime objects.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Represent the difference between two datetime objects.</span>
 
 <span class="sd">    Supported operators:</span>
 
@@ -858,24 +856,24 @@
         <span class="k">return</span> <span class="n">s</span>
 
     <span class="k">def</span> <span class="nf">total_seconds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Total seconds in the duration.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Total seconds in the duration.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">days</span> <span class="o">*</span> <span class="mi">86400</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">seconds</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**</span><span class="mi">6</span> <span class="o">+</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">microseconds</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10</span><span class="o">**</span><span class="mi">6</span>
 
     <span class="c1"># Read-only field accessors</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">days</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;days&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;days&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_days</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">seconds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;seconds&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;seconds&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seconds</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">microseconds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;microseconds&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;microseconds&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_microseconds</span>
 
     <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
@@ -1032,7 +1030,7 @@
 <span class="n">timedelta</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">microseconds</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
 <span class="k">class</span> <span class="nc">date</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Concrete date type.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Concrete date type.</span>
 
 <span class="sd">    Constructors:</span>
 
@@ -1062,7 +1060,7 @@
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="s1">&#39;_year&#39;</span><span class="p">,</span> <span class="s1">&#39;_month&#39;</span><span class="p">,</span> <span class="s1">&#39;_day&#39;</span><span class="p">,</span> <span class="s1">&#39;_hashcode&#39;</span>
 
     <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">day</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Constructor.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor.</span>
 
 <span class="sd">        Arguments:</span>
 
@@ -1109,7 +1107,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">fromordinal</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Construct a date from a proleptic Gregorian ordinal.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct a date from a proleptic Gregorian ordinal.</span>
 
 <span class="sd">        January 1 of year 1 is day 1.  Only the year, month and day are</span>
 <span class="sd">        non-zero in the result.</span>
@@ -1119,7 +1117,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">fromisoformat</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">date_string</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Construct a date from the output of date.isoformat().&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct a date from the output of date.isoformat().&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">date_string</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;fromisoformat: argument must be str&#39;</span><span class="p">)</span>
 
@@ -1131,7 +1129,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">fromisocalendar</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">year</span><span class="p">,</span> <span class="n">week</span><span class="p">,</span> <span class="n">day</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Construct a date from the ISO year, week number and weekday.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct a date from the ISO year, week number and weekday.</span>
 
 <span class="sd">        This is the inverse of the date.isocalendar() function&quot;&quot;&quot;</span>
         <span class="c1"># Year is bounded this way because 9999-12-31 is (9999, 52, 5)</span>
@@ -1167,7 +1165,7 @@
     <span class="c1"># Conversions to string</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Convert to formal string, for repr().</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert to formal string, for repr().</span>
 
 <span class="sd">        &gt;&gt;&gt; dt = datetime(2010, 1, 1)</span>
 <span class="sd">        &gt;&gt;&gt; repr(dt)</span>
@@ -1208,7 +1206,7 @@
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">isoformat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return the date formatted according to ISO.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the date formatted according to ISO.</span>
 
 <span class="sd">        This is &#39;YYYY-MM-DD&#39;.</span>
 
@@ -1223,17 +1221,17 @@
     <span class="c1"># Read-only field accessors</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">year</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;year (1-9999)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;year (1-9999)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_year</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">month</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;month (1-12)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;month (1-12)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_month</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">day</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;day (1-31)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;day (1-31)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_day</span>
 
     <span class="c1"># Standard conversions, __eq__, __le__, __lt__, __ge__, __gt__,</span>
@@ -1245,7 +1243,7 @@
                                   <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">toordinal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return proleptic Gregorian ordinal for the year, month and day.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return proleptic Gregorian ordinal for the year, month and day.</span>
 
 <span class="sd">        January 1 of year 1 is day 1.  Only the year, month and day values</span>
 <span class="sd">        contribute to the result.</span>
@@ -1253,7 +1251,7 @@
         <span class="k">return</span> <span class="n">_ymd2ord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_year</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_month</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_day</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">year</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">month</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">day</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return a new date with new values for the specified fields.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new date with new values for the specified fields.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">year</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">year</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_year</span>
         <span class="k">if</span> <span class="n">month</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1315,7 +1313,7 @@
     <span class="fm">__radd__</span> <span class="o">=</span> <span class="fm">__add__</span>
 
     <span class="k">def</span> <span class="fm">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Subtract two dates, or a date and a timedelta.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Subtract two dates, or a date and a timedelta.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="o">-</span><span class="n">other</span><span class="o">.</span><span class="n">days</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">date</span><span class="p">):</span>
@@ -1336,7 +1334,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">toordinal</span><span class="p">()</span> <span class="o">%</span> <span class="mi">7</span> <span class="ow">or</span> <span class="mi">7</span>
 
     <span class="k">def</span> <span class="nf">isocalendar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return a 3-tuple containing ISO year, week number, and weekday.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a 3-tuple containing ISO year, week number, and weekday.</span>
 
 <span class="sd">        The first ISO week of the year is the (Mon-Sun) week</span>
 <span class="sd">        containing the year&#39;s first Thursday; everything else derives</span>
@@ -1384,7 +1382,7 @@
 
 
 <span class="k">class</span> <span class="nc">tzinfo</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Abstract base class for time zone info classes.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for time zone info classes.</span>
 
 <span class="sd">    Subclasses must override the name(), utcoffset() and dst() methods.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1399,7 +1397,7 @@
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;tzinfo subclass must override utcoffset()&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">dst</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;datetime -&gt; DST offset as timedelta, positive for east of UTC.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;datetime -&gt; DST offset as timedelta, positive for east of UTC.</span>
 
 <span class="sd">        Return 0 if DST not in effect.  utcoffset() must include the DST</span>
 <span class="sd">        offset.</span>
@@ -1454,7 +1452,7 @@
 <span class="n">_tzinfo_class</span> <span class="o">=</span> <span class="n">tzinfo</span>
 
 <span class="k">class</span> <span class="nc">time</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Time with time zone.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Time with time zone.</span>
 
 <span class="sd">    Constructors:</span>
 
@@ -1479,7 +1477,7 @@
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="s1">&#39;_hour&#39;</span><span class="p">,</span> <span class="s1">&#39;_minute&#39;</span><span class="p">,</span> <span class="s1">&#39;_second&#39;</span><span class="p">,</span> <span class="s1">&#39;_microsecond&#39;</span><span class="p">,</span> <span class="s1">&#39;_tzinfo&#39;</span><span class="p">,</span> <span class="s1">&#39;_hashcode&#39;</span><span class="p">,</span> <span class="s1">&#39;_fold&#39;</span>
 
     <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">hour</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">minute</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">second</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">microsecond</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">fold</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Constructor.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor.</span>
 
 <span class="sd">        Arguments:</span>
 
@@ -1520,27 +1518,27 @@
     <span class="c1"># Read-only field accessors</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">hour</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;hour (0-23)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;hour (0-23)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hour</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">minute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;minute (0-59)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;minute (0-59)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_minute</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">second</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;second (0-59)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;second (0-59)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_second</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">microsecond</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;microsecond (0-999999)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;microsecond (0-999999)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_microsecond</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">tzinfo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;timezone info object&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;timezone info object&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tzinfo</span>
 
     <span class="nd">@property</span>
@@ -1610,7 +1608,7 @@
                     <span class="p">(</span><span class="n">othhmm</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">_second</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">_microsecond</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Hash.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Hash.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hashcode</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fold</span><span class="p">:</span>
                 <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">fold</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -1633,12 +1631,12 @@
     <span class="c1"># Conversion to string</span>
 
     <span class="k">def</span> <span class="nf">_tzstr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return formatted timezone offset (+xx:xx) or an empty string.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return formatted timezone offset (+xx:xx) or an empty string.&quot;&quot;&quot;</span>
         <span class="n">off</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">utcoffset</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">_format_offset</span><span class="p">(</span><span class="n">off</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Convert to formal string, for repr().&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert to formal string, for repr().&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_microsecond</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;, </span><span class="si">%d</span><span class="s2">, </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_second</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_microsecond</span><span class="p">)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_second</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
@@ -1657,7 +1655,7 @@
         <span class="k">return</span> <span class="n">s</span>
 
     <span class="k">def</span> <span class="nf">isoformat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timespec</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return the time formatted according to ISO.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the time formatted according to ISO.</span>
 
 <span class="sd">        The full format is &#39;HH:MM:SS.mmmmmm+zz:zz&#39;. By default, the fractional</span>
 <span class="sd">        part is omitted if self.microsecond == 0.</span>
@@ -1677,7 +1675,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">fromisoformat</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">time_string</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Construct a time from the output of isoformat().&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct a time from the output of isoformat().&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">time_string</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;fromisoformat: argument must be str&#39;</span><span class="p">)</span>
 
@@ -1688,7 +1686,7 @@
 
 
     <span class="k">def</span> <span class="nf">strftime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Format using strftime().  The date part of the timestamp passed</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Format using strftime().  The date part of the timestamp passed</span>
 <span class="sd">        to underlying strftime should not be used.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># The year must be &gt;= 1000 else Python&#39;s strftime implementation</span>
@@ -1708,7 +1706,7 @@
     <span class="c1"># Timezone functions</span>
 
     <span class="k">def</span> <span class="nf">utcoffset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return the timezone offset as timedelta, positive east of UTC</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the timezone offset as timedelta, positive east of UTC</span>
 <span class="sd">         (negative west of UTC).&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tzinfo</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -1717,7 +1715,7 @@
         <span class="k">return</span> <span class="n">offset</span>
 
     <span class="k">def</span> <span class="nf">tzname</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return the timezone name.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the timezone name.</span>
 
 <span class="sd">        Note that the name is 100% informational -- there&#39;s no requirement that</span>
 <span class="sd">        it mean anything in particular. For example, &quot;GMT&quot;, &quot;UTC&quot;, &quot;-500&quot;,</span>
@@ -1730,7 +1728,7 @@
         <span class="k">return</span> <span class="n">name</span>
 
     <span class="k">def</span> <span class="nf">dst</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return 0 if DST is not in effect, or the DST offset (as timedelta</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return 0 if DST is not in effect, or the DST offset (as timedelta</span>
 <span class="sd">        positive eastward) if DST is in effect.</span>
 
 <span class="sd">        This is purely informational; the DST offset has already been added to</span>
@@ -1746,7 +1744,7 @@
 
     <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hour</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">minute</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">second</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">microsecond</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">tzinfo</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">fold</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return a new time with new values for the specified fields.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new time with new values for the specified fields.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">hour</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">hour</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hour</span>
         <span class="k">if</span> <span class="n">minute</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1802,7 +1800,7 @@
 <span class="n">time</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">microseconds</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
 <span class="k">class</span> <span class="nc">datetime</span><span class="p">(</span><span class="n">date</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;datetime(year, month, day[, hour[, minute[, second[, microsecond[,tzinfo]]]]])</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;datetime(year, month, day[, hour[, minute[, second[, microsecond[,tzinfo]]]]])</span>
 
 <span class="sd">    The year, month and day arguments are required. tzinfo may be None, or an</span>
 <span class="sd">    instance of a tzinfo subclass. The remaining arguments may be ints.</span>
@@ -1847,27 +1845,27 @@
     <span class="c1"># Read-only field accessors</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">hour</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;hour (0-23)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;hour (0-23)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hour</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">minute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;minute (0-59)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;minute (0-59)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_minute</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">second</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;second (0-59)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;second (0-59)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_second</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">microsecond</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;microsecond (0-999999)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;microsecond (0-999999)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_microsecond</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">tzinfo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;timezone info object&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;timezone info object&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tzinfo</span>
 
     <span class="nd">@property</span>
@@ -1876,7 +1874,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_fromtimestamp</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">utc</span><span class="p">,</span> <span class="n">tz</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Construct a datetime from a POSIX timestamp (like time.time()).</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct a datetime from a POSIX timestamp (like time.time()).</span>
 
 <span class="sd">        A timezone info object may be passed in as well.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1920,7 +1918,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">fromtimestamp</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">tz</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Construct a datetime from a POSIX timestamp (like time.time()).</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct a datetime from a POSIX timestamp (like time.time()).</span>
 
 <span class="sd">        A timezone info object may be passed in as well.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1930,7 +1928,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">utcfromtimestamp</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Construct a naive UTC datetime from a POSIX timestamp.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct a naive UTC datetime from a POSIX timestamp.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_fromtimestamp</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
@@ -1960,7 +1958,7 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">fromisoformat</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">date_string</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Construct a datetime from the output of datetime.isoformat().&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct a datetime from the output of datetime.isoformat().&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">date_string</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;fromisoformat: argument must be str&#39;</span><span class="p">)</span>
 
@@ -1997,7 +1995,7 @@
                                   <span class="n">dst</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_mktime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return integer POSIX timestamp.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return integer POSIX timestamp.&quot;&quot;&quot;</span>
         <span class="n">epoch</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">1970</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">max_fold_seconds</span> <span class="o">=</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">3600</span>
         <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span> <span class="o">-</span> <span class="n">epoch</span><span class="p">)</span> <span class="o">//</span> <span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -2064,7 +2062,7 @@
     <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">year</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">month</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">day</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hour</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">minute</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">second</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">microsecond</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="o">*</span><span class="p">,</span> <span class="n">fold</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return a new datetime with new values for the specified fields.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new datetime with new values for the specified fields.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">year</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">year</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">year</span>
         <span class="k">if</span> <span class="n">month</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -2136,7 +2134,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_year</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">isoformat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="n">timespec</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return the time formatted according to ISO.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the time formatted according to ISO.</span>
 
 <span class="sd">        The full format looks like &#39;YYYY-MM-DD HH:MM:SS.mmmmmm&#39;.</span>
 <span class="sd">        By default, the fractional part is omitted if self.microsecond == 0.</span>
@@ -2163,7 +2161,7 @@
         <span class="k">return</span> <span class="n">s</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Convert to formal string, for repr().&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert to formal string, for repr().&quot;&quot;&quot;</span>
         <span class="n">L</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_year</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_month</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_day</span><span class="p">,</span>  <span class="c1"># These are never zero</span>
              <span class="bp">self</span><span class="o">.</span><span class="n">_hour</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_minute</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_second</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_microsecond</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">L</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -2192,7 +2190,7 @@
         <span class="k">return</span> <span class="n">_strptime</span><span class="o">.</span><span class="n">_strptime_datetime</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">date_string</span><span class="p">,</span> <span class="nb">format</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">utcoffset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return the timezone offset as timedelta positive east of UTC (negative west of</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the timezone offset as timedelta positive east of UTC (negative west of</span>
 <span class="sd">        UTC).&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tzinfo</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -2201,7 +2199,7 @@
         <span class="k">return</span> <span class="n">offset</span>
 
     <span class="k">def</span> <span class="nf">tzname</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return the timezone name.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the timezone name.</span>
 
 <span class="sd">        Note that the name is 100% informational -- there&#39;s no requirement that</span>
 <span class="sd">        it mean anything in particular. For example, &quot;GMT&quot;, &quot;UTC&quot;, &quot;-500&quot;,</span>
@@ -2214,7 +2212,7 @@
         <span class="k">return</span> <span class="n">name</span>
 
     <span class="k">def</span> <span class="nf">dst</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return 0 if DST is not in effect, or the DST offset (as timedelta</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return 0 if DST is not in effect, or the DST offset (as timedelta</span>
 <span class="sd">        positive eastward) if DST is in effect.</span>
 
 <span class="sd">        This is purely informational; the DST offset has already been added to</span>
@@ -2451,7 +2449,7 @@
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="nf">__getinitargs__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;pickle support&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;pickle support&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_offset</span><span class="p">,)</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_offset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">)</span>
@@ -2465,7 +2463,7 @@
         <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_offset</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Convert to formal string, for repr().</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert to formal string, for repr().</span>
 
 <span class="sd">        &gt;&gt;&gt; tz = timezone.utc</span>
 <span class="sd">        &gt;&gt;&gt; repr(tz)</span>
@@ -2776,8 +2774,8 @@
       
     </p>
     <p>
-        &copy; Copyright 2020-2022, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+        &copy; Copyright 2020-2023, The Firebird Project.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.0.1.<br/>
     </p>
   </div>
 </footer>

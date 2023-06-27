@@ -4,13 +4,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; firebird-driver 1.8.0 documentation</title>
+    <title>Index &#8212; firebird-driver 1.9.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="#" />
@@ -38,7 +35,7 @@
 
         <a class="brand" href="index.html">
           firebird-driver</a>
-        <span class="navbar-text pull-left"><b>1.8.0</b></span>
+        <span class="navbar-text pull-left"><b>1.9.0</b></span>
 
         <div class="nav-collapse">
           <ul class="nav">
@@ -168,6 +165,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-9-0">Version 1.9.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-8-0">Version 1.8.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-7-0">Version 1.7.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#version-1-6-0">Version 1.6.0</a></li>
@@ -765,6 +763,8 @@
 </li>
       <li><a href="ref-types.html#firebird.driver.types.DbClass.CLASSIC_ACCESS">CLASSIC_ACCESS (firebird.driver.types.DbClass attribute)</a>
 </li>
+      <li><a href="ref-types.html#firebird.driver.types.SrvNBackupOption.CLEAN_HISTORY">CLEAN_HISTORY (firebird.driver.types.SrvNBackupOption attribute)</a>
+</li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.IXpbBuilder_VTable.clear">clear (firebird.driver.fbapi.IXpbBuilder_VTable attribute)</a>
 </li>
       <li><a href="ref-core.html#firebird.driver.core.DPB.clear">clear() (firebird.driver.core.DPB method)</a>
@@ -777,9 +777,11 @@
         <li><a href="ref-intf.html#firebird.driver.interfaces.iXpbBuilder.clear">(firebird.driver.interfaces.iXpbBuilder method)</a>
 </li>
       </ul></li>
-      <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.client_library">client_library (firebird.driver.fbapi.FirebirdAPI attribute)</a>
+      <li><a href="ref-types.html#firebird.driver.types.DPBItem.CLEAR_MAP">CLEAR_MAP (firebird.driver.types.DPBItem attribute)</a>
 </li>
-      <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.client_library_name">client_library_name (firebird.driver.fbapi.FirebirdAPI attribute)</a>
+      <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.client_library">client_library (firebird.driver.fbapi.FirebirdAPI attribute)</a>, <a href="ref-fbapi.html#id0">[1]</a>
+</li>
+      <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.client_library_name">client_library_name (firebird.driver.fbapi.FirebirdAPI attribute)</a>, <a href="ref-fbapi.html#id1">[1]</a>
 </li>
       <li><a href="ref-types.html#firebird.driver.types.DPBItem.CLIENT_VERSION">CLIENT_VERSION (firebird.driver.types.DPBItem attribute)</a>
 </li>
@@ -819,8 +821,6 @@
         <li><a href="ref-intf.html#firebird.driver.interfaces.iBlob.close">(firebird.driver.interfaces.iBlob method)</a>
 </li>
         <li><a href="ref-intf.html#firebird.driver.interfaces.iBlob_v3.close">(firebird.driver.interfaces.iBlob_v3 method)</a>
-</li>
-        <li><a href="ref-intf.html#firebird.driver.interfaces.iResultSet.close">(firebird.driver.interfaces.iResultSet method)</a>
 </li>
         <li><a href="ref-intf.html#firebird.driver.interfaces.iResultSet_v3.close">(firebird.driver.interfaces.iResultSet_v3 method)</a>
 </li>
@@ -1429,10 +1429,10 @@
 </li>
       <li><a href="ref-types.html#firebird.driver.types.PreparePrefetchFlag.DETAILED_PLAN">DETAILED_PLAN (firebird.driver.types.PreparePrefetchFlag attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ref-types.html#firebird.driver.types.Implementation.DG_X86">DG_X86 (firebird.driver.types.Implementation attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ref-types.html#firebird.driver.types.DirectoryCode.DIR_BIN">DIR_BIN (firebird.driver.types.DirectoryCode attribute)</a>
 </li>
       <li><a href="ref-types.html#firebird.driver.types.DirectoryCode.DIR_CONF">DIR_CONF (firebird.driver.types.DirectoryCode attribute)</a>
@@ -1471,6 +1471,12 @@
 </li>
       <li><a href="ref-types.html#firebird.driver.types.SrvNBackupOption.DIRECT">DIRECT (firebird.driver.types.SrvNBackupOption attribute)</a>
 </li>
+      <li><a href="ref-types.html#firebird.driver.types.SrvBackupFlag.DIRECT_IO">DIRECT_IO (firebird.driver.types.SrvBackupFlag attribute)</a>
+
+      <ul>
+        <li><a href="ref-types.html#firebird.driver.types.SrvRestoreFlag.DIRECT_IO">(firebird.driver.types.SrvRestoreFlag attribute)</a>
+</li>
+      </ul></li>
       <li><a href="ref-types.html#firebird.driver.types.DirectoryCode">DirectoryCode (class in firebird.driver.types)</a>
 </li>
       <li><a href="ref-types.html#firebird.driver.types.CancelType.DISABLE">DISABLE (firebird.driver.types.CancelType attribute)</a>
@@ -1828,6 +1834,10 @@
 </li>
       <li><a href="ref-types.html#firebird.driver.types.TableShareMode.EXCLUSIVE">EXCLUSIVE (firebird.driver.types.TableShareMode attribute)</a>
 </li>
+      <li><a href="ref-types.html#firebird.driver.types.StmtInfoCode.EXEC_PATH_BLR_BYTES">EXEC_PATH_BLR_BYTES (firebird.driver.types.StmtInfoCode attribute)</a>
+</li>
+      <li><a href="ref-types.html#firebird.driver.types.StmtInfoCode.EXEC_PATH_BLR_TEXT">EXEC_PATH_BLR_TEXT (firebird.driver.types.StmtInfoCode attribute)</a>
+</li>
       <li><a href="ref-types.html#firebird.driver.types.StatementType.EXEC_PROCEDURE">EXEC_PROCEDURE (firebird.driver.types.StatementType attribute)</a>
 </li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.IAttachment_VTable.execute">execute (firebird.driver.fbapi.IAttachment_VTable attribute)</a>
@@ -1921,9 +1931,15 @@
 </li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.FB_DEC34Ptr">FB_DEC34Ptr (in module firebird.driver.fbapi)</a>
 </li>
+      <li><a href="ref-fbapi.html#id2">fb_get_database_handle (firebird.driver.fbapi.FirebirdAPI attribute)</a>
+</li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.fb_get_database_handle">fb_get_database_handle() (firebird.driver.fbapi.FirebirdAPI method)</a>
 </li>
+      <li><a href="ref-fbapi.html#id3">fb_get_master_interface (firebird.driver.fbapi.FirebirdAPI attribute)</a>
+</li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.fb_get_master_interface">fb_get_master_interface() (firebird.driver.fbapi.FirebirdAPI method)</a>
+</li>
+      <li><a href="ref-fbapi.html#id4">fb_get_transaction_handle (firebird.driver.fbapi.FirebirdAPI attribute)</a>
 </li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.fb_get_transaction_handle">fb_get_transaction_handle() (firebird.driver.fbapi.FirebirdAPI method)</a>
 </li>
@@ -1931,7 +1947,13 @@
 </li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.FB_I128Ptr">FB_I128Ptr (in module firebird.driver.fbapi)</a>
 </li>
+      <li><a href="ref-fbapi.html#id5">fb_interpret (firebird.driver.fbapi.FirebirdAPI attribute)</a>
+</li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.fb_interpret">fb_interpret() (firebird.driver.fbapi.FirebirdAPI method)</a>
+</li>
+      <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.fb_shutdown_callback">fb_shutdown_callback (firebird.driver.fbapi.FirebirdAPI attribute)</a>
+</li>
+      <li><a href="ref-fbapi.html#id6">fb_sqlstate (firebird.driver.fbapi.FirebirdAPI attribute)</a>
 </li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.fb_sqlstate">fb_sqlstate() (firebird.driver.fbapi.FirebirdAPI method)</a>
 </li>
@@ -2040,10 +2062,10 @@
 </li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.IConfig_VTable.findPos">findPos (firebird.driver.fbapi.IConfig_VTable attribute)</a>
 </li>
-      <li><a href="ref-fbapi.html#firebird.driver.fbapi.IConfig_VTable.findValue">findValue (firebird.driver.fbapi.IConfig_VTable attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="ref-fbapi.html#firebird.driver.fbapi.IConfig_VTable.findValue">findValue (firebird.driver.fbapi.IConfig_VTable attribute)</a>
+</li>
       <li><a href="ref-types.html#firebird.driver.types.DbProvider.FIREBIRD">FIREBIRD (firebird.driver.types.DbProvider attribute)</a>
 </li>
       <li>
@@ -2170,6 +2192,12 @@
       <li><a href="ref-types.html#firebird.driver.types.Implementation.FREEBSD">FREEBSD (firebird.driver.types.Implementation attribute)</a>
 </li>
       <li><a href="ref-types.html#firebird.driver.types.Implementation.FREEBSD_AMD64">FREEBSD_AMD64 (firebird.driver.types.Implementation attribute)</a>
+</li>
+      <li><a href="ref-types.html#firebird.driver.types.Implementation.FREEBSD_PPC">FREEBSD_PPC (firebird.driver.types.Implementation attribute)</a>
+</li>
+      <li><a href="ref-types.html#firebird.driver.types.Implementation.FREEBSD_PPC64">FREEBSD_PPC64 (firebird.driver.types.Implementation attribute)</a>
+</li>
+      <li><a href="ref-types.html#firebird.driver.types.Implementation.FREEBSD_PPC64EL">FREEBSD_PPC64EL (firebird.driver.types.Implementation attribute)</a>
 </li>
       <li><a href="ref-intf.html#firebird.driver.interfaces.iDecFloat16.from_bcd">from_bcd() (firebird.driver.interfaces.iDecFloat16 method)</a>
 
@@ -2327,6 +2355,8 @@
         <li><a href="ref-intf.html#firebird.driver.interfaces.iBlob_v3.get_info">(firebird.driver.interfaces.iBlob_v3 method)</a>
 </li>
         <li><a href="ref-intf.html#firebird.driver.interfaces.iRequest_v3.get_info">(firebird.driver.interfaces.iRequest_v3 method)</a>
+</li>
+        <li><a href="ref-intf.html#firebird.driver.interfaces.iResultSet.get_info">(firebird.driver.interfaces.iResultSet method)</a>
 </li>
         <li><a href="ref-intf.html#firebird.driver.interfaces.iStatement_v3.get_info">(firebird.driver.interfaces.iStatement_v3 method)</a>
 </li>
@@ -2535,6 +2565,8 @@
         <li><a href="ref-fbapi.html#firebird.driver.fbapi.IBlob_VTable.getInfo">(firebird.driver.fbapi.IBlob_VTable attribute)</a>
 </li>
         <li><a href="ref-fbapi.html#firebird.driver.fbapi.IRequest_VTable.getInfo">(firebird.driver.fbapi.IRequest_VTable attribute)</a>
+</li>
+        <li><a href="ref-fbapi.html#firebird.driver.fbapi.IResultSet_VTable.getInfo">(firebird.driver.fbapi.IResultSet_VTable attribute)</a>
 </li>
         <li><a href="ref-fbapi.html#firebird.driver.fbapi.IStatement_VTable.getInfo">(firebird.driver.fbapi.IStatement_VTable attribute)</a>
 </li>
@@ -3034,8 +3066,6 @@
       </ul></li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.IOffsetsCallback_struct">IOffsetsCallback_struct (class in firebird.driver.fbapi)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.IOffsetsCallback_VTable">IOffsetsCallback_VTable (class in firebird.driver.fbapi)</a>
 </li>
       <li><a href="ref-intf.html#firebird.driver.interfaces.iOffsetsCallbackImp">iOffsetsCallbackImp (class in firebird.driver.interfaces)</a>
@@ -3068,6 +3098,8 @@
 </li>
       <li><a href="ref-intf.html#firebird.driver.interfaces.iReferenceCounted">iReferenceCounted (class in firebird.driver.interfaces)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.IReferenceCounted_struct">IReferenceCounted_struct (class in firebird.driver.fbapi)</a>
 </li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.IReferenceCounted_VTable">IReferenceCounted_VTable (class in firebird.driver.fbapi)</a>
@@ -3148,15 +3180,39 @@
 </li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.ISC_ARRAY_DESC_PTR">ISC_ARRAY_DESC_PTR (in module firebird.driver.fbapi)</a>
 </li>
+      <li><a href="ref-fbapi.html#id7">isc_array_get_slice (firebird.driver.fbapi.FirebirdAPI attribute)</a>
+</li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.isc_array_get_slice">isc_array_get_slice() (firebird.driver.fbapi.FirebirdAPI method)</a>
+</li>
+      <li><a href="ref-fbapi.html#id8">isc_array_lookup_bounds (firebird.driver.fbapi.FirebirdAPI attribute)</a>
 </li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.isc_array_lookup_bounds">isc_array_lookup_bounds() (firebird.driver.fbapi.FirebirdAPI method)</a>
 </li>
+      <li><a href="ref-fbapi.html#id9">isc_array_put_slice (firebird.driver.fbapi.FirebirdAPI attribute)</a>
+</li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.isc_array_put_slice">isc_array_put_slice() (firebird.driver.fbapi.FirebirdAPI method)</a>
+</li>
+      <li><a href="ref-fbapi.html#id10">isc_blob_info (firebird.driver.fbapi.FirebirdAPI attribute)</a>
+</li>
+      <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.isc_blob_info">isc_blob_info() (firebird.driver.fbapi.FirebirdAPI method)</a>
+</li>
+      <li><a href="ref-fbapi.html#id11">isc_cancel_events (firebird.driver.fbapi.FirebirdAPI attribute)</a>
 </li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.isc_cancel_events">isc_cancel_events() (firebird.driver.fbapi.FirebirdAPI method)</a>
 </li>
+      <li><a href="ref-fbapi.html#id12">isc_close_blob (firebird.driver.fbapi.FirebirdAPI attribute)</a>
+</li>
+      <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.isc_close_blob">isc_close_blob() (firebird.driver.fbapi.FirebirdAPI method)</a>
+</li>
+      <li><a href="ref-fbapi.html#id13">isc_compile_request (firebird.driver.fbapi.FirebirdAPI attribute)</a>
+</li>
+      <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.isc_compile_request">isc_compile_request() (firebird.driver.fbapi.FirebirdAPI method)</a>
+</li>
       <li><a href="ref-types.html#firebird.driver.types.Implementation.ISC_CRAY">ISC_CRAY (firebird.driver.types.Implementation attribute)</a>
+</li>
+      <li><a href="ref-fbapi.html#id14">isc_create_blob2 (firebird.driver.fbapi.FirebirdAPI attribute)</a>
+</li>
+      <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.isc_create_blob2">isc_create_blob2() (firebird.driver.fbapi.FirebirdAPI method)</a>
 </li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.ISC_DATE">ISC_DATE (in module firebird.driver.fbapi)</a>
 </li>
@@ -3170,7 +3226,13 @@
 </li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.isc_event_block">isc_event_block() (firebird.driver.fbapi.FirebirdAPI method)</a>
 </li>
+      <li><a href="ref-fbapi.html#id15">isc_event_counts (firebird.driver.fbapi.FirebirdAPI attribute)</a>
+</li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.isc_event_counts">isc_event_counts() (firebird.driver.fbapi.FirebirdAPI method)</a>
+</li>
+      <li><a href="ref-fbapi.html#id16">isc_get_segment (firebird.driver.fbapi.FirebirdAPI attribute)</a>
+</li>
+      <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.isc_get_segment">isc_get_segment() (firebird.driver.fbapi.FirebirdAPI method)</a>
 </li>
       <li><a href="ref-types.html#firebird.driver.types.Implementation.ISC_HP_MPEXL">ISC_HP_MPEXL (firebird.driver.types.Implementation attribute)</a>
 </li>
@@ -3192,23 +3254,55 @@
 </li>
       <li><a href="ref-types.html#firebird.driver.types.Implementation.ISC_NEXT">ISC_NEXT (firebird.driver.types.Implementation attribute)</a>
 </li>
+      <li><a href="ref-fbapi.html#id17">isc_open_blob2 (firebird.driver.fbapi.FirebirdAPI attribute)</a>
+</li>
+      <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.isc_open_blob2">isc_open_blob2() (firebird.driver.fbapi.FirebirdAPI method)</a>
+</li>
       <li><a href="ref-types.html#firebird.driver.types.Implementation.ISC_OS2">ISC_OS2 (firebird.driver.types.Implementation attribute)</a>
+</li>
+      <li><a href="ref-fbapi.html#id18">isc_put_segment (firebird.driver.fbapi.FirebirdAPI attribute)</a>
+</li>
+      <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.isc_put_segment">isc_put_segment() (firebird.driver.fbapi.FirebirdAPI method)</a>
 </li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.ISC_QUAD">ISC_QUAD (class in firebird.driver.fbapi)</a>
 </li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.ISC_QUAD_PTR">ISC_QUAD_PTR (in module firebird.driver.fbapi)</a>
 </li>
+      <li><a href="ref-fbapi.html#id19">isc_que_events (firebird.driver.fbapi.FirebirdAPI attribute)</a>
+</li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.isc_que_events">isc_que_events() (firebird.driver.fbapi.FirebirdAPI method)</a>
+</li>
+      <li><a href="ref-fbapi.html#id20">isc_receive (firebird.driver.fbapi.FirebirdAPI attribute)</a>
+</li>
+      <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.isc_receive">isc_receive() (firebird.driver.fbapi.FirebirdAPI method)</a>
+</li>
+      <li><a href="ref-fbapi.html#id21">isc_release_request (firebird.driver.fbapi.FirebirdAPI attribute)</a>
+</li>
+      <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.isc_release_request">isc_release_request() (firebird.driver.fbapi.FirebirdAPI method)</a>
 </li>
       <li><a href="ref-types.html#firebird.driver.types.Implementation.ISC_RT_AIX">ISC_RT_AIX (firebird.driver.types.Implementation attribute)</a>
 </li>
       <li><a href="ref-types.html#firebird.driver.types.Implementation.ISC_SCO_UNIX">ISC_SCO_UNIX (firebird.driver.types.Implementation attribute)</a>
 </li>
+      <li><a href="ref-fbapi.html#id22">isc_send (firebird.driver.fbapi.FirebirdAPI attribute)</a>
+</li>
+      <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.isc_send">isc_send() (firebird.driver.fbapi.FirebirdAPI method)</a>
+</li>
       <li><a href="ref-types.html#firebird.driver.types.Implementation.ISC_SGI">ISC_SGI (firebird.driver.types.Implementation attribute)</a>
 </li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.ISC_SHORT">ISC_SHORT (in module firebird.driver.fbapi)</a>
 </li>
+      <li><a href="ref-fbapi.html#id23">isc_sqlcode (firebird.driver.fbapi.FirebirdAPI attribute)</a>
+</li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.isc_sqlcode">isc_sqlcode() (firebird.driver.fbapi.FirebirdAPI method)</a>
+</li>
+      <li><a href="ref-fbapi.html#id24">isc_start_and_send (firebird.driver.fbapi.FirebirdAPI attribute)</a>
+</li>
+      <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.isc_start_and_send">isc_start_and_send() (firebird.driver.fbapi.FirebirdAPI method)</a>
+</li>
+      <li><a href="ref-fbapi.html#id25">isc_start_request (firebird.driver.fbapi.FirebirdAPI attribute)</a>
+</li>
+      <li><a href="ref-fbapi.html#firebird.driver.fbapi.FirebirdAPI.isc_start_request">isc_start_request() (firebird.driver.fbapi.FirebirdAPI method)</a>
 </li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.ISC_STATUS">ISC_STATUS (in module firebird.driver.fbapi)</a>
 </li>
@@ -3376,6 +3470,10 @@
 <h2 id="K">K</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="ref-types.html#firebird.driver.types.SrvNBackupOption.KEEP_DAYS">KEEP_DAYS (firebird.driver.types.SrvNBackupOption attribute)</a>
+</li>
+      <li><a href="ref-types.html#firebird.driver.types.SrvNBackupOption.KEEP_ROWS">KEEP_ROWS (firebird.driver.types.SrvNBackupOption attribute)</a>
+</li>
       <li><a href="ref-types.html#firebird.driver.types.SrvBackupOption.KEYHOLDER">KEYHOLDER (firebird.driver.types.SrvBackupOption attribute)</a>
 
       <ul>
@@ -3449,6 +3547,8 @@
       <li><a href="ref-types.html#firebird.driver.types.Implementation.LINUX_M68K">LINUX_M68K (firebird.driver.types.Implementation attribute)</a>
 </li>
       <li><a href="ref-types.html#firebird.driver.types.Implementation.LINUX_MIPS">LINUX_MIPS (firebird.driver.types.Implementation attribute)</a>
+</li>
+      <li><a href="ref-types.html#firebird.driver.types.Implementation.LINUX_MIPS64EL">LINUX_MIPS64EL (firebird.driver.types.Implementation attribute)</a>
 </li>
       <li><a href="ref-types.html#firebird.driver.types.Implementation.LINUX_MIPSEL">LINUX_MIPSEL (firebird.driver.types.Implementation attribute)</a>
 </li>
@@ -3722,8 +3822,6 @@
       <li><a href="ref-types.html#firebird.driver.types.DbInfoCode.NEXT_TRANSACTION">NEXT_TRANSACTION (firebird.driver.types.DbInfoCode attribute)</a>
 </li>
       <li><a href="ref-types.html#firebird.driver.types.ServerAction.NFIX">NFIX (firebird.driver.types.ServerAction attribute)</a>
-</li>
-      <li><a href="ref-core.html#firebird.driver.core.ServerDbServices.nfix_database">nfix_database() (firebird.driver.core.ServerDbServices method)</a>
 </li>
       <li><a href="ref-types.html#firebird.driver.types.TPBItem.NO_AUTO_UNDO">NO_AUTO_UNDO (firebird.driver.types.TPBItem attribute)</a>
 </li>
@@ -4016,6 +4114,22 @@
 </li>
       <li><a href="ref-types.html#firebird.driver.types.PageSize">PageSize (class in firebird.driver.types)</a>
 </li>
+      <li><a href="ref-config.html#firebird.driver.config.DatabaseConfig.parallel_workers">parallel_workers (firebird.driver.config.DatabaseConfig attribute)</a>
+
+      <ul>
+        <li><a href="ref-core.html#firebird.driver.core.DPB.parallel_workers">(firebird.driver.core.DPB attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="ref-types.html#firebird.driver.types.DPBItem.PARALLEL_WORKERS">PARALLEL_WORKERS (firebird.driver.types.DPBItem attribute)</a>
+
+      <ul>
+        <li><a href="ref-types.html#firebird.driver.types.SrvBackupOption.PARALLEL_WORKERS">(firebird.driver.types.SrvBackupOption attribute)</a>
+</li>
+        <li><a href="ref-types.html#firebird.driver.types.SrvRepairOption.PARALLEL_WORKERS">(firebird.driver.types.SrvRepairOption attribute)</a>
+</li>
+        <li><a href="ref-types.html#firebird.driver.types.SrvRestoreOption.PARALLEL_WORKERS">(firebird.driver.types.SrvRestoreOption attribute)</a>
+</li>
+      </ul></li>
       <li>
     parameter
 
@@ -4063,12 +4177,12 @@
         <li><a href="ref-types.html#firebird.driver.types.SrvUserOption.PASSWORD">(firebird.driver.types.SrvUserOption attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ref-types.html#firebird.driver.types.UserInfo.password">password (firebird.driver.types.UserInfo attribute)</a>
 </li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.PerformanceInfo">PerformanceInfo (class in firebird.driver.fbapi)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.IAttachment_VTable.ping">ping (firebird.driver.fbapi.IAttachment_VTable attribute)</a>
 </li>
       <li><a href="ref-core.html#firebird.driver.core.Connection.ping">ping() (firebird.driver.core.Connection method)</a>
@@ -4292,6 +4406,8 @@
 </li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.IAttachment_VTable.reconnectTransaction">reconnectTransaction (firebird.driver.fbapi.IAttachment_VTable attribute)</a>
 </li>
+      <li><a href="ref-types.html#firebird.driver.types.ResultSetInfoCode.RECORD_COUNT">RECORD_COUNT (firebird.driver.types.ResultSetInfoCode attribute)</a>
+</li>
       <li><a href="ref-types.html#firebird.driver.types.DbInfoCode.RECORD_ERRORS">RECORD_ERRORS (firebird.driver.types.DbInfoCode attribute)</a>
 </li>
       <li><a href="ref-types.html#firebird.driver.types.TraInfoReadCommitted.RECORD_VERSION">RECORD_VERSION (firebird.driver.types.TraInfoReadCommitted attribute)</a>
@@ -4457,6 +4573,8 @@
       <li><a href="ref-core.html#firebird.driver.core.ServerDbServices3.restore">restore() (firebird.driver.core.ServerDbServices3 method)</a>
 </li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.RESULT_VECTOR">RESULT_VECTOR (in module firebird.driver.fbapi)</a>
+</li>
+      <li><a href="ref-types.html#firebird.driver.types.ResultSetInfoCode">ResultSetInfoCode (class in firebird.driver.types)</a>
 </li>
       <li><a href="ref-core.html#firebird.driver.core.ServerTraceServices.resume">resume() (firebird.driver.core.ServerTraceServices method)</a>
 </li>
@@ -4774,8 +4892,6 @@
       </ul></li>
       <li><a href="ref-intf.html#firebird.driver.interfaces.iMetadataBuilder.set_relation">set_relation() (firebird.driver.interfaces.iMetadataBuilder method)</a>
 </li>
-      <li><a href="ref-core.html#firebird.driver.core.ServerDbServices.set_replica_mode">set_replica_mode() (firebird.driver.core.ServerDbServices method)</a>
-</li>
       <li><a href="ref-intf.html#firebird.driver.interfaces.iMetadataBuilder_v3.set_scale">set_scale() (firebird.driver.interfaces.iMetadataBuilder_v3 method)</a>
 </li>
       <li><a href="ref-core.html#firebird.driver.core.ServerDbServices3.set_space_reservation">set_space_reservation() (firebird.driver.core.ServerDbServices3 method)</a>
@@ -4850,10 +4966,10 @@
 </li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.IStatement_VTable.setTimeout">setTimeout (firebird.driver.fbapi.IStatement_VTable attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.IMetadataBuilder_VTable.setType">setType (firebird.driver.fbapi.IMetadataBuilder_VTable attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.IStatus_VTable.setWarnings">setWarnings (firebird.driver.fbapi.IStatus_VTable attribute)</a>
 </li>
       <li><a href="ref-fbapi.html#firebird.driver.fbapi.IStatus_VTable.setWarnings2">setWarnings2 (firebird.driver.fbapi.IStatus_VTable attribute)</a>
@@ -4967,6 +5083,8 @@
 </li>
       </ul></li>
       <li><a href="ref-types.html#firebird.driver.types.DPBItem.SQL_DIALECT">SQL_DIALECT (firebird.driver.types.DPBItem attribute)</a>
+</li>
+      <li><a href="ref-types.html#firebird.driver.types.DbInfoCode.SQL_ROLE">SQL_ROLE (firebird.driver.types.DbInfoCode attribute)</a>
 </li>
       <li><a href="ref-types.html#firebird.driver.types.DPBItem.SQL_ROLE_NAME">SQL_ROLE_NAME (firebird.driver.types.DPBItem attribute)</a>
 
@@ -5525,6 +5643,14 @@
 </li>
       <li><a href="ref-types.html#firebird.driver.types.TableAccessStats.updates">updates (firebird.driver.types.TableAccessStats attribute)</a>
 </li>
+      <li><a href="ref-core.html#firebird.driver.core.ServerDbServices.upgrade">upgrade() (firebird.driver.core.ServerDbServices method)</a>
+</li>
+      <li><a href="ref-types.html#firebird.driver.types.DPBItem.UPGRADE_DB">UPGRADE_DB (firebird.driver.types.DPBItem attribute)</a>
+
+      <ul>
+        <li><a href="ref-types.html#firebird.driver.types.SrvRepairFlag.UPGRADE_DB">(firebird.driver.types.SrvRepairFlag attribute)</a>
+</li>
+      </ul></li>
       <li>
     usage
 
@@ -5560,9 +5686,11 @@
 </li>
       <li><a href="ref-types.html#firebird.driver.types.UserInfo.user_id">user_id (firebird.driver.types.UserInfo attribute)</a>
 </li>
-      <li><a href="ref-types.html#firebird.driver.types.DPBItem.USER_NAME">USER_NAME (firebird.driver.types.DPBItem attribute)</a>
+      <li><a href="ref-types.html#firebird.driver.types.DbInfoCode.USER_NAME">USER_NAME (firebird.driver.types.DbInfoCode attribute)</a>
 
       <ul>
+        <li><a href="ref-types.html#firebird.driver.types.DPBItem.USER_NAME">(firebird.driver.types.DPBItem attribute)</a>
+</li>
         <li><a href="ref-types.html#firebird.driver.types.SPBItem.USER_NAME">(firebird.driver.types.SPBItem attribute)</a>
 </li>
         <li><a href="ref-types.html#firebird.driver.types.SrvUserOption.USER_NAME">(firebird.driver.types.SrvUserOption attribute)</a>
@@ -5945,11 +6073,13 @@
 </li>
       <li><a href="ref-types.html#firebird.driver.types.Implementation.WINNT_PPC">WINNT_PPC (firebird.driver.types.Implementation attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ref-types.html#firebird.driver.types.DbInfoCode.WIRE_CRYPT">WIRE_CRYPT (firebird.driver.types.DbInfoCode attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="ref-types.html#firebird.driver.types.NetProtocol.WNET">WNET (firebird.driver.types.NetProtocol attribute)</a>
+</li>
+      <li><a href="ref-types.html#firebird.driver.types.DPBItem.WORKER_ATTACH">WORKER_ATTACH (firebird.driver.types.DPBItem attribute)</a>
 </li>
       <li>
     working with
@@ -6016,8 +6146,8 @@
       
     </p>
     <p>
-        &copy; Copyright 2020-2022, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+        &copy; Copyright 2020-2023, The Firebird Project.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.0.1.<br/>
     </p>
   </div>
 </footer>

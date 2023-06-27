@@ -4,13 +4,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>firebird.base.types &#8212; firebird-driver 1.7.0 documentation</title>
+    <title>firebird.base.types &#8212; firebird-driver 1.9.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -38,7 +35,7 @@
 
         <a class="brand" href="../../../index.html">
           firebird-driver</a>
-        <span class="navbar-text pull-left"><b>1.7.0</b></span>
+        <span class="navbar-text pull-left"><b>1.9.0</b></span>
 
         <div class="nav-collapse">
           <ul class="nav">
@@ -168,6 +165,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-9-0">Version 1.9.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-8-0">Version 1.8.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-7-0">Version 1.7.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog.html#version-1-6-0">Version 1.6.0</a></li>
@@ -290,7 +288,7 @@
 <span class="c1"># Exceptions</span>
 
 <div class="viewcode-block" id="Error"><a class="viewcode-back" href="../../../ref-types.html#firebird.driver.types.Error">[docs]</a><span class="k">class</span> <span class="nc">Error</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Exception that is intended to be used as a base class of all **application-related**</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Exception that is intended to be used as a base class of all **application-related**</span>
 <span class="sd">    errors. The important difference from `Exception` class is that `Error` accepts keyword</span>
 <span class="sd">    arguments, that are stored into instance attributes with the same name.</span>
 
@@ -326,7 +324,7 @@
 <span class="n">_singletons_</span> <span class="o">=</span> <span class="p">{}</span>
 
 <span class="k">class</span> <span class="nc">SingletonMeta</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Metaclass for `Singleton` classes.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Metaclass for `Singleton` classes.</span>
 
 <span class="sd">    Manages internal cache of class instances. If instance for a class is in cache, it&#39;s</span>
 <span class="sd">    returned without calling the constructor, otherwise the instance is created normally</span>
@@ -341,7 +339,7 @@
         <span class="k">return</span> <span class="n">obj</span>
 
 <span class="k">class</span> <span class="nc">Singleton</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">SingletonMeta</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Base class for singletons.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for singletons.</span>
 
 <span class="sd">    Important:</span>
 <span class="sd">        If you create a descendant class that uses constructor arguments, these arguments</span>
@@ -352,7 +350,7 @@
 <span class="c1"># Sentinels</span>
 
 <span class="k">class</span> <span class="nc">SentinelMeta</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Metaclass for `Sentinel`.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Metaclass for `Sentinel`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Sentinel</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
@@ -363,7 +361,7 @@
         <span class="k">return</span> <span class="n">obj</span>
 
 <span class="k">class</span> <span class="nc">Sentinel</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">SentinelMeta</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Simple sentinel object.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Simple sentinel object.</span>
 
 <span class="sd">    Important:</span>
 <span class="sd">      All sentinels have name, that is **always in capital letters**. Sentinels with</span>
@@ -372,18 +370,18 @@
     <span class="c1">#: Class attribute with defined sentinels. There is no need to access or manipulate it.</span>
     <span class="n">instances</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Arguments:</span>
 <span class="sd">            name: Sentinel name.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#: Sentinel name.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Returns name.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns name.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Returns Sentinel(&#39;name&#39;).</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns Sentinel(&#39;name&#39;).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Sentinel(&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;)&quot;</span>
 
@@ -414,11 +412,11 @@
 
 <span class="c1"># Distinct objects</span>
 <span class="k">class</span> <span class="nc">Distinct</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Abstract base class for classes (incl. dataclasses) with distinct instances.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for classes (incl. dataclasses) with distinct instances.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">get_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Hashable</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns instance key.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns instance key.</span>
 
 <span class="sd">        Important:</span>
 <span class="sd">            The key is used for instance hash computation that by default uses the `hash`</span>
@@ -428,7 +426,7 @@
     <span class="fm">__hash__</span> <span class="o">=</span> <span class="k">lambda</span> <span class="bp">self</span><span class="p">:</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_key</span><span class="p">())</span> <span class="c1"># pylint: disable=[C3001]</span>
 
 <span class="k">class</span> <span class="nc">CachedDistinctMeta</span><span class="p">(</span><span class="n">ABCMeta</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Metaclass for CachedDistinct.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Metaclass for CachedDistinct.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">CachedDistinct</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">key</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">extract_key</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -439,7 +437,7 @@
         <span class="k">return</span> <span class="n">obj</span>
 
 <span class="k">class</span> <span class="nc">CachedDistinct</span><span class="p">(</span><span class="n">Distinct</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">CachedDistinctMeta</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Abstract `Distinct` descendant that caches instances.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract `Distinct` descendant that caches instances.</span>
 
 <span class="sd">    All created instances are cached in `~weakref.WeakValueDictionary`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -449,7 +447,7 @@
     <span class="nd">@classmethod</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">extract_key</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Hashable</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns key from arguments passed to `__init__()`.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns key from arguments passed to `__init__()`.</span>
 
 <span class="sd">        Important:</span>
 <span class="sd">            The key is used to store instance in cache. It should be the same as key</span>
@@ -458,14 +456,14 @@
 
 <span class="c1"># Enums</span>
 <span class="k">class</span> <span class="nc">ByteOrder</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Byte order for storing numbers in binary `.MemoryBuffer`.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Byte order for storing numbers in binary `.MemoryBuffer`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">LITTLE</span> <span class="o">=</span> <span class="s1">&#39;little&#39;</span>
     <span class="n">BIG</span> <span class="o">=</span> <span class="s1">&#39;big&#39;</span>
     <span class="n">NETWORK</span> <span class="o">=</span> <span class="n">BIG</span>
 
 <span class="k">class</span> <span class="nc">ZMQTransport</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;ZeroMQ transport protocol.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;ZeroMQ transport protocol.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">UNKNOWN</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Not a valid option, defined only to handle undefined values</span>
     <span class="n">INPROC</span> <span class="o">=</span> <span class="mi">1</span>
@@ -476,7 +474,7 @@
     <span class="n">VMCI</span> <span class="o">=</span> <span class="mi">6</span>
 
 <span class="k">class</span> <span class="nc">ZMQDomain</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;ZeroMQ address domain.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;ZeroMQ address domain.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">UNKNOWN</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Not a valid option, defined only to handle undefined values</span>
     <span class="n">LOCAL</span> <span class="o">=</span> <span class="mi">1</span>    <span class="c1"># Within process (inproc)</span>
@@ -485,7 +483,7 @@
 
 <span class="c1"># Enhanced string types</span>
 <span class="k">class</span> <span class="nc">ZMQAddress</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;ZeroMQ endpoint address.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;ZeroMQ endpoint address.</span>
 
 <span class="sd">    It behaves like `str`, but checks that value is valid ZMQ endpoint address, has</span>
 <span class="sd">    additional R/O properties and meaningful `repr()`.</span>
@@ -509,19 +507,19 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;ZMQAddress(&#39;</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">&#39;)&quot;</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ZMQTransport</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Transport protocol.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transport protocol.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">protocol</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;://&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ZMQTransport</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">[</span><span class="n">protocol</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">address</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Endpoint address.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Endpoint address.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">address</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;://&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">address</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">domain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ZMQDomain</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Endpoint address domain.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Endpoint address domain.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="o">==</span> <span class="n">ZMQTransport</span><span class="o">.</span><span class="n">INPROC</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">ZMQDomain</span><span class="o">.</span><span class="n">LOCAL</span>
@@ -535,7 +533,7 @@
         <span class="k">return</span> <span class="n">ZMQDomain</span><span class="o">.</span><span class="n">NETWORK</span>
 
 <span class="k">class</span> <span class="nc">MIME</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;MIME type specification.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;MIME type specification.</span>
 
 <span class="sd">    It behaves like `str`, but checks that value is valid MIME type specification, has</span>
 <span class="sd">    additional R/O properties and meaningful `repr()`.</span>
@@ -560,26 +558,26 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;MIME(&#39;</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">&#39;)&quot;</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">mime_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;MIME type specification: &lt;type&gt;/&lt;subtype&gt;.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;MIME type specification: &lt;type&gt;/&lt;subtype&gt;.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fp_</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">_fp_</span><span class="p">]</span>
         <span class="k">return</span> <span class="bp">self</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;MIME type.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;MIME type.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">_bs_</span><span class="p">]</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">subtype</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;MIME subtype.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;MIME subtype.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fp_</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_bs_</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_fp_</span><span class="p">]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_bs_</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;MIME parameters.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;MIME parameters.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fp_</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span> <span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span>
@@ -587,7 +585,7 @@
         <span class="k">return</span> <span class="p">{}</span>
 
 <span class="k">class</span> <span class="nc">PyExpr</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Source code for Python expression.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Source code for Python expression.</span>
 
 <span class="sd">    It behaves like `str`, but checks that value is a valid Python expression, and provides</span>
 <span class="sd">    direct access to compiled code.</span>
@@ -604,7 +602,7 @@
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;PyExpr(&#39;</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">&#39;)&quot;</span>
     <span class="k">def</span> <span class="nf">get_callable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arguments</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">namespace</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns expression as callable function ready for execution.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns expression as callable function ready for execution.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            arguments: String with arguments (names separated by coma) for returned function.</span>
@@ -619,11 +617,11 @@
         <span class="k">return</span> <span class="n">ns</span><span class="p">[</span><span class="s1">&#39;expr&#39;</span><span class="p">]</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">expr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="s2">&quot;Expression code ready to be appased to `eval`.&quot;</span>
+        <span class="s2">&quot;Expression code ready to be pased to `eval`.&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expr_</span>
 
 <span class="k">class</span> <span class="nc">PyCode</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Python source code.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Python source code.</span>
 
 <span class="sd">    It behaves like `str`, but checks that value is a valid Python code block, and provides</span>
 <span class="sd">    direct access to compiled code.</span>
@@ -639,12 +637,12 @@
         <span class="k">return</span> <span class="n">new</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">code</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Python code ready to be appased to `exec`.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Python code ready to be pased to `exec`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_code_</span>
 
 <span class="k">class</span> <span class="nc">PyCallable</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Source code for Python callable.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Source code for Python callable.</span>
 
 <span class="sd">    It behaves like `str`, but checks that value is a valid Python callable (function of class</span>
 <span class="sd">    definition), and acts like a callable (i.e. you can directly call the PyCallable value).</span>
@@ -680,8 +678,9 @@
 
 <span class="c1"># Metaclasses</span>
 <span class="k">def</span> <span class="nf">Conjunctive</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns a metaclass that is conjunctive descendant of all metaclasses used by parent</span>
-<span class="sd">    classes.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a metaclass that is conjunctive descendant of all metaclasses used by parent</span>
+<span class="sd">    classes. It&#39;s necessary to create a class with multiple inheritance, where multiple</span>
+<span class="sd">    parent classes use different metaclasses.</span>
 
 <span class="sd">    Example:</span>
 
@@ -705,7 +704,7 @@
 
 <span class="c1"># Functions</span>
 <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">spec</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Return object from module. Module is imported if necessary.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return object from module. Module is imported if necessary.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        spec: Object specification in format `module[.submodule...]:object_name[.object_name...]`</span>
@@ -721,49 +720,6 @@
         <span class="n">result</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">result</span>
 
-<span class="c1"># Next two functions are copied from stdlib enum module, as they were removed in Python 3.11</span>
-
-<span class="k">def</span> <span class="nf">_decompose</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Extract all members from the value.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># _decompose is only called if the value is not named</span>
-    <span class="n">not_covered</span> <span class="o">=</span> <span class="n">value</span>
-    <span class="n">negative</span> <span class="o">=</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mi">0</span>
-    <span class="c1"># issue29167: wrap accesses to _value2member_map_ in a list to avoid race</span>
-    <span class="c1">#             conditions between iterating over it and having more pseudo-</span>
-    <span class="c1">#             members added to it</span>
-    <span class="k">if</span> <span class="n">negative</span><span class="p">:</span>
-        <span class="c1"># only check for named flags</span>
-        <span class="n">flags_to_check</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">flag</span><span class="o">.</span><span class="n">_value2member_map_</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
-                <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                <span class="p">]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># check for named flags and powers-of-two flags</span>
-        <span class="n">flags_to_check</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">flag</span><span class="o">.</span><span class="n">_value2member_map_</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
-                <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">_power_of_two</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-                <span class="p">]</span>
-    <span class="n">members</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">member</span><span class="p">,</span> <span class="n">member_value</span> <span class="ow">in</span> <span class="n">flags_to_check</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">member_value</span> <span class="ow">and</span> <span class="n">member_value</span> <span class="o">&amp;</span> <span class="n">value</span> <span class="o">==</span> <span class="n">member_value</span><span class="p">:</span>
-            <span class="n">members</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">member</span><span class="p">)</span>
-            <span class="n">not_covered</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="n">member_value</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">members</span> <span class="ow">and</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">flag</span><span class="o">.</span><span class="n">_value2member_map_</span><span class="p">:</span>
-        <span class="n">members</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">flag</span><span class="o">.</span><span class="n">_value2member_map_</span><span class="p">[</span><span class="n">value</span><span class="p">])</span>
-    <span class="n">members</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> <span class="n">m</span><span class="o">.</span><span class="n">_value_</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">members</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">members</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
-        <span class="c1"># we have the breakdown, don&#39;t need the value member itself</span>
-        <span class="n">members</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">members</span><span class="p">,</span> <span class="n">not_covered</span>
-
-<span class="k">def</span> <span class="nf">_power_of_two</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">False</span>
-    <span class="k">return</span> <span class="n">value</span> <span class="o">==</span> <span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -777,8 +733,8 @@
       
     </p>
     <p>
-        &copy; Copyright 2020-2022, The Firebird Project.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+        &copy; Copyright 2020-2023, The Firebird Project.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.0.1.<br/>
     </p>
   </div>
 </footer>
