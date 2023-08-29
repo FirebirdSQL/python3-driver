@@ -5550,10 +5550,13 @@ def connect_server(server: str, *, user: str=None, password: str=None,
         host = server or None
     else:
         host = srv_config.host.value
+        port = srv_config.port.value
     if host is None:
         host = 'service_mgr'
     if not host.endswith('service_mgr'):
         if host and not host.endswith(':'):
+            if port:
+                host += f"/{port}"
             host += ':'
         host += 'service_mgr'
     if user is None:
