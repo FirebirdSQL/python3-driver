@@ -5548,6 +5548,7 @@ def connect_server(server: str, *, user: str=None, password: str=None,
     if srv_config is None:
         srv_config = driver_config.server_defaults
         host = server or None
+        port = None
     else:
         host = srv_config.host.value
         port = srv_config.port.value
