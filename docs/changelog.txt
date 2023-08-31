@@ -2,6 +2,12 @@
 Changelog
 #########
 
+Version 1.9.1 [Unreleased]
+==========================
+
+* Fix: #27 - Failed to establish a connection to the server on the specified port.
+* Fix: #15 - Documentation issue.
+
 Version 1.9.0
 =============
 
