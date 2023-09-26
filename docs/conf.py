@@ -15,18 +15,19 @@
 # sys.path.insert(0, os.path.abspath('.'))
 
 import sphinx_bootstrap_theme
+from firebird.driver import __VERSION__
 
 # -- Project information -----------------------------------------------------
 
 project = 'firebird-driver'
-copyright = '2020-2023, The Firebird Project'
+copyright = '2020-present, The Firebird Project'
 author = 'Pavel Císař'
 
 # The short X.Y version
-version = '1.9.0'
+version = __VERSION__
 
 # The full version, including alpha/beta/rc tags
-release = '1.9.0'
+release = __VERSION__
 
 
 # -- General configuration ---------------------------------------------------
