@@ -2,8 +2,8 @@
 
 ## Firebird driver for Python
 
-[![PyPI - Version](https://img.shields.io/pypi/v/firebird-base.svg)](https://pypi.org/project/firebird-base)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/firebird-base.svg)](https://pypi.org/project/firebird-base)
+[![PyPI - Version](https://img.shields.io/pypi/v/firebird-driver.svg)](https://pypi.org/project/firebird-driver)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/firebird-driver.svg)](https://pypi.org/project/firebird-driver)
 [![Hatch project](https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg)](https://github.com/pypa/hatch)
 
 This package provides official Python Database API 2.0-compliant driver for the open
