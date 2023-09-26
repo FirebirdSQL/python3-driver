@@ -130,8 +130,8 @@ class DriverTestBase(unittest.TestCase, LoggingIdMixin):
             raise Exception("Unsupported Firebird version (%s)" % self.version)
         #
         self.cwd = os.getcwd()
-        self.dbpath = self.cwd if os.path.split(self.cwd)[1] == 'test' \
-            else os.path.join(self.cwd, 'test')
+        self.dbpath = self.cwd if os.path.split(self.cwd)[1] == 'tests' \
+            else os.path.join(self.cwd, 'tests')
     def clear_output(self) -> None:
         self.output.close()
         self.output = StringIO()
