@@ -43,7 +43,10 @@ Source = "https://github.com/FirebirdSQL/python3-driver"
 [tool.hatch.version]
 path = "src/firebird/driver/__init__.py"
 
-[tool.hatch.build]
+[tool.hatch.build.targets.sdist]
+include = ["src"]
+
+[tool.hatch.build.targets.wheel]
 packages = ["src/firebird"]
 
 [tool.hatch.envs.default]

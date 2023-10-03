@@ -1,7 +1,9 @@
-#coding:utf-8
+# SPDX-FileCopyrightText: 2020-present The Firebird Projects <www.firebirdsql.org>
+#
+# SPDX-License-Identifier: MIT
 #
 #   PROGRAM/MODULE: firebird-driver
-#   FILE:           test/driver.py
+#   FILE:           tests/test_driver.py
 #   DESCRIPTION:    Unit tests for firebird.driver
 #   CREATED:        21.3.2020
 #
