@@ -2,8 +2,8 @@
 Changelog
 #########
 
-Version 1.10.0 [Unreleased]
-===========================
+Version 1.10.0
+==============
 
 * Build system changed from setuptools to hatch
 * Fix: #27 - Failed to establish a connection to the server on the specified port.
