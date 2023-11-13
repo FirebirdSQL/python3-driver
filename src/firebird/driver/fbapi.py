@@ -2044,7 +2044,7 @@ class FirebirdAPI:
         if sys.platform in ('win32', 'cygwin', 'os2', 'os2emx'):
             self.client_library: ctypes.CDLL = ctypes.WinDLL(str(filename))
         else:
-            self.client_library: ctypes.CDLL = ctypes.CDLL(str(filename))
+            self.client_library: ctypes.CDLL = ctypes.CDLL(str(filename), mode=ctypes.RTLD_GLOBAL)
         #: Firebird client library name
         self.client_library_name: Path = Path(filename)
         #: Firebird API

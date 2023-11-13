@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - #27 - Failed to establish a connection to the server on the specified port.
 - #15 - Documentation issue.
+- Fixed issue on MacOS (see #7827 in Firebird)
 
 ### Changed
 

@@ -29,7 +29,7 @@ classifiers = [
   "Topic :: Database",
 ]
 dependencies = [
-  "firebird-base>=1.6.1",
+  "firebird-base>=1.7.0",
   "python-dateutil>=2.8",
 ]
 
