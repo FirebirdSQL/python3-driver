@@ -1176,9 +1176,10 @@ with attachment is to close it."""
         self._check()
     def detach(self) -> None:
         "Replaces `isc_detach_database()`. On success releases interface."
-        self.vtable.deprecatedDetach(self, self.status)
-        self._check()
-        self._refcnt -= 1
+        if self._refcnt:
+            self.vtable.deprecatedDetach(self, self.status)
+            self._check()
+            self._refcnt -= 1
     def drop_database(self) -> None:
         "Replaces `isc_drop_database()`. On success releases interface."
         self.vtable.deprecatedDropDatabase(self, self.status)
@@ -1223,7 +1224,7 @@ class iAttachment_v4(iAttachment_v3):
 
 # IAttachment(5) : IAttachment(4)
 class iAttachment(iAttachment_v4):
-    "Class that wraps IAttachment v4 interface for use from Python"
+    "Class that wraps IAttachment v5 interface for use from Python"
     VERSION = 5
     def detach(self) -> None:
         "Replaces `isc_detach_database()`. On success releases interface."
@@ -1238,7 +1239,7 @@ class iAttachment(iAttachment_v4):
 
 # IService(3) : ReferenceCounted
 class iService_v3(iReferenceCounted):
-    "Class that wraps IService interface for use from Python"
+    "Class that wraps IService v3 interface for use from Python"
     VERSION = 3
     def detach(self) -> None:
         """Close attachment to services manager, on success releases interface.
@@ -1262,7 +1263,7 @@ class iService_v3(iReferenceCounted):
 
 # IService(4) : IService(3)
 class iService_v4(iService_v3):
-    "Class that wraps IService interface for use from Python"
+    "Class that wraps IService v4 interface for use from Python"
     VERSION = 4
     def detach(self) -> None:
         """Close attachment to services manager, on success releases interface.
@@ -1274,7 +1275,7 @@ class iService_v4(iService_v3):
 
 # IService(5) : IService(4)
 class iService(iService_v4):
-    "Class that wraps IService interface for use from Python"
+    "Class that wraps IService v5 interface for use from Python"
     VERSION = 5
     def cancel(self) -> None:
         """Cancel wait of current `query()` call. Supported only for embedded connections.
