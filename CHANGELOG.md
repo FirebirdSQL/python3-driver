@@ -4,10 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.10.1] - Unreleased
+## [1.10.1] - 2023-12-21
 
 ### Fixed
 
+- Call iProvider.shutdown() on program exit.
 - #33 - SIGABRT on interface detach.
 
 ## [1.10.0] - 2023-10-03

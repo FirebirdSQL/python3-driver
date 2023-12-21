@@ -50,6 +50,7 @@ import contextlib
 import struct
 import datetime
 import decimal
+import atexit
 from abc import ABC, abstractmethod
 from warnings import warn
 from pathlib import Path
@@ -149,6 +150,14 @@ def __api_loaded(api: a.FirebirdAPI) -> None:
     setattr(sys.modules[__name__], '_util', _master.get_util_interface())
 
 add_hook(APIHook.LOADED, a.FirebirdAPI, __api_loaded)
+
+@atexit.register
+def _api_shutdown():
+    """Calls a smart shutdown of various Firebird subsystems (yValve, engine, redirector).
+    """
+    if _master is not None:
+        with _master.get_dispatcher() as provider:
+            provider.shutdown(0, -3) # fb_shutrsn_app_stopped
 
 def _create_blob_buffer(size: int=MAX_BLOB_SEGMENT_SIZE) -> Any:
     if size < MAX_BLOB_SEGMENT_SIZE:
