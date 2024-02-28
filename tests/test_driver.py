@@ -1475,6 +1475,16 @@ class TestInsertData(DriverTestBase):
             self.assertListEqual(rows,
                                  [(4, datetime.date(2011, 11, 13), datetime.time(15, 0, 1, 200000),
                                    datetime.datetime(2011, 11, 13, 15, 0, 1, 200000))])
+
+            # encode date before 1859-11-17 produce a negative number
+            now = datetime.datetime(1859, 11, 16, 15, 0, 1, 200000)
+            cur.execute('insert into T2 (C1,C6,C7,C8) values (?,?,?,?)', [5, now.date(), now.time(), now])
+            self.con.commit()
+            cur.execute('select C1,C6,C7,C8 from T2 where C1 = 5')
+            rows = cur.fetchall()
+            self.assertListEqual(rows,
+                                 [(5, datetime.date(1859, 11, 16), datetime.time(15, 0, 1, 200000),
+                                   datetime.datetime(1859, 11, 16, 15, 0, 1, 200000))])
     def test_insert_blob(self):
         with self.con.cursor() as cur, self.con2.cursor() as cur2:
             cur.execute('insert into T2 (C1,C9) values (?,?)', [4, 'This is a BLOB!'])

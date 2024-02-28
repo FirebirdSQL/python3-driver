@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.10.2] - Unreleased
+
+### Fixed
+
+- #34 - Pre-1970 dates causes OverflowError
+
 ## [1.10.1] - 2023-12-21
 
 ### Fixed

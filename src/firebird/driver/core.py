@@ -3328,7 +3328,7 @@ class Cursor(LoggingIdMixin):
                                          in_meta.get_subtype(i), scale)
                     memmove(buf_addr + offset, value.to_bytes(length, 'little', signed=True), length)
                 elif datatype == SQLDataType.DATE:
-                    memmove(buf_addr + offset, _util.encode_date(value).to_bytes(length, 'little'), length)
+                    memmove(buf_addr + offset, _util.encode_date(value).to_bytes(length, 'little', signed=True), length)
                 elif datatype == SQLDataType.TIME:
                     memmove(buf_addr + offset, _util.encode_time(value).to_bytes(length, 'little'), length)
                 elif datatype == SQLDataType.TIME_TZ:
