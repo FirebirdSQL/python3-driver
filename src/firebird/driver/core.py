@@ -176,7 +176,7 @@ def _encode_timestamp(v: Union[datetime.datetime, datetime.date]) -> bytes:
     if isinstance(v, datetime.datetime):
         return _util.encode_date(v.date()).to_bytes(4, 'little') + _util.encode_time(v.time()).to_bytes(4, 'little')
     if isinstance(v, datetime.date):
-        return _util.encode_date(v.date()).to_bytes(4, 'little') + _util.encode_time(datetime.time()).to_bytes(4, 'little')
+        return _util.encode_date(v).to_bytes(4, 'little') + _util.encode_time(datetime.time()).to_bytes(4, 'little')
     raise ValueError("datetime.datetime or datetime.date expected")
 
 def _is_fixed_point(dialect: int, datatype: SQLDataType, subtype: int,

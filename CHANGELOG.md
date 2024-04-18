@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - #34 - Pre-1970 dates causes OverflowError
+- #38 - 'datetime.date' object has no attribute 'date'
 
 ## [1.10.1] - 2023-12-21
 
