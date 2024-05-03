@@ -299,11 +299,14 @@ _OP_RECORD_AND_REREGISTER = object()
 class TPB: # pylint: disable=R0902
     """Transaction Parameter Buffer.
     """
-    def __init__(self, *, access_mode: TraAccessMode = TraAccessMode.WRITE,
-                 isolation: Isolation = Isolation.SNAPSHOT,
-                 lock_timeout: int = -1, no_auto_undo: bool = False,
-                 auto_commit: bool = False, ignore_limbo: bool = False,
-                 at_snapshot_number: int=None, encoding: str='ascii'):
+    def __init__(self, *, access_mode: TraAccessMode=TraAccessMode.WRITE,
+                 isolation: Isolation=Isolation.SNAPSHOT,
+                 lock_timeout: int=-1,
+                 no_auto_undo: bool=False,
+                 auto_commit: bool=False,
+                 ignore_limbo: bool=False,
+                 at_snapshot_number: int=None,
+                 encoding: str='ascii'):
         self.encoding: str = encoding
         self.access_mode: TraAccessMode = access_mode
         self.isolation: Isolation = isolation
@@ -2441,7 +2444,8 @@ class TransactionManager(LoggingIdMixin):
         """
         assert not self.__closed
         self._finish()  # Make sure that previous transaction (if any) is ended
-        self._tra = self._connection()._att.start_transaction(tpb or self.default_tpb)
+        self._tra = self._connection()._att.start_transaction(self.default_tpb if tpb is None
+                                                              else tpb)
     def commit(self, *, retaining: bool=False) -> None:
         """Commits the transaction managed by this instance.
 

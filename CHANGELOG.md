@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.10.3] - 2024-05-03
+
+### Fixed
+
+- #30 - It is not possible to start a transaction without specifying an isolation level
+  The fix allows use of empty tpb in `TransactionManager.begin()`
+
 ## [1.10.2] - 2024-05-03
 
 ### Fixed

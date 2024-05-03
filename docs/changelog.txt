@@ -2,6 +2,13 @@
 Changelog
 #########
 
+
+Version 1.10.3
+==============
+
+* Fix: #30 - It is not possible to start a transaction without specifying an isolation level
+  The fix allows use of empty tpb in `.TransactionManager.begin()`
+
 Version 1.10.2
 ==============
 
