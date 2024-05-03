@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Mangled output for `DbInfoCode` itsens `CRYPT_PLUGIN`, `WIRE_CRYPT`, `DB_GUID` and `DB_FILE_ID`
 - #34 - Pre-1970 dates causes OverflowError
 - #38 - 'datetime.date' object has no attribute 'date'
 

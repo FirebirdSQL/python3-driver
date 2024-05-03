@@ -1154,7 +1154,7 @@ class DatabaseInfoProvider3(InfoProvider):
              DbInfoCode.DB_PROVIDER: self.response.read_sized_int,
              DbInfoCode.PAGES_USED: self.response.read_sized_int,
              DbInfoCode.PAGES_FREE: self.response.read_sized_int,
-             DbInfoCode.CRYPT_KEY: self._info_string,
+             DbInfoCode.CRYPT_KEY: self._single_info_string,
              DbInfoCode.CRYPT_STATE: self.__crypt_state,
              DbInfoCode.CONN_FLAGS: self.__con_state,
              DbInfoCode.BACKOUT_COUNT: self.__tbl_perf_count,
@@ -1197,6 +1197,9 @@ class DatabaseInfoProvider3(InfoProvider):
     def _info_string(self) -> str:
         self.response.read_byte()  # Cluster length
         self.response.read_short()  # number of strings
+        return self.response.read_pascal_string()
+    def _single_info_string(self) -> str:
+        self.response.read_byte()  # Cluster length
         return self.response.read_pascal_string()
     def __user_names(self) -> Dict[str, str]:
         self.response.rewind() # necessary to process names separated by info tag
@@ -1559,14 +1562,14 @@ class DatabaseInfoProvider(DatabaseInfoProvider3):
             DbInfoCode.STMT_TIMEOUT_DB: self.response.read_sized_int,
             DbInfoCode.STMT_TIMEOUT_ATT: self.response.read_sized_int,
             DbInfoCode.PROTOCOL_VERSION: self.response.read_sized_int,
-            DbInfoCode.CRYPT_PLUGIN: self._info_string,
+            DbInfoCode.CRYPT_PLUGIN: self._single_info_string,
             DbInfoCode.CREATION_TIMESTAMP_TZ: self.__creation_tstz,
-            DbInfoCode.WIRE_CRYPT: self._info_string,
+            DbInfoCode.WIRE_CRYPT: self._single_info_string,
             DbInfoCode.FEATURES: self.__features,
             DbInfoCode.NEXT_ATTACHMENT: self.response.read_sized_int,
             DbInfoCode.NEXT_STATEMENT: self.response.read_sized_int,
-            DbInfoCode.DB_GUID: self._info_string,
-            DbInfoCode.DB_FILE_ID: self._info_string,
+            DbInfoCode.DB_GUID: self._single_info_string,
+            DbInfoCode.DB_FILE_ID: self._single_info_string,
             DbInfoCode.REPLICA_MODE: self.__replica_mode,
         })
     def __creation_tstz(self) -> datetime.datetime:
@@ -4974,7 +4977,7 @@ class ServerDbServices(ServerDbServices4):
     """Database-related actions and services [Firebird 5+].
     """
     def upgrade(self, *, database: FILESPEC) -> bytes:
-        """Perform database repair operation.  **(SYNC service)**
+        """Perform database ODS upgrade operation.  **(SYNC service)**
 
         Arguments:
             database: Database specification or alias.
@@ -5501,7 +5504,7 @@ class Server(LoggingIdMixin):
             self.__info = ServerInfoProvider(self.encoding, self)
         return self.__info
     @property
-    def database(self) -> Union[ServerDbServices3, ServerDbServices]:
+    def database(self) -> Union[ServerDbServices4, ServerDbServices3, ServerDbServices]:
         """Access to various database-related actions and services.
         """
         if self.__dbsvc is None:

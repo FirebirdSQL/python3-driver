@@ -82,7 +82,7 @@ python = ["3.8", "3.9", "3.10", "3.11"]
 detached = false
 platforms = ["linux"]
 dependencies = [
-  "Sphinx>=7.1",
+  "Sphinx==7.2.6",
   "sphinx-bootstrap-theme>=0.8.1",
   "sphinx-autodoc-typehints>=1.24.0",
   "doc2dash>=3.0.0"
