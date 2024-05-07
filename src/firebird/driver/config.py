@@ -41,9 +41,8 @@
 from __future__ import annotations
 from typing import Dict, Union, Iterable
 import os
-from configparser import ConfigParser, ExtendedInterpolation
 from firebird.base.config import Config, StrOption, IntOption, BoolOption, EnumOption, \
-     ConfigListOption, ListOption
+     ConfigListOption, ListOption, ConfigParser, EnvExtendedInterpolation
 from .types import NetProtocol, DecfloatRound, DecfloatTraps
 
 class ServerConfig(Config): # pylint: disable=R0902
@@ -218,7 +217,7 @@ class DriverConfig(Config):
 
         Return list of successfully read files.
         """
-        parser = ConfigParser(interpolation=ExtendedInterpolation())
+        parser = ConfigParser(interpolation=EnvExtendedInterpolation())
         read_ok = parser.read(filenames, encoding)
         if read_ok:
             self.load_config(parser)
@@ -228,13 +227,13 @@ class DriverConfig(Config):
 
         The `f` argument must be iterable, returning one line at a time.
         """
-        parser = ConfigParser(interpolation=ExtendedInterpolation())
+        parser = ConfigParser(interpolation=EnvExtendedInterpolation())
         parser.read_file(f)
         self.load_config(parser)
     def read_string(self, string: str) -> None:
         """Read configuration from a given string.
         """
-        parser = ConfigParser(interpolation=ExtendedInterpolation())
+        parser = ConfigParser(interpolation=EnvExtendedInterpolation())
         parser.read_string(string)
         self.load_config(parser)
     def read_dict(self, dictionary: Dict) -> None:
@@ -247,7 +246,7 @@ class DriverConfig(Config):
         All types held in the dictionary are converted to strings during
         reading, including section names, option names and keys.
         """
-        parser = ConfigParser(interpolation=ExtendedInterpolation())
+        parser = ConfigParser(interpolation=EnvExtendedInterpolation())
         parser.read_dict(dictionary)
         self.load_config(parser)
     def get_server(self, name: str) -> ServerConfig:
@@ -282,7 +281,7 @@ class DriverConfig(Config):
         srv_config = ServerConfig(name)
         self.servers.value.append(srv_config)
         if config:
-            parser = ConfigParser(interpolation=ExtendedInterpolation())
+            parser = ConfigParser(interpolation=EnvExtendedInterpolation())
             parser.read_string(config)
             srv_config.load_config(parser, name)
         return srv_config
@@ -304,7 +303,7 @@ class DriverConfig(Config):
         db_config = DatabaseConfig(name)
         self.databases.value.append(db_config)
         if config:
-            parser = ConfigParser(interpolation=ExtendedInterpolation())
+            parser = ConfigParser(interpolation=EnvExtendedInterpolation())
             parser.read_string(config)
             db_config.load_config(parser, name)
         return db_config

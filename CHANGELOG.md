@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.10.4] - 2024-05-07
+
+### Added
+
+- Support for values fetched from environment variables in configuration files via
+  EnvExtendedInterpolation provided by firebird-base package v1.8.0.
+
+### Fixed
+
+- Unregistered bug: db info call for CRYPT_KEY, CRYPT_PLUGIN, WIRE_CRYPT, DB_GUID and
+  DB_FILE_ID returned mangled values.
+- Unregistered bug: db info call for FIREBIRD_VERSION or Connection.info.firebird_version
+  always returned only one string. Now it returns all values returned by server, separated
+  by newline.
+
 ## [1.10.3] - 2024-05-03
 
 ### Fixed

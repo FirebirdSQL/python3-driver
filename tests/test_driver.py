@@ -536,6 +536,9 @@ class TestConnection(DriverTestBase):
             self.assertIsInstance(con.info.get_info(DbInfoCode.ODS_VERSION), int)
             self.assertIsInstance(con.info.get_info(DbInfoCode.ODS_MINOR_VERSION), int)
             #
+            self.assertEqual(con.info.get_info(DbInfoCode.CRYPT_KEY), '')
+            self.assertEqual(con.info.get_info(DbInfoCode.CRYPT_PLUGIN), '')
+            self.assertEqual(con.info.get_info(DbInfoCode.DB_GUID), '{03EC58E8-865D-4528-A888-130677BEB1CF}')
 
 
 class TestTransaction(DriverTestBase):

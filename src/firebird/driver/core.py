@@ -1116,8 +1116,8 @@ class DatabaseInfoProvider3(InfoProvider):
              DbInfoCode.DB_ID: self.__db_id,
              DbInfoCode.IMPLEMENTATION: self.__implementation,
              DbInfoCode.IMPLEMENTATION_OLD: self.__implementation_old,
-             DbInfoCode.VERSION: self._info_string,
-             DbInfoCode.FIREBIRD_VERSION: self._info_string,
+             DbInfoCode.VERSION: self._version_string,
+             DbInfoCode.FIREBIRD_VERSION: self._version_string,
              DbInfoCode.USER_NAMES: self.__user_names,
              DbInfoCode.ACTIVE_TRANSACTIONS: self.__tra_active,
              DbInfoCode.LIMBO: self.__tra_limbo,
@@ -1197,13 +1197,15 @@ class DatabaseInfoProvider3(InfoProvider):
         impl_number = self.response.read_byte()
         class_number = self.response.read_byte()
         return (impl_number, class_number)
-    def _info_string(self) -> str:
-        self.response.read_byte()  # Cluster length
-        self.response.read_short()  # number of strings
-        return self.response.read_pascal_string()
+    def _version_string(self) -> str:
+        self.response.read_short()  # Cluster length
+        result = []
+        count = self.response.read_byte() # number of strings
+        for _ in range(count):
+            result.append(self.response.read_pascal_string())
+        return '\n'.join(result)
     def _single_info_string(self) -> str:
-        self.response.read_byte()  # Cluster length
-        return self.response.read_pascal_string()
+        return self.response.read_sized_string()
     def __user_names(self) -> Dict[str, str]:
         self.response.rewind() # necessary to process names separated by info tag
         usernames = []

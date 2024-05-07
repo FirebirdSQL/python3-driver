@@ -2,6 +2,16 @@
 Changelog
 #########
 
+Version 1.10.4
+==============
+
+- Support for values fetched from environment variables in configuration files via
+  `~firebird.base.config.EnvExtendedInterpolation` provided by firebird-base package v1.8.0.
+- Fix: db info call for CRYPT_KEY, CRYPT_PLUGIN, WIRE_CRYPT, DB_GUID and
+  DB_FILE_ID returned mangled values.
+- Fix: db info call for FIREBIRD_VERSION or `.Connection.info.firebird_version`
+  always returned only one string. Now it returns all values returned by server, separated
+  by newline.
 
 Version 1.10.3
 ==============
