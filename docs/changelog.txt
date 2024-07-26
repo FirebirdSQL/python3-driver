@@ -2,6 +2,11 @@
 Changelog
 #########
 
+Version 1.10.5
+==============
+
+- Fix: DECFLOAT ARRAYs do not work.
+
 Version 1.10.4
 ==============
 

@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.10.5] - 2024-07-26
+
+### Fixed
+
+- Unregistered bug: DECFLOAT ARRAYs do not work.
+
 ## [1.10.4] - 2024-05-07
 
 ### Added

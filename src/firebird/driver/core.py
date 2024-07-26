@@ -3143,6 +3143,10 @@ class Cursor(LoggingIdMixin):
             valuebuf = create_string_buffer(bytes([0]), esize)
         elif dtype == a.blr_bool:
             valuebuf = create_string_buffer(bytes([0]), esize)
+        elif dtype in (a.blr_int128, a.blr_dec64, a.blr_dec128):
+            valuebuf = create_string_buffer(bytes([0]), esize)
+        elif dtype in (a.blr_sql_time_tz, a.blr_timestamp_tz):
+            valuebuf = create_string_buffer(bytes([0]), esize)
         else:  # pragma: no cover
             raise InterfaceError(f"Unsupported Firebird ARRAY subtype: {dtype}")
         self._fill_db_array_buffer(esize, dtype,
@@ -3216,14 +3220,11 @@ class Cursor(LoggingIdMixin):
                     valuebuf.value = _util.encode_timestamp_tz(value[i])
                     memmove(byref(buf, bufpos), valuebuf, esize)
                 elif dtype == a.blr_dec64:
-                    valuebuf.value = _util.get_decfloat16().from_str(str(value[i]))
-                    memmove(byref(buf, bufpos), valuebuf, esize)
+                    memmove(byref(buf, bufpos), byref(_util.get_decfloat16().from_str(str(value[i]))), esize)
                 elif dtype == a.blr_dec128:
-                    valuebuf.value = _util.get_decfloat34().from_str(str(value[i]))
-                    memmove(byref(buf, bufpos), valuebuf, esize)
+                    memmove(byref(buf, bufpos), _util.get_decfloat34().from_str(str(value[i])), esize)
                 elif dtype == a.blr_int128:
-                    valuebuf.value = _util.get_int128().from_str(str(value), scale)
-                    memmove(byref(buf, bufpos), valuebuf, esize)
+                    memmove(byref(buf, bufpos), _util.get_int128().from_str(str(value[i]), scale), esize)
                 else:  # pragma: no cover
                     raise InterfaceError(f"Unsupported Firebird ARRAY subtype: {dtype}")
                 bufpos += esize

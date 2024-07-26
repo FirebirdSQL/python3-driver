@@ -1205,7 +1205,9 @@ class TestArrays(DriverTestBase):
                                     c12 double precision[2],
                                     c13 decimal(10,1)[2],
                                     c14 decimal(10,5)[2],
-                                    c15 decimal(18,5)[2]
+                                    c15 decimal(18,5)[2],
+                                    c16 boolean[2],
+                                    c17 decfloat[2]
                                     )
 """
         #
@@ -2681,7 +2683,7 @@ class TestFB4(DriverTestBase):
                 self.assertEqual(n128, d)
                 self.assertIsInstance(d128, decimal.Decimal)
                 self.assertEqual(d128, d)
-    def test_08_select_int128(self):
+    def test_08_insert_int128(self):
         data = {5: (decimal.Decimal('1111111111222222222233333333.334444'),decimal.Decimal('1111111111222222222233333333.334444')),
                 6: (decimal.Decimal('111111111122222222223333333333.4444'),decimal.Decimal('111111111122222222223333333333.4444')),
                 7: (decimal.Decimal('111111111122222222223333333333.444455'),decimal.Decimal('111111111122222222223333333333.444455')),
@@ -2698,6 +2700,53 @@ class TestFB4(DriverTestBase):
                 self.assertEqual(n128, d[1])
                 self.assertIsInstance(d128, decimal.Decimal)
                 self.assertEqual(d128, d[1])
+    def test_09_array_defloat(self):
+        d_df = [decimal.Decimal('1111111111222222222233333333334444'),
+               decimal.Decimal('1111111111222222222233333333334445')]
+        d_df16 = [decimal.Decimal('1111111111222222'),
+                 decimal.Decimal('1111111111222223')]
+        d_df34 = [decimal.Decimal('1111111111222222222233333333334444'),
+                 decimal.Decimal('1111111111222222222233333333334445')]
+        data = {9: (d_df, d_df16, d_df34),
+                }
+        with self.con.cursor() as cur:
+            for pk, d in data.items():
+                cur.execute("insert into FB4 (PK,ADF,ADF16,ADF34) values (?, ?, ?, ?)", (pk, d[0], d[1], d[2]))
+                self.con.commit()
+            cur.execute('select PK,ADF,ADF16,ADF34 from FB4 where PK = 9')
+            for pk, adf, adf16, adf34 in cur:
+                d = data[pk]
+                self.assertIsInstance(adf, list)
+                for v in adf:
+                    self.assertIsInstance(v, decimal.Decimal)
+                self.assertEqual(adf, d_df)
+                self.assertIsInstance(adf16, list)
+                for v in adf16:
+                    self.assertIsInstance(v, decimal.Decimal)
+                self.assertEqual(adf16, d_df16)
+                self.assertIsInstance(adf34, list)
+                for v in adf34:
+                    self.assertIsInstance(v, decimal.Decimal)
+                self.assertEqual(adf34, d_df34)
+    def test_10_array_int128(self):
+        d_int128 = [decimal.Decimal('1111111111222222222233333333.334444'),
+                    decimal.Decimal('1111111111222222222233333333.334444')]
+        data = {11: (d_int128)}
+        with self.con.cursor() as cur:
+            for pk, d in data.items():
+                cur.execute("insert into FB4 (PK,AN128,AD128) values (?, ?, ?)", (pk, d, d))
+                self.con.commit()
+            cur.execute('select PK,AN128,AD128 from FB4 where PK = 11 order by pk')
+            for pk, an128, ad128 in cur:
+                d = data[pk]
+                self.assertIsInstance(an128, list)
+                for v in an128:
+                    self.assertIsInstance(v, decimal.Decimal)
+                self.assertEqual(an128, d)
+                self.assertIsInstance(ad128, list)
+                for v in ad128:
+                    self.assertIsInstance(v, decimal.Decimal)
+                self.assertEqual(ad128, d)
 
 class TestIssues(DriverTestBase):
     def setUp(self):
