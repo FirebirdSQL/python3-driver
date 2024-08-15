@@ -1260,6 +1260,28 @@ determine encoding for conversions from/to `unicode`.
 
 .. _working_with_blobs:
 
+Working with TIME/TIMESTAMP WITH TIMEZONE
+-----------------------------------------
+
+Firebird 4 introduced support for TIME and TIMESTAMP WITH TIMEZONE. The driver supports these
+types with timezone-aware `datetime.datetime` and `datetime.time` objects. However, this
+support has some specific limitations:
+
+1. The driver uses `python-dateutil` package to handle timezone information. Due to specific
+   requirements it's not possible to use standard `zoneinfo` package available in Python since
+   version 3.9, neither any other `datetime.tzinfo` implementation.
+2. All timezone-aware `datetime.datetime` and `datetime.time` objects passed to the driver
+   must use `datetime.tzinfo` created with `.get_timezone()` utility function.
+
+**Examples:**
+
+.. sourcecode:: python
+
+   from firebird.driver import get_timezone
+
+   ts_region = datetime.datetime(2020, 12, 31, 23, 55, 35, 123400, get_timezone('Europe/Prague'))
+   ts_offset = datetime.datetime(2020, 12, 31, 23, 55, 35, 123400, get_timezone('+02:00'))
+
 Working with BLOBs
 ------------------
 
