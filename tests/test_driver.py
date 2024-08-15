@@ -2747,6 +2747,54 @@ class TestFB4(DriverTestBase):
                 for v in ad128:
                     self.assertIsInstance(v, decimal.Decimal)
                 self.assertEqual(ad128, d)
+    def test_11_array_time_tz(self):
+        data = [(2020, 1, 31, 11, 55, 35, 123400, 'Europe/Prague'),
+                (2020, 6, 1, 1, 55, 35, 123400, 'Europe/Prague')]
+        pk = 11
+        ar_data = []
+        with self.con.cursor() as cur:
+            for d in data:
+                zone = get_timezone(d[7])
+                ts = datetime.datetime(d[0], d[1], d[2], d[3], d[4], d[5], d[6], zone)
+                ar_data.append(ts.timetz())
+            cur.execute("insert into FB4 (PK,AT_TZ) values (?, ?)", (pk, ar_data))
+            cur.execute(f'select AT_TZ from FB4 where PK = {pk}')
+            for row in cur:
+                for d, t_tz in zip(data, row[0]):
+                    self.assertIsInstance(t_tz, datetime.time)
+                    self.assertIsNotNone(t_tz.tzinfo)
+                    self.assertIsNotNone(getattr(t_tz.tzinfo, '_timezone_'))
+                    self.assertEqual(t_tz.hour, d[3])
+                    self.assertEqual(t_tz.minute, d[4])
+                    self.assertEqual(t_tz.second, d[5])
+                    self.assertEqual(t_tz.microsecond, d[6])
+                    self.assertEqual(t_tz.tzinfo._timezone_, d[7])
+                    #
+    def test_12_array_timestamp_tz(self):
+        data = [(2020, 1, 31, 11, 55, 35, 123400, 'Europe/Prague'),
+                (2020, 6, 1, 1, 55, 35, 123400, 'Europe/Prague')]
+        pk = 12
+        ar_data = []
+        with self.con.cursor() as cur:
+            for d in data:
+                zone = get_timezone(d[7])
+                ts = datetime.datetime(d[0], d[1], d[2], d[3], d[4], d[5], d[6], zone)
+                ar_data.append(ts)
+            cur.execute("insert into FB4 (PK,ATS_TZ) values (?, ?)", (pk, ar_data))
+            cur.execute(f'select ATS_TZ from FB4 where PK = {pk}')
+            for row in cur:
+                for d, ts_tz in zip(data, row[0]):
+                    self.assertIsInstance(ts_tz, datetime.datetime)
+                    self.assertIsNotNone(ts_tz.tzinfo)
+                    self.assertIsNotNone(getattr(ts_tz.tzinfo, '_timezone_'))
+                    self.assertEqual(ts_tz.year, d[0])
+                    self.assertEqual(ts_tz.month, d[1])
+                    self.assertEqual(ts_tz.day, d[2])
+                    self.assertEqual(ts_tz.hour, d[3])
+                    self.assertEqual(ts_tz.minute, d[4])
+                    self.assertEqual(ts_tz.second, d[5])
+                    self.assertEqual(ts_tz.microsecond, d[6])
+                    self.assertEqual(ts_tz.tzinfo._timezone_, d[7])
 
 class TestIssues(DriverTestBase):
     def setUp(self):

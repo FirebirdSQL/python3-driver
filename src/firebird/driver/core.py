@@ -131,7 +131,7 @@ _master = None
 _util = None
 _thns = threading.local()
 
-_tenTo = [10 ** x for x in range(20)]
+_tenTo = [10 ** x for x in range(30)]
 _i2name = {DbInfoCode.READ_SEQ_COUNT: 'sequential', DbInfoCode.READ_IDX_COUNT: 'indexed',
            DbInfoCode.INSERT_COUNT: 'inserts', DbInfoCode.UPDATE_COUNT: 'updates',
            DbInfoCode.DELETE_COUNT: 'deletes', DbInfoCode.BACKOUT_COUNT: 'backouts',
@@ -3078,7 +3078,7 @@ class Cursor(LoggingIdMixin):
                 elif dtype in (a.blr_short, a.blr_long, a.blr_int64):
                     val = (0).from_bytes(buf[bufpos:bufpos + esize], 'little', signed=True)
                     if subtype or scale:
-                        val = decimal.Decimal(val) / _tenTo[abs(256-scale)]
+                        val = decimal.Decimal(val) / _tenTo[abs(scale)]
                 elif dtype == a.blr_bool:
                     val = (0).from_bytes(buf[bufpos:bufpos + esize], 'little') == 1
                 elif dtype == a.blr_float:
@@ -3173,9 +3173,9 @@ class Cursor(LoggingIdMixin):
                     if subtype or scale:
                         val = value[i]
                         if isinstance(val, decimal.Decimal):
-                            val = int((val * _tenTo[256-abs(scale)]).to_integral())
+                            val = int((val * _tenTo[abs(scale)]).to_integral())
                         elif isinstance(val, (int, float)):
-                            val = int(val * _tenTo[256-abs(scale)])
+                            val = int(val * _tenTo[abs(scale)])
                         else:
                             raise TypeError(f'Objects of type {type(val)} are not '
                                             f' acceptable input for'
@@ -3214,7 +3214,7 @@ class Cursor(LoggingIdMixin):
                     valuebuf.value = _util.encode_time(value[i]).to_bytes(4, 'little')
                     memmove(byref(buf, bufpos), valuebuf, esize)
                 elif dtype == a.blr_sql_time_tz:
-                    valuebuf.value = _util.encode_time_tz(value[i]).to_bytes(esize, 'little')
+                    valuebuf.value = _util.encode_time_tz(value[i])
                     memmove(byref(buf, bufpos), valuebuf, esize)
                 elif dtype == a.blr_timestamp_tz:
                     valuebuf.value = _util.encode_timestamp_tz(value[i])

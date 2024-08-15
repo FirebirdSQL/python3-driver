@@ -2,6 +2,12 @@
 Changelog
 #########
 
+Version 1.10.6
+==============
+
+- Fix: Big NUMERIC/DECIMAL (i.e. INT128) ARRAYs do not work.
+- Fix: ARRAYs of TIME WITH TIMEZONE do not work.
+
 Version 1.10.5
 ==============
 

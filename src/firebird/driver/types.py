@@ -1417,6 +1417,9 @@ def get_timezone(timezone: str=None) -> datetime.tzinfo:
     for timezone tzinfo objects, but adds metadata neccessary to store timezone regions into
     database instead zoned time, and to handle offset-based timezones in format required by
     Firebird.
+
+    Arguments:
+      timezone: Timezone region specification or UTC offset.
     """
     if timezone[0] in ('+', '-'):
         timezone = 'UTC' + timezone

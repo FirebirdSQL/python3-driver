@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.10.6] - 2024-08-15
+
+### Fixed
+
+- Unregistered bug: Big NUMERIC/DECIMAL (i.e. INT128) ARRAYs do not work.
+- Unregistered bug: ARRAYs of TIME WITH TIMEZONE do not work.
+
 ## [1.10.5] - 2024-07-26
 
 ### Fixed

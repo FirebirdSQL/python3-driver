@@ -294,7 +294,7 @@ class ISC_ARRAY_DESC(Structure):
     "ISC_ARRAY_DESC"
     _fields_ = [
         ('array_desc_dtype', c_ubyte),
-        ('array_desc_scale', c_ubyte),  # was ISC_SCHAR),
+        ('array_desc_scale', c_byte),  # was ISC_SCHAR),
         ('array_desc_length', c_ushort),
         ('array_desc_field_name', c_char * 32),
         ('array_desc_relation_name', c_char * 32),
