@@ -78,7 +78,8 @@ from .types import (Error, InterfaceError, DatabaseError, DataError,
                     StateResult, SrvDbInfoOption, ServerAction, CB_OUTPUT_LINE, FILESPEC,
                     SrvBackupOption, SrvRestoreOption, SrvNBackupOption, SrvRepairOption,
                     SrvPropertiesOption, SrvPropertiesFlag, SrvValidateOption,
-                    SrvUserOption, SrvTraceOption, UserInfo, TraceSession)
+                    SrvUserOption, SrvTraceOption, UserInfo, TraceSession, ReqInfoCode,
+                    StmtInfoCode)
 from .interfaces import iAttachment, iTransaction, iStatement, iMessageMetadata, iBlob, \
      iResultSet, iDtc, iService, iCryptKeyCallbackImpl
 from .hooks import APIHook, ConnectionHook, ServerHook, register_class, get_callbacks, add_hook
@@ -1409,7 +1410,7 @@ class DatabaseInfoProvider3(InfoProvider):
     def implementation(self) -> Implementation:
         """Implementation (old format).
         """
-        return Implementation(self.get_info(DbInfoCode.IMPLEMENTATION_OLD)[0])
+        return Implementation(self.get_info(DbInfoCode.IMPLEMENTATION_OLD)[1])
     @property
     def provider(self) -> DbProvider:
         """Database Provider.
@@ -4035,10 +4036,10 @@ class Cursor(LoggingIdMixin):
                                                    StatementType.UPDATE,
                                                    StatementType.DELETE)):
             info = create_string_buffer(64)
-            self._stmt._istmt.get_info(bytes([23, 1]), info) # bytes(isc_info_sql_records, isc_info_end)
-            if ord(info[0]) != 23:  # pragma: no cover
+            self._stmt._istmt.get_info(bytes([StmtInfoCode.RECORDS, isc_info_end]), info)
+            if ord(info[0]) != StmtInfoCode.RECORDS:  # pragma: no cover
                 raise InterfaceError("Cursor.affected_rows:\n"
-                                     "first byte must be 'isc_info_sql_records'")
+                                     "first byte must be 'StmtInfoCode.RECORDS'")
             res_walk = 3
             while ord(info[res_walk]) != isc_info_end:
                 cur_count_type = ord(info[res_walk])
@@ -4047,10 +4048,10 @@ class Cursor(LoggingIdMixin):
                 res_walk += 2
                 count = (0).from_bytes(info[res_walk:res_walk + size], 'little')
                 # pylint: disable=R0916
-                if ((cur_count_type == 13 and self._stmt.type == StatementType.SELECT)
-                    or (cur_count_type == 14 and self._stmt.type == StatementType.INSERT)
-                    or (cur_count_type == 15 and self._stmt.type == StatementType.UPDATE)
-                    or (cur_count_type == 16 and self._stmt.type == StatementType.DELETE)):
+                if ((cur_count_type == ReqInfoCode.SELECT_COUNT and self._stmt.type == StatementType.SELECT)
+                    or (cur_count_type == ReqInfoCode.INSERT_COUNT and self._stmt.type == StatementType.INSERT)
+                    or (cur_count_type == ReqInfoCode.UPDATE_COUNT and self._stmt.type == StatementType.UPDATE)
+                    or (cur_count_type == ReqInfoCode.DELETE_COUNT and self._stmt.type == StatementType.DELETE)):
                     result = count
                 res_walk += size
         return result
@@ -5588,7 +5589,8 @@ def connect_server(server: str, *, user: str=None, password: str=None,
     spb = SPB_ATTACH(user=user, password=password, config=srv_config.config.value,
                      trusted_auth=srv_config.trusted_auth.value,
                      auth_plugin_list=srv_config.auth_plugin_list.value,
-                     expected_db=expected_db, role=role)
+                     expected_db=expected_db, encoding=srv_config.encoding.value,
+                     errors=srv_config.encoding_errors.value, role=role)
     spb_buf = spb.get_buffer()
     with a.get_api().master.get_dispatcher() as provider:
         if crypt_callback is not None:
