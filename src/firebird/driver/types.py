@@ -402,6 +402,29 @@ class StmtInfoCode(IntEnum):
     EXEC_PATH_BLR_BYTES = 31
     EXEC_PATH_BLR_TEXT = 32
 
+class ReqInfoCode(IntEnum):
+    """Request information (isc_info_*) codes.
+    """
+    INFO_STATE = 8
+    MESSAGE_NUMBER = 9
+    MESSAGE_SIZE = 10
+    SELECT_COUNT = 13
+    INSERT_COUNT = 14
+    UPDATE_COUNT = 15
+    DELETE_COUNT = 16
+
+
+class ReqState(IntEnum):
+    """Request states(isc_info_req_*) codes.
+    """
+    ACTIVE = 2
+    INACTIVE = 3
+    SEND = 4
+    RECEIVE = 5
+    SELECT = 6
+    SQL_STALL = 7
+
+
 class ResultSetInfoCode(IntEnum):
     """Result set information codes.
     """
