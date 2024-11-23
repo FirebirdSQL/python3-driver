@@ -735,6 +735,11 @@ class iResultSet(iResultSet_v3):
         "Returns information about result set."
         self.vtable.getInfo(self, self.status, len(items), items, len(buffer), buffer)
         self._check()
+    def close(self) -> None:
+        "Close result set, releases interface on success"
+        self.vtable.close(self, self.status)
+        self._check()
+        self._refcnt -= 1
 
 # IStatement(3) : ReferenceCounted
 class iStatement_v3(iReferenceCounted):
