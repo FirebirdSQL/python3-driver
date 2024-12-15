@@ -2,6 +2,23 @@
 Changelog
 #########
 
+Version 1.10.7
+==============
+
+- Change: Rename `.DbClass` items to become more descriptive
+- Change: Cleanup of Useless StmtInfoCode codes
+- Add: `.DatabaseInfoProvider3.supports` and `.TransactionInfoProvider3.supports` functions.
+- Add: `.StatementInfoProvider` and use it in `.Cursor.affected_rows` implementation.
+- Add: Dataclasses `.ImpData` and `.ImpDataOld`
+- Add: Missing `.ReqInfoCode` codes
+- Add: missing `encoding` and `errors` SPB config parameters.
+- Use new info codes in Statement
+- Fix: `.DatabaseInfoProvider3.implementation` property
+- Fix: issue when wrong close is selected in class hierarchy.
+- Fix: Handling of `.DbInfoCode.BASE_LEVEL`, `.DbInfoCode.DB_FILE_SIZE`,
+  `.DbInfoCode.IMPLEMENTATION`, `.DbInfoCode.IMPLEMENTATION_OLD`, `.DbInfoCode.ACTIVE_TRANSACTIONS`,
+  `.DbInfoCode.LIMBO`, `.DbInfoCode.PAGE_CONTENTS`, `.DbInfoCode.USER_NAME`, `.DbInfoCode.SQL_ROLE` codes
+
 Version 1.10.6
 ==============
 

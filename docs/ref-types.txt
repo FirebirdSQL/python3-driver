@@ -117,6 +117,8 @@ Enums
 .. autoclass:: Features
 .. autoclass:: ReplicaMode
 .. autoclass:: StmtInfoCode
+.. autoclass:: ReqInfoCode
+.. autoclass:: ReqState
 .. autoclass:: TraInfoCode
 .. autoclass:: TraInfoIsolation
 .. autoclass:: TraInfoReadCommitted
@@ -198,6 +200,12 @@ Dataclasses
    :no-members:
 
 .. autoclass:: TraceSession
+   :no-members:
+
+.. autoclass:: ImpData
+   :no-members:
+
+.. autoclass:: ImpDataOld
    :no-members:
 
 Helper functions

@@ -79,7 +79,7 @@ from .types import (Error, InterfaceError, DatabaseError, DataError,
                     SrvBackupOption, SrvRestoreOption, SrvNBackupOption, SrvRepairOption,
                     SrvPropertiesOption, SrvPropertiesFlag, SrvValidateOption,
                     SrvUserOption, SrvTraceOption, UserInfo, TraceSession, ReqInfoCode,
-                    StmtInfoCode)
+                    StmtInfoCode, ImpData, ImpDataOld)
 from .interfaces import iAttachment, iTransaction, iStatement, iMessageMetadata, iBlob, \
      iResultSet, iDtc, iService, iCryptKeyCallbackImpl
 from .hooks import APIHook, ConnectionHook, ServerHook, register_class, get_callbacks, add_hook
@@ -1113,7 +1113,7 @@ class DatabaseInfoProvider3(InfoProvider):
         super().__init__(connection._encoding)
         self._con: Connection = weakref.ref(connection)
         self._handlers: Dict[DbInfoCode, Callable] = \
-            {DbInfoCode.BASE_LEVEL: self.response.get_tag,
+            {DbInfoCode.BASE_LEVEL: self.__base_level,
              DbInfoCode.DB_ID: self.__db_id,
              DbInfoCode.IMPLEMENTATION: self.__implementation,
              DbInfoCode.IMPLEMENTATION_OLD: self.__implementation_old,
@@ -1171,6 +1171,7 @@ class DatabaseInfoProvider3(InfoProvider):
              DbInfoCode.UPDATE_COUNT: self.__tbl_perf_count,
              DbInfoCode.CREATION_DATE: self.__creation_date,
              DbInfoCode.PAGE_CONTENTS: self.response.read_bytes,
+             DbInfoCode.DB_FILE_SIZE: self.response.read_sized_int,
              }
         # Page size
         self.__page_size = self.get_info(DbInfoCode.PAGE_SIZE)  # prefetch it
@@ -1178,6 +1179,10 @@ class DatabaseInfoProvider3(InfoProvider):
         self.__version = _engine_version_provider.get_server_version(self._con)
         x = self.__version.split('.')
         self.__engine_version = float(f'{x[0]}.{x[1]}')
+    def __base_level(self) -> int:
+        self.response.read_short() # cluster length
+        self.response.read_byte() # number of codes
+        return self.response.read_byte() # should be always 6 for Firebird
     def __db_id(self) -> List:
         result = []
         self.response.read_short()  # Cluster length
@@ -1186,18 +1191,28 @@ class DatabaseInfoProvider3(InfoProvider):
             result.append(self.response.read_pascal_string(encoding=self._charset))
             count -= 1
         return result
-    def __implementation(self) -> Tuple[ImpCPU, ImpOS, ImpCompiler, ImpFlags]:
-        self.response.read_short()  # Cluster length
-        cpu_id = ImpCPU(self.response.read_byte())
-        os_id = ImpOS(self.response.read_byte())
-        compiler_id = ImpCompiler(self.response.read_byte())
-        flags = ImpFlags(self.response.read_byte())
-        return (cpu_id, os_id, compiler_id, flags)
-    def __implementation_old(self) -> Tuple[int, int]:
-        self.response.read_short()  # Cluster length
-        impl_number = self.response.read_byte()
-        class_number = self.response.read_byte()
-        return (impl_number, class_number)
+    def __implementation(self) -> Tuple[ImpData]:
+        result = []
+        self.response.read_short() # Cluster length
+        seqences = self.response.read_byte()  # Cluster length
+        while seqences:
+            result.append(ImpData(ImpCPU(self.response.read_byte()),
+                                  ImpOS(self.response.read_byte()),
+                                  ImpCompiler(self.response.read_byte()),
+                                  ImpFlags(self.response.read_byte()),
+                                  DbClass(self.response.read_byte()),
+                                  self.response.read_byte()))
+            seqences -= 1
+        return tuple(result)
+    def __implementation_old(self) -> Tuple[ImpDataOld]:
+        result = []
+        self.response.read_short() # Cluster length
+        seqences = self.response.read_byte()  # Cluster length
+        while seqences:
+            result.append(ImpDataOld(Implementation(self.response.read_byte()),
+                                     DbClass(self.response.read_byte())))
+            seqences -= 1
+        return tuple(result)
     def _version_string(self) -> str:
         self.response.read_short()  # Cluster length
         result = []
@@ -1224,28 +1239,13 @@ class DatabaseInfoProvider3(InfoProvider):
         result = []
         while not self.response.is_eof():
             self.response.get_tag()  # DbInfoCode.ACTIVE_TRANSACTIONS
-            tid_size = self.response.read_short()
-            if tid_size == 4:
-                tra_id = self.response.read_int()
-            elif tid_size == 8:
-                tra_id = self.response.read_bigint()
-            else:  # pragma: no cover
-                raise InterfaceError(f"Wrong transaction ID size {tid_size}")
-            result.append(tra_id)
+            result.append(self.response.read_sized_int())
         return result
     def __tra_limbo(self) -> List:
         result = []
-        self.response.read_short()  # Total data length
         while not self.response.is_eof():
-            self.response.get_tag()
-            tid_size = self.response.read_short()
-            if tid_size == 4:
-                tra_id = self.response.read_int()
-            elif tid_size == 8:
-                tra_id = self.response.read_bigint()
-            else:  # pragma: no cover
-                raise InterfaceError(f"Wrong transaction ID size {tid_size}")
-            result.append(tra_id)
+            self.response.get_tag()  # DbInfoCode.LIMBO
+            result.append(self.response.read_sized_int())
         return result
     def __crypt_state(self) -> EncryptionFlag:
         return EncryptionFlag(self.response.read_sized_int())
@@ -1275,6 +1275,13 @@ class DatabaseInfoProvider3(InfoProvider):
             request: Data specifying the required information.
         """
         self._con()._att.get_info(request, self.response.raw)
+    def supports(self, code: DbInfoCode) -> bool:
+        """Returns True if specified info code is supported by this InfoProvider.
+
+        Arguments:
+            code: Info code.
+        """
+        return code in self._handlers
     def get_info(self, info_code: DbInfoCode, page_number: int=None) -> Any:
         """Returns requested information from associated attachment.
 
@@ -1292,25 +1299,25 @@ class DatabaseInfoProvider3(InfoProvider):
         self.response.clear()
         request = bytes([info_code])
         if info_code == DbInfoCode.PAGE_CONTENTS:
-            request += (4).to_bytes(2, 'little')
-            request += page_number.to_bytes(4, 'little')
+            request += (8).to_bytes(2, 'little')
+            request += page_number.to_bytes(8, 'little')
             if len(self.response.raw) < self.page_size + 10:
                 self.response.resize(self.page_size + 10)
         self._get_data(request)
         tag = self.response.get_tag()
         if request[0] != tag:
-            if info_code == DbInfoCode.ACTIVE_TRANSACTIONS:
-                # isc_info_active_transactions with no active transactions returns empty buffer
-                # and does not follow this rule
+            if info_code in (DbInfoCode.ACTIVE_TRANSACTIONS, DbInfoCode.LIMBO):
+                # isc_info_active_transactions and isc_info_limbo with no transactions to
+                # report returns empty buffer and does not follow this rule
                 pass
             elif tag == isc_info_error:  # pragma: no cover
                 raise InterfaceError("An error response was received")
             else:  # pragma: no cover
                 raise InterfaceError("Result code does not match request code")
-        if info_code == DbInfoCode.ACTIVE_TRANSACTIONS:
+        #
+        if info_code in (DbInfoCode.ACTIVE_TRANSACTIONS, DbInfoCode.LIMBO):
             # we'll rewind back, otherwise it will break the repeating cluster processing
             self.response.rewind()
-        #
         result = self._handlers[info_code]()
         # cache
         if info_code in (DbInfoCode.CREATION_DATE, DbInfoCode.DB_CLASS, DbInfoCode.DB_PROVIDER,
@@ -1407,10 +1414,10 @@ class DatabaseInfoProvider3(InfoProvider):
         """
         return self.get_info(DbInfoCode.FIREBIRD_VERSION)
     @property
-    def implementation(self) -> Implementation:
-        """Implementation (old format).
+    def implementation(self) -> tuple[ImpData]:
+        """Implementation (new format).
         """
-        return Implementation(self.get_info(DbInfoCode.IMPLEMENTATION_OLD)[1])
+        return self.get_info(DbInfoCode.IMPLEMENTATION)
     @property
     def provider(self) -> DbProvider:
         """Database Provider.
@@ -1577,6 +1584,8 @@ class DatabaseInfoProvider(DatabaseInfoProvider3):
             DbInfoCode.DB_GUID: self._single_info_string,
             DbInfoCode.DB_FILE_ID: self._single_info_string,
             DbInfoCode.REPLICA_MODE: self.__replica_mode,
+            DbInfoCode.USER_NAME: self._single_info_string,
+            DbInfoCode.SQL_ROLE: self._single_info_string,
         })
     def __creation_tstz(self) -> datetime.datetime:
         value = self.response.read_bytes()
@@ -2272,8 +2281,15 @@ class TransactionInfoProvider3(InfoProvider):
         self._mngr()._tra.get_info(request, self.response.raw)
     def _close(self) -> None:
         self._mngr = None
+    def supports(self, code: TraInfoCode) -> bool:
+        """Returns True if specified info code is supported by this InfoProvider.
+
+        Arguments:
+            code: Info code.
+        """
+        return code in self._handlers
     def get_info(self, info_code: TraInfoCode) -> Any:
-        """Returns response for transaction INFO request. The type anc content of returned
+        """Returns response for transaction INFO request. The type and content of returned
         value(s) depend on INFO code passed as parameter.
         """
         if info_code not in self._handlers:
@@ -2663,6 +2679,84 @@ class DistributedTransactionManager(TransactionManager):
     def log_context(self) -> Connection:
         return UNDEFINED
 
+class StatementInfoProvider3(InfoProvider):
+    """Provides access to information about statement [Firebird 3+].
+
+    Important:
+       Do NOT create instances of this class directly! Use `Statement.info`
+       property to access the instance already bound to transaction context.
+    """
+    def __init__(self, charset: str, stmt: Statement):
+        super().__init__(charset)
+        self._stmt: Statement = weakref.ref(stmt)
+        self._handlers: Dict[StmtInfoCode, Callable] = \
+            {StmtInfoCode.STMT_TYPE: self.__stmt_type,
+             StmtInfoCode.GET_PLAN: self.response.read_sized_string,
+             StmtInfoCode.RECORDS: self.__records,
+             StmtInfoCode.BATCH_FETCH: self.response.read_sized_int,
+             StmtInfoCode.EXPLAIN_PLAN: self.response.read_sized_string,
+             StmtInfoCode.FLAGS: self.__flags,
+            }
+    def __flags(self) -> StatementFlag:
+        return StatementFlag(self.response.read_sized_int())
+    def __stmt_type(self) -> StatementType:
+        return StatementType(self.response.read_sized_int())
+    def __records(self) -> Dict[ReqInfoCode, int]:
+        result = {}
+        self.response.read_short() # Cluster length
+        while not self.response.is_eof():
+            code = ReqInfoCode(self.response.read_byte())
+            result[code] = self.response.read_sized_int()
+        return result
+    def _acquire(self, request: bytes) -> None:
+        """Acquires information from associated statement. Information is stored in native
+        format in `response` buffer.
+
+        Arguments:
+            request: Data specifying the required information.
+        """
+        self._stmt()._istmt.get_info(request, self.response.raw)
+    def _close(self) -> None:
+        self._stmt = None
+    def supports(self, code: StmtInfoCode) -> bool:
+        """Returns True if specified info code is supported by this InfoProvider.
+
+        Arguments:
+            code: Info code.
+        """
+        return code in self._handlers
+    def get_info(self, info_code: StmtInfoCode) -> Any:
+        """Returns response for statement INFO request. The type and content of returned
+        value(s) depend on INFO code passed as parameter.
+        """
+        if info_code not in self._handlers:
+            raise NotSupportedError(f"Info code {info_code} not supported by engine version {self._stmt()._connection()._engine_version()}")
+        request = bytes([info_code])
+        self._get_data(request)
+        tag = self.response.get_tag()
+        if request[0] != tag:
+            raise InterfaceError("An error response was received" if tag == isc_info_error
+                                 else "Result code does not match request code")
+        #
+        return self._handlers[info_code]()
+
+class StatementInfoProvider(StatementInfoProvider3):
+    """Provides access to information about statement [Firebird 4+].
+
+    Important:
+       Do NOT create instances of this class directly! Use `Statement.info`
+       property to access the instance already bound to transaction context.
+    """
+    def __init__(self, charset: str, stmt: Statement):
+        super().__init__(charset, stmt)
+        self._stmt: Statement = weakref.ref(stmt)
+        self._handlers.update({StmtInfoCode.TIMEOUT_USER: self.response.read_sized_int,
+            StmtInfoCode.TIMEOUT_RUN: self.response.read_sized_int,
+            StmtInfoCode.BLOB_ALIGN: self.response.read_sized_int,
+            StmtInfoCode.EXEC_PATH_BLR_BYTES: self.response.read_bytes,
+            StmtInfoCode.EXEC_PATH_BLR_TEXT: self.response.read_sized_string,
+        })
+
 class Statement(LoggingIdMixin):
     """Prepared SQL statement.
 
@@ -2677,6 +2771,7 @@ class Statement(LoggingIdMixin):
         self._type: StatementType = stmt.get_type()
         self._flags: StatementFlag = stmt.get_flags()
         self._desc: DESCRIPTION = None
+        self.__info: Union[StatementInfoProvider3, StatementInfoProvider] = None
         # Input metadata
         meta = stmt.get_input_metadata()
         self._in_cnt: int = meta.get_count()
@@ -2753,6 +2848,15 @@ class Statement(LoggingIdMixin):
         if self._connection is None:
             return 'Connection.GC'
         return self._connection()
+    @property
+    def info(self) -> Union[StatementInfoProvider3, StatementInfoProvider]:
+        """Access to various information about statement.
+        """
+        if self.__info is None:
+            cls = StatementInfoProvider if self._connection()._engine_version() >= 4.0 \
+                else StatementInfoProvider3
+            self.__info = cls(self._connection()._encoding, self)
+        return self.__info
     @property
     def plan(self) -> str:
         """Execution plan in classic format.
@@ -4030,31 +4134,7 @@ class Cursor(LoggingIdMixin):
         """
         if self._stmt is None:
             return -1
-        result = -1
-        if (self._executed and self._stmt.type in (StatementType.SELECT,
-                                                   StatementType.INSERT,
-                                                   StatementType.UPDATE,
-                                                   StatementType.DELETE)):
-            info = create_string_buffer(64)
-            self._stmt._istmt.get_info(bytes([StmtInfoCode.RECORDS, isc_info_end]), info)
-            if ord(info[0]) != StmtInfoCode.RECORDS:  # pragma: no cover
-                raise InterfaceError("Cursor.affected_rows:\n"
-                                     "first byte must be 'StmtInfoCode.RECORDS'")
-            res_walk = 3
-            while ord(info[res_walk]) != isc_info_end:
-                cur_count_type = ord(info[res_walk])
-                res_walk += 1
-                size = (0).from_bytes(info[res_walk:res_walk + 2], 'little')
-                res_walk += 2
-                count = (0).from_bytes(info[res_walk:res_walk + size], 'little')
-                # pylint: disable=R0916
-                if ((cur_count_type == ReqInfoCode.SELECT_COUNT and self._stmt.type == StatementType.SELECT)
-                    or (cur_count_type == ReqInfoCode.INSERT_COUNT and self._stmt.type == StatementType.INSERT)
-                    or (cur_count_type == ReqInfoCode.UPDATE_COUNT and self._stmt.type == StatementType.UPDATE)
-                    or (cur_count_type == ReqInfoCode.DELETE_COUNT and self._stmt.type == StatementType.DELETE)):
-                    result = count
-                res_walk += size
-        return result
+        return sum(self._stmt.info.get_info(StmtInfoCode.RECORDS).values())
     rowcount = affected_rows
     @property
     def transaction(self) -> TransactionManager:

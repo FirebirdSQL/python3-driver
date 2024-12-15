@@ -33,6 +33,7 @@ from firebird.base.logging import logging_manager, ANY, install_null_logger, \
      LoggingIdMixin
 from firebird.driver import *
 from firebird.driver.hooks import ConnectionHook, ServerHook, hook_manager, add_hook
+from firebird.driver.types import ImpData, ImpDataOld
 import firebird.driver as driver
 import sys, os
 import threading
@@ -450,7 +451,8 @@ class TestConnection(DriverTestBase):
             self.assertEqual(con.info.sql_dialect, 3)
             self.assertEqual(con.info.name.upper(), self.dbfile.upper())
             self.assertIsInstance(con.info.site, str)
-            self.assertIsInstance(con.info.implementation, driver.types.Implementation)
+            self.assertIsInstance(con.info.implementation, tuple)
+            self.assertIsInstance(con.info.implementation[0], driver.types.ImpData)
             self.assertIsInstance(con.info.provider, driver.types.DbProvider)
             self.assertIsInstance(con.info.db_class, driver.types.DbClass)
             self.assertIsInstance(con.info.creation_date, datetime.date)
@@ -517,17 +519,20 @@ class TestConnection(DriverTestBase):
             self.assertEqual(res[0].upper(), self.dbfile.upper())
             res = con.info.get_info(DbInfoCode.IMPLEMENTATION)
             self.assertIsInstance(res, tuple)
-            self.assertEqual(len(res), 4)
-            self.assertIsInstance(res[0], driver.types.ImpCPU)
-            self.assertIsInstance(res[1], driver.types.ImpOS)
-            self.assertIsInstance(res[2], driver.types.ImpCompiler)
-            self.assertIsInstance(res[3], driver.types.ImpFlags)
+            for x in res:
+                self.assertIsInstance(x, ImpData)
+                self.assertIsInstance(x.cpu, driver.types.ImpCPU)
+                self.assertIsInstance(x.os, driver.types.ImpOS)
+                self.assertIsInstance(x.compiler, driver.types.ImpCompiler)
+                self.assertIsInstance(x.flags, driver.types.ImpFlags)
+                self.assertIsInstance(x.db_class, driver.types.DbClass)
+                self.assertIsInstance(x.depth, int)
             res = con.info.get_info(DbInfoCode.IMPLEMENTATION_OLD)
             self.assertIsInstance(res, tuple)
-            self.assertEqual(len(res), 2)
-            self.assertIsInstance(res[0], int)
-            self.assertIsInstance(res[1], int)
-            self.assertIn(res[0], driver.types.Implementation._value2member_map_)
+            for x in res:
+                self.assertIsInstance(x, ImpDataOld)
+                self.assertIsInstance(x.implementation, driver.types.Implementation)
+                self.assertIsInstance(x.db_class, driver.types.DbClass)
             self.assertIn('Firebird', con.info.get_info(DbInfoCode.VERSION))
             self.assertIn('Firebird', con.info.get_info(DbInfoCode.FIREBIRD_VERSION))
             self.assertIn(con.info.get_info(DbInfoCode.NO_RESERVE), (0, 1))

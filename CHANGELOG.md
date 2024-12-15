@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.10.7] - 2024-12-15
+
+### Changed
+
+- Rename `DbClass` items to become more descriptive
+- Cleanup of Useless StmtInfoCode codes
+- Use new info codes in Statement
+
+### Added
+
+- `DatabaseInfoProvider3.supports` and `TransactionInfoProvider3.supports` functions.
+- `StatementInfoProvider` and use it in `Cursor.affected_rows` implementation.
+- Dataclasses `IpData` and `ImpDataOld`
+- Missing `ReqInfoCode` codes.
+- missing `encoding` and `errors` SPB config parameters.
+
+### Fixed
+
+- `DatabaseInfoProvider3.implementation` property.
+- Issue when wrong close is selected in class hierarchy.
+- Handling of `DbInfoCode.BASE_LEVEL`, `DbInfoCode.DB_FILE_SIZE`,
+  `DbInfoCode.IMPLEMENTATION`, `DbInfoCode.IMPLEMENTATION_OLD`, `DbInfoCode.ACTIVE_TRANSACTIONS`,
+  `DbInfoCode.LIMBO`, `DbInfoCode.PAGE_CONTENTS`, `DbInfoCode.USER_NAME`, `DbInfoCode.SQL_ROLE` codes
+
 ## [1.10.6] - 2024-08-15
 
 ### Fixed

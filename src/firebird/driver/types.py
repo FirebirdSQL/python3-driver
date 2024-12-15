@@ -370,28 +370,10 @@ class ReplicaMode(IntEnum):
 class StmtInfoCode(IntEnum):
     """Statement information (isc_info_sql_*) codes.
     """
-    SELECT = 4
-    BIND = 5
-    NUM_VARIABLES = 6
-    DESCRIBE_VARS = 7
-    DESCRIBE_END = 8
-    SQLDA_SEQ = 9
-    MESSAGE_SEQ = 10
-    TYPE = 11
-    SUB_TYPE = 12
-    SCALE = 13
-    LENGTH = 14
-    NULL_IND = 15
-    FIELD = 16
-    RELATION = 17
-    OWNER = 18
-    ALIAS = 19
-    SQLDA_START = 20
     STMT_TYPE = 21
     GET_PLAN = 22
     RECORDS = 23
     BATCH_FETCH = 24
-    RELATION_ALIAS = 25
     EXPLAIN_PLAN = 26
     FLAGS = 27
     # Firebird 4
@@ -405,14 +387,19 @@ class StmtInfoCode(IntEnum):
 class ReqInfoCode(IntEnum):
     """Request information (isc_info_*) codes.
     """
+    NUMBER_MESSAGES = 4
+    MAX_MESSAGE = 5
+    MAX_SEND = 6
+    MAX_RECEIVE = 7
     INFO_STATE = 8
     MESSAGE_NUMBER = 9
     MESSAGE_SIZE = 10
+    REQUEST_COST = 11
+    ACCESS_PATH = 12
     SELECT_COUNT = 13
     INSERT_COUNT = 14
     UPDATE_COUNT = 15
     DELETE_COUNT = 16
-
 
 class ReqState(IntEnum):
     """Request states(isc_info_req_*) codes.
@@ -423,7 +410,6 @@ class ReqState(IntEnum):
     RECEIVE = 5
     SELECT = 6
     SQL_STALL = 7
-
 
 class ResultSetInfoCode(IntEnum):
     """Result set information codes.
@@ -896,17 +882,17 @@ class DbClass(IntEnum):
     """Database Classes.
     """
     UNKNOWN = 0
-    ACCESS = 1
+    ACCESS_METHOD = 1
     Y_VALVE = 2
-    REM_INT = 3
-    REM_SRVR = 4
-    PIPE_INT = 7
-    PIPE_SRVR = 8
-    SAM_INT = 9
-    SAM_SRVR = 10
+    REMOTE_INTERFACE = 3
+    REMOTE_SERVER = 4
+    PIPE_INTERFACE = 7
+    PIPE_SERVER = 8
+    CENTRAL_INTERFACE = 9
+    CENTRAL_SERVER = 10
     GATEWAY = 11
-    CACHE = 12
-    CLASSIC_ACCESS = 13
+    CLASSIC_SERVER = 12
+    SUPER_SERVER = 13
     SERVER_ACCESS = 14
 
 class Implementation(IntEnum):
@@ -1330,6 +1316,36 @@ class TraceSession:
     timestamp: datetime.datetime
     name: str = ''
     flags: List = field(default_factory=list)
+
+@dataclass
+class ImpData:
+    """Information about Firebird implementation (new format).
+
+    Attributes:
+        cpu (ImpCPU): CPU identification
+        os (ImpOS): Operating system
+        compiler (ImpCompiler): Compiler indentification
+        flags (ImpFlags): Implementation flags
+        db_class (DbClass): Provider class
+        depth (int): Depth of info stack
+    """
+    cpu: ImpCPU
+    os: ImpOS
+    compiler: ImpCompiler
+    flags: ImpFlags
+    db_class: DbClass
+    depth: int
+
+@dataclass
+class ImpDataOld:
+    """Information about Firebird implementation (new format).
+
+    Attributes:
+        implementation (Implementation): CPU and OS identification
+        db_class (DbClass): Provider class
+    """
+    implementation: Implementation
+    db_class: DbClass
 
 # Constants required by Python DB API 2.0 specification
 

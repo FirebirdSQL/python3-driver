@@ -90,6 +90,8 @@ Classes
 .. autoclass:: DatabaseInfoProvider
 .. autoclass:: TransactionInfoProvider3
 .. autoclass:: TransactionInfoProvider
+.. autoclass:: StatementInfoProvider3
+.. autoclass:: StatementInfoProvider
 .. autoclass:: ServerInfoProvider
 .. autoclass:: EventCollector
 .. autoclass:: EventBlock
