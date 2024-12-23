@@ -1299,8 +1299,8 @@ class DatabaseInfoProvider3(InfoProvider):
         self.response.clear()
         request = bytes([info_code])
         if info_code == DbInfoCode.PAGE_CONTENTS:
-            request += (8).to_bytes(2, 'little')
-            request += page_number.to_bytes(8, 'little')
+            request += (4).to_bytes(2, 'little')
+            request += page_number.to_bytes(4, 'little')
             if len(self.response.raw) < self.page_size + 10:
                 self.response.resize(self.page_size + 10)
         self._get_data(request)

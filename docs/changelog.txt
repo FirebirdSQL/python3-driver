@@ -2,6 +2,11 @@
 Changelog
 #########
 
+Version 1.10.8
+==============
+
+- Fix page number size in `.DatabaseInfoProvider3.get_info`.
+
 Version 1.10.7
 ==============
 

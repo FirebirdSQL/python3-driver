@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.10.8] - 2024-12-23
+
+### Fixed
+
+- Fix page number size in `DatabaseInfoProvider3.get_info`.
+
 ## [1.10.7] - 2024-12-15
 
 ### Changed
