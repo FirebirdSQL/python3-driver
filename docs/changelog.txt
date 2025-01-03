@@ -2,6 +2,11 @@
 Changelog
 #########
 
+Version 1.10.9
+==============
+
+- Fix #44 - Invalid affected_row count on multiple statements
+
 Version 1.10.8
 ==============
 

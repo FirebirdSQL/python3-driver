@@ -4134,7 +4134,19 @@ class Cursor(LoggingIdMixin):
         """
         if self._stmt is None:
             return -1
-        return sum(self._stmt.info.get_info(StmtInfoCode.RECORDS).values())
+        rows: Dict[ReqInfoCode, int] = self._stmt.info.get_info(StmtInfoCode.RECORDS)
+        code: ReqInfoCode = None
+        if self._stmt.type in (StatementType.SELECT, StatementType.SELECT_FOR_UPD):
+            code = ReqInfoCode.SELECT_COUNT
+        elif self._stmt.type == StatementType.UPDATE:
+            code = ReqInfoCode.UPDATE_COUNT
+        elif self._stmt.type == StatementType.INSERT:
+            code = ReqInfoCode.INSERT_COUNT
+        elif self._stmt.type == StatementType.DELETE:
+            code = ReqInfoCode.DELETE_COUNT
+        else:
+            return -1
+        return rows[code]
     rowcount = affected_rows
     @property
     def transaction(self) -> TransactionManager:

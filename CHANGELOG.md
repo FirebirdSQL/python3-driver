@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.10.9] - 2025-01-03
+
+### Fixed
+
+- Fix #44 - Invalid affected_row count on multiple statements
+
 ## [1.10.8] - 2024-12-23
 
 ### Fixed

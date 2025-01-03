@@ -1043,6 +1043,17 @@ class TestCursor(DriverTestBase):
                 rcount = 1
             self.assertEqual(cur.affected_rows, rcount)
             self.assertEqual(cur.rowcount, rcount)
+    def test_affected_rows_with_multiple_execute_statements_and_different_command(self):
+        with self.con.cursor() as cur:
+            cur.execute("insert into project (proj_id, proj_name) values ('FOO', 'BAR')")
+            cur.execute("update project set proj_name = 'RAB' where proj_id = 'FOO'")
+            cur.fetchone()
+            if sys.platform == 'win32':
+                rcount = 6
+            else:
+                rcount = 1
+            self.assertEqual(cur.affected_rows, rcount)
+            self.assertEqual(cur.rowcount, rcount)
     def test_name(self):
         def assign_name():
             cur.set_cursor_name('testx')
