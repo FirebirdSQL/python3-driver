@@ -384,7 +384,7 @@ class iBlob_v3(iReferenceCounted):
         return result
     def get_info2(self, code: BlobInfoCode) -> Any:
         "Returns information about BLOB"
-        blob_info = (0).to_bytes(10, 'little')
+        blob_info = (0).to_bytes(20, 'little')
         self.get_info(bytes([code]), blob_info)
         i = 0
         while blob_info[i] != isc_info_end:
