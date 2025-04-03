@@ -3618,7 +3618,7 @@ class Cursor(LoggingIdMixin):
                     val = buffer[offset:offset+length]
                     blobid = a.ISC_QUAD((0).from_bytes(val[:4], 'little'),
                                         (0).from_bytes(val[4:], 'little'))
-                    blob = self._connection._att.open_blob(self._transaction._tra, blobid, _bpb_stream)
+                    blob = self._connection._att.open_blob(self._transaction._tra, blobid)
                     # Get BLOB total length and max. size of segment
                     blob_length = blob.get_info2(BlobInfoCode.TOTAL_LENGTH)
                     segment_size = blob.get_info2(BlobInfoCode.MAX_SEGMENT)
