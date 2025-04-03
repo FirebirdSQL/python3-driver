@@ -728,7 +728,7 @@ class iResultSet_v4(iResultSet_v3):
         self._refcnt -= 1
 
 # IResultSet(5) : ReferenceCounted
-class iResultSet(iResultSet_v3):
+class iResultSet(iResultSet_v4):
     "Class that wraps IResultSet interface for use from Python"
     VERSION = 5
     def get_info(self, items: bytes, buffer: bytes) -> None:
