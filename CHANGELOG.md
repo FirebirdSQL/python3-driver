@@ -4,12 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.10.10] - Unreleased
+## [1.10.10] - 2025-04-04
 
 ### Fixed
 
 - Extend response buffer size in `iBlob.get_info2`.
-
+- Don't use `_bpb_stream` when opening blob.
+- Fixed typo in `iResultSet` definition.
 
 ## [1.10.9] - 2025-01-03
 

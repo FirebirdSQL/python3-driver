@@ -2,6 +2,13 @@
 Changelog
 #########
 
+Version 1.10.10
+===============
+
+- Fix: Extend response buffer size in `.iBlob.get_info2`.
+- Fix: Don't use `_bpb_stream` when opening blob.
+- Fix: typo in `.iResultSet` definition.
+
 Version 1.10.9
 ==============
 
