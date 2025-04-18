@@ -201,10 +201,10 @@ class DriverConfig(Config):
                                                           description="Default server configuration.")
         #: Registered servers
         self.servers: ConfigListOption = \
-            ConfigListOption('servers', "Registered servers", ServerConfig)
+            ConfigListOption('servers', ServerConfig, "Registered servers")
         #: Registered databases
         self.databases: ConfigListOption = \
-            ConfigListOption('databases', "Registered databases", DatabaseConfig)
+            ConfigListOption('databases', DatabaseConfig, "Registered databases")
     def read(self, filenames: Union[str, Iterable], encoding: str=None):
         """Read configuration from a filename or an iterable of filenames.
 

@@ -56,8 +56,7 @@ from warnings import warn
 from pathlib import Path
 from queue import PriorityQueue
 from ctypes import memset, memmove, create_string_buffer, byref, string_at, addressof, pointer
-from firebird.base.types import Sentinel, UNLIMITED, ByteOrder
-from firebird.base.logging import LoggingIdMixin, UNDEFINED
+from firebird.base.types import Sentinel, UNLIMITED, ByteOrder, UNDEFINED
 from firebird.base.buffer import MemoryBuffer, BufferFactory, BytesBufferFactory, \
      CTypesBufferFactory, safe_ord
 from . import fbapi as a
@@ -1612,7 +1611,7 @@ class DatabaseInfoProvider(DatabaseInfoProvider3):
     def set_statement_timeout(self, value: int) -> None:
         self._con()._att.set_statement_timeout(value)
 
-class Connection(LoggingIdMixin):
+class Connection:
     """Connection to the database.
 
     Note:
@@ -2077,14 +2076,14 @@ def __make_connection(create: bool, dsn: str, utf8filename: bool, dpb: bytes,
         hook(con)
     return con
 
-def connect(database: str, *, user: str=None, password: str=None, role: str=None,
+def connect(database: str | Path, *, user: str=None, password: str=None, role: str=None,
             no_gc: bool=None, no_db_triggers: bool=None, dbkey_scope: DBKeyScope=None,
             crypt_callback: iCryptKeyCallbackImpl=None, charset: str=None,
             auth_plugin_list: str=None, session_time_zone: str=None) -> Connection:
     """Establishes a connection to the database.
 
     Arguments:
-        database: DSN or Database configuration name.
+        database: DSN or Database configuration name. Could be also a Path object.
         user: User name.
         password: User password.
         role: User role.
@@ -2114,17 +2113,25 @@ def connect(database: str, *, user: str=None, password: str=None, role: str=None
 
         Any value returned by hook is ignored.
     """
+    if isinstance(database, Path):
+        database = str(database)
     db_config = driver_config.get_database(database)
     if db_config is None:
         db_config = driver_config.db_defaults
+        # we'll assume that 'database' is 'dsn'
+        dsn = database
+        database = None
+        srv_config = driver_config.server_defaults
+        srv_config.host.clear()
     else:
         database = db_config.database.value
-    if db_config.server.value is None:
-        srv_config = driver_config.server_defaults
-    else:
-        srv_config = driver_config.get_server(db_config.server.value)
-        if srv_config is None:
-            raise ValueError(f"Configuration for server '{db_config.server.value}' not found")
+        dsn = db_config.dsn.value
+        if db_config.server.value is None:
+            srv_config = driver_config.server_defaults
+        else:
+            srv_config = driver_config.get_server(db_config.server.value)
+            if srv_config is None:
+                raise ValueError(f"Configuration for server '{db_config.server.value}' not found")
     if user is None:
         user = db_config.user.value
         if user is None:
@@ -2143,7 +2150,7 @@ def connect(database: str, *, user: str=None, password: str=None, role: str=None
         auth_plugin_list = db_config.auth_plugin_list.value
     if session_time_zone is None:
         session_time_zone = db_config.session_time_zone.value
-    dsn = _connect_helper(db_config.dsn.value, srv_config.host.value, srv_config.port.value,
+    dsn = _connect_helper(dsn, srv_config.host.value, srv_config.port.value,
                           database, db_config.protocol.value)
     dpb = DPB(user=user, password=password, role=role, trusted_auth=db_config.trusted_auth.value,
               sql_dialect=db_config.sql_dialect.value, timeout=db_config.timeout.value,
@@ -2159,7 +2166,7 @@ def connect(database: str, *, user: str=None, password: str=None, role: str=None
     return __make_connection(False, dsn, db_config.utf8filename.value, dpb.get_buffer(),
                              db_config.sql_dialect.value, charset, crypt_callback)
 
-def create_database(database: str, *, user: str=None, password: str=None, role: str=None,
+def create_database(database: str | Path, *, user: str=None, password: str=None, role: str=None,
                     no_gc: bool=None, no_db_triggers: bool=None, dbkey_scope: DBKeyScope=None,
                     crypt_callback: iCryptKeyCallbackImpl=None, charset: str=None,
                     overwrite: bool=False, auth_plugin_list=None,
@@ -2188,17 +2195,19 @@ def create_database(database: str, *, user: str=None, password: str=None, role: 
 
         Any value returned by hook is ignored.
     """
+    if isinstance(database, Path):
+        database = str(database)
     db_config = driver_config.get_database(database)
     if db_config is None:
         db_config = driver_config.db_defaults
-        db_config.database.value = database
-        if db_config.server.value is None:
-            srv_config = driver_config.server_defaults
-        else:
-            srv_config = driver_config.get_server(db_config.server.value)
-            if srv_config is None:
-                raise ValueError(f"Configuration for server '{db_config.server.value}' not found")
+        # we'll assume that 'database' is 'dsn'
+        dsn = database
+        database = None
+        srv_config = driver_config.server_defaults
+        srv_config.host.clear()
     else:
+        database = db_config.database.value
+        dsn = db_config.dsn.value
         if db_config.server.value is None:
             srv_config = driver_config.server_defaults
         else:
@@ -2223,8 +2232,8 @@ def create_database(database: str, *, user: str=None, password: str=None, role: 
         auth_plugin_list = db_config.auth_plugin_list.value
     if session_time_zone is None:
         session_time_zone = db_config.session_time_zone.value
-    dsn = _connect_helper(db_config.dsn.value, srv_config.host.value, srv_config.port.value,
-                          db_config.database.value, db_config.protocol.value)
+    dsn = _connect_helper(dsn, srv_config.host.value, srv_config.port.value,
+                          database, db_config.protocol.value)
     dpb = DPB(user=user, password=password, role=role, trusted_auth=db_config.trusted_auth.value,
               sql_dialect=db_config.db_sql_dialect.value, timeout=db_config.timeout.value,
               charset=charset, cache_size=db_config.cache_size.value,
@@ -2368,7 +2377,7 @@ class TransactionInfoProvider(TransactionInfoProvider3):
         """
         return self.get_info(TraInfoCode.SNAPSHOT_NUMBER)
 
-class TransactionManager(LoggingIdMixin):
+class TransactionManager:
     """Transaction manager.
 
     Note:
@@ -2757,7 +2766,7 @@ class StatementInfoProvider(StatementInfoProvider3):
             StmtInfoCode.EXEC_PATH_BLR_TEXT: self.response.read_sized_string,
         })
 
-class Statement(LoggingIdMixin):
+class Statement:
     """Prepared SQL statement.
 
     Note:
@@ -2890,7 +2899,7 @@ class Statement(LoggingIdMixin):
             return self._istmt.set_timeout(value)
         raise NotSupportedError(f"Statement timeout not supported by engine version {self._connection()._engine_version()}")
 
-class BlobReader(io.IOBase, LoggingIdMixin):
+class BlobReader(io.IOBase):
     """Handler for large BLOB values returned by server.
 
     The BlobReader is a “file-like” class, so it acts much like an open file instance.
@@ -3112,7 +3121,7 @@ class BlobReader(io.IOBase, LoggingIdMixin):
         result = self._blob.get_info2(BlobInfoCode.TYPE)
         return BlobType(result)
 
-class Cursor(LoggingIdMixin):
+class Cursor:
     """Represents a database cursor, which is used to execute SQL statement and
     manage the context of a fetch operation.
 
@@ -5383,7 +5392,7 @@ class ServerTraceServices(ServerServiceProvider):
         store()
         return result
 
-class Server(LoggingIdMixin):
+class Server:
     """Represents connection to Firebird Service Manager.
 
     Note:

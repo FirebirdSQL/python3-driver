@@ -2,6 +2,17 @@
 Changelog
 #########
 
+Version 2.0.0
+=============
+
+- Test changed from `unittest` to `pytest`.
+- Minimal Python version raised to 3.11
+- Parameter `database` for `connect` and `create_database` now accepts `~pathlib.Path` objects.
+- Fix: Properly handle situation when parameter `database` for `connect` and `create_database` is
+  a DSN.
+- Removed all usage of `LoggingIdMixin` as it's no longer available in `firebird-base` v2.0.
+- Added missing entries in `fbapi.config_items`.
+
 Version 1.10.11
 ===============
 

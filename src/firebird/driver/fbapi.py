@@ -214,6 +214,17 @@ config_items = {
     'OutputRedirectionFile': str,
     'ExtConnPoolSize': int,
     'ExtConnPoolLifeTime': int,
+    'ClientBatchBuffer': int,
+    'DataTypeCompatibility': str,
+    'InlineSortThreshold': int,
+    'OnDisconnectTriggerTimeout': int,
+    'TempTableDirectory': str,
+    'UseFileSystemCache': bool,
+    'DefaultProfilerPlugin': str, # This and next are for Firebird 5
+    'ParallelWorkers': int,
+    'MaxParallelWorkers': int,
+    'MaxStatementCacheSize': int,
+    'OptimizeForFirstRows': bool,
 }
 
 # Types
