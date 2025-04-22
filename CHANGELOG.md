@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.10.11] - 2025-04-22
+
+### Changed
+
+- Dependency to `firebird-base` adjusted to `~=1.8`
+
 ## [1.10.10] - 2025-04-04
 
 ### Fixed
