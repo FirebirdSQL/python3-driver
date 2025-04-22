@@ -132,5 +132,12 @@ dmypy.json
 *.wpr
 *.wpu
 
+# VSCode
+.vscode
+
+# Personal
+notes/
+store/
 # Sphinx build
 docs/_build
+docs/firebird-driver.docset
