@@ -394,20 +394,20 @@ def test_local_restore(server_connection, db_file, service_test_env):
                                              flags=SrvRestoreFlag.REPLACE)
     assert rfdb.exists()
 
-def test_nbackup(server_connection, service_test_env):
+def test_nbackup(server_connection, service_test_env, db_file):
     fbk = service_test_env['fbk']
     fbk2 = service_test_env['fbk2']
-    server_connection.database.nbackup(database='employee', backup=fbk)
+    server_connection.database.nbackup(database=db_file, backup=fbk)
     assert fbk.exists()
-    server_connection.database.nbackup(database='employee', backup=fbk2, level=1,
+    server_connection.database.nbackup(database=db_file, backup=fbk2, level=1,
                               direct=True, flags=SrvNBackupFlag.NO_TRIGGERS)
     assert fbk2.exists()
 
-def test_nrestore(server_connection, service_test_env):
+def test_nrestore(server_connection, service_test_env, db_file):
     rfdb = service_test_env['rfdb']
     fbk = service_test_env['fbk']
     fbk2 = service_test_env['fbk2']
-    test_nbackup(server_connection, service_test_env)
+    test_nbackup(server_connection, service_test_env, db_file)
     if rfdb.exists():
         rfdb.unlink()
     server_connection.database.nrestore(backups=[fbk], database=rfdb)

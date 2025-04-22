@@ -97,8 +97,8 @@ def test_description(db_connection):
         assert len(cur.description) == 2
         cur.execute('select * from customer')
         assert repr(cur.description) == \
-               "(('CUST_NO', <class 'int'>, 11, 4, 0, 0, False), " \
-               "('CUSTOMER', <class 'str'>, 25, 25, 0, 0, False), " \
+            "(('CUST_NO', <class 'int'>, 11, 4, 0, 0, False), " \
+            "('CUSTOMER', <class 'str'>, 25, 25, 0, 0, False), " \
             "('CONTACT_FIRST', <class 'str'>, 15, 15, 0, 0, True), " \
             "('CONTACT_LAST', <class 'str'>, 20, 20, 0, 0, True), " \
             "('PHONE_NO', <class 'str'>, 20, 20, 0, 0, True), " \
@@ -111,8 +111,8 @@ def test_description(db_connection):
             "('ON_HOLD', <class 'str'>, 1, 1, 0, 0, True))"
         cur.execute('select * from job')
         assert repr(cur.description) == \
-               "(('JOB_CODE', <class 'str'>, 5, 5, 0, 0, False), " \
-               "('JOB_GRADE', <class 'int'>, 6, 2, 0, 0, False), " \
+            "(('JOB_CODE', <class 'str'>, 5, 5, 0, 0, False), " \
+            "('JOB_GRADE', <class 'int'>, 6, 2, 0, 0, False), " \
             "('JOB_COUNTRY', <class 'str'>, 15, 15, 0, 0, False), " \
             "('JOB_TITLE', <class 'str'>, 25, 25, 0, 0, False), " \
             "('MIN_SALARY', <class 'decimal.Decimal'>, 20, 8, 10, -2, False), " \
@@ -121,8 +121,8 @@ def test_description(db_connection):
             "('LANGUAGE_REQ', <class 'list'>, -1, 8, 0, 0, True))"
         cur.execute('select * from proj_dept_budget')
         assert repr(cur.description) == \
-               "(('FISCAL_YEAR', <class 'int'>, 11, 4, 0, 0, False), " \
-               "('PROJ_ID', <class 'str'>, 5, 5, 0, 0, False), " \
+            "(('FISCAL_YEAR', <class 'int'>, 11, 4, 0, 0, False), " \
+            "('PROJ_ID', <class 'str'>, 5, 5, 0, 0, False), " \
             "('DEPT_NO', <class 'str'>, 3, 3, 0, 0, False), " \
             "('QUART_HEAD_CNT', <class 'list'>, -1, 8, 0, 0, True), " \
             "('PROJECTED_BUDGET', <class 'decimal.Decimal'>, 20, 8, 12, -2, True))"
@@ -130,8 +130,8 @@ def test_description(db_connection):
     with db_connection.cursor() as cur2:
         cur2.execute('select * from proj_dept_budget')
         assert repr(cur2.description) == \
-               "(('FISCAL_YEAR', <class 'int'>, 11, 4, 0, 0, False), " \
-               "('PROJ_ID', <class 'str'>, 5, 5, 0, 0, False), " \
+            "(('FISCAL_YEAR', <class 'int'>, 11, 4, 0, 0, False), " \
+            "('PROJ_ID', <class 'str'>, 5, 5, 0, 0, False), " \
             "('DEPT_NO', <class 'str'>, 3, 3, 0, 0, False), " \
             "('QUART_HEAD_CNT', <class 'list'>, -1, 8, 0, 0, True), " \
             "('PROJECTED_BUDGET', <class 'decimal.Decimal'>, 20, 8, 12, -2, True))"
@@ -249,7 +249,7 @@ def test_scrollable(fb_vars, db_connection):
     if fb_vars['version'] in SpecifierSet('<5'):
         # Check for embedded
         with db_connection.cursor() as cur:
-            cur.execure('select min(a.mon$remote_protocol) from mon$attachments a')
+            cur.execute('select min(a.mon$remote_protocol) from mon$attachments a')
             if cur.fetchone()[0] is not None:
                 pytest.skip("Works only in embedded or FB 5+")
     rows = [('USA', 'Dollar'), ('England', 'Pound'), ('Canada', 'CdnDlr'),

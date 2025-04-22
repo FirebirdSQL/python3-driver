@@ -58,7 +58,7 @@ from .types import (Error, InterfaceError, DatabaseError, DataError,
      get_timezone)
 from .core import (connect, create_database, connect_server, transaction, temp_database,
      tpb, TPB, CHARSET_MAP, TIMEOUT, DistributedTransactionManager, Connection, Cursor,
-     Server, Statement)
+     Server, Statement, TransactionManager)
 
 #: Current driver version, SEMVER string.
 __VERSION__ = '2.0.0'

@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.0] - Unreleased
+
+### Fixed
+
+- #22: Allow use of Firebird embedded engine for tests
+- #41: Some `firebird.conf` parameters are missing in `fbapi.config_items`
+- Fix: Added validation-related info codes that were ommited in `DatabaseInfoProvider3`.
+- Fix: Properly handle situation when parameter `database` for `connect` and `create_database` is
+  a DSN.
+- Fix: `TPB.parse_buffer` handling of new READ COMMITTED READ CONSISTENCY.
+- Fix: `DPB.parse_buffer` and `SPB_ATTACH.parse_buffer`.
+- Fix: Introduce `StatementInfoProvider4` for proper handling of FB v5 additions.
+- Fix: `ServerInfoProvider` handling of `SrvInfoCode.LIMBO_TRANS` info code.
+
+### Changed
+
+- Minimal Python version raised to 3.11
+- Test changed from `unittest` to `pytest`
+- Parameter `database` for `connect` and `create_database` now accepts `pathlib.Path` objects.
+- Removed all usage of `LoggingIdMixin` as it's no longer available in `firebird-base` v2.0.
+- Typy hints adjusted to Python 3.11 standards
+
+### Added
+
+- More tests for greater coverage
+
 ## [1.10.11] - 2025-04-22
 
 ### Changed

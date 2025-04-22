@@ -340,7 +340,7 @@ def test_db_info(db_connection, fb_vars, db_file):
         assert t2.info.id in active_ids
 
     assert con.info.get_info(DbInfoCode.PAGE_SIZE) >= 4096
-    assert con.info.get_info(DbInfoCode.DB_READ_ONLY) == 0
+    assert con.info.get_info(DbInfoCode.DB_READ_ONLY) == DbAccessMode.READ_WRITE
     assert con.info.get_info(DbInfoCode.DB_SQL_DIALECT) == 3
     res = con.info.get_info(DbInfoCode.USER_NAMES)
     assert res == {'SYSDBA': 1}
@@ -364,8 +364,8 @@ def test_db_info(db_connection, fb_vars, db_file):
         # ... (rest of ImpDataOld checks) ...
     assert 'Firebird' in con.info.get_info(DbInfoCode.VERSION)
     assert 'Firebird' in con.info.get_info(DbInfoCode.FIREBIRD_VERSION)
-    assert con.info.get_info(DbInfoCode.NO_RESERVE) in (0, 1)
-    assert con.info.get_info(DbInfoCode.FORCED_WRITES) in (0, 1)
+    assert con.info.get_info(DbInfoCode.NO_RESERVE) is DbSpaceReservation.RESERVE
+    assert con.info.get_info(DbInfoCode.FORCED_WRITES) is DbWriteMode.SYNC
     assert isinstance(con.info.get_info(DbInfoCode.BASE_LEVEL), int)
     assert isinstance(con.info.get_info(DbInfoCode.ODS_VERSION), int)
     assert isinstance(con.info.get_info(DbInfoCode.ODS_MINOR_VERSION), int)

@@ -5,13 +5,20 @@ Changelog
 Version 2.0.0
 =============
 
-- Test changed from `unittest` to `pytest`.
+- Test changed from `unittest` to `pytest`, more tests for greater coverage.
+- #22: Allow use of Firebird embedded engine for tests
 - Minimal Python version raised to 3.11
 - Parameter `database` for `connect` and `create_database` now accepts `~pathlib.Path` objects.
 - Fix: Properly handle situation when parameter `database` for `connect` and `create_database` is
   a DSN.
 - Removed all usage of `LoggingIdMixin` as it's no longer available in `firebird-base` v2.0.
-- Added missing entries in `fbapi.config_items`.
+- #41: Some `firebird.conf` parameters are missing in `fbapi.config_items`
+- Fix: Added validation-related info codes that were ommited in `.DatabaseInfoProvider3`.
+- Typy hints adjusted to Python 3.11 standards
+- Fix: `.TPB.parse_buffer` handling of new READ COMMITTED READ CONSISTENCY.
+- Fix: `.DPB.parse_buffer` and `.SPB_ATTACH.parse_buffer`.
+- Fix: Introduce `.StatementInfoProvider4` for proper handling of FB v5 additions.
+- Fix: `ServerInfoProvider` handling of `SrvInfoCode.LIMBO_TRANS` info code.
 
 Version 1.10.11
 ===============

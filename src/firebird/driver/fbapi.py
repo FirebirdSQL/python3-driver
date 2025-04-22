@@ -35,7 +35,7 @@
 
 """firebird-driver - New Firebird API
 """
-from typing import Union
+from __future__ import annotations
 import sys
 import decimal
 import ctypes
@@ -2210,7 +2210,7 @@ def has_api() -> bool:
     """
     return api is not None
 
-def load_api(filename: Union[None, str, Path] = None) -> None:
+def load_api(filename: str | Path | None = None) -> None:
     """Initializes bindings to Firebird Client Library unless they are already initialized.
     Called automatically by `get_api()`.
 

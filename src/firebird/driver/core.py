@@ -38,8 +38,7 @@
 """
 
 from __future__ import annotations
-from typing import Any, Type, Union, Dict, Set, List, Tuple, Sequence, Mapping, Optional, \
-     BinaryIO, Callable
+from typing import Any, Type, Sequence, Mapping, BinaryIO, Callable, Self
 import sys
 import os
 import weakref
@@ -171,7 +170,7 @@ def _create_blob_buffer(size: int=MAX_BLOB_SEGMENT_SIZE) -> Any:
         result = create_string_buffer(size)
     return result
 
-def _encode_timestamp(v: Union[datetime.datetime, datetime.date]) -> bytes:
+def _encode_timestamp(v: datetime.datetime | datetime.date) -> bytes:
     # Convert datetime.datetime or datetime.date to BLR format timestamp
     if isinstance(v, datetime.datetime):
         return _util.encode_date(v.date()).to_bytes(4, 'little') + _util.encode_time(v.time()).to_bytes(4, 'little')
@@ -229,7 +228,7 @@ def _is_str_param(value: Any, datatype: SQLDataType) -> bool:
     return ((isinstance(value, str) and datatype != SQLDataType.BLOB) or
             datatype in (SQLDataType.TEXT, SQLDataType.VARYING))
 
-def create_meta_descriptors(meta: iMessageMetadata) -> List[ItemMetadata]:
+def create_meta_descriptors(meta: iMessageMetadata) -> list[ItemMetadata]:
     "Returns list of metadata descriptors from statement metadata."
     result = []
     for i in range(meta.get_count()):
@@ -314,7 +313,7 @@ class TPB: # pylint: disable=R0902
         self.no_auto_undo: bool = no_auto_undo
         self.auto_commit: bool = auto_commit
         self.ignore_limbo: bool = ignore_limbo
-        self._table_reservation: List[Tuple[str, TableShareMode, TableAccessMode]] = []
+        self._table_reservation: list[tuple[str, TableShareMode, TableAccessMode]] = []
         # Firebird 4
         self.at_snapshot_number: int = at_snapshot_number
     def clear(self) -> None:
@@ -346,10 +345,12 @@ class TPB: # pylint: disable=R0902
                     isolation = TraReadCommitted(tag)
                     if isolation == TraReadCommitted.RECORD_VERSION:
                         self.isolation = Isolation.READ_COMMITTED_RECORD_VERSION
-                    else:
+                    elif isolation == TraReadCommitted.NO_RECORD_VERSION:
                         self.isolation = Isolation.READ_COMMITTED_NO_RECORD_VERSION
+                    else:
+                        self.isolation = Isolation.READ_COMMITTED_READ_CONSISTENCY
                 elif tag in TraLockResolution._value2member_map_: # pylint: disable=E1101
-                    self.lock_timeout = -1 if TraLockResolution(tag).WAIT else 0
+                    self.lock_timeout = -1 if TraLockResolution(tag) is TraLockResolution.WAIT else 0
                 elif tag == TPBItem.AUTOCOMMIT:
                     self.auto_commit = True
                 elif tag == TPBItem.NO_AUTO_UNDO:
@@ -425,7 +426,7 @@ class DPB:
                  config: str=None, auth_plugin_list: str=None, session_time_zone: str=None,
                  set_db_replica: ReplicaMode=None, set_bind: str=None,
                  decfloat_round: DecfloatRound=None,
-                 decfloat_traps: List[DecfloatTraps]=None,
+                 decfloat_traps: list[DecfloatTraps]=None,
                  parallel_workers: int=None
                  ):
         # Available options:
@@ -433,7 +434,7 @@ class DPB:
         # WireCompression, DummyPacketInterval, RemoteServiceName, RemoteServicePort,
         # RemoteAuxPort, TcpNoNagle, IpcName, RemotePipeName, ClientBatchBuffer [FB4+]
         #: Configuration override
-        self.config: Optional[str] = config
+        self.config: str | None = config
         #: List of authentication plugins override
         self.auth_plugin_list: str = auth_plugin_list
         # Connect
@@ -450,9 +451,9 @@ class DPB:
         #: Character set for database connection
         self.charset: str = charset
         #: Connection timeout
-        self.timeout: Optional[int] = timeout
+        self.timeout: int | None = timeout
         #: Dummy packet interval for this database connection
-        self.dummy_packet_interval: Optional[int] = dummy_packet_interval
+        self.dummy_packet_interval: int | None = dummy_packet_interval
         #: Page cache size override for database connection
         self.cache_size: int = cache_size
         #: Disable garbage collection for database connection
@@ -464,39 +465,39 @@ class DPB:
         #: Database filename passed in UTF8
         self.utf8filename: bool = utf8filename
         #: Scope for RDB$DB_KEY values
-        self.dbkey_scope: Optional[DBKeyScope] = dbkey_scope
+        self.dbkey_scope: DBKeyScope | None = dbkey_scope
         #: Session time zone [Firebird 4]
-        self.session_time_zone: Optional[str] = session_time_zone
+        self.session_time_zone: str | None = session_time_zone
         #: Set replica mode [Firebird 4]
-        self.set_db_replica: Optional[ReplicaMode] = set_db_replica
+        self.set_db_replica: ReplicaMode | None = set_db_replica
         #: Set BIND [Firebird 4]
-        self.set_bind: Optional[str] = set_bind
+        self.set_bind: str | None = set_bind
         #: Set DECFLOAT ROUND [Firebird 4]
-        self.decfloat_round: Optional[DecfloatRound] = decfloat_round
+        self.decfloat_round: DecfloatRound | None = decfloat_round
         #: Set DECFLOAT TRAPS [Firebird 4]
-        self.decfloat_traps: Optional[List[DecfloatTraps]] = \
+        self.decfloat_traps: list[DecfloatTraps] | None = \
             None if decfloat_traps is None else list(decfloat_traps)
         # For db create
         #: Database page size [db create only]
-        self.page_size: Optional[int] = page_size
+        self.page_size: int | None = page_size
         #: Overwrite existing database [db create only]
         self.overwrite: bool = overwrite
         #: Number of pages in database cache [db create only]
         self.db_buffers = None
         #: Database cache size [db create only]
-        self.db_cache_size: Optional[int] = db_cache_size
+        self.db_cache_size: int | None = db_cache_size
         #: Database write mode (True = sync/False = async) [db create only]
-        self.forced_writes: Optional[bool] = forced_writes
+        self.forced_writes: bool | None = forced_writes
         #: Database data page space usage (True = reserve space, False = Use all space) [db create only]
-        self.reserve_space: Optional[bool] = reserve_space
+        self.reserve_space: bool | None = reserve_space
         #: Database access mode (True = read-only/False = read-write) [db create only]
         self.read_only: bool = read_only
         #: Sweep interval for the database [db create only]
-        self.sweep_interval: Optional[int] = sweep_interval
+        self.sweep_interval: int | None = sweep_interval
         #: SQL dialect for the database [db create only]
-        self.db_sql_dialect: Optional[int] = db_sql_dialect
+        self.db_sql_dialect: int | None = db_sql_dialect
         #: Character set for the database [db create only]
-        self.db_charset: Optional[str] = db_charset
+        self.db_charset: str | None = db_charset
         #: Number of parallel workers
         self.parallel_workers: int = parallel_workers
     def clear(self) -> None:
@@ -605,6 +606,7 @@ class DPB:
                                            for v in dpb.get_string().split(',')]
                 elif tag == DPBItem.PARALLEL_WORKERS:
                     self.parallel_workers = dpb.get_int()
+                dpb.move_next()
     def get_buffer(self, *, for_create: bool = False) -> bytes:
         """Create DPB from stored information.
         """
@@ -725,6 +727,7 @@ class SPB_ATTACH:
                     self.role = spb.get_string(encoding=self.encoding, errors=self.errors)
                 elif tag == SPBItem.EXPECTED_DB:
                     self.expected_db = spb.get_string(encoding=self.encoding, errors=self.errors)
+                spb.move_next()
     def get_buffer(self) -> bytes:
         """Create SPB_ATTACH from stored information.
         """
@@ -756,9 +759,9 @@ class SPB_ATTACH:
 class Buffer(MemoryBuffer):
     """MemoryBuffer with extensions.
     """
-    def __init__(self, init: Union[int, bytes], size: int = None, *,
+    def __init__(self, init: int | bytes, size: int = None, *,
                  factory: Type[BufferFactory]=BytesBufferFactory,
-                 max_size: Union[int, Sentinel]=UNLIMITED, byteorder: ByteOrder=ByteOrder.LITTLE):
+                 max_size: int | Sentinel=UNLIMITED, byteorder: ByteOrder=ByteOrder.LITTLE):
         super().__init__(init, size, factory=factory, eof_marker=isc_info_end,
                          max_size=max_size, byteorder=byteorder)
     def seek_last_data(self) -> int:
@@ -782,14 +785,14 @@ class Buffer(MemoryBuffer):
 class CBuffer(Buffer):
     """ctypes MemoryBuffer with extensions.
     """
-    def __init__(self, init: Union[int, bytes], size: int = None, *,
-                 max_size: Union[int, Sentinel]=UNLIMITED, byteorder: ByteOrder=ByteOrder.LITTLE):
+    def __init__(self, init: int | bytes, size: int = None, *,
+                 max_size: int | Sentinel=UNLIMITED, byteorder: ByteOrder=ByteOrder.LITTLE):
         super().__init__(init, size, factory=CTypesBufferFactory, max_size=max_size, byteorder=byteorder)
 
 class EventBlock:
     """Used internally by `EventCollector`.
     """
-    def __init__(self, queue, db_handle: a.FB_API_HANDLE, event_names: List[str]):
+    def __init__(self, queue, db_handle: a.FB_API_HANDLE, event_names: list[str]):
         self.__first = True
         def callback(result, length, updated):
             memmove(result, updated, length)
@@ -799,7 +802,7 @@ class EventBlock:
         self.__queue: PriorityQueue = weakref.proxy(queue)
         self._db_handle: a.FB_API_HANDLE = db_handle
         self._isc_status: a.ISC_STATUS_ARRAY = a.ISC_STATUS_ARRAY(0)
-        self.event_names: List[str] = event_names
+        self.event_names: list[str] = event_names
 
         self.__results: a.RESULT_VECTOR = a.RESULT_VECTOR(0)
         self.__closed: bool = False
@@ -829,7 +832,7 @@ class EventBlock:
                                           "Error while waiting for events.")
     def _begin(self) -> None:
         self.__wait_for_events()
-    def count_and_reregister(self) -> Dict[str, int]:
+    def count_and_reregister(self) -> dict[str, int]:
         """Count event occurences and re-register interest in further notifications.
         """
         result = {}
@@ -890,23 +893,23 @@ class EventCollector:
     def __init__(self, db_handle: a.FB_API_HANDLE, event_names: Sequence[str]):
         self._db_handle: a.FB_API_HANDLE = db_handle
         self._isc_status: a.ISC_STATUS_ARRAY = a.ISC_STATUS_ARRAY(0)
-        self.__event_names: List[str] = list(event_names)
-        self.__events: Dict[str, int] = dict.fromkeys(self.__event_names, 0)
-        self.__event_blocks: List[EventBlock] = []
+        self.__event_names: list[str] = list(event_names)
+        self.__events: dict[str, int] = dict.fromkeys(self.__event_names, 0)
+        self.__event_blocks: list[EventBlock] = []
         self.__closed: bool = False
         self.__queue: PriorityQueue = PriorityQueue()
         self.__events_ready: threading.Event = threading.Event()
-        self.__blocks: List[List[str]] = [[x for x in y if x] for y in itertools.zip_longest(*[iter(event_names)]*15)]
+        self.__blocks: list[list[str]] = [[x for x in y if x] for y in itertools.zip_longest(*[iter(event_names)]*15)]
         self.__initialized: bool = False
         self.__process_thread = None
-    def __del__(self):
+    def __del__(self) -> None:
         if not self.__closed:
             warn("EventCollector disposed without prior close()", ResourceWarning)
             self.close()
-    def __enter__(self):
+    def __enter__(self) -> Self:
         self.begin()
         return self
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         self.close()
     def begin(self) -> None:
         """Starts listening for events.
@@ -933,7 +936,7 @@ class EventCollector:
             event_block = EventBlock(self.__queue, self._db_handle, block_events)
             self.__event_blocks.append(event_block)
             event_block._begin()
-    def wait(self, timeout: Union[int, float]=None) -> Dict[str, int]:
+    def wait(self, timeout: int | float=None) -> dict[str, int]:
         """Wait for events.
 
         Blocks the calling thread until at least one of the events occurs, or
@@ -1005,7 +1008,7 @@ class InfoProvider(ABC):
         self._charset: str = charset
         self.response: CBuffer = CBuffer(buffer_size)
         self.request: Buffer = Buffer(10)
-        self._cache: Dict = {}
+        self._cache: dict = {}
     def _raise_not_supported(self) -> None:
         raise NotSupportedError("Requested functionality is not supported by used Firebird version.")
     @abstractmethod
@@ -1067,7 +1070,7 @@ class EngineVersionProvider(InfoProvider):
             self.con()._att.get_info(request, self.response.raw)
         else:
             self.con()._svc.query(None, request, self.response.raw)
-    def get_server_version(self, con: Union[Connection, Server]) -> str:
+    def get_server_version(self, con: Connection | Server) -> str:
         "Returns server version sctring."
         self.con = con
         info_code = DbInfoCode.FIREBIRD_VERSION if isinstance(con(), Connection) \
@@ -1093,7 +1096,7 @@ class EngineVersionProvider(InfoProvider):
         self.response.rewind()
         self.con = None
         return result
-    def get_engine_version(self, con: Union[Connection, Server]) -> float:
+    def get_engine_version(self, con: Connection | Server) -> float:
         "Returns Firebird version as <major>.<minor> float number."
         x = self.get_server_version(con).split('.')
         return float(f'{x[0]}.{x[1]}')
@@ -1111,35 +1114,36 @@ class DatabaseInfoProvider3(InfoProvider):
     def __init__(self, connection: Connection):
         super().__init__(connection._encoding)
         self._con: Connection = weakref.ref(connection)
-        self._handlers: Dict[DbInfoCode, Callable] = \
-            {DbInfoCode.BASE_LEVEL: self.__base_level,
-             DbInfoCode.DB_ID: self.__db_id,
-             DbInfoCode.IMPLEMENTATION: self.__implementation,
-             DbInfoCode.IMPLEMENTATION_OLD: self.__implementation_old,
-             DbInfoCode.VERSION: self._version_string,
-             DbInfoCode.FIREBIRD_VERSION: self._version_string,
-             DbInfoCode.USER_NAMES: self.__user_names,
-             DbInfoCode.ACTIVE_TRANSACTIONS: self.__tra_active,
-             DbInfoCode.LIMBO: self.__tra_limbo,
-             DbInfoCode.ALLOCATION: self.response.read_sized_int,
-             DbInfoCode.NO_RESERVE: self.response.read_sized_int,
-             DbInfoCode.DB_SQL_DIALECT: self.response.read_sized_int,
-             DbInfoCode.ODS_MINOR_VERSION: self.response.read_sized_int,
-             DbInfoCode.ODS_VERSION: self.response.read_sized_int,
-             DbInfoCode.PAGE_SIZE: self.response.read_sized_int,
-             DbInfoCode.CURRENT_MEMORY: self.response.read_sized_int,
-             DbInfoCode.FORCED_WRITES: self.response.read_sized_int,
-             DbInfoCode.MAX_MEMORY: self.response.read_sized_int,
-             DbInfoCode.NUM_BUFFERS: self.response.read_sized_int,
-             DbInfoCode.SWEEP_INTERVAL: self.response.read_sized_int,
-             DbInfoCode.ATTACHMENT_ID: self.response.read_sized_int,
-             DbInfoCode.FETCHES: self.response.read_sized_int,
-             DbInfoCode.MARKS: self.response.read_sized_int,
+        self._handlers: dict[DbInfoCode, Callable] = \
+            {DbInfoCode.DB_ID: self.__db_id,
              DbInfoCode.READS: self.response.read_sized_int,
              DbInfoCode.WRITES: self.response.read_sized_int,
-             DbInfoCode.SET_PAGE_BUFFERS: self.response.read_sized_int,
-             DbInfoCode.DB_READ_ONLY: self.response.read_sized_int,
-             DbInfoCode.DB_SIZE_IN_PAGES: self.response.read_sized_int,
+             DbInfoCode.FETCHES: self.response.read_sized_int,
+             DbInfoCode.MARKS: self.response.read_sized_int,
+             DbInfoCode.IMPLEMENTATION_OLD: self.__implementation_old,
+             DbInfoCode.VERSION: self._version_string,
+             DbInfoCode.BASE_LEVEL: self.__base_level,
+             DbInfoCode.PAGE_SIZE: self.response.read_sized_int,
+             DbInfoCode.NUM_BUFFERS: self.response.read_sized_int,
+             DbInfoCode.LIMBO: self.__tra_limbo,
+             DbInfoCode.CURRENT_MEMORY: self.response.read_sized_int,
+             DbInfoCode.MAX_MEMORY: self.response.read_sized_int,
+             DbInfoCode.ALLOCATION: self.response.read_sized_int,
+             DbInfoCode.ATTACHMENT_ID: self.response.read_sized_int,
+             DbInfoCode.READ_SEQ_COUNT: self.__tbl_perf_count,
+             DbInfoCode.READ_IDX_COUNT: self.__tbl_perf_count,
+             DbInfoCode.INSERT_COUNT: self.__tbl_perf_count,
+             DbInfoCode.UPDATE_COUNT: self.__tbl_perf_count,
+             DbInfoCode.DELETE_COUNT: self.__tbl_perf_count,
+             DbInfoCode.BACKOUT_COUNT: self.__tbl_perf_count,
+             DbInfoCode.PURGE_COUNT: self.__tbl_perf_count,
+             DbInfoCode.EXPUNGE_COUNT: self.__tbl_perf_count,
+             DbInfoCode.SWEEP_INTERVAL: self.response.read_sized_int,
+             DbInfoCode.ODS_VERSION: self.response.read_sized_int,
+             DbInfoCode.ODS_MINOR_VERSION: self.response.read_sized_int,
+             DbInfoCode.NO_RESERVE: self.response.read_sized_int,
+             DbInfoCode.FORCED_WRITES: self.response.read_sized_int,
+             DbInfoCode.USER_NAMES: self.__user_names,
              DbInfoCode.PAGE_ERRORS: self.response.read_sized_int,
              DbInfoCode.RECORD_ERRORS: self.response.read_sized_int,
              DbInfoCode.BPAGE_ERRORS: self.response.read_sized_int,
@@ -1147,31 +1151,47 @@ class DatabaseInfoProvider3(InfoProvider):
              DbInfoCode.IPAGE_ERRORS: self.response.read_sized_int,
              DbInfoCode.PPAGE_ERRORS: self.response.read_sized_int,
              DbInfoCode.TPAGE_ERRORS: self.response.read_sized_int,
+             DbInfoCode.SET_PAGE_BUFFERS: self.response.read_sized_int,
+             DbInfoCode.DB_SQL_DIALECT: self.response.read_sized_int,
+             DbInfoCode.DB_READ_ONLY: self.response.read_sized_int,
+             DbInfoCode.DB_SIZE_IN_PAGES: self.response.read_sized_int,
              DbInfoCode.ATT_CHARSET: self.response.read_sized_int,
+             DbInfoCode.DB_CLASS: self.response.read_sized_int,
+             DbInfoCode.FIREBIRD_VERSION: self._version_string,
              DbInfoCode.OLDEST_TRANSACTION: self.response.read_sized_int,
              DbInfoCode.OLDEST_ACTIVE: self.response.read_sized_int,
              DbInfoCode.OLDEST_SNAPSHOT: self.response.read_sized_int,
              DbInfoCode.NEXT_TRANSACTION: self.response.read_sized_int,
-             DbInfoCode.ACTIVE_TRAN_COUNT: self.response.read_sized_int,
-             DbInfoCode.DB_CLASS: self.response.read_sized_int,
              DbInfoCode.DB_PROVIDER: self.response.read_sized_int,
+             DbInfoCode.ACTIVE_TRANSACTIONS: self.__tra_active,
+             DbInfoCode.ACTIVE_TRAN_COUNT: self.response.read_sized_int,
+             DbInfoCode.CREATION_DATE: self.__creation_date,
+             DbInfoCode.DB_FILE_SIZE: self.response.read_sized_int,
+             DbInfoCode.PAGE_CONTENTS: self.response.read_bytes,
+             DbInfoCode.IMPLEMENTATION: self.__implementation,
+             DbInfoCode.PAGE_WARNS: self.response.read_sized_int,
+             DbInfoCode.RECORD_WARNS: self.response.read_sized_int,
+             DbInfoCode.BPAGE_WARNS: self.response.read_sized_int,
+             DbInfoCode.DPAGE_WARNS: self.response.read_sized_int,
+             DbInfoCode.IPAGE_WARNS: self.response.read_sized_int,
+             DbInfoCode.PPAGE_WARNS: self.response.read_sized_int,
+             DbInfoCode.TPAGE_WARNS: self.response.read_sized_int,
+             DbInfoCode.PIP_ERRORS: self.response.read_sized_int,
+             DbInfoCode.PIP_WARNS: self.response.read_sized_int,
              DbInfoCode.PAGES_USED: self.response.read_sized_int,
              DbInfoCode.PAGES_FREE: self.response.read_sized_int,
+             DbInfoCode.CONN_FLAGS: self.__con_state,
              DbInfoCode.CRYPT_KEY: self._single_info_string,
              DbInfoCode.CRYPT_STATE: self.__crypt_state,
-             DbInfoCode.CONN_FLAGS: self.__con_state,
-             DbInfoCode.BACKOUT_COUNT: self.__tbl_perf_count,
-             DbInfoCode.DELETE_COUNT: self.__tbl_perf_count,
-             DbInfoCode.EXPUNGE_COUNT: self.__tbl_perf_count,
-             DbInfoCode.INSERT_COUNT: self.__tbl_perf_count,
-             DbInfoCode.PURGE_COUNT: self.__tbl_perf_count,
-             DbInfoCode.READ_IDX_COUNT: self.__tbl_perf_count,
-             DbInfoCode.READ_SEQ_COUNT: self.__tbl_perf_count,
-             DbInfoCode.UPDATE_COUNT: self.__tbl_perf_count,
-             DbInfoCode.CREATION_DATE: self.__creation_date,
-             DbInfoCode.PAGE_CONTENTS: self.response.read_bytes,
-             DbInfoCode.DB_FILE_SIZE: self.response.read_sized_int,
              }
+        # Value convertors
+        self._convertors: dict[DbInfoCode, Callable] = \
+            {DbInfoCode.DB_PROVIDER: DbProvider,
+             DbInfoCode.DB_CLASS: DbClass,
+             DbInfoCode.NO_RESERVE: self.__conv_space_reservation,
+             DbInfoCode.FORCED_WRITES: self.__conv_write_mode,
+             DbInfoCode.DB_READ_ONLY: self.__conv_access_mode,
+            }
         # Page size
         self.__page_size = self.get_info(DbInfoCode.PAGE_SIZE)  # prefetch it
         # Get Firebird engine version
@@ -1182,7 +1202,13 @@ class DatabaseInfoProvider3(InfoProvider):
         self.response.read_short() # cluster length
         self.response.read_byte() # number of codes
         return self.response.read_byte() # should be always 6 for Firebird
-    def __db_id(self) -> List:
+    def __conv_space_reservation(self, value: int) -> DbSpaceReservation:
+        return DbSpaceReservation.USE_FULL if value else DbSpaceReservation.RESERVE
+    def __conv_write_mode(self, value: int) -> DbWriteMode:
+        return DbWriteMode.SYNC if value else DbWriteMode.ASYNC
+    def __conv_access_mode(self, value: int) -> DbAccessMode:
+        return DbAccessMode.READ_ONLY if value else DbAccessMode.READ_WRITE
+    def __db_id(self) -> list:
         result = []
         self.response.read_short()  # Cluster length
         count = self.response.read_byte()
@@ -1190,7 +1216,7 @@ class DatabaseInfoProvider3(InfoProvider):
             result.append(self.response.read_pascal_string(encoding=self._charset))
             count -= 1
         return result
-    def __implementation(self) -> Tuple[ImpData]:
+    def __implementation(self) -> tuple[ImpData]:
         result = []
         self.response.read_short() # Cluster length
         seqences = self.response.read_byte()  # Cluster length
@@ -1203,7 +1229,7 @@ class DatabaseInfoProvider3(InfoProvider):
                                   self.response.read_byte()))
             seqences -= 1
         return tuple(result)
-    def __implementation_old(self) -> Tuple[ImpDataOld]:
+    def __implementation_old(self) -> tuple[ImpDataOld]:
         result = []
         self.response.read_short() # Cluster length
         seqences = self.response.read_byte()  # Cluster length
@@ -1221,7 +1247,7 @@ class DatabaseInfoProvider3(InfoProvider):
         return '\n'.join(result)
     def _single_info_string(self) -> str:
         return self.response.read_sized_string()
-    def __user_names(self) -> Dict[str, str]:
+    def __user_names(self) -> dict[str, str]:
         self.response.rewind() # necessary to process names separated by info tag
         usernames = []
         while not self.response.is_eof():
@@ -1234,13 +1260,13 @@ class DatabaseInfoProvider3(InfoProvider):
         for name in usernames:
             result[name] = result.get(name, 0) + 1
         return result
-    def __tra_active(self) -> List:
+    def __tra_active(self) -> list:
         result = []
         while not self.response.is_eof():
             self.response.get_tag()  # DbInfoCode.ACTIVE_TRANSACTIONS
             result.append(self.response.read_sized_int())
         return result
-    def __tra_limbo(self) -> List:
+    def __tra_limbo(self) -> list:
         result = []
         while not self.response.is_eof():
             self.response.get_tag()  # DbInfoCode.LIMBO
@@ -1250,7 +1276,7 @@ class DatabaseInfoProvider3(InfoProvider):
         return EncryptionFlag(self.response.read_sized_int())
     def __con_state(self) -> ConnectionFlag:
         return ConnectionFlag(self.response.read_sized_int())
-    def __tbl_perf_count(self) -> Dict[int, int]:
+    def __tbl_perf_count(self) -> dict[int, int]:
         result = {}
         clen = self.response.read_short()  # Cluster length
         while clen > 0:
@@ -1318,6 +1344,8 @@ class DatabaseInfoProvider3(InfoProvider):
             # we'll rewind back, otherwise it will break the repeating cluster processing
             self.response.rewind()
         result = self._handlers[info_code]()
+        if info_code in self._convertors:
+            result = self._convertors[info_code](result)
         # cache
         if info_code in (DbInfoCode.CREATION_DATE, DbInfoCode.DB_CLASS, DbInfoCode.DB_PROVIDER,
                          DbInfoCode.DB_SQL_DIALECT, DbInfoCode.ODS_MINOR_VERSION,
@@ -1335,7 +1363,7 @@ class DatabaseInfoProvider3(InfoProvider):
            page_number: Sequence number of database page to be fetched from server.
         """
         return self.get_info(DbInfoCode.PAGE_CONTENTS, page_number)
-    def get_active_transaction_ids(self) -> List[int]:
+    def get_active_transaction_ids(self) -> list[int]:
         """Returns list of IDs of active transactions.
         """
         return self.get_info(DbInfoCode.ACTIVE_TRANSACTIONS)
@@ -1343,7 +1371,7 @@ class DatabaseInfoProvider3(InfoProvider):
         """Returns number of active transactions.
         """
         return self.get_info(DbInfoCode.ACTIVE_TRAN_COUNT)
-    def get_table_access_stats(self) -> List[TableAccessStats]:
+    def get_table_access_stats(self) -> list[TableAccessStats]:
         """Returns actual table access statistics.
         """
         tables = {}
@@ -1421,12 +1449,12 @@ class DatabaseInfoProvider3(InfoProvider):
     def provider(self) -> DbProvider:
         """Database Provider.
         """
-        return DbProvider(self.get_info(DbInfoCode.DB_PROVIDER))
+        return self.get_info(DbInfoCode.DB_PROVIDER)
     @property
     def db_class(self) -> DbClass:
         """Database Class.
         """
-        return DbClass(self.get_info(DbInfoCode.DB_CLASS))
+        return self.get_info(DbInfoCode.DB_CLASS)
     @property
     def creation_date(self) -> datetime.date:
         """Date when database was created.
@@ -1481,17 +1509,17 @@ class DatabaseInfoProvider3(InfoProvider):
     def space_reservation(self) -> DbSpaceReservation:
         """Data page space usage (USE_FULL or RESERVE).
         """
-        return DbSpaceReservation.USE_FULL if self.get_info(DbInfoCode.NO_RESERVE) else DbSpaceReservation.RESERVE
+        return self.get_info(DbInfoCode.NO_RESERVE)
     @property
     def write_mode(self) -> DbWriteMode:
         """Database write mode (SYNC or ASYNC).
         """
-        return DbWriteMode.SYNC if self.get_info(DbInfoCode.FORCED_WRITES) else DbWriteMode.ASYNC
+        return self.get_info(DbInfoCode.FORCED_WRITES)
     @property
     def access_mode(self) -> DbAccessMode:
         """Database access mode (READ_ONLY or READ_WRITE).
         """
-        return DbAccessMode.READ_ONLY if self.get_info(DbInfoCode.DB_READ_ONLY) else DbAccessMode.READ_WRITE
+        return self.get_info(DbInfoCode.DB_READ_ONLY)
     @property
     def reads(self) -> int:
         """Current I/O statistics - Reads from disk to page cache.
@@ -1589,7 +1617,7 @@ class DatabaseInfoProvider(DatabaseInfoProvider3):
     def __creation_tstz(self) -> datetime.datetime:
         value = self.response.read_bytes()
         return _util.decode_timestamp_tz(value)
-    def __features(self) -> List[Features]:
+    def __features(self) -> list[Features]:
         value = self.response.read_bytes()
         return [Features(x) for x in value]
     def __replica_mode(self) -> ReplicaMode:
@@ -1636,7 +1664,7 @@ class Connection:
         self.__charset: str = charset
         self.__precision_cache = {}
         self.__sqlsubtype_cache = {}
-        self.__ecollectors: List[EventCollector] = []
+        self.__ecollectors: list[EventCollector] = []
         self.__dsn: str = dsn
         self.__sql_dialect: int = sql_dialect
         self._encoding: str = CHARSET_MAP.get(charset, 'ascii')
@@ -1644,8 +1672,8 @@ class Connection:
         self._dpb: bytes = dpb
         #: Default TPB for newly created transaction managers
         self.default_tpb: bytes = tpb(Isolation.SNAPSHOT)
-        self._transactions: List[TransactionManager] = []
-        self._statements: List[Statement] = []
+        self._transactions: list[TransactionManager] = []
+        self._statements: list[Statement] = []
         #
         self.__ev: float = None
         self.__info: DatabaseInfoProvider = None
@@ -1669,7 +1697,7 @@ class Connection:
             self._close()
             self._close_internals()
             self._att.detach()
-    def __enter__(self) -> Connection:
+    def __enter__(self) -> Self:
         return self
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         self.close()
@@ -1767,7 +1795,7 @@ class Connection:
                 return result[0]
         # We ran out of options
         return 0
-    def _get_array_sqlsubtype(self, relation: bytes, column: bytes) -> Optional[int]:
+    def _get_array_sqlsubtype(self, relation: bytes, column: bytes) -> int | None:
         subtype = self.__sqlsubtype_cache.get((relation, column))
         if subtype is not None:
             return subtype
@@ -1954,7 +1982,7 @@ class Connection:
         """
         return self.__dsn
     @property
-    def info(self) -> Union[DatabaseInfoProvider3, DatabaseInfoProvider]:
+    def info(self) -> DatabaseInfoProvider3 | DatabaseInfoProvider:
         """Access to various information about attached database.
         """
         if self.__info is None:
@@ -1982,7 +2010,7 @@ class Connection:
         """
         return self._tra_qry
     @property
-    def transactions(self) -> List[TransactionManager]:
+    def transactions(self) -> list[TransactionManager]:
         """List of all transaction managers associated with connection.
 
         Note:
@@ -2262,15 +2290,15 @@ class TransactionInfoProvider3(InfoProvider):
     def __init__(self, charset: str, tra: TransactionManager):
         super().__init__(charset)
         self._mngr: TransactionManager = weakref.ref(tra)
-        self._handlers: Dict[DbInfoCode, Callable] = \
-            {TraInfoCode.ISOLATION: self.__isolation,
-             TraInfoCode.ACCESS: self.__access,
-             TraInfoCode.DBPATH: self.response.read_sized_string,
-             TraInfoCode.LOCK_TIMEOUT: self.__lock_timeout,
-             TraInfoCode.ID: self.response.read_sized_int,
+        self._handlers: dict[DbInfoCode, Callable] = \
+            {TraInfoCode.ID: self.response.read_sized_int,
              TraInfoCode.OLDEST_INTERESTING: self.response.read_sized_int,
              TraInfoCode.OLDEST_SNAPSHOT: self.response.read_sized_int,
              TraInfoCode.OLDEST_ACTIVE: self.response.read_sized_int,
+             TraInfoCode.ISOLATION: self.__isolation,
+             TraInfoCode.ACCESS: self.__access,
+             TraInfoCode.LOCK_TIMEOUT: self.__lock_timeout,
+             TraInfoCode.DBPATH: self.response.read_sized_string,
             }
     def __isolation(self) -> Isolation:
         cnt = self.response.read_short()
@@ -2391,12 +2419,12 @@ class TransactionManager:
         #: Default action (commit/rollback) to be performed when transaction is closed.
         self.default_action: DefaultAction = default_action
         self.__handle: a.FB_API_HANDLE = None
-        self.__info: Union[TransactionInfoProvider, TransactionInfoProvider3] = None
-        self._cursors: List = []  # Weak references to cursors
+        self.__info: TransactionInfoProvider | TransactionInfoProvider3 = None
+        self._cursors: list = []  # Weak references to cursors
         self._tra: iTransaction = None
         self.__closed: bool = False
         self._logging_id_ = 'Transaction'
-    def __enter__(self) -> TransactionManager:
+    def __enter__(self) -> Self:
         self.begin()
         return self
     def __exit__(self, exc_type, exc_value, traceback) -> None:
@@ -2537,7 +2565,7 @@ class TransactionManager:
         return self.__closed
     # Properties
     @property
-    def info(self) -> Union[TransactionInfoProvider3, TransactionInfoProvider]:
+    def info(self) -> TransactionInfoProvider3 | TransactionInfoProvider:
         """Access to various information about active transaction.
         """
         if self.__info is None:
@@ -2552,7 +2580,7 @@ class TransactionManager:
             return 'Connection.GC'
         return self._connection()
     @property
-    def cursors(self) -> List[Cursor]:
+    def cursors(self) -> list[Cursor]:
         """Cursors associated with this transaction.
         """
         return [x() for x in self._cursors]
@@ -2566,10 +2594,10 @@ class DistributedTransactionManager(TransactionManager):
     """
     def __init__(self, connections: Sequence[Connection], default_tpb: bytes=None, # pylint: disable=W0231
                  default_action: DefaultAction=DefaultAction.COMMIT):
-        self._connections: List[Connection] = list(connections)
+        self._connections: list[Connection] = list(connections)
         self.default_tpb: bytes = default_tpb if default_tpb is not None else tpb(Isolation.SNAPSHOT)
         self.default_action: DefaultAction = default_action
-        self._cursors: List = []  # Weak references to cursors
+        self._cursors: list = []  # Weak references to cursors
         self._tra: iTransaction = None
         self._dtc: iDtc = _master.get_dtc()
         self.__closed: bool = False
@@ -2698,7 +2726,7 @@ class StatementInfoProvider3(InfoProvider):
     def __init__(self, charset: str, stmt: Statement):
         super().__init__(charset)
         self._stmt: Statement = weakref.ref(stmt)
-        self._handlers: Dict[StmtInfoCode, Callable] = \
+        self._handlers: dict[StmtInfoCode, Callable] = \
             {StmtInfoCode.STMT_TYPE: self.__stmt_type,
              StmtInfoCode.GET_PLAN: self.response.read_sized_string,
              StmtInfoCode.RECORDS: self.__records,
@@ -2710,7 +2738,7 @@ class StatementInfoProvider3(InfoProvider):
         return StatementFlag(self.response.read_sized_int())
     def __stmt_type(self) -> StatementType:
         return StatementType(self.response.read_sized_int())
-    def __records(self) -> Dict[ReqInfoCode, int]:
+    def __records(self) -> dict[ReqInfoCode, int]:
         result = {}
         self.response.read_short() # Cluster length
         while not self.response.is_eof():
@@ -2749,7 +2777,7 @@ class StatementInfoProvider3(InfoProvider):
         #
         return self._handlers[info_code]()
 
-class StatementInfoProvider(StatementInfoProvider3):
+class StatementInfoProvider4(StatementInfoProvider3):
     """Provides access to information about statement [Firebird 4+].
 
     Important:
@@ -2762,7 +2790,19 @@ class StatementInfoProvider(StatementInfoProvider3):
         self._handlers.update({StmtInfoCode.TIMEOUT_USER: self.response.read_sized_int,
             StmtInfoCode.TIMEOUT_RUN: self.response.read_sized_int,
             StmtInfoCode.BLOB_ALIGN: self.response.read_sized_int,
-            StmtInfoCode.EXEC_PATH_BLR_BYTES: self.response.read_bytes,
+        })
+
+class StatementInfoProvider(StatementInfoProvider4):
+    """Provides access to information about statement [Firebird 4+].
+
+    Important:
+       Do NOT create instances of this class directly! Use `Statement.info`
+       property to access the instance already bound to transaction context.
+    """
+    def __init__(self, charset: str, stmt: Statement):
+        super().__init__(charset, stmt)
+        self._stmt: Statement = weakref.ref(stmt)
+        self._handlers.update({StmtInfoCode.EXEC_PATH_BLR_BYTES: self.response.read_bytes,
             StmtInfoCode.EXEC_PATH_BLR_TEXT: self.response.read_sized_string,
         })
 
@@ -2780,7 +2820,7 @@ class Statement:
         self._type: StatementType = stmt.get_type()
         self._flags: StatementFlag = stmt.get_flags()
         self._desc: DESCRIPTION = None
-        self.__info: Union[StatementInfoProvider3, StatementInfoProvider] = None
+        self.__info: StatementInfoProvider3 | StatementInfoProvider4 | StatementInfoProvider = None
         # Input metadata
         meta = stmt.get_input_metadata()
         self._in_cnt: int = meta.get_count()
@@ -2796,8 +2836,8 @@ class Statement:
         self._out_meta: iMessageMetadata = None
         self._out_cnt: int = meta.get_count()
         self._out_buffer: bytes = None
-        self._out_desc: List[ItemMetadata] = None
-        self._names: List[str] = None
+        self._out_desc: list[ItemMetadata] = None
+        self._names: list[str] = None
         if self._out_cnt == 0:
             meta.release()
             self._out_desc = []
@@ -2807,7 +2847,7 @@ class Statement:
             self._out_buffer = create_string_buffer(meta.get_message_length())
             self._out_desc = create_meta_descriptors(meta)
             self._names = [m.field if m.field == m.alias else m.alias for m in self._out_desc]
-    def __enter__(self) -> Statement:
+    def __enter__(self) -> Self:
         return self
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         self.free()
@@ -2858,12 +2898,17 @@ class Statement:
             return 'Connection.GC'
         return self._connection()
     @property
-    def info(self) -> Union[StatementInfoProvider3, StatementInfoProvider]:
+    def info(self) -> StatementInfoProvider3 | StatementInfoProvider4 | StatementInfoProvider:
         """Access to various information about statement.
         """
         if self.__info is None:
-            cls = StatementInfoProvider if self._connection()._engine_version() >= 4.0 \
-                else StatementInfoProvider3
+            version = self._connection()._engine_version()
+            if version >= 5.0:
+                cls = StatementInfoProvider
+            elif version >= 4.0:
+                cls = StatementInfoProvider4
+            else:
+                cls = StatementInfoProvider3
             self.__info = cls(self._connection()._encoding, self)
         return self.__info
     @property
@@ -2962,7 +3007,7 @@ class BlobReader(io.IOBase):
         if self._blob is not None:
             self._blob.close()
             self._blob = None
-    def read(self, size: int=-1) -> Union[str, bytes]:
+    def read(self, size: int=-1) -> str | bytes:
         """Read at most size bytes from the file (less if the read hits EOF
         before obtaining size bytes). If the size argument is negative or omitted,
         read all data until EOF is reached. The bytes are returned as a string
@@ -3037,7 +3082,7 @@ class BlobReader(io.IOBase):
         if self.newline != '\n':
             result = result.replace('\n', self.newline)
         return result
-    def readlines(self, hint: int=-1) -> List[str]:
+    def readlines(self, hint: int=-1) -> list[str]:
         """Read and return a list of lines from the stream. `hint` can be specified to
         control the number of lines read: no more lines will be read if the total size
         (in bytes/characters) of all lines so far exceeds hint.
@@ -3144,11 +3189,11 @@ class Cursor:
         self._name: str = None
         self._executed: bool = False
         self._cursor_flags: CursorFlag = CursorFlag.NONE
-        self.__output_cache: Tuple = None
+        self.__output_cache: tuple = None
         self.__internal: bool = False
-        self.__blob_readers: Set = weakref.WeakSet()
+        self.__blob_readers: set = weakref.WeakSet()
         #: Names of columns that should be returned as `BlobReader`.
-        self.stream_blobs: List[str] = []
+        self.stream_blobs: list[str] = []
         #: BLOBs greater than threshold are returned as `BlobReader` instead in materialized form.
         self.stream_blob_threshold = driver_config.stream_blob_threshold.value
     def __enter__(self) -> Cursor:
@@ -3168,8 +3213,8 @@ class Cursor:
     def _dead_con(self, obj) -> None: # pylint: disable=W0613
         self._connection = None
     def _extract_db_array_to_list(self, esize: int, dtype: int, subtype: int,
-                                  scale: int, dim: int, dimensions: List[int],
-                                  buf: Any, bufpos: int) -> Tuple[Any, int]:
+                                  scale: int, dim: int, dimensions: list[int],
+                                  buf: Any, bufpos: int) -> tuple[Any, int]:
         value = []
         if dim == len(dimensions)-1:
             for _ in range(dimensions[dim]):
@@ -3229,7 +3274,7 @@ class Cursor:
                 value.append(val)
         return (value, bufpos)
     def _copy_list_to_db_array(self, esize: int, dtype: int, subtype: int,
-                               scale: int, dim: int, dimensions: List[int],
+                               scale: int, dim: int, dimensions: list[int],
                                value: Any, buf: Any, bufpos: int) -> None:
         valuebuf = None
         if dtype in (a.blr_text, a.blr_text2):
@@ -3269,7 +3314,7 @@ class Cursor:
                                    value, valuebuf,
                                    buf, bufpos)
     def _fill_db_array_buffer(self, esize: int, dtype: int, subtype: int,
-                              scale: int, dim: int, dimensions: List[int],
+                              scale: int, dim: int, dimensions: list[int],
                               value: Any, valuebuf: Any, buf: Any, bufpos: int) -> int:
         if dim == len(dimensions)-1:
             for i in range(dimensions[dim]):
@@ -3349,7 +3394,7 @@ class Cursor:
                                                     dimensions, value[i],
                                                     valuebuf, buf, bufpos)
         return bufpos
-    def _validate_array_value(self, dim: int, dimensions: List[int],
+    def _validate_array_value(self, dim: int, dimensions: list[int],
                               value_type: int, sqlsubtype: int,
                               value_scale: int, value: Any) -> bool:
         ok = isinstance(value, (list, tuple))
@@ -3391,7 +3436,7 @@ class Cursor:
                 return False
         return ok
     def _pack_input(self, meta: iMessageMetadata, buffer: bytes,
-                    parameters: Sequence) -> Tuple[iMessageMetadata, bytes]:
+                    parameters: Sequence) -> tuple[iMessageMetadata, bytes]:
         # pylint: disable=R1702
         in_cnt = meta.get_count()
         if len(parameters) != in_cnt:
@@ -3565,7 +3610,7 @@ class Cursor:
             #
             in_meta.add_ref() # Everything went just fine, so we keep the metadata past 'with'
         return (in_meta, in_buffer)
-    def _unpack_output(self) -> Tuple:
+    def _unpack_output(self) -> tuple:
         # pylint: disable=R1702
         values = []
         buffer = self._stmt._out_buffer
@@ -3705,7 +3750,7 @@ class Cursor:
                                                                      value_buffer, 0)
             values.append(value)
         return tuple(values)
-    def _fetchone(self) -> Optional[Tuple]:
+    def _fetchone(self) -> tuple | None:
         if self._executed:
             if self._stmt._out_cnt == 0:
                 return None
@@ -3721,7 +3766,7 @@ class Cursor:
                 return self._unpack_output()
             return None
         raise InterfaceError("Cannot fetch from cursor that did not executed a statement.")
-    def _execute(self, operation: Union[str, Statement],
+    def _execute(self, operation: str | Statement,
                  parameters: Sequence=None, flags: CursorFlag=CursorFlag.NONE) -> None:
         if not self._transaction.is_active():
             self._transaction.begin()
@@ -3794,7 +3839,7 @@ class Cursor:
         sql = ('EXECUTE PROCEDURE ' + proc_name + ' '
                + ','.join('?' * len(params)))
         self.execute(sql, params)
-    def call_procedure(self, proc_name: str, parameters: Sequence=None) -> Optional[Tuple]:
+    def call_procedure(self, proc_name: str, parameters: Sequence=None) -> tuple | None:
         """Executes a stored procedure with the given name.
 
         Arguments:
@@ -3828,7 +3873,7 @@ class Cursor:
             operation: SQL command.
         """
         return self._connection._prepare(operation, self._transaction)
-    def open(self, operation: Union[str, Statement], parameters: Sequence[Any]=None) -> Cursor:
+    def open(self, operation: str | Statement, parameters: Sequence[Any]=None) -> Cursor:
         """Executes SQL command or prepared `Statement` as scrollable.
 
         Starts new transaction if transaction manager associated with cursor is not active.
@@ -3846,7 +3891,7 @@ class Cursor:
             If cursor is open, it's closed before new statement is executed.
         """
         self._execute(operation, parameters, CursorFlag.SCROLLABLE)
-    def execute(self, operation: Union[str, Statement], parameters: Sequence[Any]=None) -> Cursor:
+    def execute(self, operation: str | Statement, parameters: Sequence[Any]=None) -> Cursor:
         """Executes SQL command or prepared `Statement`.
 
         Starts new transaction if transaction manager associated with cursor is not active.
@@ -3868,7 +3913,7 @@ class Cursor:
         """
         self._execute(operation, parameters)
         return self
-    def executemany(self, operation: Union[str, Statement],
+    def executemany(self, operation: str | Statement,
                     seq_of_parameters: Sequence[Sequence[Any]]) -> None:
         """Executes SQL command or prepared statement against all parameter
         sequences found in the sequence `seq_of_parameters`.
@@ -3904,13 +3949,13 @@ class Cursor:
             if self.__internal:
                 self._stmt.free()
             self._stmt = None
-    def fetchone(self) -> Tuple:
+    def fetchone(self) -> tuple:
         """Fetch the next row of a query result set.
         """
         if self._stmt:
             return self._fetchone()
         raise InterfaceError("Cannot fetch from cursor that did not executed a statement.")
-    def fetchmany(self, size: int=None) -> List[Tuple]:
+    def fetchmany(self, size: int=None) -> list[tuple]:
         """Fetch the next set of rows of a query result, returning a sequence of
         sequences (e.g. a list of tuples).
 
@@ -3932,11 +3977,11 @@ class Cursor:
             else:
                 break
         return result
-    def fetchall(self) -> List[Tuple]:
+    def fetchall(self) -> list[tuple]:
         """Fetch all remaining rows of a query result set.
         """
         return list(self)
-    def fetch_next(self) -> Optional[Tuple]:
+    def fetch_next(self) -> tuple | None:
         """Fetch the next row of a scrollable query result set.
 
         Returns None if there is no row to be fetched.
@@ -3946,7 +3991,7 @@ class Cursor:
         if self._last_fetch_status == StateResult.OK:
             return self._unpack_output()
         return None
-    def fetch_prior(self) -> Optional[Tuple]:
+    def fetch_prior(self) -> tuple | None:
         """Fetch the previous row of a scrollable query result set.
 
         Returns None if there is no row to be fetched.
@@ -3956,7 +4001,7 @@ class Cursor:
         if self._last_fetch_status == StateResult.OK:
             return self._unpack_output()
         return None
-    def fetch_first(self) -> Optional[Tuple]:
+    def fetch_first(self) -> tuple | None:
         """Fetch the first row of a scrollable query result set.
 
         Returns None if there is no row to be fetched.
@@ -3966,7 +4011,7 @@ class Cursor:
         if self._last_fetch_status == StateResult.OK:
             return self._unpack_output()
         return None
-    def fetch_last(self) -> Optional[Tuple]:
+    def fetch_last(self) -> tuple | None:
         """Fetch the last row of a scrollable query result set.
 
         Returns None if there is no row to be fetched.
@@ -3976,7 +4021,7 @@ class Cursor:
         if self._last_fetch_status == StateResult.OK:
             return self._unpack_output()
         return None
-    def fetch_absolute(self, position: int) -> Optional[Tuple]:
+    def fetch_absolute(self, position: int) -> tuple | None:
         """Fetch the row of a scrollable query result set specified by absolute position.
 
         Returns None if there is no row to be fetched.
@@ -3989,7 +4034,7 @@ class Cursor:
         if self._last_fetch_status == StateResult.OK:
             return self._unpack_output()
         return None
-    def fetch_relative(self, offset: int) -> Optional[Tuple]:
+    def fetch_relative(self, offset: int) -> tuple | None:
         """Fetch the row of a scrollable query result set specified by relative position.
 
         Returns None if there is no row to be fetched.
@@ -4023,7 +4068,7 @@ class Cursor:
         """
         assert self._result is not None
         return self._result.is_bof()
-    def to_dict(self, row: Tuple, into: Dict=None) -> Dict:
+    def to_dict(self, row: tuple, into: dict=None) -> dict:
         """Returns row tuple as dictionary with field names as keys. Returns new dictionary
         if `into` argument is not provided, otherwise returns `into` dictionary updated
         with row data.
@@ -4054,7 +4099,7 @@ class Cursor:
         """
         return self._stmt
     @property
-    def description(self) -> Tuple[DESCRIPTION]:
+    def description(self) -> tuple[DESCRIPTION]:
         """Tuple of DESCRIPTION tuples (with 7-items).
 
         Each of these tuples contains information describing one result column:
@@ -4143,7 +4188,7 @@ class Cursor:
         """
         if self._stmt is None:
             return -1
-        rows: Dict[ReqInfoCode, int] = self._stmt.info.get_info(StmtInfoCode.RECORDS)
+        rows: dict[ReqInfoCode, int] = self._stmt.info.get_info(StmtInfoCode.RECORDS)
         code: ReqInfoCode = None
         if self._stmt.type in (StatementType.SELECT, StatementType.SELECT_FOR_UPD):
             code = ReqInfoCode.SELECT_COUNT
@@ -4215,6 +4260,12 @@ class ServerInfoProvider(InfoProvider):
         #
         if info_code in (SrvInfoCode.VERSION, SrvInfoCode.CAPABILITIES, SrvInfoCode.RUNNING):
             result = self.response.read_int()
+        elif info_code == SrvInfoCode.LIMBO_TRANS:
+            self.response.rewind()
+            result = []
+            while not self.response.is_eof():
+                self.response.get_tag()  # DbInfoCode.LIMBO
+                result.append(self.response.read_sized_int())
         elif info_code in (SrvInfoCode.SERVER_VERSION, SrvInfoCode.IMPLEMENTATION,
                            SrvInfoCode.GET_ENV, SrvInfoCode.GET_ENV_MSG,
                            SrvInfoCode.GET_ENV_LOCK, SrvInfoCode.USER_DBPATH):
@@ -4305,7 +4356,7 @@ class ServerInfoProvider(InfoProvider):
         """
         return self.get_info(SrvInfoCode.SRV_DB_INFO)[0]
     @property
-    def attached_databases(self) -> List[str]:
+    def attached_databases(self) -> list[str]:
         """List of attached databases.
         """
         return self.get_info(SrvInfoCode.SRV_DB_INFO)[1]
@@ -4347,7 +4398,7 @@ class ServerDbServices3(ServerServiceProvider):
         if callback:
             for line in self._srv():
                 callback(line)
-    def backup(self, *, database: FILESPEC, backup: Union[FILESPEC, Sequence[FILESPEC]],
+    def backup(self, *, database: FILESPEC, backup: FILESPEC | Sequence[FILESPEC],
                backup_file_sizes: Sequence[int]=(),
                flags: SrvBackupFlag=SrvBackupFlag.NONE, role: str=None,
                callback: CB_OUTPUT_LINE=None, stats: str=None,
@@ -4412,8 +4463,8 @@ class ServerDbServices3(ServerServiceProvider):
         if callback:
             for line in self._srv():
                 callback(line)
-    def restore(self, *, backup: Union[FILESPEC, Sequence[FILESPEC]],
-                database: Union[FILESPEC, Sequence[FILESPEC]],
+    def restore(self, *, backup: FILESPEC | Sequence[FILESPEC],
+                database: FILESPEC | Sequence[FILESPEC],
                 db_file_pages: Sequence[int]=(),
                 flags: SrvRestoreFlag=SrvRestoreFlag.CREATE, role: str=None,
                 callback: CB_OUTPUT_LINE=None, stats: str=None,
@@ -4535,7 +4586,7 @@ class ServerDbServices3(ServerServiceProvider):
         while not self._srv()._eof:
             backup_stream.write(self._srv()._read_next_binary_output())
     def local_restore(self, *, backup_stream: BinaryIO,
-                      database: Union[FILESPEC, Sequence[FILESPEC]],
+                      database: FILESPEC | Sequence[FILESPEC],
                       db_file_pages: Sequence[int]=(),
                       flags: SrvRestoreFlag=SrvRestoreFlag.CREATE, role: str=None,
                       skip_data: str=None, page_size: int=None, buffers: int=None,
@@ -4941,7 +4992,7 @@ class ServerDbServices3(ServerServiceProvider):
         if callback:
             for line in self._srv():
                 callback(line)
-    def get_limbo_transaction_ids(self, *, database: FILESPEC) -> List[int]:
+    def get_limbo_transaction_ids(self, *, database: FILESPEC) -> list[int]:
         """Returns list of transactions in limbo.
 
         Arguments:
@@ -5105,7 +5156,7 @@ class ServerDbServices(ServerDbServices4):
 class ServerUserServices(ServerServiceProvider):
     """User-related actions and services.
     """
-    def __fetch_users(self, data: Buffer) -> List[UserInfo]:
+    def __fetch_users(self, data: Buffer) -> list[UserInfo]:
         users = []
         user = {}
         while not data.is_eof():
@@ -5136,7 +5187,7 @@ class ServerUserServices(ServerServiceProvider):
         if user:
             users.append(UserInfo(**user))
         return users
-    def get_all(self, *, database: FILESPEC=None, sql_role: str=None) -> List[UserInfo]:
+    def get_all(self, *, database: FILESPEC=None, sql_role: str=None) -> list[UserInfo]:
         """Get information about users.
 
         Arguments:
@@ -5153,7 +5204,7 @@ class ServerUserServices(ServerServiceProvider):
                                   encoding=self._srv().encoding)
             self._srv()._svc.start(spb.get_buffer())
         return self.__fetch_users(Buffer(self._srv()._read_all_binary_output()))
-    def get(self, user_name: str, *, database: FILESPEC=None, sql_role: str=None) -> Optional[UserInfo]:
+    def get(self, user_name: str, *, database: FILESPEC=None, sql_role: str=None) -> UserInfo | None:
         """Get information about user.
 
         Arguments:
@@ -5356,7 +5407,7 @@ class ServerTraceServices(ServerServiceProvider):
         """
         return self.__action(ServerAction.TRACE_RESUME, 'resumed', session_id)
     @property
-    def sessions(self) -> Dict[int, TraceSession]:
+    def sessions(self) -> dict[int, TraceSession]:
         """Dictionary with active trace sessions.
         """
         def store():
@@ -5410,7 +5461,7 @@ class Server:
         #: Response buffer used to comunicate with service
         self.response: CBuffer = CBuffer(USHRT_MAX)
         self._eof: bool = False
-        self.__line_buffer: List[str] = []
+        self.__line_buffer: list[str] = []
         #: Encoding used for text data exchange with server
         self.encoding: str = encoding
         #: Handler used for encoding errors. See: `codecs#error-handlers`
@@ -5418,10 +5469,10 @@ class Server:
         #
         self.__ev: float = None
         self.__info: ServerInfoProvider = None
-        self.__dbsvc: Union[ServerDbServices, ServerDbServices3] = None
+        self.__dbsvc: ServerDbServices | ServerDbServices3 | ServerDbServices4 = None
         self.__trace: ServerTraceServices = None
         self.__user: ServerUserServices = None
-    def __enter__(self) -> Server:
+    def __enter__(self) -> Self:
         return self
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         self.close()
@@ -5456,7 +5507,7 @@ class Server:
         self._svc.query(send, request, self.response.raw)
         if self.response.is_truncated():  # pragma: no cover
             raise InterfaceError("Requested data can't fint into largest possible buffer")
-    def _fetch_line(self, timeout: int=-1) -> Optional[str]: # pylint: disable=W0613
+    def _fetch_line(self, timeout: int=-1) -> str | None: # pylint: disable=W0613
         self._fetch_complex_info(bytes([SrvInfoCode.LINE]))
         result = None
         while not self.response.is_eof():
@@ -5524,7 +5575,7 @@ class Server:
         """
         assert self._svc is not None
         return self.info.get_info(SrvInfoCode.RUNNING) > 0
-    def readline_timed(self, timeout: int) -> Union[str, Sentinel, None]:
+    def readline_timed(self, timeout: int) -> str | Sentinel | None:
         """Get next line of textual output from last service query.
 
         Arguments:
@@ -5544,7 +5595,7 @@ class Server:
         if data:
             return data + '\n'
         return None
-    def readline(self) -> Optional[str]:
+    def readline(self) -> str | None:
         """Get next line of textual output from last service query.
 
         Returns:
@@ -5569,7 +5620,7 @@ class Server:
         if self.__line_buffer:
             return self.__line_buffer.pop(0)
         return None
-    def readlines(self) -> List[str]:
+    def readlines(self) -> list[str]:
         """Get list of remaining output lines from last service query.
         """
         return list(self)
@@ -5613,7 +5664,7 @@ class Server:
             self.__info = ServerInfoProvider(self.encoding, self)
         return self.__info
     @property
-    def database(self) -> Union[ServerDbServices4, ServerDbServices3, ServerDbServices]:
+    def database(self) -> ServerDbServices4 | ServerDbServices3 | ServerDbServices:
         """Access to various database-related actions and services.
         """
         if self.__dbsvc is None:

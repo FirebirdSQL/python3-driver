@@ -38,7 +38,7 @@
 """
 
 from __future__ import annotations
-from typing import Union, Any, Optional, ByteString
+from typing import Any, ByteString
 import sys
 import threading
 import datetime
@@ -87,7 +87,7 @@ class iVersioned(metaclass=iVersionedMeta):
         self._as_parameter_ = intf
         if intf and self.vtable.version < self.VERSION:  # pragma: no cover
             raise InterfaceError(f"Wrong interface version {self.vtable.version}, expected {self.VERSION}")
-    def __report(self, cls: Union[Error, FirebirdWarning], vector_ptr: a.ISC_STATUS_ARRAY_PTR) -> None:
+    def __report(self, cls: Error | FirebirdWarning, vector_ptr: a.ISC_STATUS_ARRAY_PTR) -> None:
         msg = _util.format_status(self.status)
         sqlstate = create_string_buffer(6)
         a.api.fb_sqlstate(sqlstate, vector_ptr)
@@ -1293,7 +1293,7 @@ class iService(iService_v4):
 class iProvider(iPluginBase):
     "Class that wraps IProvider interface for use from Python"
     VERSION = 4
-    def attach_database(self, filename: str, dpb: Optional[bytes] = None, encoding: str = 'ascii') -> iAttachment:
+    def attach_database(self, filename: str, dpb: bytes | None = None, encoding: str = 'ascii') -> iAttachment:
         "Replaces `isc_attach_database()`"
         result = self.vtable.attachDatabase(self, self.status, filename.encode(encoding),
                                             0 if dpb is None else len(dpb), dpb)
@@ -1508,7 +1508,7 @@ handle does not work with interfaces."""
                                                    dialect, byref(c_byte(1)))
         self._check()
         return iAttachment(result)
-    def decode_date(self, date: Union[a.ISC_DATE, bytes]) -> datetime.date:
+    def decode_date(self, date: a.ISC_DATE | bytes) -> datetime.date:
         "Replaces `isc_decode_sql_date()`"
         if isinstance(date, bytes):
             date = a.ISC_DATE.from_buffer_copy(date)
@@ -1517,7 +1517,7 @@ handle does not work with interfaces."""
         day = a.Cardinal(0)
         self.vtable.decodeDate(self, date, byref(year), byref(month), byref(day))
         return datetime.date(year.value, month.value, day.value)
-    def decode_time(self, atime: Union[a.ISC_TIME, bytes]) -> datetime.time:
+    def decode_time(self, atime: a.ISC_TIME | bytes) -> datetime.time:
         "Replaces `isc_decode_sql_time()`"
         if isinstance(atime, bytes):
             atime = a.ISC_TIME.from_buffer_copy(atime)
@@ -1584,7 +1584,7 @@ class iUtil(iUtil_v2):
         result = self.vtable.getDecFloat34(self, self.status)
         self._check()
         return iDecFloat34(result)
-    def decode_time_tz(self, timetz: Union[a.ISC_TIME_TZ, bytes]) -> datetime.time:
+    def decode_time_tz(self, timetz: a.ISC_TIME_TZ | bytes) -> datetime.time:
         "Decodes TIME WITH TIMEZONE from internal format to datetime.time with tzinfo."
         if isinstance(timetz, bytes):
             timetz = a.ISC_TIME_TZ.from_buffer_copy(timetz)
@@ -1604,7 +1604,7 @@ class iUtil(iUtil_v2):
         tz = get_timezone(self.str_buf.value.decode())
         return datetime.time(self.hours.value, self.minutes.value, self.seconds.value,
                              self.fractions.value * 100, tz)
-    def decode_timestamp_tz(self, timestamptz: Union[a.ISC_TIMESTAMP_TZ, bytes]) -> datetime.datetime:
+    def decode_timestamp_tz(self, timestamptz: a.ISC_TIMESTAMP_TZ | bytes) -> datetime.datetime:
         "Decodes TIMESTAMP WITH TIMEZONE from internal format to datetime.datetime with tzinfo."
         if isinstance(timestamptz, bytes):
             timestamptz = a.ISC_TIMESTAMP_TZ.from_buffer_copy(timestamptz)

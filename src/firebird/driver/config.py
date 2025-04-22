@@ -39,7 +39,7 @@
 """
 
 from __future__ import annotations
-from typing import Dict, Union, Iterable
+from typing import Iterable
 import os
 from firebird.base.config import Config, StrOption, IntOption, BoolOption, EnumOption, \
      ConfigListOption, ListOption, ConfigParser, EnvExtendedInterpolation
@@ -205,7 +205,7 @@ class DriverConfig(Config):
         #: Registered databases
         self.databases: ConfigListOption = \
             ConfigListOption('databases', DatabaseConfig, "Registered databases")
-    def read(self, filenames: Union[str, Iterable], encoding: str=None):
+    def read(self, filenames: str | Iterable, encoding: str=None):
         """Read configuration from a filename or an iterable of filenames.
 
         Files that cannot be opened are silently ignored; this is
@@ -236,7 +236,7 @@ class DriverConfig(Config):
         parser = ConfigParser(interpolation=EnvExtendedInterpolation())
         parser.read_string(string)
         self.load_config(parser)
-    def read_dict(self, dictionary: Dict) -> None:
+    def read_dict(self, dictionary: dict) -> None:
         """Read configuration from a dictionary.
 
         Keys are section names, values are dictionaries with keys and values

@@ -37,7 +37,7 @@
 """
 
 from __future__ import annotations
-from typing import Tuple, List, Callable, Protocol, Union
+from typing import Callable, Protocol
 import time
 import datetime
 import decimal
@@ -63,7 +63,7 @@ class DatabaseError(Error):
     #: Returned SQLCODE or None
     sqlcode: int = None
     #: Tuple with all returned GDS error codes
-    gds_codes: Tuple[int] = ()
+    gds_codes: tuple[int] = ()
 
 class DataError(DatabaseError):
     """Exception raised for errors that are due to problems with the processed
@@ -229,7 +229,7 @@ class SrvInfoCode(IntEnum):
     """Service information (isc_info_svc_*) codes.
     """
     SRV_DB_INFO = 50
-    GET_CONFIG = 53
+    #GET_CONFIG = 53
     VERSION = 54
     SERVER_VERSION = 55
     IMPLEMENTATION = 56
@@ -467,6 +467,7 @@ class TraReadCommitted(IntEnum):
     """
     RECORD_VERSION = 17
     NO_RECORD_VERSION = 18
+    READ_CONSISTENCY = 22
 
 class Isolation(IntEnum):
     """Transaction Isolation TPB parameters.
@@ -1315,7 +1316,7 @@ class TraceSession:
     user: str
     timestamp: datetime.datetime
     name: str = ''
-    flags: List = field(default_factory=list)
+    flags: list = field(default_factory=list)
 
 @dataclass
 class ImpData:
@@ -1425,11 +1426,11 @@ ROWID = DBAPITypeObject()
 # Types for type hints
 
 #: DB API 2.0 Cursor DESCRIPTION
-DESCRIPTION = Tuple[str, type, int, int, int, int, bool]
+DESCRIPTION = tuple[str, type, int, int, int, int, bool]
 #: Callback that accepts line of text output
 CB_OUTPUT_LINE = Callable[[str], None]
 #: File name (incl. path) specification
-FILESPEC = Union[str, Path]
+FILESPEC = str | Path
 
 class Transactional(Protocol):  # pragma: no cover
     """Protocol type for object that supports transactional processing."""
