@@ -34,7 +34,11 @@
 #                 ______________________________________
 # pylint: disable=C0302, W0212, R0902, R0912,R0913, R0914, R0915, R0904
 
-"""firebird-driver - Main driver code (connection, transaction, cursor etc.)
+"""firebird-driver - Main driver code
+
+This module implements the core components of the firebird-driver, including the DB-API 2.0
+compliant Connection, Cursor, and Transaction objects, as well as helper classes for managing
+events, BLOBs, parameter buffers, and accessing database/server information.
 """
 
 from __future__ import annotations
@@ -296,7 +300,7 @@ _OP_RECORD_AND_REREGISTER = object()
 
 # Managers for Parameter buffers
 class TPB: # pylint: disable=R0902
-    """Transaction Parameter Buffer.
+    """Helper class to build and parse Transaction Parameter Buffers (TPB) used when starting transactions.
     """
     def __init__(self, *, access_mode: TraAccessMode=TraAccessMode.WRITE,
                  isolation: Isolation=Isolation.SNAPSHOT,
@@ -412,7 +416,7 @@ class TPB: # pylint: disable=R0902
         self._table_reservation.append((name, share_mode, access_mode))
 
 class DPB:
-    """Database Parameter Buffer.
+    """Helper class to build and parse Database Parameter Buffers (DPB) used when connecting databases.
     """
     def __init__(self, *, user: str=None, password: str=None, role: str=None,
                  trusted_auth: bool=False, sql_dialect: int=3, timeout: int=None,
@@ -684,7 +688,8 @@ class DPB:
         return result
 
 class SPB_ATTACH:
-    """Service Parameter Buffer.
+    """Helper class to build and parse Service Parameter Buffers (SPB) used when connecting
+    to service manager.
     """
     def __init__(self, *, user: str = None, password: str = None, trusted_auth: bool = False,
                  config: str = None, auth_plugin_list: str = None, expected_db: str=None,
@@ -1106,6 +1111,9 @@ _engine_version_provider: EngineVersionProvider = EngineVersionProvider('utf8')
 class DatabaseInfoProvider3(InfoProvider):
     """Provides access to information about attached database [Firebird 3+].
 
+    Information can be accessed either via specific properties (preferred) or the lower-level
+    `get_info()` method.
+
     Important:
        Do NOT create instances of this class directly! Use `Connection.info` property to
        access the instance already bound to attached database.
@@ -1316,6 +1324,13 @@ class DatabaseInfoProvider3(InfoProvider):
 
         Returns:
             The data type of returned value depends on information required.
+
+        Note:
+            Info codes that return stable values are cached on first call, so subsequent calls do not
+            access the server. These codes are: `CREATION_DATE`, `DB_CLASS`, `DB_PROVIDER`,
+            `DB_SQL_DIALECT`, `ODS_MINOR_VERSION`, `ODS_VERSION`, `PAGE_SIZE`, `VERSION`,
+            `FIREBIRD_VERSION`, `IMPLEMENTATION_OLD`, `IMPLEMENTATION`, `DB_ID`, `BASE_LEVEL`,
+            and `ATTACHMENT_ID`.
         """
         if info_code in self._cache:
             return self._cache[info_code]
@@ -1589,6 +1604,9 @@ class DatabaseInfoProvider3(InfoProvider):
 class DatabaseInfoProvider(DatabaseInfoProvider3):
     """Provides access to information about attached database [Firebird 4+].
 
+    Information can be accessed either via specific properties (preferred) or the lower-level
+    `get_info()` method.
+
     Important:
        Do NOT create instances of this class directly! Use `Connection.info` property to
        access the instance already bound to attached database.
@@ -1754,6 +1772,7 @@ class Connection:
             tra.commit()
         return result
     def _determine_field_precision(self, meta: ItemMetadata) -> int:
+        # This internal method involve database queries using _tra_qry.
         if (not meta.relation) or (not meta.field):
             # Either or both field name and relation name are not provided,
             # so we cannot determine field precision. It's normal situation
@@ -1796,6 +1815,7 @@ class Connection:
         # We ran out of options
         return 0
     def _get_array_sqlsubtype(self, relation: bytes, column: bytes) -> int | None:
+        # This internal method involve database query using _tra_qry.
         subtype = self.__sqlsubtype_cache.get((relation, column))
         if subtype is not None:
             return subtype
@@ -1819,6 +1839,9 @@ class Connection:
 
             Closes all event collectors, transaction managers (with rollback) and statements
             associated with this connection before attempt to drop the database.
+
+        Important:
+            The connection object becomes unusable after this call.
 
         Hooks:
             Event `.ConnectionHook.DROPPED`: Executed after database is sucessfuly dropped.
@@ -2021,7 +2044,7 @@ class Connection:
         return result
     @property
     def schema(self) -> 'firebird.lib.schema.Schema':
-        """Access to database schema. Requires firebird.lib package.
+        """Access to database schema. Requires `firebird.lib` package.
         """
         if self.__schema is None:
             import firebird.lib.schema # pylint: disable=C0415
@@ -2031,7 +2054,7 @@ class Connection:
         return self.__schema
     @property
     def monitor(self) -> 'firebird.lib.monitor.Monitor':
-        """Access to database monitoring tables. Requires firebird.lib package.
+        """Access to database monitoring tables. Requires `firebird.lib` package.
         """
         if self.__monitor is None:
             import firebird.lib.monitor # pylint: disable=C0415
@@ -2283,6 +2306,9 @@ def create_database(database: str | Path, *, user: str=None, password: str=None,
 class TransactionInfoProvider3(InfoProvider):
     """Provides access to information about transaction [Firebird 3+].
 
+    Information can be accessed either via specific properties (preferred) or the lower-level
+    `get_info()` method.
+
     Important:
        Do NOT create instances of this class directly! Use `TransactionManager.info`
        property to access the instance already bound to transaction context.
@@ -2392,6 +2418,9 @@ class TransactionInfoProvider3(InfoProvider):
 class TransactionInfoProvider(TransactionInfoProvider3):
     """Provides access to information about transaction [Firebird 4+].
 
+    Information can be accessed either via specific properties (preferred) or the lower-level
+    `get_info()` method.
+
     Important:
        Do NOT create instances of this class directly! Use `TransactionManager.info`
        property to access the instance already bound to transaction context.
@@ -2466,6 +2495,8 @@ class TransactionManager:
         return self.__handle
     def close(self) -> None:
         """Close the transaction manager and release all associated resources.
+
+        Implicitly ends the current active transaction according to default_action (if active).
 
         Important:
             Closed instance SHALL NOT be used anymore.
@@ -3015,7 +3046,8 @@ class BlobReader(io.IOBase):
         Like `file.read()`.
 
         Note:
-           Performs automatic conversion to `str` for TEXT BLOBs.
+           Performs automatic conversion to `str` for TEXT BLOBs (subtype 1) based on the
+           connection's encoding.
         """
         assert self._blob is not None
         if size >= 0:
@@ -3195,6 +3227,7 @@ class Cursor:
         #: Names of columns that should be returned as `BlobReader`.
         self.stream_blobs: list[str] = []
         #: BLOBs greater than threshold are returned as `BlobReader` instead in materialized form.
+        #: Defaults to the value from `driver_config`.
         self.stream_blob_threshold = driver_config.stream_blob_threshold.value
     def __enter__(self) -> Cursor:
         return self
@@ -3930,7 +3963,7 @@ class Cursor:
         Note:
             This function simply calls `.execute` in a loop, feeding it with
             parameters from `seq_of_parameters`. Because `.execute` reuses the statement,
-            calling `executemany` is equally efective as direct use of prepared `Statement`
+            calling `executemany` is equally effective as direct use of prepared `Statement`
             and calling `execute` in a loop directly in application.
         """
         for parameters in seq_of_parameters:
@@ -4075,7 +4108,7 @@ class Cursor:
 
         Arguments:
             row:  Row data returned by fetch_* method.
-            into: Dictionary that shouold be updated with row data.
+            into: Dictionary that should be updated with row data.
         """
         assert len(self._stmt._names) == len(row), "Length of data must match number of fields"
         if into is None:
@@ -4215,6 +4248,9 @@ class Cursor:
 
 class ServerInfoProvider(InfoProvider):
     """Provides access to information about attached server.
+
+    Information can be accessed either via specific properties (preferred) or the lower-level
+    `get_info()` method.
 
     Important:
        Do NOT create instances of this class directly! Use `Server.info` property to access
@@ -5458,7 +5494,7 @@ class Server:
         self.host: str = host
         #: Service output mode (line or eof)
         self.mode: SrvInfoCode = SrvInfoCode.TO_EOF
-        #: Response buffer used to comunicate with service
+        #: Response buffer used to communicate with service
         self.response: CBuffer = CBuffer(USHRT_MAX)
         self._eof: bool = False
         self.__line_buffer: list[str] = []

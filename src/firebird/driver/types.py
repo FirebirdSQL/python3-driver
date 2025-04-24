@@ -34,6 +34,9 @@
 #                 ______________________________________
 
 """firebird-driver - Types for Firebird driver
+
+This module defines DB-API 2.0 exceptions, Firebird-specific constants (enums and flags),
+data structures (dataclasses), type objects, and type hints used throughout the driver.
 """
 
 from __future__ import annotations
@@ -57,7 +60,6 @@ class InterfaceError(Error):
 class DatabaseError(Error):
     """Exception raised for all errors reported by Firebird.
     """
-
     #: Returned SQLSTATE or None
     sqlstate: str = None
     #: Returned SQLCODE or None
@@ -69,8 +71,10 @@ class DataError(DatabaseError):
     """Exception raised for errors that are due to problems with the processed
     data like division by zero, numeric value out of range, etc.
 
-    Important:
-        This exceptions is never directly thrown by Firebird driver.
+    Note:
+        This exception class exists for DB-API 2.0 compatibility. The driver typically raises
+        the base DatabaseError with specific Firebird codes, rather than this specialized
+        subclass directly.
     """
 
 class OperationalError(DatabaseError):
@@ -79,8 +83,10 @@ class OperationalError(DatabaseError):
     disconnect occurs, the data source name is not found, a transaction could not
     be processed, a memory allocation error occurred during processing, etc.
 
-    Important:
-        This exceptions is never directly thrown by Firebird driver.
+    Note:
+        This exception class exists for DB-API 2.0 compatibility. The driver typically raises
+        the base DatabaseError with specific Firebird codes, rather than this specialized
+        subclass directly.
     """
 
 class IntegrityError(DatabaseError):
@@ -180,18 +186,20 @@ class DirectoryCode(IntEnum):
 
 class XpbKind(IntEnum):
     """Xpb builder kinds.
+
+    Note:
+       Some members are specific to certain Firebird versions, indicated by comments.
     """
     DPB = 1
     SPB_ATTACH = 2
     SPB_START = 3
     TPB = 4
-    # Firebird 4 amd 3.5.6+
+    # Firebird 4 and 3.0.6+
     BATCH = 5
     BPB = 6
     SPB_SEND = 7
     SPB_RECEIVE = 8
     SPB_RESPONSE = 9
-
 
 class StateResult(IntEnum):
     """IState result codes.
@@ -203,6 +211,9 @@ class StateResult(IntEnum):
 
 class PageSize(IntEnum):
     """Supported database page sizes.
+
+    Note:
+       Some members are specific to certain Firebird versions, indicated by comments.
     """
     PAGE_4K = 4096
     PAGE_8K = 8192
@@ -256,7 +267,11 @@ class BlobInfoCode(IntEnum):
     TYPE = 7
 
 class DbInfoCode(IntEnum):
-    """Database information (isc_info_*) codes.
+    """Database information codes, corresponding to the isc_info_* constants used for
+    database-level information requests.
+
+    Note:
+       Some members are specific to certain Firebird versions, indicated by comments.
     """
     DB_ID = 4
     READS = 5
@@ -369,6 +384,9 @@ class ReplicaMode(IntEnum):
 
 class StmtInfoCode(IntEnum):
     """Statement information (isc_info_sql_*) codes.
+
+    Note:
+       Some members are specific to certain Firebird versions, indicated by comments.
     """
     STMT_TYPE = 21
     GET_PLAN = 22
@@ -471,6 +489,9 @@ class TraReadCommitted(IntEnum):
 
 class Isolation(IntEnum):
     """Transaction Isolation TPB parameters.
+
+    Note:
+       Some members are specific to certain Firebird versions, indicated by comments.
     """
     READ_COMMITTED = -1
     SERIALIZABLE = 1
@@ -528,6 +549,9 @@ class StatementType(IntEnum):
 
 class SQLDataType(IntEnum):
     """SQL data type.
+
+    Note:
+       Some members are specific to certain Firebird versions, indicated by comments.
     """
     TEXT = 452
     VARYING = 448
@@ -554,7 +578,10 @@ class SQLDataType(IntEnum):
     NULL = 32766
 
 class DPBItem(IntEnum):
-    """isc_dpb_* items (VERSION2).
+    """Database Parameter Buffer (DPB) items, corresponding to isc_dpb_* constants (using VERSION2 codes).
+
+    Note:
+       Some members are specific to certain Firebird versions, indicated by comments.
     """
     PAGE_SIZE = 4
     NUM_BUFFERS = 5
@@ -611,7 +638,10 @@ class DPBItem(IntEnum):
     WORKER_ATTACH = 101
 
 class TPBItem(IntEnum):
-    """isc_tpb_* items.
+    """Transaction Parameter Buffer (DPB) items, corresponding to isc_tpb_* constants.
+
+    Note:
+       Some members are specific to certain Firebird versions, indicated by comments.
     """
     VERSION3 = 3
     IGNORE_LIMBO = 14
@@ -669,6 +699,9 @@ class BlobStorage(IntEnum):
 
 class ServerAction(IntEnum):
     """isc_action_svc_* items.
+
+    Note:
+       Some members are specific to certain Firebird versions, indicated by comments.
     """
     BACKUP = 1
     RESTORE = 2
@@ -701,6 +734,9 @@ class SrvDbInfoOption(IntEnum):
 
 class SrvRepairOption(IntEnum):
     """Parameters for ServerAction.REPAIR.
+
+    Note:
+       Some members are specific to certain Firebird versions, indicated by comments.
     """
     COMMIT_TRANS = 15
     ROLLBACK_TRANS = 34
@@ -730,6 +766,9 @@ class SrvRepairOption(IntEnum):
 
 class SrvBackupOption(IntEnum):
     """Parameters for ServerAction.BACKUP.
+
+    Note:
+       Some members are specific to certain Firebird versions, indicated by comments.
     """
     FILE = 5
     FACTOR = 6
@@ -745,6 +784,9 @@ class SrvBackupOption(IntEnum):
 
 class SrvRestoreOption(IntEnum):
     """Parameters for ServerAction.RESTORE.
+
+    Note:
+       Some members are specific to certain Firebird versions, indicated by comments.
     """
     FILE = 5
     SKIP_DATA = 8
@@ -765,6 +807,9 @@ class SrvRestoreOption(IntEnum):
 
 class SrvNBackupOption(IntEnum):
     """Parameters for ServerAction.NBAK.
+
+    Note:
+       Some members are specific to certain Firebird versions, indicated by comments.
     """
     LEVEL = 5
     FILE = 6
@@ -1115,7 +1160,10 @@ class ServerCapability(IntFlag):
     QUOTED_FILENAME = 0b10000000000
 
 class SrvRepairFlag(IntFlag):
-    """isc_spb_rpr_* flags for ServerAction.REPAIR.
+    """isc_spb_rpr_* flags used as options for the ServerAction.REPAIR service action.
+
+    Note:
+       Some members are specific to certain Firebird versions, indicated by comments.
     """
     VALIDATE_DB = 0x01
     SWEEP_DB = 0x02
@@ -1147,6 +1195,9 @@ class SrvStatFlag(IntFlag):
 
 class SrvBackupFlag(IntFlag):
     """isc_spb_bkp_* flags for ServerAction.BACKUP.
+
+    Note:
+       Some members are specific to certain Firebird versions, indicated by comments.
     """
     NONE = 0
     IGNORE_CHECKSUMS = 0x01
@@ -1163,6 +1214,9 @@ class SrvBackupFlag(IntFlag):
 
 class SrvRestoreFlag(IntFlag):
     """isc_spb_res_* flags for ServerAction.RESTORE.
+
+    Note:
+       Some members are specific to certain Firebird versions, indicated by comments.
     """
     METADATA_ONLY = 0x04
     DEACTIVATE_IDX = 0x0100
@@ -1177,6 +1231,9 @@ class SrvRestoreFlag(IntFlag):
 
 class SrvNBackupFlag(IntFlag):
     """isc_spb_nbk_* flags for ServerAction.NBAK.
+
+    Note:
+       Some members are specific to certain Firebird versions, indicated by comments.
     """
     NONE = 0
     NO_TRIGGERS = 0x01

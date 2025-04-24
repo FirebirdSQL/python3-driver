@@ -33,7 +33,16 @@
 # Contributor(s): Pavel Císař (original code)
 #                 ______________________________________
 
-"""firebird-driver - Drivers hooks
+"""firebird-driver - Driver Hooks
+
+This module defines specific hook points (events) within the firebird-driver
+lifecycle where custom functions can be registered and executed. These hooks
+allow for extending or modifying driver behavior, logging, or monitoring.
+
+Hooks are registered using `firebird.driver.add_hook()` or the `firebird.base.hooks.hook_manager`.
+The specific signature required for each hook function and the context in which
+it's called are documented within the driver methods that trigger these hooks
+(primarily in `firebird.driver.core`).
 """
 
 from __future__ import annotations
@@ -41,20 +50,27 @@ from enum import Enum, auto
 from firebird.base.hooks import register_class, get_callbacks, add_hook, hook_manager
 
 class APIHook(Enum):
-    """Firebird API hooks.
+    """Hooks related to the loading and initialization of the underlying Firebird client API.
     """
+    #: Called after the Firebird client library has been successfully loaded and basic interfaces obtained.
     LOADED = auto()
 
 class ConnectionHook(Enum):
-    """Connection hooks.
+    """Hooks related to the lifecycle of a database connection (attachment, detachment, dropping).
     """
+    #: Called before attempting to attach to a database, allows interception or modification.
     ATTACH_REQUEST = auto()
+    #: Called after a database connection (attachment) has been successfully established.
     ATTACHED = auto()
+    #: Called before attempting to detach from a database, allows cancellation.
     DETACH_REQUEST = auto()
+    #: Called after a database connection has been successfully closed (detached).
     CLOSED = auto()
+    #: Called after a database has been successfully dropped.
     DROPPED = auto()
 
 class ServerHook(Enum):
-    """Server hooks.
+    """Hooks related to the lifecycle of a service manager connection.
     """
+    #: Called after connecting to the Firebird service manager.
     ATTACHED = auto()

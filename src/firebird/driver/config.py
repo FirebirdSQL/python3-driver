@@ -35,7 +35,14 @@
 
 """firebird-driver - Driver configuration
 
+This module defines the configuration system for the firebird-driver.
+It uses an INI-style format managed via the `DriverConfig` class, which
+allows defining settings for the driver itself, default server/database
+parameters, and named configurations for specific servers and databases.
 
+Configuration can be loaded from files, strings, or dictionaries, and
+supports environment variable interpolation. The primary interaction point
+is usually the global `driver_config` instance.
 """
 
 from __future__ import annotations
@@ -46,7 +53,7 @@ from firebird.base.config import Config, StrOption, IntOption, BoolOption, EnumO
 from .types import NetProtocol, DecfloatRound, DecfloatTraps
 
 class ServerConfig(Config): # pylint: disable=R0902
-    """Server configuration.
+    """Represents configuration options specific to a named Firebird server entry.
     """
     def __init__(self, name: str, *, optional: bool=False, description: str=None):
         super().__init__(name, optional=optional, description=description)
@@ -81,7 +88,7 @@ class ServerConfig(Config): # pylint: disable=R0902
             StrOption('encoding_errors', "Handler used for encoding errors", default='strict')
 
 class DatabaseConfig(Config): # pylint: disable=R0902
-    """Database configuration.
+    """Represents configuration options specific to a named Firebird database entry, including connection and creation parameters.
     """
     def __init__(self, name: str, *, optional: bool=False, description: str=None):
         super().__init__(name, optional=optional, description=description)
@@ -94,12 +101,12 @@ class DatabaseConfig(Config): # pylint: disable=R0902
         #: Database file specification or alias
         self.database: StrOption = \
             StrOption('database', "Database file specification or alias")
-        #: Database filename should be passed in UTF8
+        #: Specifies whether the database parameter (filename) is encoded in UTF-8 when passed to the server.
         self.utf8filename: BoolOption = \
-            BoolOption('utf8filename', "Database filename should be passed in UTF8")
-        #: Protocol to be used for databasem value is `.NetProtocol`
+            BoolOption('utf8filename', "Specifies whether the database parameter (filename) is encoded in UTF-8 when passed to the server.")
+        #: Network protocol to use for the connection. Value must be a member of the .NetProtocol enum.
         self.protocol: EnumOption = \
-            EnumOption('protocol', NetProtocol, "Protocol to be used for database")
+            EnumOption('protocol', NetProtocol, "Network protocol to use for the connection. Value must be a member of the .NetProtocol enum.")
         #: Defaul user name, default is envar ISC_USER or None if not specified
         self.user: StrOption = \
             StrOption('user', "Defaul user name", default=os.environ.get('ISC_USER', None))
@@ -147,14 +154,15 @@ class DatabaseConfig(Config): # pylint: disable=R0902
         #: Set DECFLOAT ROUND [Firebird 4], value is `.DecfloatRound`
         self.decfloat_round: EnumOption = \
             EnumOption('decfloat_round', DecfloatRound, "DECFLOAT round mode")
-        #: Set DECFLOAT TRAPS [Firebird 4], values are `.DecfloatTraps`
+        #: Specifies which DECFLOAT exceptional conditions should cause a trap (raise an error) [Firebird 4]. Accepts a list of .DecfloatTraps enum members.
         self.decfloat_traps: ListOption = \
             ListOption('decfloat_traps', DecfloatTraps,
-                       "Which DECFLOAT exceptional conditions cause a trap")
+                       """Specifies which DECFLOAT exceptional conditions should cause a trap
+(raise an error) [Firebird 4]. Accepts a list of .DecfloatTraps enum members.""")
         #: Number of parallel workers
         self.parallel_workers = \
             IntOption('parallel_workers', "Number of parallel workers")
-        # Create options
+        # --- Options specific to Database Creation ---
         #: Database create option. Page size to be used.
         self.page_size: IntOption = \
             IntOption('page_size', "Page size to be used for created database.")
@@ -179,7 +187,12 @@ class DatabaseConfig(Config): # pylint: disable=R0902
                        "Data page space usage for created database (True = reserve space, False = Use all space)")
 
 class DriverConfig(Config):
-    """Firebird driver configuration.
+    """Main configuration object for the Firebird driver. Holds global settings, default
+    configurations, and lists of registered servers and databases.
+
+    Settings loaded from specific server/database sections override those in the `db_defaults`
+    and `server_defaults` sections. When reading multiple files, options from later files
+    override those from earlier ones.
     """
     def __init__(self, name: str):
         super().__init__(name)
@@ -310,4 +323,7 @@ class DriverConfig(Config):
 
 # Configuration
 
+#: Global driver configuration instance.
+#: Load settings from files/strings/dicts into this object before connecting,
+#: or modify its attributes directly for programmatic configuration.
 driver_config: DriverConfig = DriverConfig('firebird.driver')
