@@ -42,6 +42,10 @@ from firebird.driver.core import Statement # To check instance type
 @pytest.fixture()
 def prepared_statement(db_connection):
     """Provides a prepared statement for statement info tests."""
+    # This is needed for StmtInfoCode.EXEC_PATH_BLR_BYTES and EXEC_PATH_BLR_TEXT to work
+    with db_connection.cursor() as cur:
+        cur.execute('set debug option dsql_keep_blr = true')
+    db_connection.commit()
     # Need a transaction active for prepare
     with db_connection.transaction_manager() as tm:
         with tm.cursor() as cur:

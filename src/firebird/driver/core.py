@@ -1353,7 +1353,7 @@ class DatabaseInfoProvider3(InfoProvider):
             elif tag == isc_info_error:  # pragma: no cover
                 raise InterfaceError("An error response was received")
             else:  # pragma: no cover
-                raise InterfaceError("Result code does not match request code")
+                raise InterfaceError(f"Result code does not match request code {info_code}")
         #
         if info_code in (DbInfoCode.ACTIVE_TRANSACTIONS, DbInfoCode.LIMBO):
             # we'll rewind back, otherwise it will break the repeating cluster processing
@@ -2357,12 +2357,13 @@ class TransactionInfoProvider3(InfoProvider):
         """
         if info_code not in self._handlers:
             raise NotSupportedError(f"Info code {info_code} not supported by engine version {self._mngr()._connection()._engine_version()}")
+        self.response.clear()
         request = bytes([info_code])
         self._get_data(request)
         tag = self.response.get_tag()
         if request[0] != tag:
             raise InterfaceError("An error response was received" if tag == isc_info_error
-                                 else "Result code does not match request code")
+                                 else f"Result code does not match request code {info_code}")
         #
         return self._handlers[info_code]()
     # Functions
@@ -2799,13 +2800,15 @@ class StatementInfoProvider3(InfoProvider):
         """
         if info_code not in self._handlers:
             raise NotSupportedError(f"Info code {info_code} not supported by engine version {self._stmt()._connection()._engine_version()}")
+        self.response.clear()
         request = bytes([info_code])
         self._get_data(request)
+        if self.response.is_eof():
+            return None
         tag = self.response.get_tag()
         if request[0] != tag:
             raise InterfaceError("An error response was received" if tag == isc_info_error
-                                 else "Result code does not match request code")
-        #
+                                 else f"Result code does not match request code {info_code}")
         return self._handlers[info_code]()
 
 class StatementInfoProvider4(StatementInfoProvider3):
