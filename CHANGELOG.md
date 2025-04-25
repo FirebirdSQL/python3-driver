@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Test changed from `unittest` to `pytest`
 - Parameter `database` for `connect` and `create_database` now accepts `pathlib.Path` objects.
 - Removed all usage of `LoggingIdMixin` as it's no longer available in `firebird-base` v2.0.
-- Typy hints adjusted to Python 3.11 standards
+- Type hints adjusted to Python 3.11 standards
 
 ### Added
 

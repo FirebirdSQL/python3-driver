@@ -132,9 +132,10 @@ unfixable = [
   # Don't change single quotes to double
   "Q000"
 ]
+exclude = ["*_pb2.py", "*.pyi", "tests/*", "docs/*", "work/*"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["firebird.base"]
+known-first-party = ["firebird.driver", "firebird.base"]
 
 [tool.ruff.lint.flake8-tidy-imports]
 ban-relative-imports = "all"
@@ -142,6 +143,12 @@ ban-relative-imports = "all"
 [tool.ruff.lint.per-file-ignores]
 # Tests can use magic values, assertions, and relative imports
 "tests/**/*" = ["PLR2004", "S101", "TID252"]
+"fbapi.py" = ["N801", "E501"]
+"interfaces.py" = ["ARG001", "ARG002", "N801", "N803", "E501", "FBT001"]
+"hooks.py" = ["F401"]
+"core.py" = ["PLR2004", "DTZ007", "S104", "B028", "E501"]
+"config.py" = ["E501"]
+"__init__.py" = ["F401"]
 
 [tool.coverage.run]
 source_pkgs = ["firebird.driver", "tests"]

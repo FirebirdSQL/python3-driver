@@ -32,25 +32,53 @@
 #
 # Contributor(s): Pavel Císař (original code)
 #                 ______________________________________
-# pylint: disable=C0302, W0212, R0902, R0912,R0913, R0914, R0915, R0904
 
 """firebird-driver - Interface wrappers for Firebird new API
 """
 
 from __future__ import annotations
-from typing import Any, ByteString
+
+import datetime
 import sys
 import threading
-import datetime
-from warnings import warn
+from collections.abc import ByteString
 from contextlib import suppress
-from ctypes import memmove, memset, create_string_buffer, cast, byref, string_at, sizeof, \
-     c_char_p, c_void_p, c_byte, c_ulong
-from .types import Error, DatabaseError, InterfaceError, FirebirdWarning, BCD, \
-     StateResult, DirectoryCode, BlobInfoCode, SQLDataType, XpbKind, \
-     StatementType, StateFlag, CursorFlag, StatementFlag, PreparePrefetchFlag, get_timezone
+from ctypes import (
+    byref,
+    c_byte,
+    c_char_p,
+    c_ulong,
+    c_void_p,
+    cast,
+    create_string_buffer,
+    memmove,
+    memset,
+    sizeof,
+    string_at,
+)
+from typing import Any
+from warnings import warn
+
 from . import fbapi as a
 from .hooks import APIHook, add_hook
+from .types import (
+    BCD,
+    BlobInfoCode,
+    CursorFlag,
+    DatabaseError,
+    DirectoryCode,
+    Error,
+    FirebirdWarning,
+    InterfaceError,
+    PreparePrefetchFlag,
+    SQLDataType,
+    StateFlag,
+    StatementFlag,
+    StatementType,
+    StateResult,
+    XpbKind,
+    get_timezone,
+)
 
 # Internal
 _master = None
@@ -97,9 +125,9 @@ class iVersioned(metaclass=iVersionedMeta):
         while vector_ptr[i] != 0:
             if vector_ptr[i] == 1:
                 i += 1
-                if (vector_ptr[i] & 0x14000000) == 0x14000000:
+                if (vector_ptr[i] & 0x14000000) == 0x14000000: # noqa: PLR2004
                     gds_codes.append(vector_ptr[i])
-                    if (vector_ptr[i] == 335544436) and (vector_ptr[i + 1] == 4):
+                    if (vector_ptr[i] == 335544436) and (vector_ptr[i + 1] == 4): # noqa: PLR2004
                         i += 2
                         sqlcode = vector_ptr[i]
             i += 1
@@ -179,7 +207,7 @@ class iDisposable(iVersioned):
 class iStatus(iDisposable):
     """Class that wraps IStatus interface for use from Python
 
-    IStatus replaces ISC_STATUS_ARRAY. Functionality is extended – Status has separate
+    IStatus replaces ISC_STATUS_ARRAY. Functionality is extended - Status has separate
     access to errors and warnings vectors, can hold vectors of unlimited length, itself
     stores strings used in vectors avoiding need in circular strings buffer. Interface is
     on purpose minimized (methods like convert it to text are moved to Util interface) in
@@ -419,7 +447,7 @@ class iTransaction_v3(iReferenceCounted):
         "Replaces `isc_transaction_info()`"
         self.vtable.getInfo(self, self.status, len(items), items, len(buffer), buffer)
         self._check()
-    def prepare(self, message: bytes = None) -> None:
+    def prepare(self, message: bytes | None=None) -> None:
         "Replaces `isc_prepare_transaction2()`"
         self.vtable.prepare(self, self.status, 0 if message is None else len(message), message)
         self._check()
@@ -523,7 +551,7 @@ containing index parameter, it's value should be: 0 <= index < getCount()."""
         self._check()
         return result
     def get_subtype(self, index: int) -> int:
-        "Returns blob field subtype (0 – binary, 1 – text, etc.)"
+        "Returns blob field subtype (0 - binary, 1 - text, etc.)"
         result = self.vtable.getSubType(self, self.status, index)
         self._check()
         return result
@@ -611,7 +639,7 @@ class iMetadataBuilder_v3(iReferenceCounted):
         self.vtable.truncate(self, self.status, count)
         self._check()
     def move_name_to_index(self, name: str, index: int) -> None:
-        "Reorganize fields in a message – move field “name” to given position"
+        "Reorganize fields in a message - move field 'name' to given position"
         self.vtable.moveNameToIndex(self, self.status, name.encode(), index)
         self._check()
     def remove(self, index: int) -> None:
@@ -882,7 +910,7 @@ class iBatch_v3(iReferenceCounted):
         """Adds blob data (this can be multiple objects or part of single blob) to the batch.
         Header of each blob in the stream is aligned at `get_blob_alignment()` boundary
         and contains 3 fields: first - 8-bytes blob identifier (in ISC_QUAD format),
-        second - 4-bytes length of blob, third – 4-bytes length of BPB. Blob header should
+        second - 4-bytes length of blob, third - 4-bytes length of BPB. Blob header should
         not cross boundaries of buffer in this function call. BPB data is placed right after
         header, blob data goes next. Length of blob includes BPB (if it present). All data
         may be distributed between multiple `add_blob_stream()` calls. Blob data in turn
@@ -893,7 +921,7 @@ class iBatch_v3(iReferenceCounted):
         self._check()
     def register_blob(self, existing: a.ISC_QUAD, id_: a.ISC_QUAD):
         """Makes it possible to use in batch blobs added using standard Blob interface.
-        This function contains 2 ISC_QUAD* parameters, it’s important not to mix them –
+        This function contains 2 ISC_QUAD* parameters, it's important not to mix them -
         first parameter (`existing`) is a blob identifier, already added out of batch scope,
         second (`id_`) is blob identifier that will be placed in a message in this batch.
         """
@@ -927,7 +955,7 @@ class iBatch_v3(iReferenceCounted):
         self._check()
         return result
     def get_metadata(self) -> iMessageMetadata:
-        """Returns format of metadata used in batch’s messages.
+        """Returns format of metadata used in batch's messages.
         """
         result = self.vtable.getMetadata(self, self.status)
         self._check()
@@ -1099,13 +1127,13 @@ contains transaction number in network format of given length."""
         self.vtable.transactRequest(self, self.status, transaction, len(blr), blr,
                                     len(in_msg), in_msg, len(out_msg), out_msg)
         self._check()
-    def create_blob(self, transaction: iTransaction, id_: a.ISC_QUAD, bpb: bytes = None) -> iBlob:
+    def create_blob(self, transaction: iTransaction, id_: a.ISC_QUAD, bpb: bytes | None=None) -> iBlob:
         "Creates new blob, stores it's identifier in id, replaces `isc_create_blob2()`"
         result = self.vtable.createBlob(self, self.status, transaction, byref(id_),
                                         len(bpb) if bpb is not None else 0, bpb)
         self._check()
         return iBlob(result)
-    def open_blob(self, transaction: iTransaction, id_: a.ISC_QUAD, bpb: bytes = None) -> iBlob:
+    def open_blob(self, transaction: iTransaction, id_: a.ISC_QUAD, bpb: bytes | None=None) -> iBlob:
         "Opens existing blob, replaces `isc_open_blob2()`"
         result = self.vtable.openBlob(self, self.status, transaction, byref(id_),
                                       len(bpb) if bpb is not None else 0, bpb)
@@ -1139,8 +1167,8 @@ possible to control what information will be preloaded from engine at once
         self._check()
         return iStatement(result)
     def execute(self, transaction: iTransaction, stmt: str, dialect: int,
-                in_metadata: iMessageMetadata = None, in_buffer: bytes = None,
-                out_metadata: iMessageMetadata = None, out_buffer: bytes = None) -> None:
+                in_metadata: iMessageMetadata | None=None, in_buffer: bytes | None=None,
+                out_metadata: iMessageMetadata | None=None, out_buffer: bytes | None=None) -> None:
         """Executes any SQL statement except returning multiple rows of data.
 Partial analogue of `isc_dsql_execute2()` - in and out XSLQDAs replaced with
 input and output messages with appropriate buffers."""
@@ -1501,7 +1529,7 @@ It may be seen in ISQL when invoked with -Z switch."""
         self._check()
         return result
     def execute_create_database(self, stmt: str, dialect: int) -> iAttachment:
-        """Execute “CREATE DATABASE ...” statement – ISC trick with NULL statement
+        """Execute “CREATE DATABASE ...” statement - ISC trick with NULL statement
 handle does not work with interfaces."""
         b_stmt: bytes = stmt.encode()
         result = self.vtable.executeCreateDatabase(self, self.status, len(b_stmt), b_stmt,
@@ -1542,7 +1570,7 @@ handle does not work with interfaces."""
     def get_client_version(self) -> int:
         "Returns integer, containing major version in byte 0 and minor version in byte 1"
         return self.vtable.getClientVersion(self)
-    def get_xpb_builder(self, kind: XpbKind, buffer: bytes = None) -> iXpbBuilder:
+    def get_xpb_builder(self, kind: XpbKind, buffer: bytes |None=None) -> iXpbBuilder:
         "Returns XpbBuilder interface."
         if buffer is None:
             result = self.vtable.getXpbBuilder(self, self.status, kind, None, 0)
@@ -1905,7 +1933,7 @@ class iVersionCallbackImpl(iVersionedImpl):
                 a.IVersionCallback_VTablePtr,
                 a.IVersionCallback_struct,
                 a.IVersionCallback)
-    def __callback(self, this: a.IVersionCallback, status: a.IStatus, text: c_char_p): # pylint: disable=W0613
+    def __callback(self, this: a.IVersionCallback, status: a.IStatus, text: c_char_p):
         with suppress(Exception):
             self.callback(text.decode())
     def callback(self, text: str) -> None:
@@ -1922,14 +1950,14 @@ class iCryptKeyCallbackImpl(iVersionedImpl):
                 a.ICryptKeyCallback_VTablePtr,
                 a.ICryptKeyCallback_struct,
                 a.ICryptKeyCallback)
-    def __callback(self, this: a.ICryptKeyCallback, data_length: a.Cardinal, data: c_void_p, # pylint: disable=W0613
+    def __callback(self, this: a.ICryptKeyCallback, data_length: a.Cardinal, data: c_void_p,
                    buffer_length: a.Cardinal, buffer: c_void_p) -> a.Cardinal:
         with suppress(Exception):
             key = self.get_crypt_key(data[:data_length], buffer_length)
             key_size = min(len(key), buffer_length)
             memmove(buffer, key, key_size)
             return key_size
-    def get_crypt_key(self, data: bytes, max_key_size: int) -> bytes: # pylint: disable=W0613
+    def get_crypt_key(self, data: bytes, max_key_size: int) -> bytes:
         "Should return crypt key"
         return b''
 
@@ -1944,7 +1972,7 @@ class iOffsetsCallbackImp(iVersionedImpl):
                 a.IOffsetsCallback_VTablePtr,
                 a.IOffsetsCallback_struct,
                 a.IOffsetsCallback)
-    def __callback(self, this: a.IOffsetsCallback, status: a.IStatus, index: a.Cardinal, # pylint: disable=W0613
+    def __callback(self, this: a.IOffsetsCallback, status: a.IStatus, index: a.Cardinal,
                    offset: a.Cardinal, nullOffset: a.Cardinal) -> None:
         with suppress(Exception):
             self.set_offset(index, offset, nullOffset)
@@ -1962,7 +1990,7 @@ class iEventCallbackImpl(iReferenceCountedImpl):
                 a.IEventCallback_VTablePtr,
                 a.IEventCallback_struct,
                 a.IEventCallback)
-    def __callback(self, this: a.IVersionCallback, length: a.Cardinal, events: a.BytePtr) -> None: # pylint: disable=W0613
+    def __callback(self, this: a.IVersionCallback, length: a.Cardinal, events: a.BytePtr) -> None:
         with suppress(Exception):
             self.events_arrived(string_at(events, length))
     def events_arrived(self, events: bytes) -> None:
@@ -1976,7 +2004,7 @@ class iTimerImpl(iReferenceCountedImpl):
         self.vtable.handler = a.ITimer_handler(self.__callback)
     def _get_intf(self):
         return (a.ITimer_VTable, a.ITimer_VTablePtr, a.ITimer_struct, a.ITimer)
-    def __callback(self, this: a.ITimer) -> None: # pylint: disable=W0613
+    def __callback(self, this: a.ITimer) -> None:
         with suppress(Exception):
             self.handler()
     def handler(self) -> None:
@@ -1984,12 +2012,12 @@ class iTimerImpl(iReferenceCountedImpl):
 
 # API_LOADED hook
 def __augment_api(api: a.FirebirdAPI) -> None:
-    def wrap(result, func=None, arguments=None) -> iMaster: # pylint: disable=W0613
+    def wrap(result, func=None, arguments=None) -> iMaster:
         return iMaster(result)
 
     api.fb_get_master_interface.errcheck = wrap
-    setattr(sys.modules[__name__], '_master', api.fb_get_master_interface())
-    setattr(sys.modules[__name__], '_util', _master.get_util_interface())
+    setattr(sys.modules[__name__], '_master', api.fb_get_master_interface()) # noqa: B010
+    setattr(sys.modules[__name__], '_util', _master.get_util_interface()) # noqa:B010
     api.master: iMaster = _master
     api.util: iUtil = _util
 

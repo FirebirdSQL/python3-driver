@@ -46,8 +46,11 @@ it's called are documented within the driver methods that trigger these hooks
 """
 
 from __future__ import annotations
+
 from enum import Enum, auto
-from firebird.base.hooks import register_class, get_callbacks, add_hook, hook_manager
+
+from firebird.base.hooks import add_hook, get_callbacks, hook_manager, register_class
+
 
 class APIHook(Enum):
     """Hooks related to the loading and initialization of the underlying Firebird client API.

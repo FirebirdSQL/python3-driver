@@ -40,14 +40,18 @@ data structures (dataclasses), type objects, and type hints used throughout the 
 """
 
 from __future__ import annotations
-from typing import Callable, Protocol
-import time
+
 import datetime
 import decimal
-from pathlib import Path
+import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum, IntEnum, IntFlag
+from pathlib import Path
+from typing import Protocol
+
 from dateutil import tz
+
 from firebird.base.types import Error
 
 # Exceptions required by Python Database API 2.0
@@ -1436,19 +1440,19 @@ Time = datetime.time
 #: This callable constructs an object holding a time stamp value.
 Timestamp = datetime.datetime
 
-def DateFromTicks(ticks: float) -> Date: # pragma: no cover
+def DateFromTicks(ticks: float) -> Date: # noqa: N802
     """Constructs an object holding a date value from the given ticks value
     (number of seconds since the epoch).
     """
     return Date(time.localtime(ticks)[:3])
 
-def TimeFromTicks(ticks: float) -> Time: # pragma: no cover
+def TimeFromTicks(ticks: float) -> Time: # noqa: N802
     """Constructs an object holding a time value from the given ticks value
     (number of seconds since the epoch).
     """
     return Time(time.localtime(ticks)[3:6])
 
-def TimestampFromTicks(ticks: float) -> Timestamp: # pragma: no cover
+def TimestampFromTicks(ticks: float) -> Timestamp: # noqa: N802
     """Constructs an object holding a time stamp value from the given ticks value
     (number of seconds since the epoch).
     """
@@ -1491,13 +1495,13 @@ FILESPEC = str | Path
 
 class Transactional(Protocol):  # pragma: no cover
     """Protocol type for object that supports transactional processing."""
-    def begin(self, tpb: bytes = None) -> None:
+    def begin(self, tpb: bytes | None=None) -> None:
         """Begin transaction.
         """
-    def commit(self, *, retaining: bool = False) -> None:
+    def commit(self, *, retaining: bool=False) -> None:
         """Commit transaction.
         """
-    def rollback(self, *, retaining: bool = False, savepoint: str = None) -> None:
+    def rollback(self, *, retaining: bool=False, savepoint: str | None=None) -> None:
         """Rollback transaction.
         """
     def is_active(self) -> bool:
@@ -1506,7 +1510,7 @@ class Transactional(Protocol):  # pragma: no cover
 
 # timezone
 
-def get_timezone(timezone: str=None) -> datetime.tzinfo:
+def get_timezone(timezone: str | None=None) -> datetime.tzinfo:
     """Returns `datetime.tzinfo` for specified time zone.
 
     This is preferred method to obtain timezone information for construction of timezone-aware
@@ -1522,5 +1526,5 @@ def get_timezone(timezone: str=None) -> datetime.tzinfo:
         timezone = 'UTC' + timezone
     result = tz.gettz(timezone)
     if result is not None and not hasattr(result, '_timezone_'):
-        setattr(result, '_timezone_', timezone[3:] if timezone.startswith('UTC') and len(timezone) > 3 else timezone)
+        result._timezone_ = timezone[3:] if timezone.startswith('UTC') and len(timezone) > 3 else timezone # noqa: PLR2004
     return result

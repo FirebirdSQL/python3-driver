@@ -32,7 +32,6 @@
 #
 # Contributor(s): Pavel Císař (original code)
 #                 ______________________________________
-# pylint: disable=C0302, W0212, R0902, R0912,R0913, R0914, R0915, R0904
 
 """firebird-driver - Main driver code
 
@@ -42,50 +41,130 @@ events, BLOBs, parameter buffers, and accessing database/server information.
 """
 
 from __future__ import annotations
-from typing import Any, Type, Sequence, Mapping, BinaryIO, Callable, Self
-import sys
-import os
-import weakref
-import itertools
-import threading
-import io
+
+import atexit
 import contextlib
-import struct
 import datetime
 import decimal
-import atexit
+import io
+import itertools
+import os
+import struct
+import sys
+import threading
+import weakref
 from abc import ABC, abstractmethod
-from warnings import warn
+from collections.abc import Callable, Mapping, Sequence
+from ctypes import addressof, byref, create_string_buffer, memmove, memset, pointer, string_at
 from pathlib import Path
 from queue import PriorityQueue
-from ctypes import memset, memmove, create_string_buffer, byref, string_at, addressof, pointer
-from firebird.base.types import Sentinel, UNLIMITED, ByteOrder, UNDEFINED
-from firebird.base.buffer import MemoryBuffer, BufferFactory, BytesBufferFactory, \
-     CTypesBufferFactory, safe_ord
+from typing import Any, BinaryIO, Self
+from warnings import warn
+
+from firebird.base.buffer import BufferFactory, BytesBufferFactory, CTypesBufferFactory, MemoryBuffer, safe_ord
+from firebird.base.types import UNDEFINED, UNLIMITED, ByteOrder, Sentinel
+
 from . import fbapi as a
-from .types import (Error, InterfaceError, DatabaseError, DataError,
-                    OperationalError, IntegrityError, InternalError, ProgrammingError,
-                    NotSupportedError,
-                    NetProtocol, DBKeyScope, DbInfoCode, Features, ReplicaMode, TraInfoCode,
-                    TraInfoAccess, TraIsolation, TraReadCommitted, TraLockResolution, TraAccessMode,
-                    TableShareMode, TableAccessMode, Isolation, DefaultAction, StatementType, BlobType,
-                    DbAccessMode, DbSpaceReservation, DbWriteMode, ShutdownMode, OnlineMode,
-                    ShutdownMethod,
-                    DecfloatRound, DecfloatTraps, DESCRIPTION,
-                    ServerCapability, SrvRepairFlag, SrvStatFlag, SrvBackupFlag,
-                    SrvRestoreFlag, SrvNBackupFlag, SrvInfoCode, ConnectionFlag, EncryptionFlag,
-                    TPBItem, DPBItem, BPBItem, SPBItem, SQLDataType, ItemMetadata, Transactional,
-                    XpbKind, CursorFlag, ImpCompiler, ImpCPU, ImpFlags, ImpOS, Implementation,
-                    TableAccessStats, DbProvider, DbClass, StatementFlag, BlobInfoCode,
-                    StateResult, SrvDbInfoOption, ServerAction, CB_OUTPUT_LINE, FILESPEC,
-                    SrvBackupOption, SrvRestoreOption, SrvNBackupOption, SrvRepairOption,
-                    SrvPropertiesOption, SrvPropertiesFlag, SrvValidateOption,
-                    SrvUserOption, SrvTraceOption, UserInfo, TraceSession, ReqInfoCode,
-                    StmtInfoCode, ImpData, ImpDataOld)
-from .interfaces import iAttachment, iTransaction, iStatement, iMessageMetadata, iBlob, \
-     iResultSet, iDtc, iService, iCryptKeyCallbackImpl
-from .hooks import APIHook, ConnectionHook, ServerHook, register_class, get_callbacks, add_hook
-from .config import driver_config
+from .config import DatabaseConfig, driver_config
+from .hooks import APIHook, ConnectionHook, ServerHook, add_hook, get_callbacks, register_class
+from .interfaces import (
+    iAttachment,
+    iBlob,
+    iCryptKeyCallbackImpl,
+    iDtc,
+    iMaster,
+    iMessageMetadata,
+    iResultSet,
+    iService,
+    iStatement,
+    iTransaction,
+    iUtil,
+)
+from .types import (
+    CB_OUTPUT_LINE,
+    DESCRIPTION,
+    FILESPEC,
+    BlobInfoCode,
+    BlobType,
+    BPBItem,
+    ConnectionFlag,
+    CursorFlag,
+    DatabaseError,
+    DataError,
+    DbAccessMode,
+    DbClass,
+    DbInfoCode,
+    DBKeyScope,
+    DbProvider,
+    DbSpaceReservation,
+    DbWriteMode,
+    DecfloatRound,
+    DecfloatTraps,
+    DefaultAction,
+    DPBItem,
+    EncryptionFlag,
+    Error,
+    Features,
+    ImpCompiler,
+    ImpCPU,
+    ImpData,
+    ImpDataOld,
+    ImpFlags,
+    Implementation,
+    ImpOS,
+    IntegrityError,
+    InterfaceError,
+    InternalError,
+    Isolation,
+    ItemMetadata,
+    NetProtocol,
+    NotSupportedError,
+    OnlineMode,
+    OperationalError,
+    ProgrammingError,
+    ReplicaMode,
+    ReqInfoCode,
+    ServerAction,
+    ServerCapability,
+    ShutdownMethod,
+    ShutdownMode,
+    SPBItem,
+    SQLDataType,
+    SrvBackupFlag,
+    SrvBackupOption,
+    SrvDbInfoOption,
+    SrvInfoCode,
+    SrvNBackupFlag,
+    SrvNBackupOption,
+    SrvPropertiesFlag,
+    SrvPropertiesOption,
+    SrvRepairFlag,
+    SrvRepairOption,
+    SrvRestoreFlag,
+    SrvRestoreOption,
+    SrvStatFlag,
+    SrvTraceOption,
+    SrvUserOption,
+    SrvValidateOption,
+    StatementFlag,
+    StatementType,
+    StateResult,
+    StmtInfoCode,
+    TableAccessMode,
+    TableAccessStats,
+    TableShareMode,
+    TPBItem,
+    TraAccessMode,
+    TraceSession,
+    TraInfoAccess,
+    TraInfoCode,
+    TraIsolation,
+    TraLockResolution,
+    Transactional,
+    TraReadCommitted,
+    UserInfo,
+    XpbKind,
+)
 
 SHRT_MIN = -32768
 SHRT_MAX = 32767
@@ -95,6 +174,10 @@ INT_MAX = 2147483647
 UINT_MAX = 4294967295
 LONG_MIN = -9223372036854775808
 LONG_MAX = 9223372036854775807
+
+FB50: float = 5.0
+FB40: float = 4.0
+INFINITE_TIMEOUT: int = -1
 
 #: Max BLOB segment size
 MAX_BLOB_SEGMENT_SIZE = 65535
@@ -129,12 +212,12 @@ TIMEOUT: Sentinel = Sentinel('TIMEOUT')
 
 # Internal
 #: Firebird `.iMaster` interface
-_master = None
+_master: iMaster = None
 #: Firebird `.iUtil` interface
-_util = None
+_util: iUtil = None
 _thns = threading.local()
 
-_tenTo = [10 ** x for x in range(30)]
+_ten_to = [10 ** x for x in range(30)]
 _i2name = {DbInfoCode.READ_SEQ_COUNT: 'sequential', DbInfoCode.READ_IDX_COUNT: 'indexed',
            DbInfoCode.INSERT_COUNT: 'inserts', DbInfoCode.UPDATE_COUNT: 'updates',
            DbInfoCode.DELETE_COUNT: 'deletes', DbInfoCode.BACKOUT_COUNT: 'backouts',
@@ -149,8 +232,8 @@ isc_info_error = 3
 isc_info_data_not_ready = 4
 
 def __api_loaded(api: a.FirebirdAPI) -> None:
-    setattr(sys.modules[__name__], '_master', api.fb_get_master_interface())
-    setattr(sys.modules[__name__], '_util', _master.get_util_interface())
+    setattr(sys.modules[__name__], '_master', api.fb_get_master_interface()) # noqa: B010
+    setattr(sys.modules[__name__], '_util', _master.get_util_interface()) # noqa: B010
 
 add_hook(APIHook.LOADED, a.FirebirdAPI, __api_loaded)
 
@@ -254,7 +337,7 @@ def create_meta_descriptors(meta: iMessageMetadata) -> list[ItemMetadata]:
 # Context managers
 
 @contextlib.contextmanager
-def transaction(transact_object: Transactional, *, tpb: bytes=None, bypass: bool=False) -> Transactional: # pylint: disable=W0621
+def transaction(transact_object: Transactional, *, tpb: bytes | None=None, bypass: bool=False) -> Transactional:
     """Context manager for `~firebird.driver.types.Transactional` objects.
 
     Starts new transaction when context is entered. On exit calls `rollback()` when
@@ -299,16 +382,16 @@ _OP_DIE = object()
 _OP_RECORD_AND_REREGISTER = object()
 
 # Managers for Parameter buffers
-class TPB: # pylint: disable=R0902
+class TPB:
     """Helper class to build and parse Transaction Parameter Buffers (TPB) used when starting transactions.
     """
     def __init__(self, *, access_mode: TraAccessMode=TraAccessMode.WRITE,
                  isolation: Isolation=Isolation.SNAPSHOT,
-                 lock_timeout: int=-1,
+                 lock_timeout: int=INFINITE_TIMEOUT,
                  no_auto_undo: bool=False,
                  auto_commit: bool=False,
                  ignore_limbo: bool=False,
-                 at_snapshot_number: int=None,
+                 at_snapshot_number: int | None=None,
                  encoding: str='ascii'):
         self.encoding: str = encoding
         self.access_mode: TraAccessMode = access_mode
@@ -319,7 +402,7 @@ class TPB: # pylint: disable=R0902
         self.ignore_limbo: bool = ignore_limbo
         self._table_reservation: list[tuple[str, TableShareMode, TableAccessMode]] = []
         # Firebird 4
-        self.at_snapshot_number: int = at_snapshot_number
+        self.at_snapshot_number: int | None = at_snapshot_number
     def clear(self) -> None:
         """Clear all information.
         """
@@ -336,16 +419,16 @@ class TPB: # pylint: disable=R0902
         """Load information from TPB.
         """
         self.clear()
-        with a.get_api().util.get_xpb_builder(XpbKind.TPB, buffer) as tpb: # pylint: disable=W0621
+        with a.get_api().util.get_xpb_builder(XpbKind.TPB, buffer) as tpb:
             while not tpb.is_eof():
                 tag = tpb.get_tag()
-                if tag in TraAccessMode._value2member_map_: # pylint: disable=E1101
+                if tag in TraAccessMode._value2member_map_:
                     self.access_mode = TraAccessMode(tag)
-                elif tag in TraIsolation._value2member_map_: # pylint: disable=E1101
+                elif tag in TraIsolation._value2member_map_:
                     isolation = TraIsolation(tag)
                     if isolation != TraIsolation.READ_COMMITTED:
                         self.isolation = Isolation(isolation)
-                elif tag in TraReadCommitted._value2member_map_: # pylint: disable=E1101
+                elif tag in TraReadCommitted._value2member_map_:
                     isolation = TraReadCommitted(tag)
                     if isolation == TraReadCommitted.RECORD_VERSION:
                         self.isolation = Isolation.READ_COMMITTED_RECORD_VERSION
@@ -353,7 +436,7 @@ class TPB: # pylint: disable=R0902
                         self.isolation = Isolation.READ_COMMITTED_NO_RECORD_VERSION
                     else:
                         self.isolation = Isolation.READ_COMMITTED_READ_CONSISTENCY
-                elif tag in TraLockResolution._value2member_map_: # pylint: disable=E1101
+                elif tag in TraLockResolution._value2member_map_:
                     self.lock_timeout = -1 if TraLockResolution(tag) is TraLockResolution.WAIT else 0
                 elif tag == TPBItem.AUTOCOMMIT:
                     self.auto_commit = True
@@ -365,13 +448,13 @@ class TPB: # pylint: disable=R0902
                     self.lock_timeout = tpb.get_int()
                 elif tag == TPBItem.AT_SNAPSHOT_NUMBER:
                     self.at_snapshot_number = tpb.get_bigint()
-                elif tag in TableAccessMode._value2member_map_: # pylint: disable=E1101
+                elif tag in TableAccessMode._value2member_map_:
                     tbl_access = TableAccessMode(tag)
                     tbl_name = tpb.get_string(encoding=self.encoding)
                     tpb.move_next()
                     if tpb.is_eof():
                         raise ValueError(f"Missing share mode value in table {tbl_name} reservation")
-                    if (val := tpb.get_tag()) not in TableShareMode._value2member_map_: # pylint: disable=E1101
+                    if (val := tpb.get_tag()) not in TableShareMode._value2member_map_:
                         raise ValueError(f"Missing share mode value in table {tbl_name} reservation")
                     tbl_share = TableShareMode(val)
                     self.reserve_table(tbl_name, tbl_share, tbl_access)
@@ -379,7 +462,7 @@ class TPB: # pylint: disable=R0902
     def get_buffer(self) -> bytes:
         """Create TPB from stored information.
         """
-        with a.get_api().util.get_xpb_builder(XpbKind.TPB) as tpb: # pylint: disable=W0621
+        with a.get_api().util.get_xpb_builder(XpbKind.TPB) as tpb:
             tpb.insert_tag(self.access_mode)
             isolation = (Isolation.READ_COMMITTED_RECORD_VERSION
                          if self.isolation == Isolation.READ_COMMITTED
@@ -418,20 +501,21 @@ class TPB: # pylint: disable=R0902
 class DPB:
     """Helper class to build and parse Database Parameter Buffers (DPB) used when connecting databases.
     """
-    def __init__(self, *, user: str=None, password: str=None, role: str=None,
-                 trusted_auth: bool=False, sql_dialect: int=3, timeout: int=None,
-                 charset: str='UTF8', cache_size: int=None, no_gc: bool=False,
+    def __init__(self, *, user: str | None=None, password: str | None=None, role: str | None=None,
+                 trusted_auth: bool=False, sql_dialect: int=3, timeout: int | None=None,
+                 charset: str='UTF8', cache_size: int | None=None, no_gc: bool=False,
                  no_db_triggers: bool=False, no_linger: bool=False,
-                 utf8filename: bool=False, dbkey_scope: DBKeyScope=None,
-                 dummy_packet_interval: int=None, overwrite: bool=False,
-                 db_cache_size: int=None, forced_writes: bool=None,
-                 reserve_space: bool=None, page_size: int=None, read_only: bool=False,
-                 sweep_interval: int=None, db_sql_dialect: int=None, db_charset: str=None,
-                 config: str=None, auth_plugin_list: str=None, session_time_zone: str=None,
-                 set_db_replica: ReplicaMode=None, set_bind: str=None,
-                 decfloat_round: DecfloatRound=None,
-                 decfloat_traps: list[DecfloatTraps]=None,
-                 parallel_workers: int=None
+                 utf8filename: bool=False, dbkey_scope: DBKeyScope | None=None,
+                 dummy_packet_interval: int | None=None, overwrite: bool=False,
+                 db_cache_size: int | None=None, forced_writes: bool | None=None,
+                 reserve_space: bool | None=None, page_size: int | None=None, read_only: bool=False,
+                 sweep_interval: int | None=None, db_sql_dialect: int | None=None,
+                 db_charset: str | None=None, config: str | None=None,
+                 auth_plugin_list: str | None=None, session_time_zone: str | None=None,
+                 set_db_replica: ReplicaMode | None=None, set_bind: str | None=None,
+                 decfloat_round: DecfloatRound | None=None,
+                 decfloat_traps: list[DecfloatTraps] | None=None,
+                 parallel_workers: int | None=None
                  ):
         # Available options:
         # AuthClient, WireCryptPlugin, Providers, ConnectionTimeout, WireCrypt,
@@ -440,16 +524,16 @@ class DPB:
         #: Configuration override
         self.config: str | None = config
         #: List of authentication plugins override
-        self.auth_plugin_list: str = auth_plugin_list
+        self.auth_plugin_list: str | None = auth_plugin_list
         # Connect
         #: Use trusted authentication
         self.trusted_auth: bool = trusted_auth
         #: User name
-        self.user: str = user
+        self.user: str | None = user
         #: User password
-        self.password: str = password
+        self.password: str | None = password
         #: User role
-        self.role: str = role
+        self.role: str | None = role
         #: SQL Dialect for database connection
         self.sql_dialect: int = sql_dialect
         #: Character set for database connection
@@ -459,7 +543,7 @@ class DPB:
         #: Dummy packet interval for this database connection
         self.dummy_packet_interval: int | None = dummy_packet_interval
         #: Page cache size override for database connection
-        self.cache_size: int = cache_size
+        self.cache_size: int | None = cache_size
         #: Disable garbage collection for database connection
         self.no_gc: bool = no_gc
         #: Disable database triggers for database connection
@@ -487,7 +571,7 @@ class DPB:
         #: Overwrite existing database [db create only]
         self.overwrite: bool = overwrite
         #: Number of pages in database cache [db create only]
-        self.db_buffers = None
+        self.db_buffers: int | None= None
         #: Database cache size [db create only]
         self.db_cache_size: int | None = db_cache_size
         #: Database write mode (True = sync/False = async) [db create only]
@@ -503,7 +587,7 @@ class DPB:
         #: Character set for the database [db create only]
         self.db_charset: str | None = db_charset
         #: Number of parallel workers
-        self.parallel_workers: int = parallel_workers
+        self.parallel_workers: int | None = parallel_workers
     def clear(self) -> None:
         """Clear all information.
         """
@@ -611,7 +695,7 @@ class DPB:
                 elif tag == DPBItem.PARALLEL_WORKERS:
                     self.parallel_workers = dpb.get_int()
                 dpb.move_next()
-    def get_buffer(self, *, for_create: bool = False) -> bytes:
+    def get_buffer(self, *, for_create: bool=False) -> bytes:
         """Create DPB from stored information.
         """
         _py_charset: str = CHARSET_MAP.get(self.charset, 'ascii')
@@ -687,22 +771,22 @@ class DPB:
             result = dpb.get_buffer()
         return result
 
-class SPB_ATTACH:
+class SPB_ATTACH: # noqa: N801
     """Helper class to build and parse Service Parameter Buffers (SPB) used when connecting
     to service manager.
     """
-    def __init__(self, *, user: str = None, password: str = None, trusted_auth: bool = False,
-                 config: str = None, auth_plugin_list: str = None, expected_db: str=None,
-                 encoding: str='ascii', errors: str='strict', role: str=None):
+    def __init__(self, *, user: str | None=None, password: str | None=None, trusted_auth: bool=False,
+                 config: str | None=None, auth_plugin_list: str | None=None, expected_db: str | None=None,
+                 encoding: str='ascii', errors: str='strict', role: str | None=None):
         self.encoding: str = encoding
         self.errors: str = errors
-        self.user: str = user
-        self.password: str = password
+        self.user: str | None = user
+        self.password: str | None = password
         self.trusted_auth: bool = trusted_auth
-        self.config: str = config
-        self.auth_plugin_list: str = auth_plugin_list
-        self.expected_db: str = expected_db
-        self.role: str = role
+        self.config: str | None = config
+        self.auth_plugin_list: str | None = auth_plugin_list
+        self.expected_db: str | None = expected_db
+        self.role: str | None = role
     def clear(self) -> None:
         """Clear all information.
         """
@@ -764,9 +848,9 @@ class SPB_ATTACH:
 class Buffer(MemoryBuffer):
     """MemoryBuffer with extensions.
     """
-    def __init__(self, init: int | bytes, size: int = None, *,
-                 factory: Type[BufferFactory]=BytesBufferFactory,
-                 max_size: int | Sentinel=UNLIMITED, byteorder: ByteOrder=ByteOrder.LITTLE):
+    def __init__(self, init: int | bytes, size: int | None=None, *,
+                 factory: type[BufferFactory]=BytesBufferFactory,
+                 max_size: int | UNLIMITED=UNLIMITED, byteorder: ByteOrder=ByteOrder.LITTLE):
         super().__init__(init, size, factory=factory, eof_marker=isc_info_end,
                          max_size=max_size, byteorder=byteorder)
     def seek_last_data(self) -> int:
@@ -790,8 +874,8 @@ class Buffer(MemoryBuffer):
 class CBuffer(Buffer):
     """ctypes MemoryBuffer with extensions.
     """
-    def __init__(self, init: int | bytes, size: int = None, *,
-                 max_size: int | Sentinel=UNLIMITED, byteorder: ByteOrder=ByteOrder.LITTLE):
+    def __init__(self, init: int | bytes, size: int | None=None, *,
+                 max_size: int | UNLIMITED=UNLIMITED, byteorder: ByteOrder=ByteOrder.LITTLE):
         super().__init__(init, size, factory=CTypesBufferFactory, max_size=max_size, byteorder=byteorder)
 
 class EventBlock:
@@ -875,7 +959,7 @@ class EventCollector:
     Notifications of events are not accumulated until `.begin()` method is called.
 
     From the moment the `.begin()` is called, notifications of any events that occur
-    will accumulate asynchronously within the conduit’s internal queue until the collector
+    will accumulate asynchronously within the conduit's internal queue until the collector
     is closed either explicitly (via the `.close()` method) or implicitly
     (via garbage collection).
 
@@ -941,7 +1025,7 @@ class EventCollector:
             event_block = EventBlock(self.__queue, self._db_handle, block_events)
             self.__event_blocks.append(event_block)
             event_block._begin()
-    def wait(self, timeout: int | float=None) -> dict[str, int]:
+    def wait(self, timeout: int | float | None=None) -> dict[str, int]:
         """Wait for events.
 
         Blocks the calling thread until at least one of the events occurs, or
@@ -979,7 +1063,7 @@ class EventCollector:
             self.__events_ready.wait(timeout)
         return self.__events.copy()
     def flush(self) -> None:
-        """Clear any event notifications that have accumulated in the collector’s
+        """Clear any event notifications that have accumulated in the collector's
         internal queue.
         """
         if not self.__closed:
@@ -1216,7 +1300,7 @@ class DatabaseInfoProvider3(InfoProvider):
         return DbWriteMode.SYNC if value else DbWriteMode.ASYNC
     def __conv_access_mode(self, value: int) -> DbAccessMode:
         return DbAccessMode.READ_ONLY if value else DbAccessMode.READ_WRITE
-    def __db_id(self) -> list:
+    def __db_id(self) -> list[str]:
         result = []
         self.response.read_short()  # Cluster length
         count = self.response.read_byte()
@@ -1268,13 +1352,13 @@ class DatabaseInfoProvider3(InfoProvider):
         for name in usernames:
             result[name] = result.get(name, 0) + 1
         return result
-    def __tra_active(self) -> list:
+    def __tra_active(self) -> list[int]:
         result = []
         while not self.response.is_eof():
             self.response.get_tag()  # DbInfoCode.ACTIVE_TRANSACTIONS
             result.append(self.response.read_sized_int())
         return result
-    def __tra_limbo(self) -> list:
+    def __tra_limbo(self) -> list[int]:
         result = []
         while not self.response.is_eof():
             self.response.get_tag()  # DbInfoCode.LIMBO
@@ -1315,7 +1399,7 @@ class DatabaseInfoProvider3(InfoProvider):
             code: Info code.
         """
         return code in self._handlers
-    def get_info(self, info_code: DbInfoCode, page_number: int=None) -> Any:
+    def get_info(self, info_code: DbInfoCode, page_number: int | None=None) -> Any:
         """Returns requested information from associated attachment.
 
         Arguments:
@@ -1401,7 +1485,7 @@ class DatabaseInfoProvider3(InfoProvider):
                 tables.setdefault(table, dict.fromkeys(info_codes))[info_code] = count
         return [TableAccessStats(table, **{_i2name[code]:count
                                            for code, count in tables[table].items()})
-                for table in tables] # pylint: disable=C0206
+                for table in tables]
     def is_compressed(self) -> bool:
         """Returns True if connection to the server uses data compression.
         """
@@ -1674,8 +1758,8 @@ class Connection:
     InternalError = InternalError
     ProgrammingError = ProgrammingError
     NotSupportedError = NotSupportedError
-    def __init__(self, att: iAttachment, dsn: str, dpb: bytes=None, sql_dialect: int=3,
-                 charset: str=None) -> None:
+    def __init__(self, att: iAttachment, dsn: str, dpb: bytes | None=None, sql_dialect: int=3,
+                 charset: str | None=None) -> None:
         self._att: iAttachment = att
         self.__handle: a.FB_API_HANDLE = None
         self.__str: str = f'Connection[{self._get_handle().value}]'
@@ -1687,7 +1771,7 @@ class Connection:
         self.__sql_dialect: int = sql_dialect
         self._encoding: str = CHARSET_MAP.get(charset, 'ascii')
         self._att.encoding = self._encoding
-        self._dpb: bytes = dpb
+        self._dpb: bytes | None = dpb
         #: Default TPB for newly created transaction managers
         self.default_tpb: bytes = tpb(Isolation.SNAPSHOT)
         self._transactions: list[TransactionManager] = []
@@ -1731,7 +1815,7 @@ class Connection:
                                               isc_status,
                                               "Error in Connection._get_handle:fb_get_database_handle()")
         return self.__handle
-    def __stmt_deleted(self, stmt) -> None:
+    def __stmt_deleted(self, stmt: Statement) -> None:
         self._statements.remove(stmt)
     def _close(self) -> None:
         if self.__schema is not None:
@@ -1870,7 +1954,6 @@ class Connection:
         Arguments:
            sql: SQL statement to be executed.
         """
-        assert self._att is not None
         self.main_transaction.execute_immediate(sql)
     def event_collector(self, event_names: Sequence[str]) -> EventCollector:
         """Create new `EventCollector` instance for this connection.
@@ -1928,7 +2011,7 @@ class Connection:
                     self._att = None
                     for hook in get_callbacks(ConnectionHook.CLOSED, self):
                         hook(self)
-    def transaction_manager(self, default_tpb: bytes=None,
+    def transaction_manager(self, default_tpb: bytes | None=None,
                             default_action: DefaultAction=DefaultAction.COMMIT) -> TransactionManager:
         """Create new `TransactionManager` instance for this connection.
 
@@ -1936,18 +2019,16 @@ class Connection:
             default_tpb: Default Transaction parameter buffer.
             default_action: Default action to be performed on implicit transaction end.
         """
-        assert self._att is not None
         tra = TransactionManager(self, default_tpb or self.default_tpb, default_action)
         self._transactions.append(tra)
         return tra
-    def begin(self, tpb: bytes=None) -> None: # pylint: disable=W0621
+    def begin(self, tpb: bytes | None=None) -> None:
         """Starts new transaction managed by `.main_transaction`.
 
         Arguments:
             tpb: Transaction parameter buffer with transaction parameters. If not specified,
                  the `.default_tpb` is used.
         """
-        assert self._att is not None
         self.main_transaction.begin(tpb)
     def savepoint(self, name: str) -> None:
         """Creates a new savepoint for transaction managed by `.main_transaction`.
@@ -1955,7 +2036,6 @@ class Connection:
         Arguments:
             name: Name for the savepoint
         """
-        assert self._att is not None
         return self.main_transaction.savepoint(name)
     def commit(self, *, retaining: bool=False) -> None:
         """Commits the transaction managed by `.main_transaction`.
@@ -1963,21 +2043,18 @@ class Connection:
         Arguments:
             retaining: When True, the transaction context is retained after commit.
         """
-        assert self._att is not None
         self.main_transaction.commit(retaining=retaining)
-    def rollback(self, *, retaining: bool=False, savepoint: str=None) -> None:
+    def rollback(self, *, retaining: bool=False, savepoint: str | None=None) -> None:
         """Rolls back the transaction managed by `.main_transaction`.
 
         Arguments:
             retaining: When True, the transaction context is retained after rollback.
             savepoint: When specified, the transaction is rolled back to savepoint with given name.
         """
-        assert self._att is not None
         self.main_transaction.rollback(retaining=retaining, savepoint=savepoint)
     def cursor(self) -> Cursor:
         """Returns new `Cursor` instance associated with `.main_transaction`.
         """
-        assert self._att is not None
         return self.main_transaction.cursor()
     def ping(self) -> None:
         """Checks connection status. If test fails the only operation possible
@@ -1986,7 +2063,6 @@ class Connection:
         Raises:
           DatabaseError: When connection is dead.
         """
-        assert self._att is not None
         self._att.ping()
     def is_active(self) -> bool:
         """Returns True if `.main_transaction` has active transaction.
@@ -2043,26 +2119,27 @@ class Connection:
         result.extend(self._transactions)
         return result
     @property
-    def schema(self) -> 'firebird.lib.schema.Schema':
+    def schema(self) -> 'firebird.lib.schema.Schema': # noqa: UP037, F821
         """Access to database schema. Requires `firebird.lib` package.
         """
         if self.__schema is None:
-            import firebird.lib.schema # pylint: disable=C0415
+            import firebird.lib.schema
             self.__schema = firebird.lib.schema.Schema()
             self.__schema.bind(self)
             self.__schema._set_internal(True)
         return self.__schema
     @property
-    def monitor(self) -> 'firebird.lib.monitor.Monitor':
+    def monitor(self) -> 'firebird.lib.monitor.Monitor': # noqa: UP037, F821
         """Access to database monitoring tables. Requires `firebird.lib` package.
         """
         if self.__monitor is None:
-            import firebird.lib.monitor # pylint: disable=C0415
+            import firebird.lib.monitor
             self.__monitor = firebird.lib.monitor.Monitor(self)
             self.__monitor._set_internal(True)
         return self.__monitor
 
-def tpb(isolation: Isolation, lock_timeout: int=-1, access_mode: TraAccessMode=TraAccessMode.WRITE) -> bytes:
+def tpb(isolation: Isolation, lock_timeout: int=INFINITE_TIMEOUT,
+        access_mode: TraAccessMode=TraAccessMode.WRITE) -> bytes:
     """Helper function to costruct simple TPB.
 
     Arguments:
@@ -2073,7 +2150,7 @@ def tpb(isolation: Isolation, lock_timeout: int=-1, access_mode: TraAccessMode=T
     return TPB(isolation=isolation, lock_timeout=lock_timeout, access_mode=access_mode).get_buffer()
 
 def _connect_helper(dsn: str, host: str, port: str, database: str, protocol: NetProtocol) -> str:
-    if ((not dsn and not host and not database) or # pylint: disable=R0916
+    if ((not dsn and not host and not database) or
             (dsn and (host or database)) or
             (host and not database)):
         raise InterfaceError("Must supply one of:\n"
@@ -2102,9 +2179,8 @@ def _connect_helper(dsn: str, host: str, port: str, database: str, protocol: Net
         dsn += database
     return dsn
 
-def __make_connection(create: bool, dsn: str, utf8filename: bool, dpb: bytes,
-                      sql_dialect: int, charset: str,
-                      crypt_callback: iCryptKeyCallbackImpl) -> Connection:
+def __make_connection(dsn: str, utf8filename: bool, dpb: bytes, sql_dialect: int, charset: str, # noqa: FBT001
+                      crypt_callback: iCryptKeyCallbackImpl, *, create: bool) -> Connection:
     with a.get_api().master.get_dispatcher() as provider:
         if crypt_callback is not None:
             provider.set_dbcrypt_callback(crypt_callback)
@@ -2127,10 +2203,11 @@ def __make_connection(create: bool, dsn: str, utf8filename: bool, dpb: bytes,
         hook(con)
     return con
 
-def connect(database: str | Path, *, user: str=None, password: str=None, role: str=None,
-            no_gc: bool=None, no_db_triggers: bool=None, dbkey_scope: DBKeyScope=None,
-            crypt_callback: iCryptKeyCallbackImpl=None, charset: str=None,
-            auth_plugin_list: str=None, session_time_zone: str=None) -> Connection:
+def connect(database: str | Path, *, user: str | None=None, password: str | None=None,
+            role: str | None=None, no_gc: bool | None=None, no_db_triggers: bool | None=None,
+            dbkey_scope: DBKeyScope | None=None, crypt_callback: iCryptKeyCallbackImpl | None=None,
+            charset: str | None=None, auth_plugin_list: str | None=None,
+            session_time_zone: str | None=None) -> Connection:
     """Establishes a connection to the database.
 
     Arguments:
@@ -2166,7 +2243,7 @@ def connect(database: str | Path, *, user: str=None, password: str=None, role: s
     """
     if isinstance(database, Path):
         database = str(database)
-    db_config = driver_config.get_database(database)
+    db_config: DatabaseConfig = driver_config.get_database(database)
     if db_config is None:
         db_config = driver_config.db_defaults
         # we'll assume that 'database' is 'dsn'
@@ -2214,14 +2291,14 @@ def connect(database: str | Path, *, user: str=None, password: str=None, role: s
               decfloat_round=db_config.decfloat_round.value,
               decfloat_traps=db_config.decfloat_traps.value,
               parallel_workers=db_config.parallel_workers.value)
-    return __make_connection(False, dsn, db_config.utf8filename.value, dpb.get_buffer(),
-                             db_config.sql_dialect.value, charset, crypt_callback)
+    return __make_connection(dsn, db_config.utf8filename.value, dpb.get_buffer(),
+                             db_config.sql_dialect.value, charset, crypt_callback, create=False)
 
-def create_database(database: str | Path, *, user: str=None, password: str=None, role: str=None,
-                    no_gc: bool=None, no_db_triggers: bool=None, dbkey_scope: DBKeyScope=None,
-                    crypt_callback: iCryptKeyCallbackImpl=None, charset: str=None,
-                    overwrite: bool=False, auth_plugin_list=None,
-                    session_time_zone: str=None) -> Connection:
+def create_database(database: str | Path, *, user: str | None=None, password: str | None=None,
+                    role: str | None=None, no_gc: bool | None=None, no_db_triggers: bool | None=None,
+                    dbkey_scope: DBKeyScope | None=None, crypt_callback: iCryptKeyCallbackImpl | None=None,
+                    charset: str | None=None, overwrite: bool=False, auth_plugin_list: str | None=None,
+                    session_time_zone: str | None=None) -> Connection:
     """Creates new database.
 
     Arguments:
@@ -2248,7 +2325,7 @@ def create_database(database: str | Path, *, user: str=None, password: str=None,
     """
     if isinstance(database, Path):
         database = str(database)
-    db_config = driver_config.get_database(database)
+    db_config: DatabaseConfig = driver_config.get_database(database)
     if db_config is None:
         db_config = driver_config.db_defaults
         # we'll assume that 'database' is 'dsn'
@@ -2299,9 +2376,9 @@ def create_database(database: str | Path, *, user: str=None, password: str=None,
               forced_writes=db_config.forced_writes.value, page_size=db_config.page_size.value,
               reserve_space=db_config.reserve_space.value, sweep_interval=db_config.sweep_interval.value,
               db_sql_dialect=db_config.db_sql_dialect.value, db_charset=db_config.db_charset.value)
-    return __make_connection(True, dsn, db_config.utf8filename.value,
+    return __make_connection(dsn, db_config.utf8filename.value,
                              dpb.get_buffer(for_create=True), db_config.sql_dialect.value,
-                             charset, crypt_callback)
+                             charset, crypt_callback, create=True)
 
 class TransactionInfoProvider3(InfoProvider):
     """Provides access to information about transaction [Firebird 3+].
@@ -2338,7 +2415,6 @@ class TransactionInfoProvider3(InfoProvider):
     def __lock_timeout(self) -> int:
         return self.response.read_sized_int(signed=True)
     def _acquire(self, request: bytes) -> None:
-        assert self._mngr is not None
         if not self._mngr().is_active():
             raise InterfaceError("TransactionManager is not active")
         self._mngr()._tra.get_info(request, self.response.raw)
@@ -2463,16 +2539,16 @@ class TransactionManager:
         if self._tra is not None:
             warn(f"Transaction '{self.logging_id}' disposed while active", ResourceWarning)
             self._finish()
-    def __dead_con(self, obj) -> None: # pylint: disable=W0613
+    def __dead_con(self, obj: Connection) -> None: # noqa: ARG002
         self._connection = None
     def _close_cursors(self) -> None:
         for cursor in self._cursors:
             c = cursor()
             if c:
                 c.close()
-    def _cursor_deleted(self, obj) -> None:
+    def _cursor_deleted(self, obj: Cursor) -> None:
         self._cursors.remove(obj)
-    def _finish(self, default_action: DefaultAction=None) -> None:
+    def _finish(self, default_action: DefaultAction | None=None) -> None:
         try:
             if self._tra is not None:
                 if default_action is None:
@@ -2519,18 +2595,16 @@ class TransactionManager:
         Arguments:
            sql: SQL statement to be executed.
         """
-        assert not self.__closed
         if not self.is_active():
             self.begin()
         self._connection()._att.execute(self._tra, sql, self._connection().sql_dialect)
-    def begin(self, tpb: bytes=None) -> None: # pylint: disable=W0621
+    def begin(self, tpb: bytes | None=None) -> None:
         """Starts new transaction managed by this instance.
 
         Arguments:
             tpb: Transaction parameter buffer with transaction's parameters. If not specified,
                  the `.default_tpb` is used.
         """
-        assert not self.__closed
         self._finish()  # Make sure that previous transaction (if any) is ended
         self._tra = self._connection()._att.start_transaction(self.default_tpb if tpb is None
                                                               else tpb)
@@ -2540,8 +2614,6 @@ class TransactionManager:
         Arguments:
             retaining: When True, the transaction context is retained after commit.
         """
-        assert not self.__closed
-        assert self.is_active()
         if retaining:
             self._tra.commit_retaining()
         else:
@@ -2549,7 +2621,7 @@ class TransactionManager:
             self._tra.commit()
         if not retaining:
             self._tra = None
-    def rollback(self, *, retaining: bool=False, savepoint: str=None) -> None:
+    def rollback(self, *, retaining: bool=False, savepoint: str | None=None) -> None:
         """Rolls back the transaction managed by this instance.
 
         Arguments:
@@ -2559,8 +2631,6 @@ class TransactionManager:
         Raises:
             InterfaceError: When both retaining and savepoint parameters are specified.
         """
-        assert not self.__closed
-        assert self.is_active()
         if retaining and savepoint:
             raise InterfaceError("Can't rollback to savepoint while retaining context")
         if savepoint:
@@ -2583,7 +2653,6 @@ class TransactionManager:
     def cursor(self) -> Cursor:
         """Returns new `Cursor` instance associated with this instance.
         """
-        assert not self.__closed
         cur = Cursor(self._connection(), self)
         self._cursors.append(weakref.ref(cur, self._cursor_deleted))
         return cur
@@ -2624,7 +2693,7 @@ class DistributedTransactionManager(TransactionManager):
     Note:
         Implements context manager protocol to call `.close()` automatically.
     """
-    def __init__(self, connections: Sequence[Connection], default_tpb: bytes=None, # pylint: disable=W0231
+    def __init__(self, connections: Sequence[Connection], default_tpb: bytes | None=None,
                  default_action: DefaultAction=DefaultAction.COMMIT):
         self._connections: list[Connection] = list(connections)
         self.default_tpb: bytes = default_tpb if default_tpb is not None else tpb(Isolation.SNAPSHOT)
@@ -2654,19 +2723,17 @@ class DistributedTransactionManager(TransactionManager):
         Arguments:
            sql: SQL statement to be executed.
         """
-        assert not self.__closed
         if not self.is_active():
             self.begin()
         for connection in self._connections:
             connection._att.execute(self._tra, sql, connection.sql_dialect)
-    def begin(self, tpb: bytes=None) -> None: # pylint: disable=W0621
+    def begin(self, tpb: bytes | None=None) -> None:
         """Starts new distributed transaction managed by this instance.
 
         Arguments:
             tpb: Transaction parameter buffer with transaction's parameters. If not specified,
                  the `.default_tpb` is used.
         """
-        assert not self.__closed
         self._finish()  # Make sure that previous transaction (if any) is ended
         with self._dtc.start_builder() as builder:
             for con in self._connections:
@@ -2679,8 +2746,6 @@ class DistributedTransactionManager(TransactionManager):
            Direct use of this method is optional; if preparation is not triggered
            manually, it will be performed implicitly by `.commit()` in a 2PC.
         """
-        assert not self.__closed
-        assert self.is_active()
         self._tra.prepare()
     def commit(self, *, retaining: bool=False) -> None:
         """Commits the distributed transaction managed by this instance.
@@ -2688,8 +2753,6 @@ class DistributedTransactionManager(TransactionManager):
         Arguments:
             retaining: When True, the transaction context is retained after commit.
         """
-        assert not self.__closed
-        assert self.is_active()
         if retaining:
             self._tra.commit_retaining()
         else:
@@ -2697,7 +2760,7 @@ class DistributedTransactionManager(TransactionManager):
             self._tra.commit()
         if not retaining:
             self._tra = None
-    def rollback(self, *, retaining: bool=False, savepoint: str=None) -> None:
+    def rollback(self, *, retaining: bool=False, savepoint: str | None=None) -> None:
         """Rolls back the distributed transaction managed by this instance.
 
         Arguments:
@@ -2707,8 +2770,6 @@ class DistributedTransactionManager(TransactionManager):
         Raises:
             InterfaceError: When both retaining and savepoint parameters are specified.
         """
-        assert not self.__closed
-        assert self.is_active()
         if retaining and savepoint:
             raise InterfaceError("Can't rollback to savepoint while retaining context")
         if savepoint:
@@ -2728,7 +2789,7 @@ class DistributedTransactionManager(TransactionManager):
             name: Name for the savepoint
         """
         self.execute_immediate(f'SAVEPOINT {name}')
-    def cursor(self, connection: Connection) -> Cursor: # pylint: disable=W0221
+    def cursor(self, connection: Connection) -> Cursor:
         """Returns new `Cursor` instance associated with specified connection and
         this distributed transaction manager.
 
@@ -2736,7 +2797,6 @@ class DistributedTransactionManager(TransactionManager):
             InterfaceError: When specified connection is not associated with distributed
                             connection manager.
         """
-        assert not self.__closed
         if connection not in self._connections:
             raise InterfaceError("Cannot create cursor for connection that does "
                                  "not belong to this distributed transaction")
@@ -2893,10 +2953,9 @@ class Statement:
         return f'{self.logging_id}[{self.sql}]'
     def __repr__(self):
         return str(self)
-    def __dead_con(self, obj) -> None: # pylint: disable=W0613
+    def __dead_con(self, obj: Connection) -> None: # noqa: ARG002
         self._connection = None
-    def __get_plan(self, detailed: bool) -> str:
-        assert self._istmt is not None
+    def __get_plan(self, *, detailed: bool) -> str:
         result = self._istmt.get_plan(detailed)
         return result if result is None else result.strip()
     def free(self) -> None:
@@ -2917,12 +2976,10 @@ class Statement:
     def has_cursor(self) -> bool:
         """Returns True if statement has cursor (can return multiple rows).
         """
-        assert self._istmt is not None
         return StatementFlag.HAS_CURSOR in self._flags
     def can_repeat(self) -> bool:
         """Returns True if statement could be executed repeatedly.
         """
-        assert self._istmt is not None
         return StatementFlag.REPEAT_EXECUTE in self._flags
     # Properties
     @property
@@ -2949,12 +3006,12 @@ class Statement:
     def plan(self) -> str:
         """Execution plan in classic format.
         """
-        return self.__get_plan(False)
+        return self.__get_plan(detailed=False)
     @property
     def detailed_plan(self) -> str:
         """Execution plan in new format (explained).
         """
-        return self.__get_plan(True)
+        return self.__get_plan(detailed=True)
     @property
     def sql(self) -> str:
         """SQL statement.
@@ -2991,11 +3048,11 @@ class BlobReader(io.IOBase):
         Implements context manager protocol to call `.close()` automatically.
     """
     def __init__(self, blob: iBlob, blob_id: a.ISC_QUAD, sub_type: int,
-                 length: int, segment_size: int, charset: str, owner: Any=None):
+                 length: int, segment_size: int, charset: str, owner: Any | None=None):
         self._blob: iBlob = blob
         self.newline: str = '\n'
         self.sub_type: int = sub_type
-        self._owner: Any = weakref.ref(owner)
+        self._owner: Any | None = weakref.ref(owner)
         self._charset: str = charset
         self._blob_length: int = length
         self._segment_size: int = segment_size
@@ -3041,7 +3098,7 @@ class BlobReader(io.IOBase):
         if self._blob is not None:
             self._blob.close()
             self._blob = None
-    def read(self, size: int=-1) -> str | bytes:
+    def read(self, size: int=INFINITE_TIMEOUT) -> str | bytes:
         """Read at most size bytes from the file (less if the read hits EOF
         before obtaining size bytes). If the size argument is negative or omitted,
         read all data until EOF is reached. The bytes are returned as a string
@@ -3052,7 +3109,6 @@ class BlobReader(io.IOBase):
            Performs automatic conversion to `str` for TEXT BLOBs (subtype 1) based on the
            connection's encoding.
         """
-        assert self._blob is not None
         if size >= 0:
             to_read = min(size, self._blob_length - self.__pos)
         else:
@@ -3077,7 +3133,7 @@ class BlobReader(io.IOBase):
         if self.sub_type == 1:
             result = result.decode(self._charset)
         return result
-    def readline(self, size: int=-1) -> str:
+    def readline(self, size: int=INFINITE_TIMEOUT) -> str:
         """Read and return one line from the BLOB. If size is specified, at most size bytes
         will be read.
 
@@ -3086,7 +3142,6 @@ class BlobReader(io.IOBase):
         Raises:
            InterfaceError: For non-textual BLOBs.
         """
-        assert self._blob is not None
         if self.sub_type != 1:
             raise InterfaceError("Can't read line from binary BLOB")
         line = []
@@ -3117,13 +3172,13 @@ class BlobReader(io.IOBase):
         if self.newline != '\n':
             result = result.replace('\n', self.newline)
         return result
-    def readlines(self, hint: int=-1) -> list[str]:
+    def readlines(self, hint: int=INFINITE_TIMEOUT) -> list[str]:
         """Read and return a list of lines from the stream. `hint` can be specified to
         control the number of lines read: no more lines will be read if the total size
         (in bytes/characters) of all lines so far exceeds hint.
 
         Note:
-            It’s already possible to iterate on BLOB using `for line in blob:` ... without
+            It's already possible to iterate on BLOB using `for line in blob:` ... without
             calling `.readlines()`.
 
         Raises:
@@ -3138,7 +3193,7 @@ class BlobReader(io.IOBase):
             line = self.readline()
         return result
     def seek(self, offset: int, whence: int=os.SEEK_SET) -> None:
-        """Set the file’s current position, like stdio‘s `fseek()`.
+        """Set the file's current position, like stdio's `fseek()`.
 
         See:
             :meth:`io.IOBase.seek()` for details.
@@ -3151,7 +3206,6 @@ class BlobReader(io.IOBase):
            If BLOB was NOT CREATED as `stream` BLOB, this method raises `DatabaseError`
            exception. This constraint is set by Firebird.
         """
-        assert self._blob is not None
         self.__pos = self._blob.seek(whence, offset)
         self.__reset_buffer()
     def tell(self) -> int:
@@ -3213,7 +3267,7 @@ class Cursor:
     #:
     #: Required by Python DB API 2.0
     arraysize: int = 1
-    def __init__(self, connection: Connection, transaction: TransactionManager): # pylint: disable=W0621
+    def __init__(self, connection: Connection, transaction: TransactionManager):
         self._connection: Connection = connection
         self._dialect: int = connection.sql_dialect
         self._transaction: TransactionManager = transaction
@@ -3232,7 +3286,7 @@ class Cursor:
         #: BLOBs greater than threshold are returned as `BlobReader` instead in materialized form.
         #: Defaults to the value from `driver_config`.
         self.stream_blob_threshold = driver_config.stream_blob_threshold.value
-    def __enter__(self) -> Cursor:
+    def __enter__(self) -> Self:
         return self
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         self.close()
@@ -3244,9 +3298,9 @@ class Cursor:
         if (row := self.fetchone()) is not None:
             return row
         raise StopIteration
-    def __iter__(self):
+    def __iter__(self) -> Self:
         return self
-    def _dead_con(self, obj) -> None: # pylint: disable=W0613
+    def _dead_con(self, obj: Connection) -> None: # noqa: ARG002
         self._connection = None
     def _extract_db_array_to_list(self, esize: int, dtype: int, subtype: int,
                                   scale: int, dim: int, dimensions: list[int],
@@ -3273,7 +3327,7 @@ class Cursor:
                 elif dtype in (a.blr_short, a.blr_long, a.blr_int64):
                     val = (0).from_bytes(buf[bufpos:bufpos + esize], 'little', signed=True)
                     if subtype or scale:
-                        val = decimal.Decimal(val) / _tenTo[abs(scale)]
+                        val = decimal.Decimal(val) / _ten_to[abs(scale)]
                 elif dtype == a.blr_bool:
                     val = (0).from_bytes(buf[bufpos:bufpos + esize], 'little') == 1
                 elif dtype == a.blr_float:
@@ -3368,15 +3422,15 @@ class Cursor:
                     if subtype or scale:
                         val = value[i]
                         if isinstance(val, decimal.Decimal):
-                            val = int((val * _tenTo[abs(scale)]).to_integral())
-                        elif isinstance(val, (int, float)):
-                            val = int(val * _tenTo[abs(scale)])
+                            val = int((val * _ten_to[abs(scale)]).to_integral())
+                        elif isinstance(val, int | float):
+                            val = int(val * _ten_to[abs(scale)])
                         else:
                             raise TypeError(f'Objects of type {type(val)} are not '
                                             f' acceptable input for'
                                             f' a fixed-point column.')
                         valuebuf.value = val
-                    else:
+                    else: # noqa: PLR5501
                         if esize == 2:
                             valuebuf.value = value[i]
                         elif esize == 4:
@@ -3433,7 +3487,7 @@ class Cursor:
     def _validate_array_value(self, dim: int, dimensions: list[int],
                               value_type: int, sqlsubtype: int,
                               value_scale: int, value: Any) -> bool:
-        ok = isinstance(value, (list, tuple))
+        ok = isinstance(value, list | tuple)
         ok = ok and (len(value) == dimensions[dim])
         if not ok:
             return False
@@ -3473,7 +3527,6 @@ class Cursor:
         return ok
     def _pack_input(self, meta: iMessageMetadata, buffer: bytes,
                     parameters: Sequence) -> tuple[iMessageMetadata, bytes]:
-        # pylint: disable=R1702
         in_cnt = meta.get_count()
         if len(parameters) != in_cnt:
             raise InterfaceError(f"Statement parameter sequence contains"
@@ -3488,7 +3541,7 @@ class Cursor:
                 value = parameters[i]
                 if _is_str_param(value, meta.get_type(i)):
                     builder.set_type(i, SQLDataType.TEXT)
-                    if not isinstance(value, (str, bytes, bytearray)):
+                    if not isinstance(value, str | bytes | bytearray):
                         value = str(value)
                     builder.set_length(i, len(value.encode(self._encoding)) if isinstance(value, str) else len(value))
             in_meta = builder.get_metadata()
@@ -3508,7 +3561,7 @@ class Cursor:
                 # store parameter value
                 if _is_str_param(value, datatype):
                     # Implicit conversion to string
-                    if not isinstance(value, (str, bytes, bytearray)):
+                    if not isinstance(value, str | bytes | bytearray):
                         value = str(value)
                     if isinstance(value, str) and self._encoding:
                         value = value.encode(self._encoding)
@@ -3522,9 +3575,9 @@ class Cursor:
                     scale = in_meta.get_scale(i)
                     if in_meta.get_subtype(i) or scale:
                         if isinstance(value, decimal.Decimal):
-                            value = int((value * _tenTo[abs(scale)]).to_integral())
-                        elif isinstance(value, (int, float)):
-                            value = int(value * _tenTo[abs(scale)])
+                            value = int((value * _ten_to[abs(scale)]).to_integral())
+                        elif isinstance(value, int | float):
+                            value = int(value * _ten_to[abs(scale)])
                         else:
                             raise TypeError(f'Objects of type {type(value)} are not '
                                             f' acceptable input for'
@@ -3647,7 +3700,6 @@ class Cursor:
             in_meta.add_ref() # Everything went just fine, so we keep the metadata past 'with'
         return (in_meta, in_buffer)
     def _unpack_output(self) -> tuple:
-        # pylint: disable=R1702
         values = []
         buffer = self._stmt._out_buffer
         buf_addr = addressof(buffer)
@@ -3682,7 +3734,7 @@ class Cursor:
                     value = (0).from_bytes(buffer[offset:offset + length], 'little', signed=True)
                     # It's scalled integer?
                     if desc.subtype or desc.scale:
-                        value = decimal.Decimal(value) / _tenTo[abs(desc.scale)]
+                        value = decimal.Decimal(value) / _ten_to[abs(desc.scale)]
                 elif datatype == SQLDataType.DATE:
                     value = _util.decode_date(buffer[offset:offset+length])
                 elif datatype == SQLDataType.TIME:
@@ -3803,7 +3855,7 @@ class Cursor:
             return None
         raise InterfaceError("Cannot fetch from cursor that did not executed a statement.")
     def _execute(self, operation: str | Statement,
-                 parameters: Sequence=None, flags: CursorFlag=CursorFlag.NONE) -> None:
+                 parameters: Sequence | None=None, flags: CursorFlag=CursorFlag.NONE) -> None:
         if not self._transaction.is_active():
             self._transaction.begin()
         if isinstance(operation, Statement):
@@ -3855,7 +3907,7 @@ class Cursor:
         self.__output_cache = None
         while self.__blob_readers:
             self.__blob_readers.pop().close()
-    def callproc(self, proc_name: str, parameters: Sequence=None) -> None:
+    def callproc(self, proc_name: str, parameters: Sequence | None=None) -> None:
         """Executes a stored procedure with the given name.
 
         Arguments:
@@ -3875,7 +3927,7 @@ class Cursor:
         sql = ('EXECUTE PROCEDURE ' + proc_name + ' '
                + ','.join('?' * len(params)))
         self.execute(sql, params)
-    def call_procedure(self, proc_name: str, parameters: Sequence=None) -> tuple | None:
+    def call_procedure(self, proc_name: str, parameters: Sequence | None=None) -> tuple | None:
         """Executes a stored procedure with the given name.
 
         Arguments:
@@ -3909,7 +3961,7 @@ class Cursor:
             operation: SQL command.
         """
         return self._connection._prepare(operation, self._transaction)
-    def open(self, operation: str | Statement, parameters: Sequence[Any]=None) -> Cursor:
+    def open(self, operation: str | Statement, parameters: Sequence[Any] | None=None) -> Cursor:
         """Executes SQL command or prepared `Statement` as scrollable.
 
         Starts new transaction if transaction manager associated with cursor is not active.
@@ -3927,7 +3979,7 @@ class Cursor:
             If cursor is open, it's closed before new statement is executed.
         """
         self._execute(operation, parameters, CursorFlag.SCROLLABLE)
-    def execute(self, operation: str | Statement, parameters: Sequence[Any]=None) -> Cursor:
+    def execute(self, operation: str | Statement, parameters: Sequence[Any] | None=None) -> Cursor:
         """Executes SQL command or prepared `Statement`.
 
         Starts new transaction if transaction manager associated with cursor is not active.
@@ -3991,12 +4043,12 @@ class Cursor:
         if self._stmt:
             return self._fetchone()
         raise InterfaceError("Cannot fetch from cursor that did not executed a statement.")
-    def fetchmany(self, size: int=None) -> list[tuple]:
+    def fetchmany(self, size: int | None=None) -> list[tuple]:
         """Fetch the next set of rows of a query result, returning a sequence of
         sequences (e.g. a list of tuples).
 
         An empty sequence is returned when no more rows are available. The number of rows
-        to fetch per call is specified by the parameter. If it is not given, the cursor’s
+        to fetch per call is specified by the parameter. If it is not given, the cursor's
         `.arraysize` determines the number of rows to be fetched. The method does try to
         fetch as many rows as indicated by the size parameter. If this is not possible due
         to the specified number of rows not being available, fewer rows may be returned.
@@ -4022,7 +4074,6 @@ class Cursor:
 
         Returns None if there is no row to be fetched.
         """
-        assert self._result is not None
         self._last_fetch_status = self._result.fetch_next(self._stmt._out_buffer)
         if self._last_fetch_status == StateResult.OK:
             return self._unpack_output()
@@ -4032,7 +4083,6 @@ class Cursor:
 
         Returns None if there is no row to be fetched.
         """
-        assert self._result is not None
         self._last_fetch_status = self._result.fetch_prior(self._stmt._out_buffer)
         if self._last_fetch_status == StateResult.OK:
             return self._unpack_output()
@@ -4042,7 +4092,6 @@ class Cursor:
 
         Returns None if there is no row to be fetched.
         """
-        assert self._result is not None
         self._last_fetch_status = self._result.fetch_first(self._stmt._out_buffer)
         if self._last_fetch_status == StateResult.OK:
             return self._unpack_output()
@@ -4052,7 +4101,6 @@ class Cursor:
 
         Returns None if there is no row to be fetched.
         """
-        assert self._result is not None
         self._last_fetch_status = self._result.fetch_last(self._stmt._out_buffer)
         if self._last_fetch_status == StateResult.OK:
             return self._unpack_output()
@@ -4065,7 +4113,6 @@ class Cursor:
         Arguments:
             position: Absolute position number of row in result set.
         """
-        assert self._result is not None
         self._last_fetch_status = self._result.fetch_absolute(position, self._stmt._out_buffer)
         if self._last_fetch_status == StateResult.OK:
             return self._unpack_output()
@@ -4079,15 +4126,14 @@ class Cursor:
             offset: Relative position number of row in result set. Negative value refers
                     to previous row, positive to next row.
         """
-        assert self._result is not None
         self._last_fetch_status = self._result.fetch_relative(offset, self._stmt._out_buffer)
         if self._last_fetch_status == StateResult.OK:
             return self._unpack_output()
         return None
-    def setinputsizes(self, sizes: Sequence[Type]) -> None:
+    def setinputsizes(self, sizes: Sequence[type]) -> None:
         """Required by Python DB API 2.0, but pointless for Firebird, so it does nothing.
         """
-    def setoutputsize(self, size: int, column: int=None) -> None:
+    def setoutputsize(self, size: int, column: int | None=None) -> None:
         """Required by Python DB API 2.0, but pointless for Firebird, so it does nothing.
         """
     def is_closed(self) -> bool:
@@ -4097,14 +4143,12 @@ class Cursor:
     def is_eof(self) -> bool:
         """Returns True is scrollable cursor is positioned at the end.
         """
-        assert self._result is not None
         return self._result.is_eof()
     def is_bof(self) -> bool:
         """Returns True is scrollable cursor is positioned at the beginning.
         """
-        assert self._result is not None
         return self._result.is_bof()
-    def to_dict(self, row: tuple, into: dict=None) -> dict:
+    def to_dict(self, row: tuple, into: dict | None=None) -> dict:
         """Returns row tuple as dictionary with field names as keys. Returns new dictionary
         if `into` argument is not provided, otherwise returns `into` dictionary updated
         with row data.
@@ -4113,11 +4157,10 @@ class Cursor:
             row:  Row data returned by fetch_* method.
             into: Dictionary that should be updated with row data.
         """
-        assert len(self._stmt._names) == len(row), "Length of data must match number of fields"
         if into is None:
-            into = dict(zip(self._stmt._names, row))
+            into = dict(zip(self._stmt._names, row, strict=True))
         else:
-            into.update(zip(self._stmt._names, row))
+            into.update(zip(self._stmt._names, row, strict=True))
         return into
     # Properties
     @property
@@ -4201,9 +4244,9 @@ class Cursor:
                 else:
                     vtype = None
                     dispsize = -1
-                desc.append(tuple([meta.field if meta.field == meta.alias else meta.alias,
-                                  vtype, dispsize, meta.length, precision,
-                                  scale, meta.nullable]))
+                desc.append((meta.field if meta.field == meta.alias else meta.alias,
+                             vtype, dispsize, meta.length, precision,
+                             scale, meta.nullable))
             self._stmt._desc = tuple(desc) if desc else None
         return self._stmt._desc
     @property
@@ -4332,13 +4375,12 @@ class ServerInfoProvider(InfoProvider):
                          SrvInfoCode.GET_ENV_MSG, SrvInfoCode.CAPABILITIES):
             self._cache[info_code] = result
         return result
-    def get_log(self, callback: CB_OUTPUT_LINE=None) -> None:
+    def get_log(self, callback: CB_OUTPUT_LINE | None=None) -> None:
         """Request content of Firebird Server log. **(ASYNC service)**
 
         Arguments:
             callback: Function to call back with each output line.
         """
-        assert self._srv()._svc is not None
         self._srv()._reset_output()
         self._srv()._svc.start(bytes([ServerAction.GET_FB_LOG]))
         if callback:
@@ -4412,8 +4454,8 @@ class ServerDbServices3(ServerServiceProvider):
     """Database-related actions and services [Firebird 3+].
     """
     def get_statistics(self, *, database: FILESPEC,
-                       flags: SrvStatFlag=SrvStatFlag.DEFAULT, role: str=None,
-                       tables: Sequence[str]=None, callback: CB_OUTPUT_LINE=None) -> None:
+                       flags: SrvStatFlag=SrvStatFlag.DEFAULT, role: str | None=None,
+                       tables: Sequence[str] | None=None, callback: CB_OUTPUT_LINE | None=None) -> None:
         """Return database statistics produced by gstat utility. **(ASYNC service)**
 
         Arguments:
@@ -4439,11 +4481,11 @@ class ServerDbServices3(ServerServiceProvider):
                 callback(line)
     def backup(self, *, database: FILESPEC, backup: FILESPEC | Sequence[FILESPEC],
                backup_file_sizes: Sequence[int]=(),
-               flags: SrvBackupFlag=SrvBackupFlag.NONE, role: str=None,
-               callback: CB_OUTPUT_LINE=None, stats: str=None,
-               verbose: bool=False, verbint: int=None, skip_data: str=None,
-               include_data: str=None, keyhoder: str=None, keyname: str=None,
-               crypt: str=None, parallel_workers: int=None) -> None:
+               flags: SrvBackupFlag=SrvBackupFlag.NONE, role: str | None=None,
+               callback: CB_OUTPUT_LINE | None=None, stats: str | None=None,
+               verbose: bool=False, verbint: int | None=None, skip_data: str | None=None,
+               include_data: str | None=None, keyhoder: str | None=None, keyname: str | None=None,
+               crypt: str | None=None, parallel_workers: int | None=None) -> None:
         """Request logical (GBAK) database backup. **(ASYNC service)**
 
         Arguments:
@@ -4463,12 +4505,8 @@ class ServerDbServices3(ServerServiceProvider):
             crypt: Encryption specification [Firebird 4]
             parallel_workers: Number of parallel workers [Firebird 5]
         """
-        if isinstance(backup, (str, Path)):
+        if isinstance(backup, str | Path):
             backup = [backup]
-            assert len(backup_file_sizes) == 0
-        else:
-            assert len(backup) >= 1
-            assert len(backup) == len(backup_file_sizes) - 1
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.BACKUP)
@@ -4505,13 +4543,13 @@ class ServerDbServices3(ServerServiceProvider):
     def restore(self, *, backup: FILESPEC | Sequence[FILESPEC],
                 database: FILESPEC | Sequence[FILESPEC],
                 db_file_pages: Sequence[int]=(),
-                flags: SrvRestoreFlag=SrvRestoreFlag.CREATE, role: str=None,
-                callback: CB_OUTPUT_LINE=None, stats: str=None,
-                verbose: bool=False, verbint: int=None, skip_data: str=None,
-                page_size: int=None, buffers: int=None,
-                access_mode: DbAccessMode=DbAccessMode.READ_WRITE, include_data: str=None,
-                keyhoder: str=None, keyname: str=None, crypt: str=None,
-                replica_mode: ReplicaMode=None, parallel_workers: int=None) -> None:
+                flags: SrvRestoreFlag=SrvRestoreFlag.CREATE, role: str | None=None,
+                callback: CB_OUTPUT_LINE | None=None, stats: str | None=None,
+                verbose: bool=False, verbint: int | None=None, skip_data: str | None=None,
+                page_size: int | None=None, buffers: int | None=None,
+                access_mode: DbAccessMode=DbAccessMode.READ_WRITE, include_data: str | None=None,
+                keyhoder: str | None=None, keyname: str | None=None, crypt: str | None=None,
+                replica_mode: ReplicaMode | None=None, parallel_workers: int | None=None) -> None:
         """Request database restore from logical (GBAK) backup. **(ASYNC service)**
 
         Arguments:
@@ -4535,14 +4573,10 @@ class ServerDbServices3(ServerServiceProvider):
             replica_mode: Replica mode for restored database [Firebird 4]
             parallel_workers: Number of parallel workers [Firebird 5]
         """
-        if isinstance(backup, (str, Path)):
+        if isinstance(backup, str | Path):
             backup = [backup]
-        if isinstance(database, (str, Path)):
+        if isinstance(database, str | Path):
             database = [database]
-            assert len(db_file_pages) == 0
-        else:
-            assert len(database) >= 1
-            assert len(database) - 1 == len(db_file_pages)
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.RESTORE)
@@ -4585,9 +4619,9 @@ class ServerDbServices3(ServerServiceProvider):
             for line in self._srv():
                 callback(line)
     def local_backup(self, *, database: FILESPEC, backup_stream: BinaryIO,
-                     flags: SrvBackupFlag=SrvBackupFlag.NONE, role: str=None,
-                     skip_data: str=None, include_data: str=None, keyhoder: str=None,
-                     keyname: str=None, crypt: str=None) -> None:
+                     flags: SrvBackupFlag=SrvBackupFlag.NONE, role: str | None=None,
+                     skip_data: str | None=None, include_data: str | None=None, keyhoder: str | None=None,
+                     keyname: str | None=None, crypt: str | None=None) -> None:
         """Request logical (GBAK) database backup into local byte stream. **(SYNC service)**
 
         Arguments:
@@ -4627,11 +4661,11 @@ class ServerDbServices3(ServerServiceProvider):
     def local_restore(self, *, backup_stream: BinaryIO,
                       database: FILESPEC | Sequence[FILESPEC],
                       db_file_pages: Sequence[int]=(),
-                      flags: SrvRestoreFlag=SrvRestoreFlag.CREATE, role: str=None,
-                      skip_data: str=None, page_size: int=None, buffers: int=None,
+                      flags: SrvRestoreFlag=SrvRestoreFlag.CREATE, role: str | None=None,
+                      skip_data: str | None=None, page_size: int | None=None, buffers: int | None=None,
                       access_mode: DbAccessMode=DbAccessMode.READ_WRITE,
-                      include_data: str=None, keyhoder: str=None, keyname: str=None,
-                      crypt: str=None, replica_mode: ReplicaMode=None) -> None:
+                      include_data: str | None=None, keyhoder: str | None=None, keyname: str | None=None,
+                      crypt: str | None=None, replica_mode: ReplicaMode | None=None) -> None:
         """Request database restore from logical (GBAK) backup stored in local byte stream.
         **(SYNC service)**
 
@@ -4651,12 +4685,8 @@ class ServerDbServices3(ServerServiceProvider):
             crypt: Encryption specification [Firebird 4]
             replica_mode: Replica mode for restored database [Firebird 4]
         """
-        if isinstance(database, (str, Path)):
+        if isinstance(database, str | Path):
             database = [database]
-            assert len(db_file_pages) == 0
-        else:
-            assert len(database) >= 1
-            assert len(database) == len(db_file_pages) - 1
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
             spb.insert_tag(ServerAction.RESTORE)
@@ -4718,8 +4748,8 @@ class ServerDbServices3(ServerServiceProvider):
                 tag = self._srv().response.get_tag()
             keep_going = no_data or request_length != 0 or line
     def nbackup(self, *, database: FILESPEC, backup: FILESPEC, level: int=0,
-                direct: bool=None, flags: SrvNBackupFlag=SrvNBackupFlag.NONE,
-                role: str=None, guid: str=None) -> None:
+                direct: bool | None=None, flags: SrvNBackupFlag=SrvNBackupFlag.NONE,
+                role: str | None=None, guid: str | None=None) -> None:
         """Perform physical (NBACKUP) database backup. **(SYNC service)**
 
         Arguments:
@@ -4753,7 +4783,7 @@ class ServerDbServices3(ServerServiceProvider):
         self._srv().wait()
     def nrestore(self, *, backups: Sequence[FILESPEC], database: FILESPEC,
                  direct: bool=False, flags: SrvNBackupFlag=SrvNBackupFlag.NONE,
-                 role: str=None) -> None:
+                 role: str | None=None) -> None:
         """Perform restore from physical (NBACKUP) database backup.  **(SYNC service)**
 
         Arguments:
@@ -4776,7 +4806,7 @@ class ServerDbServices3(ServerServiceProvider):
             spb.insert_int(SPBItem.OPTIONS, flags)
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
-    def set_default_cache_size(self, *, database: FILESPEC, size: int, role: str=None) -> None:
+    def set_default_cache_size(self, *, database: FILESPEC, size: int, role: str | None=None) -> None:
         """Set individual page cache size for database.
 
         Arguments:
@@ -4793,7 +4823,7 @@ class ServerDbServices3(ServerServiceProvider):
             spb.insert_int(SrvPropertiesOption.PAGE_BUFFERS, size)
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
-    def set_sweep_interval(self, *, database: FILESPEC, interval: int, role: str=None) -> None:
+    def set_sweep_interval(self, *, database: FILESPEC, interval: int, role: str | None=None) -> None:
         """Set database sweep interval.
 
         Arguments:
@@ -4811,7 +4841,7 @@ class ServerDbServices3(ServerServiceProvider):
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
     def set_space_reservation(self, *, database: FILESPEC, mode: DbSpaceReservation,
-                              role: str=None) -> None:
+                              role: str | None=None) -> None:
         """Set space reservation for database.
 
         Arguments:
@@ -4829,7 +4859,7 @@ class ServerDbServices3(ServerServiceProvider):
                              bytes([mode]))
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
-    def set_write_mode(self, *, database: FILESPEC, mode: DbWriteMode, role: str=None) -> None:
+    def set_write_mode(self, *, database: FILESPEC, mode: DbWriteMode, role: str | None=None) -> None:
         """Set database write mode (SYNC/ASYNC).
 
         Arguments:
@@ -4847,7 +4877,7 @@ class ServerDbServices3(ServerServiceProvider):
                              bytes([mode]))
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
-    def set_access_mode(self, *, database: FILESPEC, mode: DbAccessMode, role: str=None) -> None:
+    def set_access_mode(self, *, database: FILESPEC, mode: DbAccessMode, role: str | None=None) -> None:
         """Set database access mode (R/W or R/O).
 
         Arguments:
@@ -4864,7 +4894,7 @@ class ServerDbServices3(ServerServiceProvider):
             spb.insert_bytes(SrvPropertiesOption.ACCESS_MODE, bytes([mode]))
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
-    def set_sql_dialect(self, *, database: FILESPEC, dialect: int, role: str=None) -> None:
+    def set_sql_dialect(self, *, database: FILESPEC, dialect: int, role: str | None=None) -> None:
         """Set database SQL dialect.
 
         Arguments:
@@ -4881,7 +4911,7 @@ class ServerDbServices3(ServerServiceProvider):
             spb.insert_int(SrvPropertiesOption.SET_SQL_DIALECT, dialect)
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
-    def activate_shadow(self, *, database: FILESPEC, role: str=None) -> None:
+    def activate_shadow(self, *, database: FILESPEC, role: str | None=None) -> None:
         """Activate database shadow.
 
         Arguments:
@@ -4897,7 +4927,7 @@ class ServerDbServices3(ServerServiceProvider):
             spb.insert_int(SPBItem.OPTIONS, SrvPropertiesFlag.ACTIVATE)
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
-    def no_linger(self, *, database: FILESPEC, role: str=None) -> None:
+    def no_linger(self, *, database: FILESPEC, role: str | None=None) -> None:
         """Set one-off override for database linger.
 
         Arguments:
@@ -4914,7 +4944,7 @@ class ServerDbServices3(ServerServiceProvider):
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
     def shutdown(self, *, database: FILESPEC, mode: ShutdownMode,
-                 method: ShutdownMethod, timeout: int, role: str=None) -> None:
+                 method: ShutdownMethod, timeout: int, role: str | None=None) -> None:
         """Database shutdown.
 
         Arguments:
@@ -4935,7 +4965,7 @@ class ServerDbServices3(ServerServiceProvider):
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
     def bring_online(self, *, database: FILESPEC, mode: OnlineMode=OnlineMode.NORMAL,
-                     role: str=None) -> None:
+                     role: str | None=None) -> None:
         """Bring previously shut down database back online.
 
         Arguments:
@@ -4952,7 +4982,7 @@ class ServerDbServices3(ServerServiceProvider):
             spb.insert_bytes(SrvPropertiesOption.ONLINE_MODE, bytes([mode]))
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
-    def sweep(self, *, database: FILESPEC, role: str=None, parallel_workers: int=None) -> None:
+    def sweep(self, *, database: FILESPEC, role: str | None=None, parallel_workers: int | None=None) -> None:
         """Perform database sweep operation.
 
         Arguments:
@@ -4972,7 +5002,7 @@ class ServerDbServices3(ServerServiceProvider):
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
     def repair(self, *, database: FILESPEC, flags: SrvRepairFlag=SrvRepairFlag.REPAIR,
-               role: str=None) -> None:
+               role: str | None=None) -> None:
         """Perform database repair operation.  **(SYNC service)**
 
         Arguments:
@@ -4989,10 +5019,10 @@ class ServerDbServices3(ServerServiceProvider):
             spb.insert_int(SPBItem.OPTIONS, flags)
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
-    def validate(self, *, database: FILESPEC, include_table: str=None,
-                 exclude_table: str=None, include_index: str=None,
-                 exclude_index: str=None, lock_timeout: int=None, role: str=None,
-                 callback: CB_OUTPUT_LINE=None) -> None:
+    def validate(self, *, database: FILESPEC, include_table: str | None=None,
+                 exclude_table: str | None=None, include_index: str | None=None,
+                 exclude_index: str | None=None, lock_timeout: int | None=None,
+                 role: str | None=None, callback: CB_OUTPUT_LINE | None=None) -> None:
         """Perform database validation. **(ASYNC service)**
 
         Arguments:
@@ -5031,7 +5061,7 @@ class ServerDbServices3(ServerServiceProvider):
         if callback:
             for line in self._srv():
                 callback(line)
-    def get_limbo_transaction_ids(self, *, database: FILESPEC) -> list[int]:
+    def get_limbo_transaction_ids(self, *, database: FILESPEC) -> list[int]: # noqa: ARG002
         """Returns list of transactions in limbo.
 
         Arguments:
@@ -5136,7 +5166,7 @@ class ServerDbServices3(ServerServiceProvider):
 class ServerDbServices4(ServerDbServices3):
     """Database-related actions and services [Firebird 4+].
     """
-    def nfix_database(self, *, database: FILESPEC, role: str=None,
+    def nfix_database(self, *, database: FILESPEC, role: str | None=None,
                       flags: SrvNBackupFlag=SrvNBackupFlag.NONE) -> None:
         """Fixup database after filesystem copy.
 
@@ -5154,7 +5184,7 @@ class ServerDbServices4(ServerDbServices3):
             spb.insert_int(SPBItem.OPTIONS, flags)
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
-    def set_replica_mode(self, *, database: FILESPEC, mode: ReplicaMode, role: str=None) -> None:
+    def set_replica_mode(self, *, database: FILESPEC, mode: ReplicaMode, role: str | None=None) -> None:
         """Manage replica database.
 
         Arguments:
@@ -5226,7 +5256,7 @@ class ServerUserServices(ServerServiceProvider):
         if user:
             users.append(UserInfo(**user))
         return users
-    def get_all(self, *, database: FILESPEC=None, sql_role: str=None) -> list[UserInfo]:
+    def get_all(self, *, database: FILESPEC | None=None, sql_role: str | None=None) -> list[UserInfo]:
         """Get information about users.
 
         Arguments:
@@ -5243,7 +5273,7 @@ class ServerUserServices(ServerServiceProvider):
                                   encoding=self._srv().encoding)
             self._srv()._svc.start(spb.get_buffer())
         return self.__fetch_users(Buffer(self._srv()._read_all_binary_output()))
-    def get(self, user_name: str, *, database: FILESPEC=None, sql_role: str=None) -> UserInfo | None:
+    def get(self, user_name: str, *, database: FILESPEC | None=None, sql_role: str | None=None) -> UserInfo | None:
         """Get information about user.
 
         Arguments:
@@ -5262,10 +5292,10 @@ class ServerUserServices(ServerServiceProvider):
             self._srv()._svc.start(spb.get_buffer())
         users = self.__fetch_users(Buffer(self._srv()._read_all_binary_output()))
         return users[0] if users else None
-    def add(self, *, user_name: str, password: str, user_id: int=None,
-                 group_id: int=None, first_name: str=None, middle_name: str=None,
-                 last_name: str=None, admin: bool=None, database: FILESPEC=None,
-                 sql_role: str=None) -> None:
+    def add(self, *, user_name: str, password: str, user_id: int | None=None,
+                 group_id: int | None=None, first_name: str | None=None, middle_name: str | None=None,
+                 last_name: str | None=None, admin: bool | None=None, database: FILESPEC | None=None,
+                 sql_role: str | None=None) -> None:
         """Add new user.
 
         Arguments:
@@ -5307,10 +5337,10 @@ class ServerUserServices(ServerServiceProvider):
                 spb.insert_int(SrvUserOption.ADMIN, 1 if admin else 0)
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
-    def update(self, user_name: str, *, password: str=None,
-                    user_id: int=None, group_id: int=None,
-                    first_name: str=None, middle_name: str=None,
-                    last_name: str=None, admin: bool=None, database: FILESPEC=None) -> None:
+    def update(self, user_name: str, *, password: str | None=None,
+                    user_id: int | None=None, group_id: int | None=None,
+                    first_name: str | None=None, middle_name: str | None=None,
+                    last_name: str | None=None, admin: bool | None=None, database: FILESPEC | None=None) -> None:
         """Update user information.
 
         Arguments:
@@ -5350,7 +5380,7 @@ class ServerUserServices(ServerServiceProvider):
                 spb.insert_int(SrvUserOption.ADMIN, 1 if admin else 0)
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
-    def delete(self, user_name: str, *, database: FILESPEC=None, sql_role: str=None) -> None:
+    def delete(self, user_name: str, *, database: FILESPEC | None=None, sql_role: str | None=None) -> None:
         """Delete user.
 
         Arguments:
@@ -5368,7 +5398,7 @@ class ServerUserServices(ServerServiceProvider):
                 spb.insert_string(SPBItem.SQL_ROLE_NAME, sql_role, encoding=self._srv().encoding)
             self._srv()._svc.start(spb.get_buffer())
         self._srv().wait()
-    def exists(self, user_name: str, *, database: FILESPEC=None, sql_role: str=None) -> bool:
+    def exists(self, user_name: str, *, database: FILESPEC | None=None, sql_role: str | None=None) -> bool:
         """Returns True if user exists.
 
         Arguments:
@@ -5392,7 +5422,7 @@ class ServerTraceServices(ServerServiceProvider):
             # response should contain the error message
             raise DatabaseError(response)
         return response
-    def start(self, *, config: str, name: str=None) -> int:
+    def start(self, *, config: str, name: str | None=None) -> int:
         """Start new trace session. **(ASYNC service)**
 
         Arguments:
@@ -5540,13 +5570,13 @@ class Server:
         return b''.join([SrvInfoCode.TIMEOUT.value.to_bytes(1, 'little'),
                          (2).to_bytes(2, 'little'),
                          timeout.to_bytes(2, 'little')])
-    def _fetch_complex_info(self, request: bytes, timeout: int=-1) -> None:
+    def _fetch_complex_info(self, request: bytes, timeout: int=INFINITE_TIMEOUT) -> None:
         send = self._make_request(timeout)
         self.response.clear()
         self._svc.query(send, request, self.response.raw)
         if self.response.is_truncated():  # pragma: no cover
             raise InterfaceError("Requested data can't fint into largest possible buffer")
-    def _fetch_line(self, timeout: int=-1) -> str | None: # pylint: disable=W0613
+    def _fetch_line(self, timeout: int=INFINITE_TIMEOUT) -> str | None: # noqa: ARG002
         self._fetch_complex_info(bytes([SrvInfoCode.LINE]))
         result = None
         while not self.response.is_eof():
@@ -5559,13 +5589,12 @@ class Server:
             raise InterfaceError("Malformed result buffer (missing isc_info_end item)")
         return result
     def _query_output(self, timeout: int) -> str:
-        assert self._svc is not None
         self.response.clear()
         self._svc.query(self._make_request(timeout), bytes([self.mode]), self.response.raw)
         if (tag := self.response.get_tag()) != self.mode:  # pragma: no cover
             raise InterfaceError(f"Service responded with error code: {tag}")
         return self.response.read_sized_string(encoding=self.encoding, errors=self.encoding_errors)
-    def _read_output(self, *, init: str='', timeout: int=-1) -> None:
+    def _read_output(self, *, init: str='', timeout: int=INFINITE_TIMEOUT) -> None:
         data = self._query_output(timeout)
         if self.mode is SrvInfoCode.TO_EOF:
             self._eof = self.response.get_tag() == isc_info_end
@@ -5579,8 +5608,7 @@ class Server:
         if data and self.mode is SrvInfoCode.LINE:
             init += '\n'
         self.__line_buffer = init.splitlines(keepends=True)
-    def _read_all_binary_output(self, *, timeout: int=-1) -> bytes:
-        assert self._svc is not None
+    def _read_all_binary_output(self, *, timeout: int=INFINITE_TIMEOUT) -> bytes:
         send = self._make_request(timeout)
         result = []
         eof = False
@@ -5592,8 +5620,7 @@ class Server:
             result.append(self.response.read_bytes())
             eof = self.response.get_tag() == isc_info_end
         return b''.join(result)
-    def _read_next_binary_output(self, *, timeout: int=-1) -> bytes:
-        assert self._svc is not None
+    def _read_next_binary_output(self, *, timeout: int=INFINITE_TIMEOUT) -> bytes:
         result = None
         if not self._eof:
             send = self._make_request(timeout)
@@ -5612,7 +5639,6 @@ class Server:
            may take time to comlete, so they're called asynchronously. Until they're finished,
            no other async service could be started.
         """
-        assert self._svc is not None
         return self.info.get_info(SrvInfoCode.RUNNING) > 0
     def readline_timed(self, timeout: int) -> str | Sentinel | None:
         """Get next line of textual output from last service query.
@@ -5623,7 +5649,6 @@ class Server:
         Returns:
           Line of service output, `None` for EOF or `.TIMEOUT` sentinel for expired timeout.
         """
-        assert timeout >= 0
         self.response.clear()
         self._svc.query(self._make_request(timeout), bytes([SrvInfoCode.LINE]), self.response.raw)
         if (tag := self.response.get_tag()) != SrvInfoCode.LINE:  # pragma: no cover
@@ -5707,9 +5732,9 @@ class Server:
         """Access to various database-related actions and services.
         """
         if self.__dbsvc is None:
-            if self._engine_version() >= 5.0:
+            if self._engine_version() >= FB50:
                 cls = ServerDbServices
-            elif self._engine_version() == 4.0:
+            elif self._engine_version() == FB40:
                 cls = ServerDbServices4
             else:
                 cls = ServerDbServices3
@@ -5730,10 +5755,10 @@ class Server:
             self.__user = ServerUserServices(self)
         return self.__user
 
-def connect_server(server: str, *, user: str=None, password: str=None,
-                   crypt_callback: iCryptKeyCallbackImpl=None,
-                   expected_db: str=None, role: str=None, encoding: str=None,
-                   encoding_errors: str=None) -> Server:
+def connect_server(server: str, *, user: str | None=None, password: str | None=None,
+                   crypt_callback: iCryptKeyCallbackImpl | None=None,
+                   expected_db: str | None=None, role: str | None=None, encoding: str | None=None,
+                   encoding_errors: str | None=None) -> Server:
     """Establishes a connection to server's service manager.
 
     Arguments:

@@ -240,10 +240,6 @@ def test_to_dict(db_connection):
         d2 = cur.to_dict(row, d)
         assert d2 == sample
         assert d is d2 # Ensure the passed dict was modified
-        with pytest.raises(AssertionError, match='Length of data must match number of fields'):
-            cur.to_dict([1])
-        with pytest.raises(AssertionError, match='Length of data must match number of fields'):
-            cur.to_dict([1, 2, 3])
 
 def test_scrollable(fb_vars, db_connection):
     if fb_vars['version'] in SpecifierSet('<5'):

@@ -36,19 +36,41 @@
 """firebird-driver - New Firebird API
 """
 from __future__ import annotations
-import sys
-import decimal
+
 import ctypes
-from ctypes import c_byte, c_ubyte, c_char, c_bool, c_short, c_ushort, c_int, c_uint, \
-    c_long, c_ulong, c_longlong, c_ulonglong, c_char_p, c_void_p, \
-    POINTER, CFUNCTYPE, Structure, create_string_buffer, cast, addressof
+import decimal
+import platform
+import sys
+from contextlib import suppress
+from ctypes import (
+    CFUNCTYPE,
+    POINTER,
+    Structure,
+    addressof,
+    c_bool,
+    c_byte,
+    c_char,
+    c_char_p,
+    c_int,
+    c_long,
+    c_longlong,
+    c_short,
+    c_ubyte,
+    c_uint,
+    c_ulong,
+    c_ulonglong,
+    c_ushort,
+    c_void_p,
+    cast,
+    create_string_buffer,
+)
 from ctypes.util import find_library
 from locale import getpreferredencoding
 from pathlib import Path
-from contextlib import suppress
-import platform
+from typing import ClassVar
+
 from .config import driver_config
-from .hooks import APIHook, register_class, get_callbacks
+from .hooks import APIHook, get_callbacks, register_class
 
 # Constants
 
@@ -151,7 +173,7 @@ else:
 
 # Firebird configuration parameters (for use in iFirebirdConf.get_key())
 
-config_items = {
+config_items: dict[str, type] = {
     'DatabaseAccess': str,
     'RemoteAccess': bool,
     'ExternalFileAccess': str,
@@ -256,7 +278,7 @@ FB_I128Ptr = POINTER(FB_I128)
 
 class ISC_QUAD(Structure):
     "ISC_QUAD"
-    _fields_ = [('high', ISC_LONG), ('low', ISC_ULONG)]
+    _fields_: ClassVar = [('high', ISC_LONG), ('low', ISC_ULONG)]
 
 ISC_QUAD_PTR = POINTER(ISC_QUAD)
 ISC_STATUS = intptr_t
@@ -273,37 +295,37 @@ FB_SHUTDOWN_CALLBACK = CFUNCTYPE(c_int, c_int, c_int, c_void_p)
 # >>> Firebird 4
 class ISC_TIME_TZ(Structure):
     "ISC_TIME_TZ"
-    _fields_ = [('utc_time', ISC_TIME), ('time_zone', ISC_USHORT)]
+    _fields_: ClassVar = [('utc_time', ISC_TIME), ('time_zone', ISC_USHORT)]
 ISC_TIME_TZ_PTR = POINTER(ISC_TIME_TZ)
 
 class ISC_TIME_TZ_EX(Structure):
     "ISC_TIME_TZ_EX"
-    _fields_ = [('utc_time', ISC_TIME), ('time_zone', ISC_USHORT), ('ext_offset', ISC_SHORT)]
+    _fields_: ClassVar = [('utc_time', ISC_TIME), ('time_zone', ISC_USHORT), ('ext_offset', ISC_SHORT)]
 ISC_TIME_TZ_EX_PTR = POINTER(ISC_TIME_TZ_EX)
 
 class ISC_TIMESTAMP(Structure):
     "ISC_TIMESTAMP"
-    _fields_ = [('timestamp_date', ISC_DATE), ('timestamp_time', ISC_TIME)]
+    _fields_: ClassVar = [('timestamp_date', ISC_DATE), ('timestamp_time', ISC_TIME)]
 ISC_TIMESTAMP_PTR = POINTER(ISC_TIMESTAMP)
 
 class ISC_TIMESTAMP_TZ(Structure):
     "ISC_TIMESTAMP_TZ"
-    _fields_ = [('utc_timestamp', ISC_TIMESTAMP), ('time_zone', ISC_USHORT)]
+    _fields_: ClassVar = [('utc_timestamp', ISC_TIMESTAMP), ('time_zone', ISC_USHORT)]
 ISC_TIMESTAMP_TZ_PTR = POINTER(ISC_TIMESTAMP_TZ)
 
 class ISC_TIMESTAMP_TZ_EX(Structure):
     "ISC_TIMESTAMP_TZ_EX"
-    _fields_ = [('utc_timestamp', ISC_TIMESTAMP), ('time_zone', ISC_USHORT), ('ext_offset', ISC_SHORT)]
+    _fields_: ClassVar = [('utc_timestamp', ISC_TIMESTAMP), ('time_zone', ISC_USHORT), ('ext_offset', ISC_SHORT)]
 ISC_TIMESTAMP_TZ_EX_PTR = POINTER(ISC_TIMESTAMP_TZ_EX)
 # <<< Firebird 4
 
 class ISC_ARRAY_BOUND(Structure):
     "ISC_ARRAY_BOUND"
-    _fields_ = [('array_bound_lower', c_short), ('array_bound_upper', c_short)]
+    _fields_: ClassVar = [('array_bound_lower', c_short), ('array_bound_upper', c_short)]
 
 class ISC_ARRAY_DESC(Structure):
     "ISC_ARRAY_DESC"
-    _fields_ = [
+    _fields_: ClassVar = [
         ('array_desc_dtype', c_ubyte),
         ('array_desc_scale', c_byte),  # was ISC_SCHAR),
         ('array_desc_length', c_ushort),
@@ -316,12 +338,12 @@ ISC_ARRAY_DESC_PTR = POINTER(ISC_ARRAY_DESC)
 
 class TraceCounts(Structure):
     "Trace counters for table"
-    _fields_ = [('relation_id', c_int), ('relation_name', c_char_p), ('counters', Int64Ptr)]
+    _fields_: ClassVar = [('relation_id', c_int), ('relation_name', c_char_p), ('counters', Int64Ptr)]
 TraceCountsPtr = POINTER(TraceCounts)
 
 class PerformanceInfo(Structure):
     "Performance info"
-    _fields_ = [
+    _fields_: ClassVar = [
         ('time', c_long),
         ('counters', Int64Ptr),
         ('count', c_uint),
@@ -330,7 +352,7 @@ class PerformanceInfo(Structure):
 
 #class Dsc(Structure):
     #"Field descriptor"
-#Dsc._fields_ = [
+#Dsc._fields_: ClassVar = [
     #('dtype', c_byte),
     #('scale', c_byte),
     #('length', c_short),
@@ -359,7 +381,7 @@ class IVersioned_VTable(Structure):
 IVersioned_VTablePtr = POINTER(IVersioned_VTable)
 class IVersioned_struct(Structure):
     "Fiebird Interface data structure"
-    _fields_ = [('dummy', c_void_p), ('vtable', IVersioned_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IVersioned_VTablePtr)]
 IVersioned = POINTER(IVersioned_struct)
 # IReferenceCounted(2)
 class IReferenceCounted_VTable(Structure):
@@ -367,7 +389,7 @@ class IReferenceCounted_VTable(Structure):
 IReferenceCounted_VTablePtr = POINTER(IReferenceCounted_VTable)
 class IReferenceCounted_struct(Structure):
     "IReferenceCounted data structure"
-    _fields_ = [('dummy', c_void_p), ('vtable', IReferenceCounted_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IReferenceCounted_VTablePtr)]
 IReferenceCounted = POINTER(IReferenceCounted_struct)
 # IDisposable(2)
 class IDisposable_VTable(Structure):
@@ -375,7 +397,7 @@ class IDisposable_VTable(Structure):
 IDisposable_VTablePtr = POINTER(IDisposable_VTable)
 class IDisposable_struct(Structure):
     "IDisposable data structure"
-    _fields_ = [('dummy', c_void_p), ('vtable', IDisposable_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IDisposable_VTablePtr)]
 IDisposable = POINTER(IDisposable_struct)
 # IStatus(3) : Disposable
 class IStatus_VTable(Structure):
@@ -383,7 +405,7 @@ class IStatus_VTable(Structure):
 IStatus_VTablePtr = POINTER(IStatus_VTable)
 class IStatus_struct(Structure):
     "IStatus interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IStatus_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IStatus_VTablePtr)]
 IStatus = POINTER(IStatus_struct)
 # IMaster(2) : Versioned
 class IMaster_VTable(Structure):
@@ -391,7 +413,7 @@ class IMaster_VTable(Structure):
 IMaster_VTablePtr = POINTER(IMaster_VTable)
 class IMaster_struct(Structure):
     "IMaster interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IMaster_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IMaster_VTablePtr)]
 IMaster = POINTER(IMaster_struct)
 # IPluginBase(3) : ReferenceCounted
 class IPluginBase_VTable(Structure):
@@ -399,7 +421,7 @@ class IPluginBase_VTable(Structure):
 IPluginBase_VTablePtr = POINTER(IPluginBase_VTable)
 class IPluginBase_struct(Structure):
     "IPluginBase interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IPluginBase_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IPluginBase_VTablePtr)]
 IPluginBase = POINTER(IPluginBase_struct)
 # IPluginSet(3) : ReferenceCounted
 class IPluginSet_VTable(Structure):
@@ -407,7 +429,7 @@ class IPluginSet_VTable(Structure):
 IPluginSet_VTablePtr = POINTER(IPluginSet_VTable)
 class IPluginSet_struct(Structure):
     "IPluginSet interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IPluginSet_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IPluginSet_VTablePtr)]
 IPluginSet = POINTER(IPluginSet_struct)
 # IConfigEntry(3) : ReferenceCounted
 class IConfigEntry_VTable(Structure):
@@ -415,7 +437,7 @@ class IConfigEntry_VTable(Structure):
 IConfigEntry_VTablePtr = POINTER(IConfigEntry_VTable)
 class IConfigEntry_struct(Structure):
     "IConfigEntry interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IConfigEntry_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IConfigEntry_VTablePtr)]
 IConfigEntry = POINTER(IConfigEntry_struct)
 # IConfig(3) : ReferenceCounted
 class IConfig_VTable(Structure):
@@ -423,7 +445,7 @@ class IConfig_VTable(Structure):
 IConfig_VTablePtr = POINTER(IConfig_VTable)
 class IConfig_struct(Structure):
     "IConfig interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IConfig_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IConfig_VTablePtr)]
 IConfig = POINTER(IConfig_struct)
 # IFirebirdConf(3) : ReferenceCounted
 class IFirebirdConf_VTable(Structure):
@@ -431,7 +453,7 @@ class IFirebirdConf_VTable(Structure):
 IFirebirdConf_VTablePtr = POINTER(IFirebirdConf_VTable)
 class IFirebirdConf_struct(Structure):
     "IFirebirdConf interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IFirebirdConf_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IFirebirdConf_VTablePtr)]
 IFirebirdConf = POINTER(IFirebirdConf_struct)
 # IPluginConfig(3) : ReferenceCounted
 # IPluginFactory(2) : Versioned
@@ -442,7 +464,7 @@ class IPluginManager_VTable(Structure):
 IPluginManager_VTablePtr = POINTER(IPluginManager_VTable)
 class IPluginManager_struct(Structure):
     "IPluginManager interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IPluginManager_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IPluginManager_VTablePtr)]
 IPluginManager = POINTER(IPluginManager_struct)
 # ICryptKey(2) : Versioned
 # IConfigManager(2) : Versioned
@@ -451,7 +473,7 @@ class IConfigManager_VTable(Structure):
 IConfigManager_VTablePtr = POINTER(IConfigManager_VTable)
 class IConfigManager_struct(Structure):
     "IConfigManager interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IConfigManager_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IConfigManager_VTablePtr)]
 IConfigManager = POINTER(IConfigManager_struct)
 # IEventCallback(3) : ReferenceCounted
 class IEventCallback_VTable(Structure):
@@ -459,7 +481,7 @@ class IEventCallback_VTable(Structure):
 IEventCallback_VTablePtr = POINTER(IEventCallback_VTable)
 class IEventCallback_struct(Structure):
     "IEventCallback interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IEventCallback_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IEventCallback_VTablePtr)]
 IEventCallback = POINTER(IEventCallback_struct)
 # IBlob(3) : ReferenceCounted
 class IBlob_VTable(Structure):
@@ -467,7 +489,7 @@ class IBlob_VTable(Structure):
 IBlob_VTablePtr = POINTER(IBlob_VTable)
 class IBlob_struct(Structure):
     "IBlob interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IBlob_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IBlob_VTablePtr)]
 IBlob = POINTER(IBlob_struct)
 # ITransaction(3) : ReferenceCounted
 class ITransaction_VTable(Structure):
@@ -475,7 +497,7 @@ class ITransaction_VTable(Structure):
 ITransaction_VTablePtr = POINTER(ITransaction_VTable)
 class ITransaction_struct(Structure):
     "ITransaction interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', ITransaction_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', ITransaction_VTablePtr)]
 ITransaction = POINTER(ITransaction_struct)
 # IMessageMetadata(3) : ReferenceCounted
 class IMessageMetadata_VTable(Structure):
@@ -483,7 +505,7 @@ class IMessageMetadata_VTable(Structure):
 IMessageMetadata_VTablePtr = POINTER(IMessageMetadata_VTable)
 class IMessageMetadata_struct(Structure):
     "IMessageMetadata interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IMessageMetadata_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IMessageMetadata_VTablePtr)]
 IMessageMetadata = POINTER(IMessageMetadata_struct)
 # IMetadataBuilder(3) : ReferenceCounted
 class IMetadataBuilder_VTable(Structure):
@@ -491,7 +513,7 @@ class IMetadataBuilder_VTable(Structure):
 IMetadataBuilder_VTablePtr = POINTER(IMetadataBuilder_VTable)
 class IMetadataBuilder_struct(Structure):
     "IMetadataBuilder interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IMetadataBuilder_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IMetadataBuilder_VTablePtr)]
 IMetadataBuilder = POINTER(IMetadataBuilder_struct)
 # IResultSet(3) : ReferenceCounted
 class IResultSet_VTable(Structure):
@@ -499,7 +521,7 @@ class IResultSet_VTable(Structure):
 IResultSet_VTablePtr = POINTER(IResultSet_VTable)
 class IResultSet_struct(Structure):
     "IResultSet interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IResultSet_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IResultSet_VTablePtr)]
 IResultSet = POINTER(IResultSet_struct)
 # IStatement(3) : ReferenceCounted
 class IStatement_VTable(Structure):
@@ -507,7 +529,7 @@ class IStatement_VTable(Structure):
 IStatement_VTablePtr = POINTER(IStatement_VTable)
 class IStatement_struct(Structure):
     "IStatement interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IStatement_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IStatement_VTablePtr)]
 IStatement = POINTER(IStatement_struct)
 # >>> Firebird 4
 # IBatch(3) : ReferenceCounted
@@ -516,7 +538,7 @@ class IBatch_VTable(Structure):
 IBatch_VTablePtr = POINTER(IBatch_VTable)
 class IBatch_struct(Structure):
     "IBatch interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IBatch_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IBatch_VTablePtr)]
 IBatch = POINTER(IBatch_struct)
 # IBatchCompletionState(3) : Disposable
 class IBatchCompletionState_VTable(Structure):
@@ -524,7 +546,7 @@ class IBatchCompletionState_VTable(Structure):
 IBatchCompletionState_VTablePtr = POINTER(IBatchCompletionState_VTable)
 class IBatchCompletionState_struct(Structure):
     "IBatchCompletionState interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IBatchCompletionState_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IBatchCompletionState_VTablePtr)]
 IBatchCompletionState = POINTER(IBatchCompletionState_struct)
 # IReplicator(3) : ReferenceCounted
 # <<< Firebird 4
@@ -534,7 +556,7 @@ class IRequest_VTable(Structure):
 IRequest_VTablePtr = POINTER(IRequest_VTable)
 class IRequest_struct(Structure):
     "IRequest interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IRequest_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IRequest_VTablePtr)]
 IRequest = POINTER(IRequest_struct)
 # IEvents(3) : ReferenceCounted
 class IEvents_VTable(Structure):
@@ -542,7 +564,7 @@ class IEvents_VTable(Structure):
 IEvents_VTablePtr = POINTER(IEvents_VTable)
 class IEvents_struct(Structure):
     "IEvents interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IEvents_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IEvents_VTablePtr)]
 IEvents = POINTER(IEvents_struct)
 # IAttachment(3) : ReferenceCounted
 class IAttachment_VTable(Structure):
@@ -550,7 +572,7 @@ class IAttachment_VTable(Structure):
 IAttachment_VTablePtr = POINTER(IAttachment_VTable)
 class IAttachment_struct(Structure):
     "IAttachment interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IAttachment_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IAttachment_VTablePtr)]
 IAttachment = POINTER(IAttachment_struct)
 # IService(3) : ReferenceCounted
 class IService_VTable(Structure):
@@ -558,7 +580,7 @@ class IService_VTable(Structure):
 IService_VTablePtr = POINTER(IService_VTable)
 class IService_struct(Structure):
     "IService interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IService_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IService_VTablePtr)]
 IService = POINTER(IService_struct)
 # IProvider(4) : PluginBase
 class IProvider_VTable(Structure):
@@ -566,7 +588,7 @@ class IProvider_VTable(Structure):
 IProvider_VTablePtr = POINTER(IProvider_VTable)
 class IProvider_struct(Structure):
     "IProvider interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IProvider_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IProvider_VTablePtr)]
 IProvider = POINTER(IProvider_struct)
 # IDtcStart(3) : Disposable
 class IDtcStart_VTable(Structure):
@@ -574,7 +596,7 @@ class IDtcStart_VTable(Structure):
 IDtcStart_VTablePtr = POINTER(IDtcStart_VTable)
 class IDtcStart_struct(Structure):
     "IDtcStart interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IDtcStart_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IDtcStart_VTablePtr)]
 IDtcStart = POINTER(IDtcStart_struct)
 # IDtc(2) : Versioned
 class IDtc_VTable(Structure):
@@ -582,7 +604,7 @@ class IDtc_VTable(Structure):
 IDtc_VTablePtr = POINTER(IDtc_VTable)
 class IDtc_struct(Structure):
     "IDtc interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IDtc_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IDtc_VTablePtr)]
 IDtc = POINTER(IDtc_struct)
 # IAuth(4) : PluginBase
 # IWriter(2) : Versioned
@@ -605,7 +627,7 @@ class ICryptKeyCallback_VTable(Structure):
 ICryptKeyCallback_VTablePtr = POINTER(ICryptKeyCallback_VTable)
 class ICryptKeyCallback_struct(Structure):
     "ICryptKeyCallback interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', ICryptKeyCallback_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', ICryptKeyCallback_VTablePtr)]
 ICryptKeyCallback = POINTER(ICryptKeyCallback_struct)
 # IKeyHolderPlugin(5) : PluginBase
 # IDbCryptInfo(3) : ReferenceCounted
@@ -623,7 +645,7 @@ class ITimer_VTable(Structure):
 ITimer_VTablePtr = POINTER(ITimer_VTable)
 class ITimer_struct(Structure):
     "ITimer interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', ITimer_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', ITimer_VTablePtr)]
 ITimer = POINTER(ITimer_struct)
 # ITimerControl(2) : Versioned
 class ITimerControl_VTable(Structure):
@@ -631,7 +653,7 @@ class ITimerControl_VTable(Structure):
 ITimerControl_VTablePtr = POINTER(ITimerControl_VTable)
 class ITimerControl_struct(Structure):
     "ITimerControl interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', ITimerControl_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', ITimerControl_VTablePtr)]
 ITimerControl = POINTER(ITimerControl_struct)
 # IVersionCallback(2) : Versioned
 class IVersionCallback_VTable(Structure):
@@ -639,7 +661,7 @@ class IVersionCallback_VTable(Structure):
 IVersionCallback_VTablePtr = POINTER(IVersionCallback_VTable)
 class IVersionCallback_struct(Structure):
     "IVersionCallback interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IVersionCallback_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IVersionCallback_VTablePtr)]
 IVersionCallback = POINTER(IVersionCallback_struct)
 # IUtil(2) : Versioned
 class IUtil_VTable(Structure):
@@ -647,7 +669,7 @@ class IUtil_VTable(Structure):
 IUtil_VTablePtr = POINTER(IUtil_VTable)
 class IUtil_struct(Structure):
     "IUtil interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IUtil_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IUtil_VTablePtr)]
 IUtil = POINTER(IUtil_struct)
 # IOffsetsCallback(2) : Versioned
 class IOffsetsCallback_VTable(Structure):
@@ -655,7 +677,7 @@ class IOffsetsCallback_VTable(Structure):
 IOffsetsCallback_VTablePtr = POINTER(IOffsetsCallback_VTable)
 class IOffsetsCallback_struct(Structure):
     "IOffsetsCallback interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IOffsetsCallback_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IOffsetsCallback_VTablePtr)]
 IOffsetsCallback = POINTER(IOffsetsCallback_struct)
 # IXpbBuilder(3) : Disposable
 class IXpbBuilder_VTable(Structure):
@@ -663,7 +685,7 @@ class IXpbBuilder_VTable(Structure):
 IXpbBuilder_VTablePtr = POINTER(IXpbBuilder_VTable)
 class IXpbBuilder_struct(Structure):
     "IXpbBuilder interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IXpbBuilder_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IXpbBuilder_VTablePtr)]
 IXpbBuilder = POINTER(IXpbBuilder_struct)
 # ITraceConnection(2) : Versioned
 # ITraceDatabaseConnection(3) : TraceConnection
@@ -695,7 +717,7 @@ class IDecFloat16_VTable(Structure):
 IDecFloat16_VTablePtr = POINTER(IDecFloat16_VTable)
 class IDecFloat16_struct(Structure):
     "IDecFloat16 interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IDecFloat16_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IDecFloat16_VTablePtr)]
 IDecFloat16 = POINTER(IDecFloat16_struct)
 # IDecFloat34(2) : Versioned
 class IDecFloat34_VTable(Structure):
@@ -703,7 +725,7 @@ class IDecFloat34_VTable(Structure):
 IDecFloat34_VTablePtr = POINTER(IDecFloat34_VTable)
 class IDecFloat34_struct(Structure):
     "IDecFloat34 interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IDecFloat34_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IDecFloat34_VTablePtr)]
 IDecFloat34 = POINTER(IDecFloat34_struct)
 # IInt128(2) : Versioned
 class IInt128_VTable(Structure):
@@ -711,7 +733,7 @@ class IInt128_VTable(Structure):
 IInt128_VTablePtr = POINTER(IInt128_VTable)
 class IInt128_struct(Structure):
     "IInt128 interface"
-    _fields_ = [('dummy', c_void_p), ('vtable', IInt128_VTablePtr)]
+    _fields_: ClassVar = [('dummy', c_void_p), ('vtable', IInt128_VTablePtr)]
 IInt128 = POINTER(IInt128_struct)
 # IReplicatedRecord(2) : Versioned
 # IReplicatedBlob(2) : Versioned
@@ -1366,20 +1388,20 @@ IInt128_fromString = CFUNCTYPE(None, IInt128, IStatus, c_int, c_char_p, FB_I128P
 # Interfaces - Data structures
 # ------------------------------------------------------------------------------
 # IVersioned(1)
-IVersioned_VTable._fields_ = [('dummy', c_void_p), ('version', c_ulong)]
+IVersioned_VTable._fields_: ClassVar = [('dummy', c_void_p), ('version', c_ulong)]
 # IReferenceCounted(2)
-IReferenceCounted_VTable._fields_ = [
+IReferenceCounted_VTable._fields_: ClassVar = [
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
     ('release', IReferenceCounted_release)]
 # IDisposable(2)
-IDisposable_VTable._fields_ = [
+IDisposable_VTable._fields_: ClassVar = [
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('dispose', IDisposable_dispose)]
 # IStatus(3) : Disposable
-IStatus_VTable._fields_ = [
+IStatus_VTable._fields_: ClassVar = [
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('dispose', IDisposable_dispose),
@@ -1393,7 +1415,7 @@ IStatus_VTable._fields_ = [
     ('getWarnings', IStatus_getWarnings),
     ('clone', IStatus_clone)]
 # IMaster(2) : Versioned
-IMaster_VTable._fields_ = [
+IMaster_VTable._fields_: ClassVar = [
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('getStatus', IMaster_getStatus),
@@ -1409,7 +1431,7 @@ IMaster_VTable._fields_ = [
     ('getConfigManager', IMaster_getConfigManager),
     ('getProcessExiting', IMaster_getProcessExiting)]
 # IPluginBase(3) : ReferenceCounted
-IPluginBase_VTable._fields_ = [
+IPluginBase_VTable._fields_: ClassVar = [
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
@@ -1418,7 +1440,7 @@ IPluginBase_VTable._fields_ = [
     ('getOwner', IPluginBase_getOwner)]
 # IPluginSet(3) : ReferenceCounted
 # IConfigEntry(3) : ReferenceCounted
-IConfigEntry_VTable._fields_ = [
+IConfigEntry_VTable._fields_: ClassVar = [
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
@@ -1429,7 +1451,7 @@ IConfigEntry_VTable._fields_ = [
     ('getBoolValue', IConfigEntry_getBoolValue),
     ('getSubConfig', IConfigEntry_getSubConfig)]
 # IConfig(3) : ReferenceCounted
-IConfig_VTable._fields_ = [
+IConfig_VTable._fields_: ClassVar = [
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
@@ -1439,7 +1461,7 @@ IConfig_VTable._fields_ = [
     ('findPos', IConfig_findPos)]
 # >>> Firebird 4
 # IFirebirdConf(4) : ReferenceCounted
-IFirebirdConf_VTable._fields_ = [ # v3 - initial
+IFirebirdConf_VTable._fields_: ClassVar = [ # v3 - initial
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
@@ -1456,7 +1478,7 @@ IFirebirdConf_VTable._fields_ = [ # v3 - initial
 # ICryptKey(2) : Versioned
 # >>> Firebird 4
 # IConfigManager(3) : Versioned
-IConfigManager_VTable._fields_ = [
+IConfigManager_VTable._fields_: ClassVar = [
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('getDirectory', IConfigManager_getDirectory),
@@ -1467,14 +1489,14 @@ IConfigManager_VTable._fields_ = [
     ('getRootDirectory', IConfigManager_getRootDirectory),
     ('getDefaultSecurityDb', IConfigManager_getDefaultSecurityDb)]
 # IEventCallback(3) : ReferenceCounted
-IEventCallback_VTable._fields_ = [
+IEventCallback_VTable._fields_: ClassVar = [
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
     ('release', IReferenceCounted_release),
     ('eventCallbackFunction', IEventCallback_eventCallbackFunction)]
 # IBlob(3) : ReferenceCounted
-IBlob_VTable._fields_ = [
+IBlob_VTable._fields_: ClassVar = [
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
@@ -1488,7 +1510,7 @@ IBlob_VTable._fields_ = [
     ('cancel', IBlob_cancel), # v4: 3.0.7 => 3.0.8, 4.0.0 => 4.0.1
     ('close', IBlob_close)]
 # ITransaction(4) : ReferenceCounted
-ITransaction_VTable._fields_ = [ # v3 - initial
+ITransaction_VTable._fields_: ClassVar = [ # v3 - initial
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
@@ -1508,7 +1530,7 @@ ITransaction_VTable._fields_ = [ # v3 - initial
     ('disconnect', ITransaction_disconnect)]
 # >>> Firebird 4
 # IMessageMetadata(4) : ReferenceCounted
-IMessageMetadata_VTable._fields_ = [ # v3 - initial
+IMessageMetadata_VTable._fields_: ClassVar = [ # v3 - initial
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
@@ -1532,7 +1554,7 @@ IMessageMetadata_VTable._fields_ = [ # v3 - initial
     ('getAlignedLength', IMessageMetadata_getAlignedLength)]
 # >>> Firebird 4
 # IMetadataBuilder(4) : ReferenceCounted
-IMetadataBuilder_VTable._fields_ = [ # v3 - initial
+IMetadataBuilder_VTable._fields_: ClassVar = [ # v3 - initial
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
@@ -1552,7 +1574,7 @@ IMetadataBuilder_VTable._fields_ = [ # v3 - initial
     ('setOwner', IMetadataBuilder_setOwner),
     ('setAlias', IMetadataBuilder_setAlias)]
 # IResultSet(4) : ReferenceCounted
-IResultSet_VTable._fields_ = [ # v3 - initial
+IResultSet_VTable._fields_: ClassVar = [ # v3 - initial
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
@@ -1573,7 +1595,7 @@ IResultSet_VTable._fields_ = [ # v3 - initial
     ]
 # >>> Firebird 4
 # IStatement(5) : ReferenceCounted
-IStatement_VTable._fields_ = [ # v3 - initial
+IStatement_VTable._fields_: ClassVar = [ # v3 - initial
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
@@ -1594,7 +1616,7 @@ IStatement_VTable._fields_ = [ # v3 - initial
     ('createBatch', IStatement_createBatch),
     ('free', IStatement_free)] # v5: 3.0.7 => 3.0.8, 4.0.0 => 4.0.1
 # IBatch(4) : ReferenceCounted
-IBatch_VTable._fields_ = [ # v3 - initial
+IBatch_VTable._fields_: ClassVar = [ # v3 - initial
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
@@ -1613,7 +1635,7 @@ IBatch_VTable._fields_ = [ # v3 - initial
     ('close', IBatch_close), # v4: 4.0.0 => 4.0.1
     ('getInfo', IBatch_getInfo)]
 # IBatchCompletionState(3) : Disposable
-IBatchCompletionState_VTable._fields_ = [
+IBatchCompletionState_VTable._fields_: ClassVar = [
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('dispose', IDisposable_dispose),
@@ -1623,7 +1645,7 @@ IBatchCompletionState_VTable._fields_ = [
     ('getStatus', IBatchCompletionState_getStatus)]
 # ? IReplicator(3) : ReferenceCounted
 # IRequest(4) : ReferenceCounted
-IRequest_VTable._fields_ = [ # v3 - initial
+IRequest_VTable._fields_: ClassVar = [ # v3 - initial
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
@@ -1637,7 +1659,7 @@ IRequest_VTable._fields_ = [ # v3 - initial
     ('deprecatedFree', IRequest_deprecatedFree),
     ('free', IRequest_free)] # v4: 3.0.7 => 3.0.8, 4.0.0 => 4.0.1
 # IEvents(4) : ReferenceCounted
-IEvents_VTable._fields_ = [ # v3 - initial
+IEvents_VTable._fields_: ClassVar = [ # v3 - initial
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
@@ -1646,7 +1668,7 @@ IEvents_VTable._fields_ = [ # v3 - initial
     ('cancel', IEvents_cancel)] # v4: 3.0.7 => 3.0.8, 4.0.0 => 4.0.1
 # >>> Firebird 4
 # IAttachment(5) : ReferenceCounted
-IAttachment_VTable._fields_ = [ # v3 - initial
+IAttachment_VTable._fields_: ClassVar = [ # v3 - initial
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
@@ -1679,7 +1701,7 @@ IAttachment_VTable._fields_ = [ # v3 - initial
     ('dropDatabase', IAttachment_dropDatabase),
     ]
 # IService(5) : ReferenceCounted
-IService_VTable._fields_ = [ # v3 - initial
+IService_VTable._fields_: ClassVar = [ # v3 - initial
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
@@ -1690,7 +1712,7 @@ IService_VTable._fields_ = [ # v3 - initial
     ('detach', IService_detach), # v4: 3.0.7 => 3.0.8, 4.0.0 => 4.0.1
     ('cancel', IService_cancel)] # v5: 3.0.9 => 3.0.10, 4.0.1 => 4.0.2
 # IProvider(4) : PluginBase
-IProvider_VTable._fields_ = [
+IProvider_VTable._fields_: ClassVar = [
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
@@ -1703,7 +1725,7 @@ IProvider_VTable._fields_ = [
     ('shutdown', IProvider_shutdown),
     ('setDbCryptCallback', IProvider_setDbCryptCallback)]
 # IDtcStart(3) : Disposable
-IDtcStart_VTable._fields_ = [
+IDtcStart_VTable._fields_: ClassVar = [
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('dispose', IDisposable_dispose),
@@ -1711,7 +1733,7 @@ IDtcStart_VTable._fields_ = [
     ('addWithTpb', IDtcStart_addWithTpb),
     ('start', IDtcStart_start)]
 # IDtc(2) : Versioned
-IDtc_VTable._fields_ = [
+IDtc_VTable._fields_: ClassVar = [
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('join', IDtc_join),
@@ -1732,7 +1754,7 @@ IDtc_VTable._fields_ = [
 # ? IAuthBlock(2) : Versioned
 # ? IWireCryptPlugin(4) : PluginBase
 # ICryptKeyCallback(2) : Versioned
-ICryptKeyCallback_VTable._fields_ = [
+ICryptKeyCallback_VTable._fields_: ClassVar = [
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('callback', ICryptKeyCallback_callback)]
@@ -1747,26 +1769,26 @@ ICryptKeyCallback_VTable._fields_ = [
 # ? IRoutineMetadata(2) : Versioned
 # ? IExternalEngine(4) : PluginBase
 # ITimer(3) : ReferenceCounted
-ITimer_VTable._fields_ = [
+ITimer_VTable._fields_: ClassVar = [
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('addRef', IReferenceCounted_addRef),
     ('release', IReferenceCounted_release),
     ('handler', ITimer_handler)]
 # ITimerControl(2) : Versioned
-ITimerControl_VTable._fields_ = [
+ITimerControl_VTable._fields_: ClassVar = [
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('start', ITimerControl_start),
     ('stop', ITimerControl_stop)]
 # IVersionCallback(2) : Versioned
-IVersionCallback_VTable._fields_ = [
+IVersionCallback_VTable._fields_: ClassVar = [
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('callback', IVersionCallback_callback)]
 # >>> Firebird 4
 # IUtil(4) : Versioned
-IUtil_VTable._fields_ = [ # v2 - initial
+IUtil_VTable._fields_: ClassVar = [ # v2 - initial
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('getFbVersion', IUtil_getFbVersion),
@@ -1792,12 +1814,12 @@ IUtil_VTable._fields_ = [ # v2 - initial
     ('decodeTimeTzEx', IUtil_decodeTimeTzEx),
     ('decodeTimeStampTzEx', IUtil_decodeTimeStampTzEx)]
 # IOffsetsCallback(2) : Versioned
-IOffsetsCallback_VTable._fields_ = [
+IOffsetsCallback_VTable._fields_: ClassVar = [
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('setOffset', IOffsetsCallback_setOffset)]
 # IXpbBuilder(3) : Disposable
-IXpbBuilder_VTable._fields_ = [
+IXpbBuilder_VTable._fields_: ClassVar = [
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('dispose', IDisposable_dispose),
@@ -1846,7 +1868,7 @@ IXpbBuilder_VTable._fields_ = [
 # ? IUdrPlugin(2) : Versioned
 # >>> Firebird 4
 # IDecFloat16(2) : Versioned
-IDecFloat16_VTable._fields_ = [
+IDecFloat16_VTable._fields_: ClassVar = [
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('toBcd', IDecFloat16_toBcd),
@@ -1854,7 +1876,7 @@ IDecFloat16_VTable._fields_ = [
     ('fromBcd', IDecFloat16_fromBcd),
     ('fromString', IDecFloat16_fromString)]
 # IDecFloat34(2) : Versioned
-IDecFloat34_VTable._fields_ = [
+IDecFloat34_VTable._fields_: ClassVar = [
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('toBcd', IDecFloat34_toBcd),
@@ -1862,7 +1884,7 @@ IDecFloat34_VTable._fields_ = [
     ('fromBcd', IDecFloat34_fromBcd),
     ('fromString', IDecFloat34_fromString)]
 # IInt128(2) : Versioned
-IInt128_VTable._fields_ = [
+IInt128_VTable._fields_: ClassVar = [
     ('dummy', c_void_p),
     ('version', c_ulong),
     ('toString', IInt128_toString),
@@ -1877,7 +1899,7 @@ def db_api_error(status: ISC_STATUS_ARRAY) -> bool:
     return status[0] == 1 and status[1] > 0
 
 
-def exception_from_status(error, status: ISC_STATUS_ARRAY, preamble: str = None) -> Exception:
+def exception_from_status(error, status: ISC_STATUS_ARRAY, preamble: str | None=None) -> Exception:
     "Returns exception assembled from error information stored in `status`."
     msglist = []
     msg = create_string_buffer(1024)
@@ -2030,7 +2052,7 @@ class FirebirdAPI:
             Old API function.
 
     """
-    def __init__(self, filename: Path = None):
+    def __init__(self, filename: Path | None=None):
         decimal.getcontext().prec = 34
         if filename is None:
             if sys.platform == 'darwin':
@@ -2198,7 +2220,7 @@ class FirebirdAPI:
         """Convenience wrapper for isc_event_block() API function. Injects variable
         number of parameters into `C_isc_event_block` call.
         """
-        if len(args) > 15:
+        if len(args) > 15: # noqa: PLR2004
             raise ValueError("isc_event_block takes no more than 15 event names")
         newargs = list(self.P_isc_event_block_args)
         newargs.extend(STRING for x in args)
@@ -2210,7 +2232,7 @@ def has_api() -> bool:
     """
     return api is not None
 
-def load_api(filename: str | Path | None = None) -> None:
+def load_api(filename: str | Path | None=None) -> None:
     """Initializes bindings to Firebird Client Library unless they are already initialized.
     Called automatically by `get_api()`.
 
@@ -2232,7 +2254,7 @@ def load_api(filename: str | Path | None = None) -> None:
         if filename and not isinstance(filename, Path):
             filename = Path(filename)
         _api = FirebirdAPI(filename)
-        setattr(sys.modules[__name__], 'api', _api)
+        setattr(sys.modules[__name__], 'api', _api) # noqa: B010
         for hook in get_callbacks(APIHook.LOADED, _api):
             hook(_api)
 
@@ -2245,4 +2267,4 @@ def get_api() -> FirebirdAPI:
 
 api: FirebirdAPI = None
 
-register_class(FirebirdAPI, set([APIHook.LOADED]))
+register_class(FirebirdAPI, {APIHook.LOADED})

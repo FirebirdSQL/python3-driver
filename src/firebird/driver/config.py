@@ -46,16 +46,29 @@ is usually the global `driver_config` instance.
 """
 
 from __future__ import annotations
-from typing import Iterable
-import os
-from firebird.base.config import Config, StrOption, IntOption, BoolOption, EnumOption, \
-     ConfigListOption, ListOption, ConfigParser, EnvExtendedInterpolation
-from .types import NetProtocol, DecfloatRound, DecfloatTraps
 
-class ServerConfig(Config): # pylint: disable=R0902
+import os
+from collections.abc import Iterable
+
+from firebird.base.config import (
+    BoolOption,
+    Config,
+    ConfigListOption,
+    ConfigParser,
+    EnumOption,
+    EnvExtendedInterpolation,
+    IntOption,
+    ListOption,
+    StrOption,
+)
+
+from .types import DecfloatRound, DecfloatTraps, NetProtocol
+
+
+class ServerConfig(Config):
     """Represents configuration options specific to a named Firebird server entry.
     """
-    def __init__(self, name: str, *, optional: bool=False, description: str=None):
+    def __init__(self, name: str, *, optional: bool=False, description: str | None=None):
         super().__init__(name, optional=optional, description=description)
         #: Server host machine specification
         self.host: StrOption = \
@@ -87,10 +100,10 @@ class ServerConfig(Config): # pylint: disable=R0902
         self.encoding_errors: StrOption = \
             StrOption('encoding_errors', "Handler used for encoding errors", default='strict')
 
-class DatabaseConfig(Config): # pylint: disable=R0902
+class DatabaseConfig(Config):
     """Represents configuration options specific to a named Firebird database entry, including connection and creation parameters.
     """
-    def __init__(self, name: str, *, optional: bool=False, description: str=None):
+    def __init__(self, name: str, *, optional: bool=False, description: str | None=None):
         super().__init__(name, optional=optional, description=description)
         #: Name of server where database is located
         self.server: StrOption = \
@@ -218,7 +231,7 @@ class DriverConfig(Config):
         #: Registered databases
         self.databases: ConfigListOption = \
             ConfigListOption('databases', DatabaseConfig, "Registered databases")
-    def read(self, filenames: str | Iterable, encoding: str=None):
+    def read(self, filenames: str | Iterable, encoding: str | None=None):
         """Read configuration from a filename or an iterable of filenames.
 
         Files that cannot be opened are silently ignored; this is
@@ -249,7 +262,7 @@ class DriverConfig(Config):
         parser = ConfigParser(interpolation=EnvExtendedInterpolation())
         parser.read_string(string)
         self.load_config(parser)
-    def read_dict(self, dictionary: dict) -> None:
+    def read_dict(self, dictionary: dict[str, str]) -> None:
         """Read configuration from a dictionary.
 
         Keys are section names, values are dictionaries with keys and values
@@ -276,7 +289,7 @@ class DriverConfig(Config):
             if db.name == name:
                 return db
         return None
-    def register_server(self, name: str, config: str=None) -> ServerConfig:
+    def register_server(self, name: str, config: str | None=None) -> ServerConfig:
         """Register server.
 
         Arguments:
@@ -298,7 +311,7 @@ class DriverConfig(Config):
             parser.read_string(config)
             srv_config.load_config(parser, name)
         return srv_config
-    def register_database(self, name: str, config: str=None) -> DatabaseConfig:
+    def register_database(self, name: str, config: str | None=None) -> DatabaseConfig:
         """Register database.
 
         Arguments:
