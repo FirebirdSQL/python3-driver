@@ -28,8 +28,7 @@ classifiers = [
   "Topic :: Database",
 ]
 dependencies = [
-  "firebird-base @file:////home/job/python/projects/firebird-base",
-  #"firebird-base~=2.0",
+  "firebird-base~=2.0",
   "python-dateutil~=2.8",
 ]
 
