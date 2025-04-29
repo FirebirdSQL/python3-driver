@@ -57,8 +57,6 @@ dependencies = [
 
 [tool.hatch.envs.hatch-test]
 extra-args = ["--host=localhost"]
-
-[tool.hatch.envs.test]
 dependencies = [
   "coverage[toml]>=6.5",
   "pytest",

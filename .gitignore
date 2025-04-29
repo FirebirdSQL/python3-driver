@@ -26,6 +26,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+.hatch/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -138,6 +139,7 @@ dmypy.json
 # Personal
 notes/
 store/
+
 # Sphinx build
 docs/_build
 docs/firebird-driver.docset
