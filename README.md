@@ -53,7 +53,7 @@ This project is using [pytest](https://docs.pytest.org/en/stable/) for testing, 
 tests add several options via `tests/conftest.py`.
 
 By default, tests are configured to use local Firebird installation via network access.
-To use local instllation in `mebedded` mode, comment out the section:
+To use local installation in `embedded` mode, comment out the section:
 ```
 [tool.hatch.envs.hatch-test]
 extra-args = ["--host=localhost"]
