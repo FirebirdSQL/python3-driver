@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.1] - 2025-05-05
+
+### Fixed
+
+- #48: AttributeError object has no attribute 'logging_id' in "__del__" methods
+
 ## [2.0.0] - 2025-04-30
 
 ### Fixed

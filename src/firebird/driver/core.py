@@ -1795,7 +1795,7 @@ class Connection:
         self.__FIREBIRD_LIB__ = None
     def __del__(self):
         if not self.is_closed():
-            warn(f"Connection '{self.logging_id}' disposed without prior close()", ResourceWarning)
+            warn(f"Connection disposed without prior close()", ResourceWarning)
             self._close()
             self._close_internals()
             self._att.detach()
@@ -2537,7 +2537,7 @@ class TransactionManager:
         self.close()
     def __del__(self):
         if self._tra is not None:
-            warn(f"Transaction '{self.logging_id}' disposed while active", ResourceWarning)
+            warn(f"Transaction disposed while active", ResourceWarning)
             self._finish()
     def __dead_con(self, obj: Connection) -> None: # noqa: ARG002
         self._connection = None
@@ -2947,12 +2947,8 @@ class Statement:
         self.free()
     def __del__(self):
         if self._in_meta or self._out_meta or self._istmt:
-            warn(f"Statement '{self.logging_id}' disposed without prior free()", ResourceWarning)
+            warn(f"Statement disposed without prior free()", ResourceWarning)
             self.free()
-    def __str__(self):
-        return f'{self.logging_id}[{self.sql}]'
-    def __repr__(self):
-        return str(self)
     def __dead_con(self, obj: Connection) -> None: # noqa: ARG002
         self._connection = None
     def __get_plan(self, *, detailed: bool) -> str:
@@ -3085,10 +3081,8 @@ class BlobReader(io.IOBase):
         self.close()
     def __del__(self):
         if self._blob is not None:
-            warn(f"BlobReader '{self.logging_id}' disposed without prior close()", ResourceWarning)
+            warn(f"BlobReader disposed without prior close()", ResourceWarning)
             self.close()
-    def __repr__(self):
-        return f'{self.logging_id}[size={self.length}]'
     def flush(self) -> None:
         """Does nothing.
         """
@@ -3292,7 +3286,7 @@ class Cursor:
         self.close()
     def __del__(self):
         if self._result is not None or self._stmt is not None or self.__blob_readers:
-            warn(f"Cursor '{self.logging_id}' disposed without prior close()", ResourceWarning)
+            warn(f"Cursor disposed without prior close()", ResourceWarning)
             self.close()
     def __next__(self):
         if (row := self.fetchone()) is not None:
@@ -5547,7 +5541,7 @@ class Server:
         self.close()
     def __del__(self):
         if self._svc is not None:
-            warn(f"Server '{self.logging_id}' disposed without prior close()", ResourceWarning)
+            warn(f"Server disposed without prior close()", ResourceWarning)
             self.close()
     def __next__(self):
         if (line := self.readline()) is not None:

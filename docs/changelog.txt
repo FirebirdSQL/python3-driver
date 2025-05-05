@@ -2,6 +2,11 @@
 Changelog
 #########
 
+Version 2.0.1
+=============
+
+- #48: AttributeError object has no attribute 'logging_id' in "__del__" methods
+
 Version 2.0.0
 =============
 
