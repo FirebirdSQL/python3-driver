@@ -133,4 +133,4 @@ from .types import (
 )
 
 #: Current driver version, SEMVER string.
-__VERSION__ = '2.0.0'
+__VERSION__ = '2.0.1'
