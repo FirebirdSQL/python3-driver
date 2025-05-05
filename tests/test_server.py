@@ -87,7 +87,7 @@ def test_query(server_connection, fb_vars, dsn, db_file):
     elif version in SpecifierSet('>=4.0'):
         assert sec_db.endswith('SECURITY4.FDB')
     else: # FB30
-        assert sec_db.endswith('SECURITY53.FDB')
+        assert sec_db.endswith('SECURITY3.FDB')
 
     assert isinstance(svc.info.lock_directory, str) # Path can vary
     caps = svc.info.capabilities
