@@ -27,7 +27,8 @@ import pytest
 import firebird.driver as driver
 from firebird.driver.types import ImpData, ImpDataOld
 from firebird.driver import (NetProtocol, connect, Isolation, tpb,  DefaultAction,
-                             DbInfoCode, DbWriteMode, DbAccessMode, DbSpaceReservation)
+                             DbInfoCode, DbWriteMode, DbAccessMode, DbSpaceReservation,
+                             driver_config)
 
 def test_connect_helper():
     DB_LINUX_PATH = '/path/to/db/employee.fdb'
@@ -376,3 +377,177 @@ def test_db_info(db_connection, fb_vars, db_file):
     guid = con.info.get_info(DbInfoCode.DB_GUID)
     assert isinstance(guid, str)
     assert len(guid) == 38 # Example check for {GUID} format
+
+def test_connect_with_driver_config_server_defaults_local(driver_cfg, db_file, fb_vars):
+    """
+    Tests connect() using driver_config.server_defaults for a local connection.
+    The database alias registered for this test will have its 'server' attribute
+    set to None, which means it should pick up settings from server_defaults.
+    """
+    db_alias = "pytest_cfg_local_db"
+    db_path_str = str(db_file)
+
+    # Save original server_defaults to restore them, though driver_cfg fixture handles full reset
+    original_s_host = driver_config.server_defaults.host.value
+    original_s_port = driver_config.server_defaults.port.value
+    original_s_user = driver_config.server_defaults.user.value
+    original_s_password = driver_config.server_defaults.password.value
+
+    # Configure server_defaults for a local connection
+    driver_config.server_defaults.host.value = None
+    driver_config.server_defaults.port.value = None # Explicitly None for local
+    driver_config.server_defaults.user.value = fb_vars['user']
+    driver_config.server_defaults.password.value = fb_vars['password']
+
+    # Ensure the test-specific DB alias is clean if it exists from a prior failed run
+    if driver_config.get_database(db_alias):
+        driver_config.databases.value = [db_cfg for db_cfg in driver_config.databases.value if db_cfg.name != db_alias]
+
+    # Register a database alias that will use these server_defaults
+    test_db_config_entry = driver_config.register_database(db_alias)
+    test_db_config_entry.database.value = db_path_str
+    test_db_config_entry.server.value = None # Key: This tells driver to use server_defaults
+
+    # For a local connection (host=None, port=None), DSN is just the database path
+    expected_dsn = db_path_str
+
+    conn = None
+    try:
+        conn = driver.connect(db_alias, charset='UTF8')
+        assert conn._att is not None, "Connection attachment failed"
+        assert conn.dsn == expected_dsn, f"Expected DSN '{expected_dsn}', got '{conn.dsn}'"
+
+        # Verify connection is usable with a simple query
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1 FROM RDB$DATABASE")
+            assert cur.fetchone()[0] == 1, "Query failed on the connection"
+    finally:
+        if conn and not conn.is_closed():
+            conn.close()
+        # Restore original server_defaults values (driver_cfg also handles full reset)
+        driver_config.server_defaults.host.value = original_s_host
+        driver_config.server_defaults.port.value = original_s_port
+        driver_config.server_defaults.user.value = original_s_user
+        driver_config.server_defaults.password.value = original_s_password
+
+
+def test_connect_with_driver_config_server_defaults_remote(driver_cfg, db_file, fb_vars):
+    """
+    Tests connect() using driver_config.server_defaults for a remote-like connection.
+    This test relies on fb_vars providing a host (and optionally port) from conftest.py.
+    If no host is configured in fb_vars, this test variant is skipped.
+    """
+    db_alias = "pytest_cfg_remote_db"
+    db_path_str = str(db_file)
+
+    test_host = fb_vars.get('host')
+    test_port = fb_vars.get('port') # Can be None or empty string
+
+    if not test_host:
+        pytest.skip("Skipping remote server_defaults test as no host is configured in fb_vars. "
+                    "This test requires a configured host (and optionally port) for execution.")
+        return
+
+    # Save original server_defaults
+    original_s_host = driver_config.server_defaults.host.value
+    original_s_port = driver_config.server_defaults.port.value
+    original_s_user = driver_config.server_defaults.user.value
+    original_s_password = driver_config.server_defaults.password.value
+
+    # Configure server_defaults for a "remote" connection
+    driver_config.server_defaults.host.value = test_host
+    driver_config.server_defaults.port.value = str(test_port) if test_port else None
+    driver_config.server_defaults.user.value = fb_vars['user']
+    driver_config.server_defaults.password.value = fb_vars['password']
+
+    # Ensure the test-specific DB alias is clean
+    if driver_config.get_database(db_alias):
+        driver_config.databases.value = [db_cfg for db_cfg in driver_config.databases.value if db_cfg.name != db_alias]
+
+    test_db_config_entry = driver_config.register_database(db_alias)
+    test_db_config_entry.database.value = db_path_str
+    test_db_config_entry.server.value = None # Use server_defaults
+
+    # Determine expected DSN based on _connect_helper logic for non-protocol DSNs
+    if test_host.startswith("\\\\"): # Windows Named Pipes
+        if test_port:
+            expected_dsn = f"{test_host}@{test_port}\\{db_path_str}"
+        else:
+            expected_dsn = f"{test_host}\\{db_path_str}"
+    elif test_port: # TCP/IP with port
+        expected_dsn = f"{test_host}/{test_port}:{db_path_str}"
+    else: # TCP/IP without port (or other local-like with host)
+        expected_dsn = f"{test_host}:{db_path_str}"
+
+    conn = None
+    try:
+        conn = driver.connect(db_alias, charset='UTF8')
+        assert conn._att is not None, "Connection attachment failed"
+        assert conn.dsn == expected_dsn, f"Expected DSN '{expected_dsn}', got '{conn.dsn}'"
+
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1 FROM RDB$DATABASE")
+            assert cur.fetchone()[0] == 1, "Query failed on the connection"
+    finally:
+        if conn and not conn.is_closed():
+            conn.close()
+        # Restore original server_defaults
+        driver_config.server_defaults.host.value = original_s_host
+        driver_config.server_defaults.port.value = original_s_port
+        driver_config.server_defaults.user.value = original_s_user
+        driver_config.server_defaults.password.value = original_s_password
+
+def test_connect_with_driver_config_db_defaults_local(driver_cfg, db_file, fb_vars):
+    """
+    Tests connect() when db_defaults provides the database path, and
+    server_defaults provides local connection info (host=None, port=None).
+    Here, connect() is called with a DSN-like string that is *not* a registered alias.
+    """
+    db_path_str = str(db_file) # This will be our "DSN" to connect to
+
+    # Save original defaults
+    original_s_host = driver_config.server_defaults.host.value
+    original_s_port = driver_config.server_defaults.port.value
+    original_s_user = driver_config.server_defaults.user.value
+    original_s_password = driver_config.server_defaults.password.value
+    original_db_database = driver_config.db_defaults.database.value
+    original_db_server = driver_config.db_defaults.server.value
+
+
+    # Configure server_defaults for local connection
+    driver_config.server_defaults.host.value = None
+    driver_config.server_defaults.port.value = None
+    driver_config.server_defaults.user.value = fb_vars['user']
+    driver_config.server_defaults.password.value = fb_vars['password']
+
+    # Configure db_defaults (it won't be used for database path if DSN is absolute path)
+    # but it's good to ensure it's set to something known for the test.
+    # The key here is that if connect(db_path_str) is called and db_path_str is
+    # an absolute path, it's treated as the DSN. Server info then comes from
+    # server_defaults IF db_path_str is NOT a full DSN with host/port.
+    # If db_path_str is an absolute path, it's treated as the direct database target.
+    driver_config.db_defaults.database.value = "some_default_db_ignore" # Should not be used if DSN is absolute
+    driver_config.db_defaults.server.value = None # Use server_defaults
+
+    expected_dsn = db_path_str # For local connection with absolute path, DSN is the path
+
+    conn = None
+    try:
+        # Connect using the absolute path as the DSN
+        conn = driver.connect(db_path_str, charset='UTF8')
+        assert conn._att is not None, "Connection attachment failed"
+        assert conn.dsn == expected_dsn, f"Expected DSN '{expected_dsn}', got '{conn.dsn}'"
+
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1 FROM RDB$DATABASE")
+            assert cur.fetchone()[0] == 1, "Query failed on the connection"
+    finally:
+        if conn and not conn.is_closed():
+            conn.close()
+        # Restore originals
+        driver_config.server_defaults.host.value = original_s_host
+        driver_config.server_defaults.port.value = original_s_port
+        driver_config.server_defaults.user.value = original_s_user
+        driver_config.server_defaults.password.value = original_s_password
+        driver_config.db_defaults.database.value = original_db_database
+        driver_config.db_defaults.server.value = original_db_server

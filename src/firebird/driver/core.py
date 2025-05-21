@@ -53,6 +53,7 @@ import struct
 import sys
 import threading
 import weakref
+from urllib.parse import urlparse
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Mapping, Sequence
 from ctypes import addressof, byref, create_string_buffer, memmove, memset, pointer, string_at
@@ -1795,7 +1796,7 @@ class Connection:
         self.__FIREBIRD_LIB__ = None
     def __del__(self):
         if not self.is_closed():
-            warn(f"Connection disposed without prior close()", ResourceWarning)
+            warn("Connection disposed without prior close()", ResourceWarning)
             self._close()
             self._close_internals()
             self._att.detach()
@@ -2179,6 +2180,75 @@ def _connect_helper(dsn: str, host: str, port: str, database: str, protocol: Net
         dsn += database
     return dsn
 
+def _is_dsn(value: str) -> bool:
+    """
+    Checks if the given string matches known patterns for Firebird DSNs.
+
+    This function analyzes the string for structures that are typical for
+    Firebird connection strings, based on how the firebird-driver might
+    construct them (per _connect_helper) or how the Firebird client
+    library generally interprets them.
+
+    Args:
+        value: The string to check.
+
+    Returns:
+        True if the string matches a DSN pattern, False otherwise.
+    """
+    if not isinstance(value, str) or not value.strip():
+        # Empty or whitespace-only strings are not DSNs
+        return False
+
+    # 1. Protocol-based DSNs (e.g., inet://localhost/employee)
+    #    These are directly produced by _connect_helper if a protocol is specified.
+    try:
+        parsed = urlparse(value)
+        if parsed.scheme in [p.name.lower() for p in NetProtocol]:
+            # A scheme-based DSN must have a network location (host/port) or a path (database part).
+            # parsed.path.lstrip('/') handles cases like "xnet:///path/to/db" where netloc is empty.
+            if parsed.netloc or (parsed.path and parsed.path.lstrip('/')):
+                return True
+    except ValueError:
+        # urlparse can raise ValueError for some malformed inputs (e.g. "::1")
+        # These are unlikely to be scheme-based DSNs in the firebird context.
+        pass
+
+    # 2. Windows Named Pipes (e.g., \\server\pipe_name or \\server@port\pipe_name)
+    #    These are indicated by starting with \\.
+    if value.startswith("\\\\"):
+        # Basic check: must have some content after \\, and not be just \\ or \\\
+        if len(value) > 2 and value[2] not in ['\\', '/']:
+            return True
+
+    # 3. Classic host:database or host/port:database syntax
+    #    (e.g., localhost:employee, server/3050:/data/db.fdb)
+    #    This pattern should not be confused with "C:\path" or "http://..."
+    colon_idx = value.find(':')
+    if colon_idx > 0 and "://" not in value[:colon_idx]: # Colon exists, not at start, and not part of a scheme
+        host_spec = value[:colon_idx]
+        # db_spec = value[colon_idx+1:] # Not strictly needed for this check
+
+        # Avoid misinterpreting "C:\path" as "host C, db \path".
+        # If host_spec is a single letter (like a drive) AND the char after colon is a path separator,
+        # it's more likely an absolute path. os.path.isabs handles these better.
+        is_windows_drive_abs_path_candidate = (
+            len(host_spec) == 1 and host_spec[0].isalpha() and
+            len(value) > colon_idx + 1 and value[colon_idx+1] in ('/', '\\')
+        )
+
+        if not is_windows_drive_abs_path_candidate:
+            # host_spec should not contain backslashes if it's a hostname.
+            # It can contain a forward slash for host/port.
+            if '\\' not in host_spec:
+                if '/' in host_spec: # Potential host/port:db
+                    # e.g., "server/3050:dbname"
+                    parts = host_spec.split('/', 1) # Split only on the first /
+                    if len(parts) == 2 and parts[0] and parts[1].isdigit(): # host part and port part (digits)
+                        return True
+                elif host_spec: # Plain host:db, ensure host_spec is not empty
+                    # e.g., "localhost:dbname", "localhost:/path/to/db", "localhost:C:relative_path_on_C"
+                    return True
+    return False
 def __make_connection(dsn: str, utf8filename: bool, dpb: bytes, sql_dialect: int, charset: str, # noqa: FBT001
                       crypt_callback: iCryptKeyCallbackImpl, *, create: bool) -> Connection:
     with a.get_api().master.get_dispatcher() as provider:
@@ -2244,13 +2314,14 @@ def connect(database: str | Path, *, user: str | None=None, password: str | None
     if isinstance(database, Path):
         database = str(database)
     db_config: DatabaseConfig = driver_config.get_database(database)
+    dsn: str | None = None
     if db_config is None:
         db_config = driver_config.db_defaults
-        # we'll assume that 'database' is 'dsn'
-        dsn = database
-        database = None
         srv_config = driver_config.server_defaults
-        srv_config.host.clear()
+        if _is_dsn(database):
+            dsn = database
+            database = None
+            srv_config.host.clear()
     else:
         database = db_config.database.value
         dsn = db_config.dsn.value
@@ -2328,11 +2399,11 @@ def create_database(database: str | Path, *, user: str | None=None, password: st
     db_config: DatabaseConfig = driver_config.get_database(database)
     if db_config is None:
         db_config = driver_config.db_defaults
-        # we'll assume that 'database' is 'dsn'
-        dsn = database
-        database = None
         srv_config = driver_config.server_defaults
-        srv_config.host.clear()
+        if _is_dsn(database):
+            dsn = database
+            database = None
+            srv_config.host.clear()
     else:
         database = db_config.database.value
         dsn = db_config.dsn.value
@@ -2537,7 +2608,7 @@ class TransactionManager:
         self.close()
     def __del__(self):
         if self._tra is not None:
-            warn(f"Transaction disposed while active", ResourceWarning)
+            warn("Transaction disposed while active", ResourceWarning)
             self._finish()
     def __dead_con(self, obj: Connection) -> None: # noqa: ARG002
         self._connection = None
@@ -2947,7 +3018,7 @@ class Statement:
         self.free()
     def __del__(self):
         if self._in_meta or self._out_meta or self._istmt:
-            warn(f"Statement disposed without prior free()", ResourceWarning)
+            warn("Statement disposed without prior free()", ResourceWarning)
             self.free()
     def __dead_con(self, obj: Connection) -> None: # noqa: ARG002
         self._connection = None
@@ -3081,7 +3152,7 @@ class BlobReader(io.IOBase):
         self.close()
     def __del__(self):
         if self._blob is not None:
-            warn(f"BlobReader disposed without prior close()", ResourceWarning)
+            warn("BlobReader disposed without prior close()", ResourceWarning)
             self.close()
     def flush(self) -> None:
         """Does nothing.
@@ -3286,7 +3357,7 @@ class Cursor:
         self.close()
     def __del__(self):
         if self._result is not None or self._stmt is not None or self.__blob_readers:
-            warn(f"Cursor disposed without prior close()", ResourceWarning)
+            warn("Cursor disposed without prior close()", ResourceWarning)
             self.close()
     def __next__(self):
         if (row := self.fetchone()) is not None:
@@ -5541,7 +5612,7 @@ class Server:
         self.close()
     def __del__(self):
         if self._svc is not None:
-            warn(f"Server disposed without prior close()", ResourceWarning)
+            warn("Server disposed without prior close()", ResourceWarning)
             self.close()
     def __next__(self):
         if (line := self.readline()) is not None:
