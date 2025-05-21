@@ -57,6 +57,9 @@ dependencies = [
 
 [tool.hatch.envs.hatch-test]
 extra-args = ["--host=localhost"]
+extra-dependencies = [
+  "packaging>=25.0",
+]
 
 [[tool.hatch.envs.hatch-test.matrix]]
 python = ["3.11", "3.12", "3.13"]
@@ -119,7 +122,7 @@ ban-relative-imports = "all"
 
 [tool.ruff.lint.per-file-ignores]
 # Tests can use magic values, assertions, and relative imports
-"tests/**/*" = ["PLR2004", "S101", "TID252"]
+"test_*" = ["PLR2004", "S101", "TID252"]
 "fbapi.py" = ["N801", "E501"]
 "interfaces.py" = ["ARG001", "ARG002", "N801", "N803", "E501", "FBT001"]
 "hooks.py" = ["F401"]

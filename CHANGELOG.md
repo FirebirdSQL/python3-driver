@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.2] - 2025-05-21
+
+### Fixed
+
+- #49: database host configuration not work with version 2
+
 ## [2.0.1] - 2025-05-05
 
 ### Fixed

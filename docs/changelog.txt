@@ -2,6 +2,11 @@
 Changelog
 #########
 
+Version 2.0.2
+=============
+
+- #49: database host configuration not work with version 2
+
 Version 2.0.1
 =============
 

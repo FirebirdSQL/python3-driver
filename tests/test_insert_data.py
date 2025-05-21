@@ -49,7 +49,7 @@ def utf8_connection(dsn):
 
 def test_insert_integers(db_connection):
     with db_connection.cursor() as cur:
-        cur.execute('insert into T2 (C1,C2,C3) values (?,?,?)', [1, 1, 1])
+        cur.execute('insert into T2 (C1,C2,C3) values (?,?,?)', ['1', '1', '1'])
         db_connection.commit()
         cur.execute('select C1,C2,C3 from T2 where C1 = 1')
         rows = cur.fetchall()
@@ -97,12 +97,12 @@ def test_insert_datetime(db_connection):
 
         # Insert from string (driver handles conversion if possible, though explicit types are better)
         # Note: Microsecond separator might vary based on driver/server locale. Use types.
-        # cur.execute('insert into T2 (C1,C6,C7,C8) values (?,?,?,?)', [4, '2011-11-13', '15:0:1.200', '2011-11-13 15:0:1.2000'])
-        # db_connection.commit()
-        # cur.execute('select C1,C6,C7,C8 from T2 where C1 = 4')
-        # rows = cur.fetchall()
-        # assert rows == [(4, datetime.date(2011, 11, 13), datetime.time(15, 0, 1, 200000),
-        #                   datetime.datetime(2011, 11, 13, 15, 0, 1, 200000))]
+        cur.execute('insert into T2 (C1,C6,C7,C8) values (?,?,?,?)', [4, '2011-11-13', '15:0:1.200', '2011-11-13 15:0:1.2000'])
+        db_connection.commit()
+        cur.execute('select C1,C6,C7,C8 from T2 where C1 = 4')
+        rows = cur.fetchall()
+        assert rows == [(4, datetime.date(2011, 11, 13), datetime.time(15, 0, 1, 200000),
+                          datetime.datetime(2011, 11, 13, 15, 0, 1, 200000))]
 
 
         # encode date before 1859-11-17 produce a negative number
