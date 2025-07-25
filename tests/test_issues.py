@@ -31,3 +31,11 @@ def test_issue_02(db_connection):
         cur.execute('select C1,C2,C3 from T2 where C1 = 1')
         rows = cur.fetchall()
         assert rows == [(1, None, 1)]
+
+def test_issue_53(db_connection):
+    with db_connection.cursor() as cur:
+        cur.execute("select cast('0.00' as numeric(9,2)) from rdb$database")
+        numeric_val = cur.fetchone()[0]
+        numeric_val_exponent = numeric_val.as_tuple()[2]
+        db_connection.commit()
+        assert numeric_val_exponent == -2
