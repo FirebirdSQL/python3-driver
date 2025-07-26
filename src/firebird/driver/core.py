@@ -3392,7 +3392,7 @@ class Cursor:
                 elif dtype in (a.blr_short, a.blr_long, a.blr_int64):
                     val = (0).from_bytes(buf[bufpos:bufpos + esize], 'little', signed=True)
                     if subtype or scale:
-                        val = decimal.Decimal(val) / _ten_to[abs(scale)]
+                        val = decimal.Decimal(val).scaleb(-abs(scale))
                 elif dtype == a.blr_bool:
                     val = (0).from_bytes(buf[bufpos:bufpos + esize], 'little') == 1
                 elif dtype == a.blr_float:
@@ -3799,7 +3799,7 @@ class Cursor:
                     value = (0).from_bytes(buffer[offset:offset + length], 'little', signed=True)
                     # It's scalled integer?
                     if desc.subtype or desc.scale:
-                        value = decimal.Decimal(value) / _ten_to[abs(desc.scale)]
+                        value = decimal.Decimal(value).scaleb(-abs(desc.scale))
                 elif datatype == SQLDataType.DATE:
                     value = _util.decode_date(buffer[offset:offset+length])
                 elif datatype == SQLDataType.TIME:
