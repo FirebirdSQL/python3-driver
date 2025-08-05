@@ -1799,7 +1799,8 @@ class Connection:
             warn("Connection disposed without prior close()", ResourceWarning)
             self._close()
             self._close_internals()
-            self._att.detach()
+            with contextlib.suppress:
+                self._att.detach()
     def __enter__(self) -> Self:
         return self
     def __exit__(self, exc_type, exc_value, traceback) -> None:
@@ -4278,7 +4279,8 @@ class Cursor:
                 elif meta.datatype == SQLDataType.INT64:
                     vtype = int
                     dispsize = 20
-                elif meta.datatype in (SQLDataType.FLOAT, SQLDataType.D_FLOAT, SQLDataType.DOUBLE):
+                elif meta.datatype in (SQLDataType.FLOAT, SQLDataType.D_FLOAT, SQLDataType.DOUBLE,
+                                       SQLDataType.DEC16, SQLDataType.DEC34):
                     # Special case, dialect 1 DOUBLE/FLOAT
                     # could be Fixed point
                     if (self._stmt._dialect < 3) and meta.scale:
@@ -4291,13 +4293,13 @@ class Cursor:
                     vtype = str if meta.subtype == 1 else bytes
                     scale = meta.subtype
                     dispsize = 0
-                elif meta.datatype == SQLDataType.TIMESTAMP:
+                elif meta.datatype in (SQLDataType.TIMESTAMP, SQLDataType.TIMESTAMP_TZ, SQLDataType.TIMESTAMP_TZ_EX):
                     vtype = datetime.datetime
                     dispsize = 22
                 elif meta.datatype == SQLDataType.DATE:
                     vtype = datetime.date
                     dispsize = 10
-                elif meta.datatype == SQLDataType.TIME:
+                elif meta.datatype in (SQLDataType.TIME, SQLDataType.TIME_TZ, SQLDataType.TIME_TZ_EX):
                     vtype = datetime.time
                     dispsize = 11
                 elif meta.datatype == SQLDataType.ARRAY:
