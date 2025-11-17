@@ -5723,9 +5723,7 @@ class Server:
         data = self.response.read_sized_string(encoding=self.encoding, errors=self.encoding_errors)
         if self.response.get_tag() == SrvInfoCode.TIMEOUT:
             return TIMEOUT
-        if data:
-            return data + '\n'
-        return None
+        return data if data else None
     def readline(self) -> str | None:
         """Get next line of textual output from last service query.
 
