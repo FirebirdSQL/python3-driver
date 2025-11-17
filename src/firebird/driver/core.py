@@ -5723,9 +5723,11 @@ class Server:
         data = self.response.read_sized_string(encoding=self.encoding, errors=self.encoding_errors)
         if self.response.get_tag() == SrvInfoCode.TIMEOUT:
             return TIMEOUT
-        if data:
-            return data + '\n'
-        return None
+        # read_sized_string() returns lines ending with '\r ' (CR + space).
+        # Strip the trailing space to get proper '\r' line endings.
+        if data and data.endswith('\r '):
+            data = data[:-1]  # Remove space, keep '\r'
+        return data if data else None
     def readline(self) -> str | None:
         """Get next line of textual output from last service query.
 
