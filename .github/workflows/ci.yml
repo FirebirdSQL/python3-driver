@@ -142,7 +142,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      packages: write  # Required for publishing to GitHub Packages
+      id-token: write  # Required for trusted publishing to PyPI
     steps:
     - uses: actions/checkout@v4
     
@@ -159,7 +159,13 @@ jobs:
         generate_release_notes: true
         files: dist/*
     
-    - name: Publish to GitHub Packages
+    # GitHub Packages does not currently support Python packages -- https://github.com/orgs/community/discussions/8542
+
+    # - name: Publish to GitHub Packages
+    #   uses: pypa/gh-action-pypi-publish@release/v1
+    #   with:
+    #     repository-url: https://pypi.pkg.github.com/fdcastel
+
+    - name: Publish to PyPI
+      if: github.repository == 'FirebirdSQL/python3-driver'
       uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        repository-url: https://pypi.pkg.github.com/fdcastel
