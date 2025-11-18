@@ -2164,9 +2164,31 @@ def _connect_helper(dsn: str, host: str, port: str, database: str, protocol: Net
         if protocol is not None:
             dsn = f'{protocol.name.lower()}://'
             if host and port:
-                dsn += f'{host}:{port}/'
+                dsn += f'{host}:{port}'
             elif host:
-                dsn += f'{host}/'
+                dsn += host
+            # Add database path
+            # When there's a host, URLs need proper path formatting:
+            # - Unix absolute paths (start with '/') - need double slash to preserve the leading /
+            #   because Firebird URL parsing strips one /
+            # - Windows absolute paths (contain ':') - concatenate directly without separator
+            # - Aliases/relative paths - need '/' separator
+            # When there's no host (loopback), the path is used as-is
+            if host:
+                # For URLs with host
+                if database.startswith('/'):
+                    # Unix absolute path - use double slash so Firebird keeps the leading /
+                    dsn += f'/{database}'  # Results in inet://host//absolute/path
+                elif ':' in database:  # Windows path (e.g., C:\...)
+                    dsn += database  # Concatenate directly without separator
+                else:  # Relative/alias
+                    dsn += f'/{database}'
+            else:
+                # Loopback - path is used as-is after ://
+                if database.startswith('/') or ':' in database:
+                    dsn += database
+                else:
+                    dsn += f'/{database}'
         else:
             dsn = ''
             if host and host.startswith('\\\\'): # Windows Named Pipes
@@ -2178,7 +2200,7 @@ def _connect_helper(dsn: str, host: str, port: str, database: str, protocol: Net
                 dsn += f'{host}/{port}:'
             elif host:
                 dsn += f'{host}:'
-        dsn += database
+            dsn += database
     return dsn
 
 def _is_dsn(value: str) -> bool:
@@ -2401,10 +2423,9 @@ def create_database(database: str | Path, *, user: str | None=None, password: st
     if db_config is None:
         db_config = driver_config.db_defaults
         srv_config = driver_config.server_defaults
-        if _is_dsn(database):
-            dsn = database
-            database = None
-            srv_config.host.clear()
+        dsn = database
+        database = None
+        srv_config.host.clear()
     else:
         database = db_config.database.value
         dsn = db_config.dsn.value
