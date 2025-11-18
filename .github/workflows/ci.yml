@@ -1,0 +1,165 @@
+name: CI
+
+on:
+  push:
+    branches: [ '**' ]
+    tags: [ 'v*' ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        firebird-version: [3, 4, 5]
+        include:
+          - firebird-version: 3
+            db-file: fbtest30.fdb
+            docker-image: firebirdsql/firebird:3
+          - firebird-version: 4
+            db-file: fbtest40.fdb
+            docker-image: firebirdsql/firebird:4
+          - firebird-version: 5
+            db-file: fbtest50.fdb
+            docker-image: firebirdsql/firebird:5
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install Hatch
+      run: pip install hatch
+    
+    - name: Start Firebird Docker container
+      run: |
+        # Create a tmp directory that will be bind-mounted to the container
+        # This ensures test files are accessible at the same paths inside and outside the container
+        mkdir -p /tmp/firebird-test
+        
+        # Start Firebird container with /tmp bind-mounted
+        # Configure RemoteAuxPort for Firebird events support
+        docker run -d \
+          --name firebird \
+          -e FIREBIRD_ROOT_PASSWORD=masterkey \
+          -e ISC_PASSWORD=masterkey \
+          -e FIREBIRD_CONF_RemoteAuxPort=3051 \
+          -p 3050:3050 \
+          -p 3051:3051 \
+          -v /tmp:/tmp:rw \
+          ${{ matrix.docker-image }}
+    
+    - name: Wait for Firebird to be ready
+      run: |
+        echo "Waiting for Firebird to be fully ready..."
+        for i in {1..30}; do
+          if docker exec firebird /bin/bash -c "echo 'SELECT 1 FROM RDB\$DATABASE;' | /opt/firebird/bin/isql -u SYSDBA -p masterkey employee" &>/dev/null 2>&1; then
+            echo "Firebird is ready!"
+            exit 0
+          fi
+          echo "Waiting... ($i/30)"
+          sleep 2
+        done
+        echo "Firebird failed to start"
+        docker logs firebird
+        exit 1
+    
+    - name: Extract and install Firebird client library from container
+      run: |
+        # List available libraries in container for debugging
+        echo "Available libraries in container:"
+        docker exec firebird ls -la /opt/firebird/lib/ || docker exec firebird ls -la /usr/lib/
+        
+        # Find and extract client library from the running container
+        # Different versions may have different file names or locations
+        LIB_PATH=""
+        if docker exec firebird test -f /opt/firebird/lib/libfbclient.so.2; then
+          # Get the actual file path by resolving the symlink
+          LIB_PATH=$(docker exec firebird readlink -f /opt/firebird/lib/libfbclient.so.2)
+        elif docker exec firebird test -f /opt/firebird/lib/libfbclient.so; then
+          LIB_PATH=$(docker exec firebird readlink -f /opt/firebird/lib/libfbclient.so)
+        elif docker exec firebird test -f /usr/lib/libfbclient.so; then
+          LIB_PATH=$(docker exec firebird readlink -f /usr/lib/libfbclient.so)
+        elif docker exec firebird test -f /usr/lib/x86_64-linux-gnu/libfbclient.so.2; then
+          LIB_PATH=$(docker exec firebird readlink -f /usr/lib/x86_64-linux-gnu/libfbclient.so.2)
+        else
+          echo "Could not find libfbclient.so in container"
+          exit 1
+        fi
+        
+        echo "Copying library from: $LIB_PATH"
+        # Copy the actual library file (not the symlink)
+        docker cp firebird:$LIB_PATH ${{ github.workspace }}/libfbclient.so
+        
+        # Install to system
+        sudo cp ${{ github.workspace }}/libfbclient.so /usr/lib/x86_64-linux-gnu/
+        sudo ldconfig
+        
+        # Verify installation
+        ldconfig -p | grep libfbclient
+    
+    - name: Run tests
+      run: hatch test -- --host=localhost --port=3050 -v
+      env:
+        FIREBIRD_VERSION: ${{ matrix.firebird-version }}
+    
+    - name: Stop Firebird container
+      if: always()
+      run: |
+        docker logs firebird
+        docker stop firebird
+        docker rm firebird
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install Hatch
+      run: pip install hatch
+    
+    - name: Build package
+      run: hatch build
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: dist
+        path: dist/
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write  # Required for publishing to GitHub Packages
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: dist
+        path: dist/
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ github.ref_name }}
+        generate_release_notes: true
+        files: dist/*
+    
+    - name: Publish to GitHub Packages
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://pypi.pkg.github.com/fdcastel
