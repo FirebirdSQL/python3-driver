@@ -194,7 +194,8 @@ def tmp_dir(tmp_path_factory):
 
 @pytest.fixture(scope='session', autouse=True)
 def db_file(tmp_dir):
-    test_db_filename: Path = tmp_dir / 'test-db.fdb'
+    # Always use local tmp_dir - in CI, this will be bind-mounted to the container
+    test_db_filename = tmp_dir / 'test-db.fdb'
     copyfile(_vars_['source_db'], test_db_filename)
     if _platform != 'Windows':
         test_db_filename.chmod(33206)
@@ -208,7 +209,9 @@ def dsn(db_file):
     if host is None:
         result = str(db_file)
     else:
-        result = f'{host}/{port}:{db_file}' if port else f'{host}:{db_file}'
+        # For remote servers, use the absolute path string of the local file
+        # which will be the same path inside the container due to bind mount
+        result = f'{host}/{port}:{str(db_file)}' if port else f'{host}:{str(db_file)}'
     yield result
 
 @pytest.fixture()
@@ -233,8 +236,9 @@ def db_cleanup(db_connection):
             cur.execute("delete from t")
             cur.execute("delete from t2")
             cur.execute("delete from FB4")
-            db_connection.commit()
+        db_connection.commit()
     except Exception as e:
+        db_connection.rollback()
         # Ignore errors if tables don't exist, log others
         if "Table unknown" not in str(e):
             print(f"Warning: Error during pre-test cleanup: {e}")
