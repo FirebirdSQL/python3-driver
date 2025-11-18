@@ -33,14 +33,17 @@ from firebird.driver import connect, DatabaseError, get_timezone
 def setup_fb4_test(db_connection, fb_vars):
     if fb_vars['version'] not in SpecifierSet('>=4'):
         pytest.skip("Requires Firebird 4.0+")
-    # Ensure table exists
+    # Ensure table exists with proper column types
     try:
         with db_connection.cursor() as cur:
-            # Simplified check, assume table exists if no error
-            cur.execute("SELECT PK FROM FB4 WHERE 1=0")
+            # Test if we can actually query FB4 columns with new data types
+            cur.execute("SELECT PK, T_TZ, TS_TZ, DF, N128 FROM FB4 WHERE 1=0")
     except DatabaseError as e:
-        if "Table unknown FB4" in str(e):
+        error_msg = str(e)
+        if "Table unknown FB4" in error_msg or "not found" in error_msg.lower():
             pytest.skip("Table 'FB4' needed for FB4 tests does not exist.")
+        elif "Data type unknown" in error_msg or "datatype" in error_msg.lower():
+            pytest.skip("FB4 table exists but lacks proper data type support (database may need recreation with FB4+)")
         else:
             raise
     yield

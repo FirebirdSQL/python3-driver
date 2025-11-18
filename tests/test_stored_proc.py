@@ -28,6 +28,7 @@ from firebird.driver import InterfaceError
 
 def test_callproc(db_connection):
     with db_connection.cursor() as cur:
+        cur.execute('delete from t')
         # Test with string parameter
         cur.callproc('sub_tot_budget', ['100'])
         result = cur.fetchone()

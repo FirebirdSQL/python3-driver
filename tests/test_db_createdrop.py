@@ -23,11 +23,13 @@
 # See LICENSE.TXT for details.
 
 import pytest
+from pathlib import Path
 from firebird.driver import (create_database, DatabaseError, connect_server, ShutdownMethod,
                              ShutdownMode, PageSize)
 
 @pytest.fixture
 def droptest_file(fb_vars, tmp_dir):
+    # Always use tmp_dir - it's bind-mounted in CI
     drop_file = tmp_dir / 'droptest.fdb'
     # Setup: Ensure file doesn't exist
     if drop_file.exists():
@@ -55,7 +57,7 @@ def droptest_dsn(fb_vars, droptest_file):
     if host is None:
         result = str(droptest_file)
     else:
-        result = f'{host}/{port}:{droptest_file}' if port else f'{host}:{droptest_file}'
+        result = f'{host}/{port}:{str(droptest_file)}' if port else f'{host}:{str(droptest_file)}'
     yield result
 
 
@@ -81,24 +83,14 @@ def test_create_drop_dsn(droptest_dsn):
 def test_create_drop_config(fb_vars, droptest_file, driver_cfg):
     host = fb_vars['host']
     port = fb_vars['port']
+    
+    # Construct server config
     if host is None:
         srv_config = f"""
             [server.local]
             user = {fb_vars['user']}
             password = {fb_vars['password']}
             """
-        db_config = f"""
-            [test_db2]
-            server = server.local
-            database = {droptest_file}
-            utf8filename = true
-            charset = UTF8
-            sql_dialect = 1
-            page_size = {PageSize.PAGE_16K}
-            db_sql_dialect = 1
-            sweep_interval = 0
-            """
-        dsn = str(droptest_file)
     else:
         srv_config = f"""
             [server.local]
@@ -107,18 +99,25 @@ def test_create_drop_config(fb_vars, droptest_file, driver_cfg):
             password = {fb_vars['password']}
             port = {port if port else ''}
             """
-        db_config = f"""
-            [test_db2]
-            server = server.local
-            database = {droptest_file}
-            utf8filename = true
-            charset = UTF8
-            sql_dialect = 1
-            page_size = {PageSize.PAGE_16K}
-            db_sql_dialect = 1
-            sweep_interval = 0
-            """
-        dsn = f'{host}/{port}:{droptest_file}' if port else f'{host}:{droptest_file}'
+    
+    # Database config is uniform - always use the file path
+    db_config = f"""
+        [test_db2]
+        server = server.local
+        database = {droptest_file}
+        utf8filename = true
+        charset = UTF8
+        sql_dialect = 1
+        page_size = {PageSize.PAGE_16K}
+        db_sql_dialect = 1
+        sweep_interval = 0
+        """
+    
+    # Construct DSN
+    if host is None:
+        dsn = str(droptest_file)
+    else:
+        dsn = f'{host}/{port}:{str(droptest_file)}' if port else f'{host}:{str(droptest_file)}'
     # Ensure config section doesn't exist from previous runs if tests run in parallel/reordered
     if driver_cfg.get_server('server.local'):
         driver_cfg.servers.value = [s for s in driver_cfg.servers.value if s.name != 'server.local']
