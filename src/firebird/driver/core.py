@@ -1799,7 +1799,7 @@ class Connection:
             warn("Connection disposed without prior close()", ResourceWarning)
             self._close()
             self._close_internals()
-            with contextlib.suppress:
+            with contextlib.suppress(DatabaseError):
                 self._att.detach()
     def __enter__(self) -> Self:
         return self
