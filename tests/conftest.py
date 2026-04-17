@@ -122,7 +122,7 @@ def pytest_configure(config):
             client_lib = Path(client_lib)
             if not client_lib.is_file():
                 pytest.exit(f"Client library '{client_lib}' not found!")
-            driver_config.fb_client_library.value = client_lib
+            driver_config.fb_client_library.value = str(client_lib)
         #
         if host := config.getoption('host'):
             _vars_['host'] = host

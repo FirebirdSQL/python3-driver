@@ -7,111 +7,81 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         firebird-version: [3, 4, 5]
+        os: [ubuntu-22.04, windows-latest]
         include:
           - firebird-version: 3
             db-file: fbtest30.fdb
-            docker-image: firebirdsql/firebird:3
+            fb-semver: '3.0.13'
           - firebird-version: 4
             db-file: fbtest40.fdb
-            docker-image: firebirdsql/firebird:4
+            fb-semver: '4.0.6'
           - firebird-version: 5
             db-file: fbtest50.fdb
-            docker-image: firebirdsql/firebird:5
-    
+            fb-semver: '5.0.3'
+
+    defaults:
+      run:
+        shell: pwsh
+
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      ISC_USER: SYSDBA
+      ISC_PASSWORD: masterkey
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-    
+
     - name: Install Hatch
       run: pip install hatch
-    
-    - name: Start Firebird Docker container
+
+    - name: Install PSFirebird
       run: |
-        # Create a tmp directory that will be bind-mounted to the container
-        # This ensures test files are accessible at the same paths inside and outside the container
-        mkdir -p /tmp/firebird-test
-        
-        # Start Firebird container with /tmp bind-mounted
+        Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+        Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope CurrentUser -ForceBootstrap -ErrorAction Continue
+        Install-Module -Name PSFirebird -MinimumVersion 1.2.2 -Force -AllowClobber -Scope CurrentUser -Repository PSGallery
+
+    - name: Create Firebird environment
+      run: |
+        $tempPath = if ($IsWindows) { $env:TEMP } else { '/tmp' }
+        $fbPath = Join-Path $tempPath 'firebird-${{ matrix.firebird-version }}'
+        $fbEnv = New-FirebirdEnvironment -Version '${{ matrix.fb-semver }}' -Path $fbPath
+        Write-Output $fbEnv
+        Write-Output "FB_PATH=$fbPath" >> $env:GITHUB_ENV
+        Write-Output "FB_CLIENT_LIB=$($fbEnv.GetClientLibraryPath())" >> $env:GITHUB_ENV
+
+    - name: Configure and start Firebird
+      run: |
         # Configure RemoteAuxPort for Firebird events support
-        docker run -d \
-          --name firebird \
-          -e FIREBIRD_ROOT_PASSWORD=masterkey \
-          -e ISC_PASSWORD=masterkey \
-          -e FIREBIRD_CONF_RemoteAuxPort=3051 \
-          -p 3050:3050 \
-          -p 3051:3051 \
-          -v /tmp:/tmp:rw \
-          ${{ matrix.docker-image }}
-    
-    - name: Wait for Firebird to be ready
-      run: |
-        echo "Waiting for Firebird to be fully ready..."
-        for i in {1..30}; do
-          if docker exec firebird /bin/bash -c "echo 'SELECT 1 FROM RDB\$DATABASE;' | /opt/firebird/bin/isql -u SYSDBA -p masterkey employee" &>/dev/null 2>&1; then
-            echo "Firebird is ready!"
-            exit 0
-          fi
-          echo "Waiting... ($i/30)"
-          sleep 2
-        done
-        echo "Firebird failed to start"
-        docker logs firebird
-        exit 1
-    
-    - name: Extract and install Firebird client library from container
-      run: |
-        # List available libraries in container for debugging
-        echo "Available libraries in container:"
-        docker exec firebird ls -la /opt/firebird/lib/ || docker exec firebird ls -la /usr/lib/
-        
-        # Find and extract client library from the running container
-        # Different versions may have different file names or locations
-        LIB_PATH=""
-        if docker exec firebird test -f /opt/firebird/lib/libfbclient.so.2; then
-          # Get the actual file path by resolving the symlink
-          LIB_PATH=$(docker exec firebird readlink -f /opt/firebird/lib/libfbclient.so.2)
-        elif docker exec firebird test -f /opt/firebird/lib/libfbclient.so; then
-          LIB_PATH=$(docker exec firebird readlink -f /opt/firebird/lib/libfbclient.so)
-        elif docker exec firebird test -f /usr/lib/libfbclient.so; then
-          LIB_PATH=$(docker exec firebird readlink -f /usr/lib/libfbclient.so)
-        elif docker exec firebird test -f /usr/lib/x86_64-linux-gnu/libfbclient.so.2; then
-          LIB_PATH=$(docker exec firebird readlink -f /usr/lib/x86_64-linux-gnu/libfbclient.so.2)
-        else
-          echo "Could not find libfbclient.so in container"
-          exit 1
-        fi
-        
-        echo "Copying library from: $LIB_PATH"
-        # Copy the actual library file (not the symlink)
-        docker cp firebird:$LIB_PATH ${{ github.workspace }}/libfbclient.so
-        
-        # Install to system
-        sudo cp ${{ github.workspace }}/libfbclient.so /usr/lib/x86_64-linux-gnu/
-        sudo ldconfig
-        
-        # Verify installation
-        ldconfig -p | grep libfbclient
-    
+        $confPath = Join-Path $env:FB_PATH 'firebird.conf'
+        Write-FirebirdConfiguration -Path $confPath -Configuration @{ RemoteAuxPort = 3051 }
+        # Initialize SYSDBA via embedded connection (ISC_USER/ISC_PASSWORD env vars are set at job level)
+        $initDb = New-FirebirdDatabase -Database (Join-Path $env:FB_PATH 'init.fdb') -Environment $env:FB_PATH
+        "CREATE USER SYSDBA PASSWORD 'masterkey';" | Invoke-FirebirdIsql -Database $initDb -Environment $env:FB_PATH
+        Remove-FirebirdDatabase -Database $initDb -Force
+        # Seed firebird.log so get_log() service API calls return non-empty content
+        # (Firebird does not write startup messages in this mode; tests assert log is non-empty)
+        "Firebird`tServer started" | Out-File -FilePath (Join-Path $env:FB_PATH 'firebird.log') -Encoding utf8 -NoNewline:$false
+        # Start Firebird server
+        Start-FirebirdInstance -Environment $env:FB_PATH | Write-Output
+
     - name: Run tests
-      run: hatch test -- --host=localhost --port=3050 -v
+      run: hatch test -- --host=localhost --port=3050 "--client-lib=$env:FB_CLIENT_LIB" -v
       env:
         FIREBIRD_VERSION: ${{ matrix.firebird-version }}
-    
-    - name: Stop Firebird container
+
+    - name: Stop Firebird instance
       if: always()
-      run: |
-        docker logs firebird
-        docker stop firebird
-        docker rm firebird
+      run: Get-FirebirdInstance | Stop-FirebirdInstance
 
   build:
     needs: test

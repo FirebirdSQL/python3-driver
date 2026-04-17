@@ -84,19 +84,19 @@ def test_connect_helper():
     dsn = driver.core._connect_helper(None, IP, None, DB_LINUX_PATH, NetProtocol.INET)
     assert dsn == f'inet://{IP}/{DB_LINUX_PATH}'  # Double slash for absolute path
     dsn = driver.core._connect_helper(None, HOST, None, DB_WIN_PATH, NetProtocol.INET)
-    assert dsn == f'inet://{HOST}{DB_WIN_PATH}'
+    assert dsn == f'inet://{HOST}/{DB_WIN_PATH}'
     # 3. TCP/IP with Port
     dsn = driver.core._connect_helper(None, HOST, PORT, DB_ALIAS, NetProtocol.INET)
     assert dsn == f'inet://{HOST}:{PORT}/{DB_ALIAS}'
     dsn = driver.core._connect_helper(None, IP, PORT, DB_LINUX_PATH, NetProtocol.INET)
     assert dsn == f'inet://{IP}:{PORT}/{DB_LINUX_PATH}'  # Double slash for absolute path
     dsn = driver.core._connect_helper(None, HOST, SVC_NAME, DB_WIN_PATH, NetProtocol.INET)
-    assert dsn == f'inet://{HOST}:{SVC_NAME}{DB_WIN_PATH}'
+    assert dsn == f'inet://{HOST}:{SVC_NAME}/{DB_WIN_PATH}'
     # 4. Named pipes
     dsn = driver.core._connect_helper(None, NPIPE_HOST, None, DB_ALIAS, NetProtocol.WNET)
     assert dsn == f'wnet://{NPIPE_HOST}/{DB_ALIAS}'
     dsn = driver.core._connect_helper(None, NPIPE_HOST, SVC_NAME, DB_WIN_PATH, NetProtocol.WNET)
-    assert dsn == f'wnet://{NPIPE_HOST}:{SVC_NAME}{DB_WIN_PATH}'
+    assert dsn == f'wnet://{NPIPE_HOST}:{SVC_NAME}/{DB_WIN_PATH}'
 
 def test_connect_dsn(dsn, db_file):
     with connect(dsn) as con:
@@ -130,7 +130,6 @@ def test_connect_config(fb_vars, db_file, driver_cfg):
         [test_db1]
         server = server.local
         database = {db_file}
-        utf8filename = true
         charset = UTF8
         sql_dialect = 3
         """
@@ -163,21 +162,22 @@ def test_connect_config(fb_vars, db_file, driver_cfg):
 
     if host:
         # protocols
-        # For protocol URLs with absolute paths, we need double slash to preserve leading /
-        # inet://host//absolute/path so Firebird doesn't strip the leading /
+        # For protocol URLs the path always needs a / separator:
+        # - Unix: inet://host//absolute/path (double slash to keep the leading /)
+        # - Windows: inet://host:port/D:\path (single slash before drive letter)
         if str(db_file).startswith('/'):
-            dsn = f'{host}:{port}/{db_file}'  # Extra / for absolute paths
+            proto_path = f'{host}:{port}/{db_file}'  # Extra / for Unix absolute paths
         else:
-            dsn = f'{host}:{port}{db_file}'
+            proto_path = f'{host}:{port}/{db_file}'  # Single / for Windows drive-letter paths
         cfg = driver_cfg.get_database('test_db1')
         cfg.protocol.value = NetProtocol.INET
         with connect('test_db1') as con:
             assert con._att is not None
-            assert con.dsn == f'inet://{dsn}'
+            assert con.dsn == f'inet://{proto_path}'
         cfg.protocol.value = NetProtocol.INET4
         with connect('test_db1') as con:
             assert con._att is not None
-            assert con.dsn == f'inet4://{dsn}'
+            assert con.dsn == f'inet4://{proto_path}'
 
 def test_properties(db_connection):
     con = db_connection # Use the fixture

@@ -2180,7 +2180,7 @@ def _connect_helper(dsn: str, host: str, port: str, database: str, protocol: Net
                     # Unix absolute path - use double slash so Firebird keeps the leading /
                     dsn += f'/{database}'  # Results in inet://host//absolute/path
                 elif ':' in database:  # Windows path (e.g., C:\...)
-                    dsn += database  # Concatenate directly without separator
+                    dsn += f'/{database}'  # Results in inet://host:port/D:\path
                 else:  # Relative/alias
                     dsn += f'/{database}'
             else:
