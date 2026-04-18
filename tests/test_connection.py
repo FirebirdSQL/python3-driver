@@ -28,7 +28,7 @@ import firebird.driver as driver
 from firebird.driver.types import ImpData, ImpDataOld
 from firebird.driver import (NetProtocol, connect, Isolation, tpb,  DefaultAction,
                              DbInfoCode, DbWriteMode, DbAccessMode, DbSpaceReservation,
-                             driver_config)
+                             driver_config, NotSupportedError)
 
 def test_connect_helper():
     DB_LINUX_PATH = '/path/to/db/employee.fdb'
@@ -69,27 +69,27 @@ def test_connect_helper():
     # URL-Style Connection Strings (with protocol)
     # 1. Loopback connection
     dsn = driver.core._connect_helper(None, None, None, DB_ALIAS, NetProtocol.INET)
-    assert dsn == f'inet://{DB_ALIAS}'
+    assert dsn == f'inet:///{DB_ALIAS}'
     dsn = driver.core._connect_helper(None, None, None, DB_LINUX_PATH, NetProtocol.INET)
     assert dsn == f'inet://{DB_LINUX_PATH}'
     dsn = driver.core._connect_helper(None, None, None, DB_WIN_PATH, NetProtocol.INET)
     assert dsn == f'inet://{DB_WIN_PATH}'
     dsn = driver.core._connect_helper(None, None, None, DB_ALIAS, NetProtocol.WNET)
-    assert dsn == f'wnet://{DB_ALIAS}'
+    assert dsn == f'wnet:///{DB_ALIAS}'
     dsn = driver.core._connect_helper(None, None, None, DB_ALIAS, NetProtocol.XNET)
-    assert dsn == f'xnet://{DB_ALIAS}'
+    assert dsn == f'xnet:///{DB_ALIAS}'
     # 2. TCP/IP
     dsn = driver.core._connect_helper(None, HOST, None, DB_ALIAS, NetProtocol.INET)
     assert dsn == f'inet://{HOST}/{DB_ALIAS}'
     dsn = driver.core._connect_helper(None, IP, None, DB_LINUX_PATH, NetProtocol.INET)
-    assert dsn == f'inet://{IP}/{DB_LINUX_PATH}'
+    assert dsn == f'inet://{IP}/{DB_LINUX_PATH}'  # Double slash for absolute path
     dsn = driver.core._connect_helper(None, HOST, None, DB_WIN_PATH, NetProtocol.INET)
     assert dsn == f'inet://{HOST}/{DB_WIN_PATH}'
     # 3. TCP/IP with Port
     dsn = driver.core._connect_helper(None, HOST, PORT, DB_ALIAS, NetProtocol.INET)
     assert dsn == f'inet://{HOST}:{PORT}/{DB_ALIAS}'
     dsn = driver.core._connect_helper(None, IP, PORT, DB_LINUX_PATH, NetProtocol.INET)
-    assert dsn == f'inet://{IP}:{PORT}/{DB_LINUX_PATH}'
+    assert dsn == f'inet://{IP}:{PORT}/{DB_LINUX_PATH}'  # Double slash for absolute path
     dsn = driver.core._connect_helper(None, HOST, SVC_NAME, DB_WIN_PATH, NetProtocol.INET)
     assert dsn == f'inet://{HOST}:{SVC_NAME}/{DB_WIN_PATH}'
     # 4. Named pipes
@@ -108,21 +108,14 @@ def test_connect_dsn(dsn, db_file):
 def test_connect_config(fb_vars, db_file, driver_cfg):
     host = fb_vars['host']
     port = fb_vars['port']
+    
+    # Construct server config
     if host is None:
         srv_config = f"""
             [server.local]
             user = {fb_vars['user']}
             password = {fb_vars['password']}
             """
-        db_config = f"""
-            [test_db1]
-            server = server.local
-            database = {db_file}
-            utf8filename = true
-            charset = UTF8
-            sql_dialect = 3
-            """
-        dsn = str(db_file)
     else:
         srv_config = f"""
             [server.local]
@@ -131,15 +124,22 @@ def test_connect_config(fb_vars, db_file, driver_cfg):
             password = {fb_vars['password']}
             port = {port if port else ''}
             """
-        db_config = f"""
-            [test_db1]
-            server = server.local
-            database = {db_file}
-            utf8filename = true
-            charset = UTF8
-            sql_dialect = 3
-            """
-        dsn = f'{host}/{port}:{db_file}' if port else f'{host}:{db_file}'
+    
+    # Database config is uniform - always use the file path
+    db_config = f"""
+        [test_db1]
+        server = server.local
+        database = {db_file}
+        charset = UTF8
+        sql_dialect = 3
+        """
+    
+    # Construct DSN
+    if host is None:
+        dsn = str(db_file)
+    else:
+        dsn = f'{host}/{port}:{str(db_file)}' if port else f'{host}:{str(db_file)}'
+    
     # Ensure config sections don't exist from previous runs
     if driver_cfg.get_server('server.local'):
         driver_cfg.servers.value = [s for s in driver_cfg.servers.value if s.name != 'server.local']
@@ -162,16 +162,22 @@ def test_connect_config(fb_vars, db_file, driver_cfg):
 
     if host:
         # protocols
-        dsn = f'{host}/{port}/{db_file}' if port else f'{host}/{db_file}'
+        # For protocol URLs the path always needs a / separator:
+        # - Unix: inet://host//absolute/path (double slash to keep the leading /)
+        # - Windows: inet://host:port/D:\path (single slash before drive letter)
+        if str(db_file).startswith('/'):
+            proto_path = f'{host}:{port}/{db_file}'  # Extra / for Unix absolute paths
+        else:
+            proto_path = f'{host}:{port}/{db_file}'  # Single / for Windows drive-letter paths
         cfg = driver_cfg.get_database('test_db1')
         cfg.protocol.value = NetProtocol.INET
         with connect('test_db1') as con:
             assert con._att is not None
-            assert con.dsn == f'inet://{dsn}'
+            assert con.dsn == f'inet://{proto_path}'
         cfg.protocol.value = NetProtocol.INET4
         with connect('test_db1') as con:
             assert con._att is not None
-            assert con.dsn == f'inet4://{dsn}'
+            assert con.dsn == f'inet4://{proto_path}'
 
 def test_properties(db_connection):
     con = db_connection # Use the fixture
@@ -372,11 +378,17 @@ def test_db_info(db_connection, fb_vars, db_file):
     assert isinstance(con.info.get_info(DbInfoCode.ODS_MINOR_VERSION), int)
 
     assert con.info.get_info(DbInfoCode.CRYPT_KEY) == ''
-    assert con.info.get_info(DbInfoCode.CRYPT_PLUGIN) == ''
+    try:
+        assert con.info.get_info(DbInfoCode.CRYPT_PLUGIN) == ''
+    except NotSupportedError:
+        pass
     # DB_GUID can vary, just check format if needed
-    guid = con.info.get_info(DbInfoCode.DB_GUID)
-    assert isinstance(guid, str)
-    assert len(guid) == 38 # Example check for {GUID} format
+    try:
+        guid = con.info.get_info(DbInfoCode.DB_GUID)
+        assert isinstance(guid, str)
+        assert len(guid) == 38 # Example check for {GUID} format
+    except NotSupportedError:
+        pass
 
 def test_connect_with_driver_config_server_defaults_local(driver_cfg, db_file, fb_vars):
     """

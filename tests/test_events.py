@@ -37,8 +37,8 @@ def event_db(fb_vars, tmp_dir):
         dsn = str(event_file)
     else:
         dsn = f'{host}/{port}:{event_file}' if port else f'{host}:{event_file}'
+    con = create_database(dsn)
     try:
-        con = create_database(dsn)
         with con.cursor() as cur:
             cur.execute("CREATE TABLE T (PK Integer, C1 Integer)")
             cur.execute("""CREATE TRIGGER EVENTS_AU FOR T ACTIVE

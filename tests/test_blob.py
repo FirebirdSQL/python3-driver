@@ -65,6 +65,7 @@ Stream blobs are stored as a continuous array of data bytes with no length indic
 def test_stream_blob_extended(db_connection):
     blob_content = "Another test blob content." * 5 # Make it slightly longer
     with db_connection.cursor() as cur:
+        cur.execute('delete from T2 where C1 in (1, 2)')
         cur.execute('insert into T2 (C1,C9) values (?,?)', [1, StringIO(blob_content)])
         cur.execute('insert into T2 (C1,C9) values (?,?)', [2, StringIO(blob_content)])
         db_connection.commit()

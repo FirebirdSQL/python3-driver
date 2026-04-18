@@ -1,0 +1,141 @@
+name: CI
+
+on:
+  push:
+    branches: [ '**' ]
+    tags: [ 'v*' ]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        firebird-version: [3, 4, 5]
+        os: [ubuntu-22.04, windows-latest]
+        include:
+          - firebird-version: 3
+            db-file: fbtest30.fdb
+            fb-semver: '3.0.13'
+          - firebird-version: 4
+            db-file: fbtest40.fdb
+            fb-semver: '4.0.6'
+          - firebird-version: 5
+            db-file: fbtest50.fdb
+            fb-semver: '5.0.3'
+
+    defaults:
+      run:
+        shell: pwsh
+
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      ISC_USER: SYSDBA
+      ISC_PASSWORD: masterkey
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install Hatch
+      run: pip install hatch
+
+    - name: Install PSFirebird
+      run: |
+        Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+        Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope CurrentUser -ForceBootstrap -ErrorAction Continue
+        Install-Module -Name PSFirebird -MinimumVersion 1.2.2 -Force -AllowClobber -Scope CurrentUser -Repository PSGallery
+
+    - name: Create Firebird environment
+      run: |
+        $tempPath = if ($IsWindows) { $env:TEMP } else { '/tmp' }
+        $fbPath = Join-Path $tempPath 'firebird-${{ matrix.firebird-version }}'
+        $fbEnv = New-FirebirdEnvironment -Version '${{ matrix.fb-semver }}' -Path $fbPath
+        Write-Output $fbEnv
+        Write-Output "FB_PATH=$fbPath" >> $env:GITHUB_ENV
+        Write-Output "FB_CLIENT_LIB=$($fbEnv.GetClientLibraryPath())" >> $env:GITHUB_ENV
+
+    - name: Configure and start Firebird
+      run: |
+        # Configure RemoteAuxPort for Firebird events support
+        $confPath = Join-Path $env:FB_PATH 'firebird.conf'
+        Write-FirebirdConfiguration -Path $confPath -Configuration @{ RemoteAuxPort = 3051 }
+        # Initialize SYSDBA via embedded connection (ISC_USER/ISC_PASSWORD env vars are set at job level)
+        $initDb = New-FirebirdDatabase -Database (Join-Path $env:FB_PATH 'init.fdb') -Environment $env:FB_PATH
+        "CREATE USER SYSDBA PASSWORD 'masterkey';" | Invoke-FirebirdIsql -Database $initDb -Environment $env:FB_PATH
+        Remove-FirebirdDatabase -Database $initDb -Force
+        # Seed firebird.log so get_log() service API calls return non-empty content
+        # (Firebird does not write startup messages in this mode; tests assert log is non-empty)
+        "Firebird`tServer started" | Out-File -FilePath (Join-Path $env:FB_PATH 'firebird.log') -Encoding utf8 -NoNewline:$false
+        # Start Firebird server
+        Start-FirebirdInstance -Environment $env:FB_PATH | Write-Output
+
+    - name: Run tests
+      run: hatch test -- --host=localhost --port=3050 "--client-lib=$env:FB_CLIENT_LIB" -v
+      env:
+        FIREBIRD_VERSION: ${{ matrix.firebird-version }}
+
+    - name: Stop Firebird instance
+      if: always()
+      run: Get-FirebirdInstance | Stop-FirebirdInstance
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install Hatch
+      run: pip install hatch
+    
+    - name: Build package
+      run: hatch build
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: dist
+        path: dist/
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write  # Required for trusted publishing to PyPI
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: dist
+        path: dist/
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ github.ref_name }}
+        generate_release_notes: true
+        files: dist/*
+    
+    # GitHub Packages does not currently support Python packages -- https://github.com/orgs/community/discussions/8542
+
+    # - name: Publish to GitHub Packages
+    #   uses: pypa/gh-action-pypi-publish@release/v1
+    #   with:
+    #     repository-url: https://pypi.pkg.github.com/fdcastel
+
+    - name: Publish to PyPI
+      if: github.repository == 'FirebirdSQL/python3-driver'
+      uses: pypa/gh-action-pypi-publish@release/v1

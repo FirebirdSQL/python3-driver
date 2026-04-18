@@ -133,4 +133,8 @@ from .types import (
 )
 
 #: Current driver version, SEMVER string.
-__VERSION__ = '2.0.2'
+try:
+    from importlib.metadata import version as _get_version
+    __VERSION__ = _get_version('firebird-driver')
+except Exception:
+    __VERSION__ = 'unknown'

@@ -49,6 +49,7 @@ def utf8_connection(dsn):
 
 def test_insert_integers(db_connection):
     with db_connection.cursor() as cur:
+        cur.execute('delete from T2')
         cur.execute('insert into T2 (C1,C2,C3) values (?,?,?)', ['1', '1', '1'])
         db_connection.commit()
         cur.execute('select C1,C2,C3 from T2 where C1 = 1')
@@ -66,6 +67,7 @@ def test_insert_integers(db_connection):
 
 def test_insert_char_varchar(db_connection):
     with db_connection.cursor() as cur:
+        cur.execute('delete from T2')
         cur.execute('insert into T2 (C1,C4,C5) values (?,?,?)', [2, 'AA', 'AA'])
         db_connection.commit()
         cur.execute('select C1,C4,C5 from T2 where C1 = 2')
@@ -87,6 +89,7 @@ def test_insert_char_varchar(db_connection):
 
 def test_insert_datetime(db_connection):
     with db_connection.cursor() as cur:
+        cur.execute('delete from T2')
         now = datetime.datetime(2011, 11, 13, 15, 0, 1, 200000)
         cur.execute('insert into T2 (C1,C6,C7,C8) values (?,?,?,?)', [3, now.date(), now.time(), now])
         db_connection.commit()
@@ -117,6 +120,7 @@ def test_insert_datetime(db_connection):
 def test_insert_blob(db_connection, utf8_connection):
     con2 = utf8_connection # Use the UTF8 connection fixture
     with db_connection.cursor() as cur, con2.cursor() as cur2:
+        cur.execute('delete from T2')
         cur.execute('insert into T2 (C1,C9) values (?,?)', [4, 'This is a BLOB!'])
         db_connection.commit()
         cur.execute('select C1,C9 from T2 where C1 = 4')
@@ -160,6 +164,7 @@ def test_insert_blob(db_connection, utf8_connection):
 
 def test_insert_float_double(db_connection):
     with db_connection.cursor() as cur:
+        cur.execute('delete from T2')
         cur.execute('insert into T2 (C1,C12,C13) values (?,?,?)', [5, 1.0, 1.0])
         db_connection.commit()
         cur.execute('select C1,C12,C13 from T2 where C1 = 5')
@@ -173,6 +178,7 @@ def test_insert_float_double(db_connection):
 
 def test_insert_numeric_decimal(db_connection):
     with db_connection.cursor() as cur:
+        cur.execute('delete from T2')
         cur.execute('insert into T2 (C1,C10,C11) values (?,?,?)', [6, 1.1, 1.1]) # Insert float
         cur.execute('insert into T2 (C1,C10,C11) values (?,?,?)', [6, decimal.Decimal('100.11'), decimal.Decimal('100.11')])
         db_connection.commit()

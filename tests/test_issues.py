@@ -26,6 +26,7 @@ import pytest
 
 def test_issue_02(db_connection):
     with db_connection.cursor() as cur:
+        cur.execute('delete from T2')
         cur.execute('insert into T2 (C1,C2,C3) values (?,?,?)', [1, None, 1])
         db_connection.commit()
         cur.execute('select C1,C2,C3 from T2 where C1 = 1')
