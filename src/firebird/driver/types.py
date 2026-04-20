@@ -1372,12 +1372,14 @@ class TraceSession:
         timestamp (datetime.datetime): Session start timestamp
         name (str): Session name (if defined)
         flags (list): List with session flag names
+        plugins (list): List with trace plugins for this session
     """
     id: int
     user: str
     timestamp: datetime.datetime
     name: str = ''
     flags: list = field(default_factory=list)
+    plugins: list = field(default_factory=list)
 
 @dataclass
 class ImpData:

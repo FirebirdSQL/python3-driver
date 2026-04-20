@@ -5581,6 +5581,8 @@ class ServerTraceServices(ServerServiceProvider):
                     '%Y-%m-%d %H:%M:%S')
             elif line.lstrip().startswith('flags:'):
                 current['flags'] = line.split(':')[1].strip().split(',')
+            elif line.lstrip().startswith('plugins:'):
+                current['plugins'] = line.split(':')[1].strip().split(',')
             else:  # pragma: no cover
                 raise InterfaceError(f"Unexpected line in trace session list: {line}")
         store()
