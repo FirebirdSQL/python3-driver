@@ -39,3 +39,29 @@ def test_issue_53(db_connection):
         numeric_val_exponent = numeric_val.as_tuple()[2]
         db_connection.commit()
         assert numeric_val_exponent == -2
+
+def test_issue_65_prepare_ctx_mgr(db_connection):
+    """Freeing a Statement via context manager must not crash when cursor/connection closes."""
+    with db_connection.cursor() as cur:
+        with cur.prepare('select count(*) from country where 1 < ?') as stmt:
+            row = cur.execute(stmt, (2,)).fetchone()
+            assert row is not None
+
+def test_issue_65_free_then_cursor_close(db_connection):
+    """Explicit stmt.free() followed by cursor.close() must not crash."""
+    cur = db_connection.cursor()
+    stmt = cur.prepare('select count(*) from country where 1 < ?')
+    row = cur.execute(stmt, (2,)).fetchone()
+    assert row is not None
+    stmt.free()
+    cur.close()
+
+def test_issue_65_free_then_conn_close(dsn):
+    """stmt.free() followed by connection close must not crash."""
+    from firebird.driver import connect
+    with connect(dsn) as conn:
+        cur = conn.cursor()
+        stmt = cur.prepare('select count(*) from country where 1 < ?')
+        row = cur.execute(stmt, (2,)).fetchone()
+        assert row is not None
+        stmt.free()
