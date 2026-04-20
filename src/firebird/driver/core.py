@@ -3965,7 +3965,13 @@ class Cursor:
                 in_meta.release()
     def _clear(self) -> None:
         if self._result is not None:
-            self._result.close()
+            if self._stmt is not None and self._stmt._istmt is not None:
+                self._result.close()
+            else:
+                # Statement was already freed; the result set is invalidated
+                # at the Firebird API level, so we must not call close() on it.
+                # Also prevent __del__ from calling release() on the invalid interface.
+                self._result._refcnt = 0
             self._result = None
         self._name = None
         self._last_fetch_status = None
