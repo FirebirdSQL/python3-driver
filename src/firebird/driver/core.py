@@ -5854,11 +5854,11 @@ def connect_server(server: str, *, user: str | None=None, password: str | None=N
     srv_config = driver_config.get_server(server)
     if srv_config is None:
         srv_config = driver_config.server_defaults
-        host = server or None
-        port = None
-    else:
-        host = srv_config.host.value
-        port = srv_config.port.value
+        #host = server or None
+        #port = None
+    #else:
+    host = srv_config.host.value
+    port = srv_config.port.value
     if host is None:
         host = 'service_mgr'
     if not host.endswith('service_mgr'):
