@@ -2,6 +2,16 @@
 Changelog
 #########
 
+Version 2.0.3
+=============
+
+- #65: Segmentation fault when close connection or cursor
+- #63: Exception ignored in: function Connection.__del__
+- #58: readline_timed() method appending \n to data received
+- #56: Variable 'dsn' needs to be initialized in create_database()
+- #53: Loss of scale when reading numeric with zero value
+- #51: Exception ignored in: function Connection.__del__ ... connection shutdown
+
 Version 2.0.2
 =============
 

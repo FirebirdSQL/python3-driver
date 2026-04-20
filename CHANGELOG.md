@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.3] - 2026-04-20
+
+### Fixed
+
+- #65: Segmentation fault when close connection or cursor
+- #63: Exception ignored in: function Connection.__del__
+- #58: readline_timed() method appending \n to data received
+- #56: Variable 'dsn' needs to be initialized in create_database()
+- #53: Loss of scale when reading numeric with zero value
+- #51: Exception ignored in: function Connection.__del__ ... connection shutdown
+
 ## [2.0.2] - 2025-05-21
 
 ### Fixed

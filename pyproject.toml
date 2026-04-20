@@ -55,6 +55,15 @@ allow-direct-references = true
 dependencies = [
 ]
 
+[tool.hatch.envs.gdocs]
+dependencies = [
+  "great-docs",
+]
+
+[tool.hatch.envs.gdocs.scripts]
+build = "great-docs build"
+preview = "great-docs preview"
+
 [tool.hatch.envs.hatch-test]
 extra-args = ["--host=localhost"]
 extra-dependencies = [
@@ -62,7 +71,7 @@ extra-dependencies = [
 ]
 
 [[tool.hatch.envs.hatch-test.matrix]]
-python = ["3.11", "3.12", "3.13"]
+python = ["3.11", "3.12", "3.13", "3.14"]
 
 [tool.hatch.envs.doc]
 detached = false
