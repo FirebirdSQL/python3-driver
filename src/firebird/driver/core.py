@@ -2398,6 +2398,7 @@ def create_database(database: str | Path, *, user: str | None=None, password: st
     if isinstance(database, Path):
         database = str(database)
     db_config: DatabaseConfig = driver_config.get_database(database)
+    dsn: str | None = None
     if db_config is None:
         db_config = driver_config.db_defaults
         srv_config = driver_config.server_defaults
