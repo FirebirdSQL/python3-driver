@@ -830,6 +830,7 @@ class SrvTraceOption(IntEnum):
     ID = 1
     NAME = 2
     CONFIG = 3
+    PLUGINS = 4
 
 class SrvPropertiesOption(IntEnum):
     """Parameters for ServerAction.PROPERTIES.
