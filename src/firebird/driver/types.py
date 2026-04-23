@@ -830,6 +830,7 @@ class SrvTraceOption(IntEnum):
     ID = 1
     NAME = 2
     CONFIG = 3
+    PLUGINS = 4
 
 class SrvPropertiesOption(IntEnum):
     """Parameters for ServerAction.PROPERTIES.
@@ -1372,12 +1373,14 @@ class TraceSession:
         timestamp (datetime.datetime): Session start timestamp
         name (str): Session name (if defined)
         flags (list): List with session flag names
+        plugins (list): List with trace plugins for this session
     """
     id: int
     user: str
     timestamp: datetime.datetime
     name: str = ''
     flags: list = field(default_factory=list)
+    plugins: list = field(default_factory=list)
 
 @dataclass
 class ImpData:

@@ -5496,12 +5496,13 @@ class ServerTraceServices(ServerServiceProvider):
             # response should contain the error message
             raise DatabaseError(response)
         return response
-    def start(self, *, config: str, name: str | None=None) -> int:
+    def start(self, *, config: str, name: str | None=None, plugins: str | list[str] | None) -> int:
         """Start new trace session. **(ASYNC service)**
 
         Arguments:
             config: Trace session configuration.
             name: Trace session name.
+            plugins: Plugins to use for the session (only for FIREBIRD 6+)
 
         Returns:
             Trace session ID.
@@ -5511,6 +5512,11 @@ class ServerTraceServices(ServerServiceProvider):
             spb.insert_tag(ServerAction.TRACE_START)
             if name is not None:
                 spb.insert_string(SrvTraceOption.NAME, name)
+            if plugins is not None:
+                if isinstance(plugins, list):
+                    plugins = ",".join(plugins)
+                spb.insert_string(SrvTraceOption.PLUGINS, plugins)
+
             spb.insert_string(SrvTraceOption.CONFIG, config, encoding=self._srv().encoding)
             self._srv()._svc.start(spb.get_buffer())
         response = self._srv()._fetch_line()
@@ -5581,6 +5587,8 @@ class ServerTraceServices(ServerServiceProvider):
                     '%Y-%m-%d %H:%M:%S')
             elif line.lstrip().startswith('flags:'):
                 current['flags'] = line.split(':')[1].strip().split(',')
+            elif line.lstrip().startswith('plugins:'):
+                current['plugins'] = line.split(':')[1].strip().split(',')
             else:  # pragma: no cover
                 raise InterfaceError(f"Unexpected line in trace session list: {line}")
         store()
