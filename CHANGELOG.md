@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- #70: `Server.readlines_to_eof_timed(timeout)` — bulk-drain variant of `readline_timed` using the `isc_info_svc_to_eof` request mode. Required for long-running trace-stream consumers whose throughput exceeds what one-line-per-call polling can drain (the existing `readline_timed` caps a Python consumer at roughly 480 trace-events/sec while `fbtracemgr` reaches roughly 3000/sec on the same workload). The new method returns one chunk per services-API round-trip, distinguishes `isc_info_end` (end-of-service → `None`) from transient indicators (`isc_info_svc_timeout` / `isc_info_data_not_ready` / `isc_info_truncated` → `TIMEOUT` sentinel), and matches what `fbtracemgr` does at the protocol level.
+
 ## [2.0.3] - 2026-04-20
 
 ### Fixed
