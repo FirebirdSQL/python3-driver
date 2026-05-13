@@ -204,6 +204,73 @@ def test_trace(server_connection, db_file, fb_vars):
         # Finalize
         svcx.trace.stop(session_id=trace1_id)
 
+def test_readlines_to_eof_timed_drain(server_connection, db_file, fb_vars):
+    """`readlines_to_eof_timed` should drain a finite service's output to completion,
+    returning bulk chunks while the service is running and `None` once it reports
+    end-of-stream. Equivalent payload to `readlines()` for the same service call.
+
+    Uses `database.get_statistics(verbose=True)` because it produces a known multi-line
+    output and terminates on its own — no need for a long-running trace session in the test.
+    """
+    # Materialize the reference output once via the existing readlines() path.
+    server_connection.database.get_statistics(database=db_file, flags=SrvStatFlag.DEFAULT)
+    expected_lines = server_connection.readlines()
+    expected_text = '\n'.join(expected_lines).strip()
+
+    # Now drain the same call via readlines_to_eof_timed.
+    server_connection.database.get_statistics(database=db_file, flags=SrvStatFlag.DEFAULT)
+    chunks: list[str] = []
+    while True:
+        chunk = server_connection.readlines_to_eof_timed(1)
+        if chunk is None:                       # service reported end-of-stream
+            break
+        if chunk is driver.TIMEOUT:             # idle round — non-trace services shouldn't hit this
+            continue
+        assert isinstance(chunk, str)
+        chunks.append(chunk)
+
+    drained_text = ''.join(chunks).strip()
+    # Sanity: the bulk drain must have captured the same content as the per-line readlines() did.
+    # We compare on the normalized text rather than the byte-for-byte chunks because the two paths
+    # carry slightly different line-ending whitespace artifacts (readline_timed strips a trailing
+    # '\r '; the bulk path emits the multi-line buffer verbatim).
+    drained_normalized = drained_text.replace('\r\n', '\n').replace('\r', '\n').strip()
+    expected_normalized = expected_text.replace('\r\n', '\n').replace('\r', '\n').strip()
+    assert drained_normalized == expected_normalized
+    assert not server_connection.is_running()
+
+
+def test_readlines_to_eof_timed_returns_timeout_when_idle(server_connection, db_file, fb_vars):
+    """When no service action is in flight, the server returns a transient indicator
+    (TIMEOUT / data_not_ready) without ending the stream. `readlines_to_eof_timed`
+    surfaces that as the `TIMEOUT` sentinel — distinct from `None` (which would mean
+    "service has finished and won't produce more output").
+
+    Exercised against a live trace session: the session is alive (we started it), but
+    the workload that would emit events is idle, so the response is empty + transient.
+    """
+    trace_config = """database = %s
+    {
+      enabled = true
+      log_statement_finish = true
+      time_threshold = 0
+    }
+    """ % str(db_file)
+    with connect_server(fb_vars['host'], user='SYSDBA', password=fb_vars['password']) as svcx:
+        trace_id = svcx.trace.start(config=trace_config, name='test_readlines_to_eof_timed_idle')
+        try:
+            # Server is alive and the trace session is registered, but nothing is hitting
+            # `db_file` yet — the very first read should be transient, not EOF.
+            result = svcx.readlines_to_eof_timed(1)
+            assert result is driver.TIMEOUT, (
+                f"Idle trace session must return TIMEOUT, not {result!r}. Returning None "
+                "(EOF) here is the F-side bug: a transient buffer-empty round was conflated "
+                "with end-of-service and prematurely terminated trace capture."
+            )
+        finally:
+            svcx.trace.stop(session_id=trace_id)
+
+
 def test_get_users(server_connection):
     users = server_connection.user.get_all()
     assert isinstance(users, type(list()))

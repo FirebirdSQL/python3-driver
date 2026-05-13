@@ -5735,6 +5735,49 @@ class Server:
         if data and data.endswith('\r '):
             data = data[:-1]  # Remove space, keep '\r'
         return data if data else None
+    def readlines_to_eof_timed(self, timeout: int) -> str | Sentinel | None:
+        """Drain all currently-available textual output from the last service query in one round-trip.
+
+        Unlike `.readline_timed`, which sends the `isc_info_svc_line` request and gets a single
+        line per services-API call, this method sends `isc_info_svc_to_eof` and lets the server
+        pack as many lines as fit into the response buffer. For long-running services like
+        Firebird trace sessions (whose stream rate routinely exceeds what one-line-per-call
+        polling can drain), the bulk variant matches what the `fbtracemgr` C utility does and
+        avoids server-side trace-buffer overruns under sustained load.
+
+        Arguments:
+          timeout: Time in seconds to wait for output. The server enforces this per call;
+                   transient empty rounds during a still-active service return `.TIMEOUT`,
+                   not `None`.
+
+        Returns:
+          A (possibly multi-line) chunk of service output, `None` when the service reports
+          end of stream (trailing `isc_info_end` with no transient indicator), or `.TIMEOUT`
+          when the server timed out or signalled `isc_info_data_not_ready` / `isc_info_truncated`
+          with no payload this round.
+
+        The returned chunk preserves the server's line-ending convention as delivered;
+        callers that need per-line semantics can split with `.splitlines(keepends=True)`.
+        Whitespace artifacts of the `isc_info_svc_line` path (trailing `'\\r '`) do not apply
+        here because the server emits multi-line buffers verbatim under `isc_info_svc_to_eof`.
+        """
+        self.response.clear()
+        self._svc.query(self._make_request(timeout),
+                        bytes([SrvInfoCode.TO_EOF]), self.response.raw)
+        if (tag := self.response.get_tag()) != SrvInfoCode.TO_EOF:  # pragma: no cover
+            raise InterfaceError(f"Service responded with error code: {tag}")
+        data = self.response.read_sized_string(encoding=self.encoding,
+                                               errors=self.encoding_errors)
+        trailing = self.response.get_tag()
+        # Per `src/jrd/svc.cpp` in the Firebird engine, the trailing indicator distinguishes:
+        #   isc_info_svc_timeout (= SrvInfoCode.TIMEOUT, 64) — server-side timeout, session live
+        #   isc_info_data_not_ready (4)                       — no data right now, session live
+        #   isc_info_truncated (2)                            — more data on the next call, session live
+        #   isc_info_end (1)                                  — service has finished
+        if trailing == isc_info_end:
+            return data if data else None
+        # Transient indicator: keep going. Return the payload we did get, or TIMEOUT if none.
+        return data if data else TIMEOUT
     def readline(self) -> str | None:
         """Get next line of textual output from last service query.
 
