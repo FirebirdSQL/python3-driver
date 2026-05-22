@@ -22,6 +22,7 @@
 #
 # See LICENSE.TXT for details.
 
+import inspect
 from io import BytesIO
 import pytest
 from packaging.specifiers import SpecifierSet
@@ -157,6 +158,19 @@ def test_get_limbo_transaction_ids(server_connection, db_file):
     pytest.skip('Not implemented yet')
     ids = server_connection.database.get_limbo_transaction_ids(database=str(db_file))
     assert isinstance(ids, type(list()))
+
+def test_trace_start_plugins_is_optional():
+    """Regression: ServerTraceServices.start() must keep `plugins` optional.
+
+    #68 added `plugins` as a keyword-only parameter but without a default,
+    making it required and breaking every existing caller (including
+    `test_trace` below, and any FB3/4/5 user) with
+    "missing 1 required keyword-only argument: 'plugins'". The method body
+    already treats it as optional (`if plugins is not None:`) and the
+    docstring marks it FB6+ only, so it must default to None.
+    """
+    sig = inspect.signature(driver.core.ServerTraceServices.start)
+    assert sig.parameters['plugins'].default is None
 
 def test_trace(server_connection, db_file, fb_vars):
     trace_config = """database = %s

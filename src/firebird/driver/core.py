@@ -5496,7 +5496,7 @@ class ServerTraceServices(ServerServiceProvider):
             # response should contain the error message
             raise DatabaseError(response)
         return response
-    def start(self, *, config: str, name: str | None=None, plugins: str | list[str] | None) -> int:
+    def start(self, *, config: str, name: str | None=None, plugins: str | list[str] | None=None) -> int:
         """Start new trace session. **(ASYNC service)**
 
         Arguments:
