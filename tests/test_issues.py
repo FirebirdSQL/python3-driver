@@ -65,3 +65,52 @@ def test_issue_65_free_then_conn_close(dsn):
         row = cur.execute(stmt, (2,)).fetchone()
         assert row is not None
         stmt.free()
+
+def test_issue_69_gc_of_abandoned_connection(dsn):
+    """A connection abandoned without close() and reclaimed by cyclic garbage
+    collection must not crash in Connection.__del__ -> iAttachment.detach().
+
+    During cyclic GC the iAttachment's own iReferenceCounted.__del__ may run
+    release() (dropping its refcount to 0 and freeing the native interface)
+    before Connection.__del__ calls detach(); detaching the already-released
+    interface dereferences freed memory and segfaults.
+
+    On Python builds where the access violation hard-crashes the process the
+    worker dies (test fails). On builds where ctypes turns it into an
+    "Exception ignored ... in __del__" the failure is delivered via
+    sys.unraisablehook, which this test captures.
+    """
+    import gc
+    import sys
+    import warnings
+    from firebird.driver import connect
+
+    def abandon():
+        con = connect(dsn)
+        cur = con.cursor()
+        cur.execute('select count(*) from country')
+        cur.fetchall()
+        # deliberately NO con.close(); the reference is dropped on return
+
+    unraisable = []
+    old_hook = sys.unraisablehook
+    sys.unraisablehook = unraisable.append
+    try:
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            for _ in range(5):
+                abandon()
+            gc.collect()
+    finally:
+        sys.unraisablehook = old_hook
+
+    # The #69 crash is a native access violation (surfaced as OSError) escaping
+    # the finalizer; on hard-crashing builds the worker dies before reaching
+    # here. Other finalizer noise (e.g. a benign "invalid transaction handle"
+    # DatabaseError seen on some versions) is unrelated to this issue.
+    access_violations = [a for a in unraisable
+                         if isinstance(a.exc_value, OSError)]
+    assert not access_violations, \
+        f"finalizer access violation: {[a.exc_value for a in access_violations]}"
+    # The finalizer must still run and warn about the undisposed connection.
+    assert any(issubclass(w.category, ResourceWarning) for w in caught)

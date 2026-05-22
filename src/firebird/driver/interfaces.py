@@ -1261,9 +1261,15 @@ class iAttachment(iAttachment_v4):
     VERSION = 5
     def detach(self) -> None:
         "Replaces `isc_detach_database()`. On success releases interface."
-        self.vtable.detach(self, self.status)
-        self._check()
-        self._refcnt -= 1
+        # Guard against detaching an already-released interface. During cyclic
+        # garbage collection the iAttachment's own iReferenceCounted.__del__
+        # may run release() before Connection.__del__ calls detach(); without
+        # this guard the native call dereferences freed memory and segfaults
+        # (issue #69). iAttachment_v4.detach already guards the same way.
+        if self._refcnt:
+            self.vtable.detach(self, self.status)
+            self._check()
+            self._refcnt -= 1
     def drop_database(self) -> None:
         "Replaces `isc_drop_database()`. On success releases interface."
         self.vtable.dropDatabase(self, self.status)
