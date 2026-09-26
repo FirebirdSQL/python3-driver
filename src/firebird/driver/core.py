@@ -4134,7 +4134,6 @@ class Cursor(LoggingIdMixin):
         """
         if self._stmt is None:
             return -1
-        rows: Dict[ReqInfoCode, int] = self._stmt.info.get_info(StmtInfoCode.RECORDS)
         code: ReqInfoCode = None
         if self._stmt.type in (StatementType.SELECT, StatementType.SELECT_FOR_UPD):
             code = ReqInfoCode.SELECT_COUNT
@@ -4145,7 +4144,10 @@ class Cursor(LoggingIdMixin):
         elif self._stmt.type == StatementType.DELETE:
             code = ReqInfoCode.DELETE_COUNT
         else:
+            # Row counts are not available for other statement types (e.g. DDL),
+            # and the RECORDS info request is not answered for them.
             return -1
+        rows: Dict[ReqInfoCode, int] = self._stmt.info.get_info(StmtInfoCode.RECORDS)
         return rows[code]
     rowcount = affected_rows
     @property
