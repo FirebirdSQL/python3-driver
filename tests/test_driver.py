@@ -1054,6 +1054,12 @@ class TestCursor(DriverTestBase):
                 rcount = 1
             self.assertEqual(cur.affected_rows, rcount)
             self.assertEqual(cur.rowcount, rcount)
+    def test_affected_rows_ddl(self):
+        with self.con.cursor() as cur:
+            cur.execute("create table affected_rows_ddl (c1 integer)")
+            self.assertEqual(cur.affected_rows, -1)
+            self.assertEqual(cur.rowcount, -1)
+        self.con.rollback()
     def test_name(self):
         def assign_name():
             cur.set_cursor_name('testx')
