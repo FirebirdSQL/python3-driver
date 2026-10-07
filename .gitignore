@@ -143,3 +143,4 @@ store/
 # Sphinx build
 docs/_build
 docs/firebird-driver.docset
+
