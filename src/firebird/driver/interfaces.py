@@ -290,7 +290,7 @@ class iConfig(iReferenceCounted):
         return iConfigEntry(result)
     def find_pos(self, name: str, pos: int) -> iConfigEntry:
         """Find entry by name and position.
-If configuration file contains lines::
+If configuration file contains lines:
 
   Db=DBA
   Db=DBB

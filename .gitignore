@@ -71,6 +71,8 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+zdoc/site/
+zdoc/firebird-driver.docset/
 
 # PyBuilder
 target/
@@ -118,9 +120,6 @@ venv.bak/
 # Rope project settings
 .ropeproject
 
-# mkdocs documentation
-/site
-
 # mypy
 .mypy_cache/
 .dmypy.json
@@ -140,7 +139,6 @@ dmypy.json
 notes/
 store/
 
-# Sphinx build
-docs/_build
+# Zensical build
+docs/site
 docs/firebird-driver.docset
-

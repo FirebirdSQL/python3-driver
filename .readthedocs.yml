@@ -1,20 +1,15 @@
-# .readthedocs.yml
-# Read the Docs configuration file
-# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
-
-# Required
 version: 2
 
-# Build documentation in the docs/ directory with Sphinx
-sphinx:
-    configuration: docs/conf.py
-
 build:
-  os: "ubuntu-22.04"
+  os: ubuntu-24.04
   tools:
     python: "3.11"
-        
-# Optionally set the version of Python and requirements required to build your docs
-python:
+  jobs:
     install:
-        - requirements: docs/requirements.txt
+      - pip install . zensical mkdocstrings-python
+    build:
+      html:
+        - cd docs && zensical build
+    post_build:
+      - mkdir -p $READTHEDOCS_OUTPUT/html/
+      - cp --recursive docs/site/. $READTHEDOCS_OUTPUT/html/

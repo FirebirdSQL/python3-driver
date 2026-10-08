@@ -969,7 +969,7 @@ class EventCollector:
         `EventCollector` implements context manager protocol to call method `.begin()`
         and `.close()` automatically.
 
-    Example::
+    Example:
 
        with connection.event_collector(['event_a', 'event_b']) as collector:
            events = collector.wait()
@@ -1042,7 +1042,7 @@ class EventCollector:
             `None` if the wait timed out, otherwise a dictionary that maps
             `event_name -> event_occurrence_count`.
 
-        Example::
+        Example:
 
            >>> collector = connection.event_collector(['event_a', 'event_b'])
            >>> collector.begin()
@@ -1931,7 +1931,7 @@ class Connection:
 
         Hooks:
             Event `.ConnectionHook.DROPPED`: Executed after database is sucessfuly dropped.
-            Hook must have signature::
+            Hook must have signature:
 
                 hook_func(connection: Connection) -> None
 
@@ -1975,16 +1975,14 @@ class Connection:
 
         Hooks:
             Event `.ConnectionHook.DETACH_REQUEST`: Executed before connection
-            is closed. Hook must have signature::
+            is closed. Hook must have signature:
 
                 hook_func(connection: Connection) -> bool
 
-            .. note::
-
-               If any hook function returns True, connection is NOT closed.
+            Note: If any hook function returns True, connection is NOT closed.
 
             Event `.ConnectionHook.CLOSED`: Executed after connection is closed.
-            Hook must have signature::
+            Hook must have signature:
 
                 hook_func(connection: Connection) -> None
 
@@ -2297,7 +2295,7 @@ def connect(database: str | Path, *, user: str | None=None, password: str | None
     Hooks:
         Event `.ConnectionHook.ATTACH_REQUEST`: Executed after all parameters
         are preprocessed and before `Connection` is created. Hook
-        must have signature::
+        must have signature:
 
             hook_func(dsn: str, dpb: bytes) -> Optional[Connection]
 
@@ -2306,7 +2304,7 @@ def connect(database: str | Path, *, user: str | None=None, password: str | None
         of this function and other hooks are not called.
 
         Event `.ConnectionHook.ATTACHED`: Executed before `Connection` instance is
-        returned. Hook must have signature::
+        returned. Hook must have signature:
 
             hook_func(connection: Connection) -> None
 
@@ -2389,7 +2387,7 @@ def create_database(database: str | Path, *, user: str | None=None, password: st
 
     Hooks:
         Event `.ConnectionHook.ATTACHED`: Executed before `Connection` instance is
-        returned. Hook must have signature::
+        returned. Hook must have signature:
 
             hook_func(connection: Connection) -> None
 
@@ -3263,7 +3261,7 @@ class BlobReader(io.IOBase):
         """Set the file's current position, like stdio's `fseek()`.
 
         See:
-            :meth:`io.IOBase.seek()` for details.
+            `io.IOBase.seek()` for details.
 
         Arguments:
             offset: Offset from specified position.
@@ -3279,7 +3277,7 @@ class BlobReader(io.IOBase):
         """Return current position in BLOB.
 
         See:
-            :meth:`io.IOBase.tell()` for details.
+            `io.IOBase.tell()` for details.
         """
         return self.__pos
     def is_text(self) -> bool:
@@ -3988,8 +3986,7 @@ class Cursor:
             parameters: Sequence of parameters. Must contain one entry for each argument
                         that the procedure expects.
 
-        .. note::
-
+        Note:
            If stored procedure does have output parameters, you must retrieve their values
            saparatelly by `.Cursor.fetchone()` call. This method is not very convenient,
            but conforms to Python DB API 2.0. If you don't require conformance to Python
@@ -5860,7 +5857,7 @@ def connect_server(server: str, *, user: str | None=None, password: str | None=N
 
     Hooks:
         Event `.ServerHook.ATTACHED`: Executed before `Service` instance is
-        returned. Hook must have signature::
+        returned. Hook must have signature:
 
             hook_func(server: Server) -> None
 

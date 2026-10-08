@@ -1,31 +1,19 @@
-=====================
-Main driver namespace
-=====================
-
-.. module:: firebird.driver
-    :synopsis: Python 3+ Database API 2.0 Compliant driver for Firebird 3+
-
-Constants
-=========
-
-.. autodata:: __VERSION__
-   :no-value:
+# Main driver namespace
 
 
-Imports from sub-modules
-========================
+## Constants
 
-config
-------
+::: firebird.driver.__VERSION__
 
-.. py:currentmodule:: firebird.driver.config
+## Imports from sub-modules
+
+### config
+
 
 Globals: `driver_config`
 
-core
-----
+### core
 
-.. py:currentmodule:: firebird.driver.core
 
 Functions:
     `connect()`, `create_database()`, `connect_server()`, `transaction()` and `tpb()`
@@ -36,10 +24,8 @@ Translation dictionaries:
 Classes:
     `DistributedTransactionManager`, `Connection`, `Cursor`, `Server` and `TPB`
 
-types
------
+### types
 
-.. py:currentmodule:: firebird.driver.types
 
 Exceptions:
     `Warning`, `Error`, `InterfaceError`, `DatabaseError`, `DataError`,
@@ -75,10 +61,7 @@ Helper constants:
 Helper functions:
     `get_timezone()`
 
-fbapi
------
+### fbapi
 
-.. py:currentmodule:: firebird.driver.fbapi
 
 Functions `load_api()` and `get_api()`.
-

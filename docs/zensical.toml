@@ -1,0 +1,45 @@
+[project]
+site_name = "The Python driver for Firebird"
+site_author = "Pavel Císař"
+copyright = "The Firebird Project"
+site_url = "https://firebird-driver.readthedocs.io/"
+nav = [
+  { "Home" = "index.md" },
+  { "Getting Started" = "getting-started.md" },
+  { "Usage Guide" = "usage-guide.md" },
+  { "Python DB API compliance" = "python-db-api-compliance.md" },
+  { "Reference" = [
+    { "Main namespace" = "ref-main.md" },
+    { "Types" = "ref-types.md" },
+    { "Configuration" = "ref-config.md" },
+    { "Core" = "ref-core.md" },
+    { "Hooks" = "ref-hooks.md" },
+    { "Interfaces" = "ref-intf.md" },
+    { "Client API" = "ref-fbapi.md" },
+  ] },
+  { "Changelog" = "changelog.md" },
+  { "License" = "license.md" },
+]
+
+[project.theme]
+favicon = "assets/fb-favicon.png"
+features = [
+    "navigation.instant",
+    "navigation.tracking",
+    "navigation.tabs",
+    "navigation.tabs.sticky",
+    "navigation.sections",
+    "navigation.expand",
+    "navigation.path",
+    "navigation.top",
+]
+
+[project.plugins.mkdocstrings.handlers.python]
+paths = ["../src"]
+inventories = ["https://docs.python.org/3/objects.inv"]
+
+[project.plugins.mkdocstrings.handlers.python.options]
+docstring_style = "google"
+inherited_members = true
+show_root_heading = true
+show_source = true

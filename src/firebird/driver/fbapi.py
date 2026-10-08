@@ -1925,15 +1925,15 @@ def exception_from_status(error, status: ISC_STATUS_ARRAY, preamble: str | None=
 
 class FirebirdAPI:
     """Firebird Client API interface object. Loads Firebird Client Library and
-    exposes `fb_get_master_interface()`. Uses :ref:`ctypes <python:module-ctypes>`
+    exposes `fb_get_master_interface()`. Uses [`ctypes`](https://docs.python.org/3/library/ctypes.html)
     for bindings.
 
     Arguments:
         filename (`~pathlib.Path`): Firebird client library to be loaded. If it's not provided,
-            the driver uses :func:`~ctypes.util.find_library()` to locate the library.
+            the driver uses `ctypes.util.find_library()` to locate the library.
 
     Attributes:
-        client_library (`~ctypes.ctypes.CDLL`): Loaded Firebird client library :mod:`ctypes` handler
+        client_library (`ctypes.CDLL`): Loaded Firebird client library `ctypes` handler
         client_library_name (`~pathlib.Path`): Path to loaded Firebird client library
         master (iMaster): Firebird API IMaster interface
         util (iUtil): Firebird API IUtil interface

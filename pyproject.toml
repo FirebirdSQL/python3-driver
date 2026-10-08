@@ -68,16 +68,18 @@ python = ["3.11", "3.12", "3.13", "3.14"]
 detached = false
 platforms = ["linux"]
 dependencies = [
-  "Sphinx==7.2.6",
-  "sphinx-bootstrap-theme>=0.8.1",
-  "sphinx-autodoc-typehints>=1.24.0",
-  "doc2dash>=3.0.0"
+  "zensical",
+  "mkdocstrings-python",
+  "doc2dash>=3.0.0",
 ]
+
 [tool.hatch.envs.doc.scripts]
-build = "cd docs ; make html"
+build = "cd docs && zensical build {args}"
+serve = "cd docs && zensical serve {args}"
 docset = [
-  "cd docs ; doc2dash -u https://firebird-driver.readthedocs.io/en/latest/ -f -i ./_static/fb-favicon.png -n firebird-driver ./_build/html/",
-  "cd docs; VERSION=`hatch version` ; tar --exclude='.DS_Store' -cvzf ../dist/firebird-driver-$VERSION-docset.tgz firebird-driver.docset",
+  "build",
+  "cd docs && doc2dash -u https://firebird-driver.readthedocs.io/en/latest/ -f -i docs/assets/fb-favicon.png -n firebird-driver site/",
+  "cd docs && VERSION=$(python -c 'from firebird.driver import __VERSION__; print(__VERSION__)') && tar --exclude='.DS_Store' -czf ../dist/firebird-driver-$VERSION-docset.tgz firebird-driver.docset",
 ]
 
 [tool.ruff]

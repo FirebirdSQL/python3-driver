@@ -1,9 +1,5 @@
-.. module:: firebird.driver.config
-    :synopsis: Driver configuration
 
-======================
-firebird.driver.config
-======================
+# firebird.driver.config
 
 This module defines the configuration system for the firebird-driver.
 It uses an INI-style format managed via the `DriverConfig` class, which
@@ -14,15 +10,14 @@ Configuration can be loaded from files, strings, or dictionaries, and
 supports environment variable interpolation. The primary interaction point
 is usually the global `driver_config` instance.
 
-Classes
-=======
+## Classes
 
-.. autoclass:: DriverConfig
-.. autoclass:: ServerConfig
-.. autoclass:: DatabaseConfig
+::: firebird.driver.config.DriverConfig
 
-Globals
-=======
+::: firebird.driver.config.ServerConfig
 
-.. autodata:: driver_config
-   :no-value:
+::: firebird.driver.config.DatabaseConfig
+
+## Globals
+
+::: firebird.driver.config.driver_config

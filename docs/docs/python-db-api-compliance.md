@@ -1,22 +1,17 @@
-##########################
-Compliance to PyDB API 2.0
-##########################
+# Compliance to PyDB API 2.0
 
-.. currentmodule:: firebird.driver
 
 Full text of Python Database API 2.0 (PEP 249) is available at
-`http://www.python.org/dev/peps/pep-0249/ <http://www.python.org/dev/peps/pep-0249/>`__
+[http://www.python.org/dev/peps/pep-0249/](http://www.python.org/dev/peps/pep-0249/)
 
-Unsupported Optional Features
-=============================
+## Unsupported Optional Features
 
 `Cursor.nextset`
 
    This method is not implemented because the database engine does not support
    opening multiple result sets simultaneously with a single cursor.
 
-Supported Optional Features
-===========================
+## Supported Optional Features
 
   - `Connection.Error`, `Connection.ProgrammingError`, etc.
 
@@ -27,8 +22,7 @@ Supported Optional Features
     This read-only attribute return a reference to the Connection object on which the cursor was created.
 
 
-Nominally Supported Optional Features
-=====================================
+## Nominally Supported Optional Features
 
 `.Cursor`
 
@@ -48,8 +42,7 @@ Nominally Supported Optional Features
         Although this method is present, it does nothing, as allowed by the spec.
 
 
-Caveats
-=======
+## Caveats
 
 Firebird-driver offers a large feature set beyond the minimal requirements
 of the Python DB API. This section attempts to document only those
@@ -84,25 +77,27 @@ features that overlap with the DB API.
       of all `description` elements are defined by the DB API spec; these
       constants are provided merely for convenience.
 
-      .. sourcecode:: python
+      ```python
+      DESCRIPTION_NAME
+      DESCRIPTION_TYPE_CODE
+      DESCRIPTION_DISPLAY_SIZE
+      DESCRIPTION_INTERNAL_SIZE
+      DESCRIPTION_PRECISION
+      DESCRIPTION_SCALE
+      DESCRIPTION_NULL_OK
 
-         DESCRIPTION_NAME
-         DESCRIPTION_TYPE_CODE
-         DESCRIPTION_DISPLAY_SIZE
-         DESCRIPTION_INTERNAL_SIZE
-         DESCRIPTION_PRECISION
-         DESCRIPTION_SCALE
-         DESCRIPTION_NULL_OK
+      ```
 
       Here is an example of accessing the *name* of the first field in the
       `description` of cursor `cur`:
 
-      .. sourcecode:: python
+      ```python
+      nameOfFirstField = cur.description[0][firebird.driver.DESCRIPTION_NAME]
 
-         nameOfFirstField = cur.description[0][firebird.driver.DESCRIPTION_NAME]
+      ```
 
       For more information, see the documentation of Cursor.description in
-      the `DB API Specification <Python-DB-API-2.0.html>`__.
+      the [DB API Specification](https://peps.python.org/pep-0249/).
 
    `~.Cursor.rowcount`
 
@@ -124,6 +119,6 @@ features that overlap with the DB API.
       performed on the cursor or the rowcount of the last operation is not
       determinable by the interface".
 
-      .. note::
+      !!! note
 
-         This attribute is just an alias for `.Cursor.affected_rows` property.
+          This attribute is just an alias for `.Cursor.affected_rows` property.

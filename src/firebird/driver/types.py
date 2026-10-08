@@ -135,7 +135,7 @@ class FirebirdWarning(UserWarning):
         Attribute lookup on this class never fails, as all attributes that are not actually
         set, have `None` value.
 
-    Example::
+    Example:
 
         try:
             if condition:
