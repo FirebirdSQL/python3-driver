@@ -9,17 +9,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - GH-65 Segmentation fault when close connection or cursor
-- #63: Exception ignored in: function Connection.__del__
-- gh-58: readline_timed() method appending \n to data received
-- `#56``: Variable 'dsn' needs to be initialized in create_database()
-- &#8203;#53: Loss of scale when reading numeric with zero value
-- &#8203;#51: Exception ignored in: function Connection.__del__ ... connection shutdown
+- GH-63: Exception ignored in: function Connection.__del__
+- GH-58: readline_timed() method appending \n to data received
+- GH-56: Variable 'dsn' needs to be initialized in create_database()
+- GH-53: Loss of scale when reading numeric with zero value
+- GH-51: Exception ignored in: function Connection.__del__ ... connection shutdown
 
 ## [2.0.2] - 2025-05-21
 
 ### Fixed
 
-- &#8203;#49: database host configuration not work with version 2
+- GH-49: database host configuration not work with version 2
 
 ## [2.0.1] - 2025-05-05
 
@@ -31,8 +31,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- &#8203;#22: Allow use of Firebird embedded engine for tests
-- &#8203;#41: Some `firebird.conf` parameters are missing in `fbapi.config_items`
+- GH-22: Allow use of Firebird embedded engine for tests
+- GH-41: Some `firebird.conf` parameters are missing in `fbapi.config_items`
 - Fix: Added validation-related info codes that were ommited in `DatabaseInfoProvider3`.
 - Fix: Properly handle situation when parameter `database` for `connect` and `create_database` is
   a DSN.
@@ -71,7 +71,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- Fix &#8203;#44 - Invalid affected_row count on multiple statements
+- Fix GH-44 - Invalid affected_row count on multiple statements
 
 ## [1.10.8] - 2024-12-23
 
@@ -135,7 +135,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- &#8203;#30 - It is not possible to start a transaction without specifying an isolation level
+- GH-30 - It is not possible to start a transaction without specifying an isolation level
   The fix allows use of empty tpb in `TransactionManager.begin()`
 
 ## [1.10.2] - 2024-05-03
@@ -143,15 +143,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - Mangled output for `DbInfoCode` itsens `CRYPT_PLUGIN`, `WIRE_CRYPT`, `DB_GUID` and `DB_FILE_ID`
-- &#8203;#34 - Pre-1970 dates causes OverflowError
-- &#8203;#38 - 'datetime.date' object has no attribute 'date'
+- GH-34 - Pre-1970 dates causes OverflowError
+- GH-38 - 'datetime.date' object has no attribute 'date'
 
 ## [1.10.1] - 2023-12-21
 
 ### Fixed
 
 - Call iProvider.shutdown() on program exit.
-- &#8203;#33 - SIGABRT on interface detach.
+- GH-33 - SIGABRT on interface detach.
 
 ## [1.10.0] - 2023-10-03
 
@@ -159,7 +159,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - #27 - Failed to establish a connection to the server on the specified port.
 - #15 - Documentation issue.
-- Fixed issue on MacOS (see &#8203;#7827 in Firebird)
+- Fixed issue on MacOS (see GH-7827 in Firebird)
 
 ### Changed
 
@@ -187,7 +187,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Wait for completion of `ServerDbServices` services that do not return data.
   Otherwise subsequent service calls may end with "Service is currently busy" error.
 - Documentation link for the driver, provided by @mariuz
-- &#8203;#20: Cursor.description returning () instead of None when the cursor has no rows,
+- GH-20: Cursor.description returning () instead of None when the cursor has no rows,
   which is violation of PEP 249. Fix provided by @fdcastel
 
 ### Changed
@@ -414,7 +414,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- Bug &#8203;#4: exeption returns non ascii-127 symbols.
+- Bug GH-4: exeption returns non ascii-127 symbols.
   The error message decode uses `.fbapi.err_encoding` value that is initialized to
   `locale.getpreferredencoding`. Also, the decode is now done with `errors="replace"`.
 - Unregistered bug: wrong handling of milliseconds in TIME and TEMEPSTAMP datatype.
@@ -443,7 +443,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Unregistered bug: `sql_dialect` is used instead `db_sql_dialect` in
   `firebird.driver.core.create_database`.
-- Bug &#8203;#2: error when handling input parameters with value None
+- Bug GH-2: error when handling input parameters with value None
 
 ## [1.1.0] - 2021-03-04
 
