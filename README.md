@@ -43,23 +43,5 @@ The documentation for this package is available at [https://firebird-driver.read
 
 ## Running tests
 
-This project uses [hatch](https://hatch.pypa.io/latest/) , so you can use:
-```console
-hatch test
-```
-to run all tests for default Python version (3.11). To run tests for all Python versions
-defined in matrix, use `-a` switch.
-
-This project is using [pytest](https://docs.pytest.org/en/stable/) for testing, and our
-tests add several options via `tests/conftest.py`.
-
-By default, tests are configured to use local Firebird installation via network access.
-To use local installation in `embedded` mode, comment out the section:
-```
-[tool.hatch.envs.hatch-test]
-extra-args = ["--host=localhost"]
-```
-in `pyproject.toml`.
-
-You can also use firebird driver configuration file to specify server(s) that should be
-used for testing, and then pass `--driver-config` and `--server` options to `pytest`.
+See [development/README.md](development/README.md) for the Firebird test setup, Hatch
+commands, and development workflow.

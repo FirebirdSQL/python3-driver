@@ -18,7 +18,7 @@ This module contains interface wrappers for Firebird new API.
 
 In Python driver, interfaces are represented as instances of interface wrapper classes
 that expose the methods provided by particular Firebird interface version. The wrapper
-class hierarchy thus represent not only inheritabce between Firebird interfaces, but also
+class hierarchy thus represent not only inheritance between Firebird interfaces, but also
 between versions of particular Firebird interface.
 
 Because all interfaces returned by Firebird are inherited from `IVersioned` interface,
@@ -26,7 +26,7 @@ all wrapper classes have `VERSION` class attribute that contain version number o
 interface.
 
 Each Firebird interface has it's "canonical" Python wrapper with coresponding name. For
-example interface `IService` has wrapper class `.iService`. However, if there are multiple
+example interface `IService` has wrapper class `iService`. However, if there are multiple
 public versions of Firebird interface, there are multiple wrapper classes for each published
 interface version (interim, non-public versions used during Firebird development are skipped).
 These wrapper classes have names based on their canonical name with suffix that represent
@@ -40,9 +40,9 @@ that correct wrapper class is used according to returned interface version.
 However, this architecture has several important consequences:
 
 1. The interface wrapper classes may change between driver releases as new interface versions
-    are introduced. For example, driver versions up to 1.5.2 had only canonical `.iService`
-    (version 3), but in version 1.6.0 it was renamed to `.iService_v3`, new wrappers
-    `.iService_v4` and (new canonical) `.iService` (version 5) were added.
+    are introduced. For example, driver versions up to 1.5.2 had only canonical `iService`
+    (version 3), but in version 1.6.0 it was renamed to `iService_v3`, new wrappers
+    `iService_v4` and (new canonical) `iService` (version 5) were added.
 2. Instead using `isinstance` to check interface versions, you should always use
     `VERSION` attribute on wrapper class instance.
 
