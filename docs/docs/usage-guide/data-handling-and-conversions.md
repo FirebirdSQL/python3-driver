@@ -88,8 +88,8 @@ including automatic transliteration between character sets when necessary.
     especially when database operates with multiple character sets, or uses character set
     that is not `native` for client application.
 
-    Character set for communication is specified using `~.DatabaseConfig.charset`
-    configuration option, or parameter in `.connect()` or `~firebird.driver.core.create_database()` call.
+    Character set for communication is specified using [`charset`](../ref-config.md#firebird.driver.config.DatabaseConfig)
+    configuration option, or parameter in [`connect()`](../ref-core.md#firebird.driver.core.connect) or [`create_database()`](../ref-core.md#firebird.driver.core.create_database) call.
 
     When `connection charset` is defined, all textual data returned from server are encoded
     in this charset, and client application must ensure that all textual data sent to server
@@ -129,8 +129,6 @@ determine encoding for conversions from/to `unicode`.
     make your life much easier.
 
 
-<a id="working_with_blobs"></a>
-
 ## Working with TIME/TIMESTAMP WITH TIMEZONE
 
 Firebird 4 introduced support for TIME and TIMESTAMP WITH TIMEZONE. The driver supports these
@@ -141,17 +139,20 @@ support has some specific limitations:
     requirements it's not possible to use standard `zoneinfo` package available in Python since
     version 3.9, neither any other `datetime.tzinfo` implementation.
 2. All timezone-aware `datetime.datetime` and `datetime.time` objects passed to the driver
-    must use `datetime.tzinfo` created with `.get_timezone()` utility function.
+    must use `datetime.tzinfo` created with [`get_timezone()`](../ref-types.md#firebird.driver.types.get_timezone) utility function.
 
 **Examples:**
 
 ```python
+import datetime
 from firebird.driver import get_timezone
 
 ts_region = datetime.datetime(2020, 12, 31, 23, 55, 35, 123400, get_timezone('Europe/Prague'))
 ts_offset = datetime.datetime(2020, 12, 31, 23, 55, 35, 123400, get_timezone('+02:00'))
 
 ```
+
+<a id="working_with_blobs"></a>
 
 ## Working with BLOBs
 
@@ -171,16 +172,16 @@ These drawbacks are addressed by `stream` BLOBs. Using BLOBs in `stream` mode is
 
 * For **input** values, simply use [parameterized statement](executing-sql-statements.md#parameterized-statements)
     and pass any `file-like` object in place of BLOB parameter. The `file-like` object must
-    implement only the `~file.read` method, as no other method is used.
+    implement only the [`read`](https://docs.python.org/3/library/io.html#io.IOBase) method, as no other method is used.
 * For **output** values, add column name(s) that should be returned as `file-like`
-    objects to `.Cursor.stream_blobs` list attribute. Firebird-driver then returns
-    `.BlobReader` instance instead string in place of returned BLOB value for these column(s).
+    objects to [`Cursor.stream_blobs`](../ref-core.md#firebird.driver.core.Cursor) list attribute. Firebird-driver then returns
+    [`BlobReader`](../ref-core.md#firebird.driver.core.BlobReader) instance instead string in place of returned BLOB value for these column(s).
 
 !!! important
 
-    The firebird-driver provides `.Cursor.stream_blob_threshold` attribute that controls
+    The firebird-driver provides [`Cursor.stream_blob_threshold`](../ref-core.md#firebird.driver.core.Cursor) attribute that controls
     the maximum size of materialized blobs (as memory exhaustion safeguard). When particular
-    blob value exceeds this threshold, an instance of `.BlobReader` is returned instead
+    blob value exceeds this threshold, an instance of [`BlobReader`](../ref-core.md#firebird.driver.core.BlobReader) is returned instead
     string/bytes value.
 
     Zero threshold value effectively forces all blobs to be returned as stream blobs.
@@ -188,15 +189,15 @@ These drawbacks are addressed by `stream` BLOBs. Using BLOBs in `stream` mode is
     Please note that positive threshold value means that your application has to be
     prepared to handle BLOBs in both incarnations.
 
-    The default threshold is 64K and could be changed using `.DriverConfig.stream_blob_threshold`
+    The default threshold is 64K and could be changed using [`DriverConfig.stream_blob_threshold`](../ref-config.md#firebird.driver.config.DriverConfig)
     configuration option.
 
     Blob size threshold has effect only on materialized blob columns, i.e. columns not
-    explicitly requested to be returned as streamed ones using `.Cursor.stream_blobs`
+    explicitly requested to be returned as streamed ones using [`Cursor.stream_blobs`](../ref-core.md#firebird.driver.core.Cursor)
     attribute, that are **always** returned as stream blobs.
 
-The `.BlobReader` instance is bound to `.Cursor` instance, and it's automatically closed
-with cursor. However, it's good practice to use `with` statement or call `.BlobReader.close()`
+The [`BlobReader`](../ref-core.md#firebird.driver.core.BlobReader) instance is bound to [`Cursor`](../ref-core.md#firebird.driver.core.Cursor) instance, and it's automatically closed
+with cursor. However, it's good practice to use `with` statement or call [`BlobReader.close()`](../ref-core.md#firebird.driver.core.BlobReader.close)
 once you're finished reading to release system resources associated with BLOB value.
 
 !!! important
@@ -204,7 +205,7 @@ once you're finished reading to release system resources associated with BLOB va
     When working with BLOB values, always have memory efficiency in mind, especially when
     you're processing huge quantity of rows with BLOB values at once. Materialized BLOB
     values may exhaust your memory quickly, but using stream BLOBs may have inpact on
-    performance too, as new `.BlobReader` instance is created for each value fetched.
+    performance too, as new [`BlobReader`](../ref-core.md#firebird.driver.core.BlobReader) instance is created for each value fetched.
 
 **Example program:**
 
@@ -306,7 +307,7 @@ with connect('/temp/test.db', user='sysdba', password='pass') as con:
 
     cur.execute("select a from array_table")
     arrayOut = cur.fetchone()[0]
-    print(f"{arrayOut=})
+    print(f"{arrayOut=}")
 
 ```
 

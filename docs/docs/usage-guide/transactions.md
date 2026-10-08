@@ -1,4 +1,4 @@
-# Transanction management
+# Transactions
 
 For the sake of simplicity, firebird-driver lets the Python programmer ignore
 transaction management to the greatest extent allowed by the Python Database
@@ -11,27 +11,28 @@ Remember that because of ACID, every data manipulation operation in the Firebird
 database engine takes place in the context of a transaction, including operations
 that are conceptually “read-only”, such as a typical SELECT. The client programmer
 of firebird-driver establishes a transaction implicitly by using any SQL execution
-method, such as `.Connection.execute_immediate()`, `.Cursor.execute()`, or
-`.Cursor.callproc()`.
+method, such as [`Connection.execute_immediate()`](../ref-core.md#firebird.driver.core.Connection.execute_immediate), [`Cursor.execute()`](../ref-core.md#firebird.driver.core.Cursor.execute), or
+[`Cursor.callproc()`](../ref-core.md#firebird.driver.core.Cursor.callproc).
 
 Although firebird-driver allows the programmer to pay little attention to transactions,
 it also exposes the full complement of the database engine’s advanced transaction
-control features: [transaction parameters](transanction-management.md#transaction-parameters), [retaining transactions](transanction-management.md#retaining-transactions), [savepoints](transanction-management.md#savepoints),
-and [distributed transactions](transanction-management.md#distributed-transactions).
+control features: [transaction parameters](transactions.md#transaction-parameters),
+[retaining transactions](transactions.md#retaining-transactions), [savepoints](transactions.md#savepoints),
+and [distributed transactions](transactions.md#distributed-transactions).
 
 ## Basics
 
-When it comes to transactions, Python Database API 2.0 specify that `.Connection` object
+When it comes to transactions, Python Database API 2.0 specify that [`Connection`](../ref-core.md#firebird.driver.core.Connection) object
 has to respond to the following methods:
 
-`.Connection.commit()`
+[`Connection.commit()`](../ref-core.md#firebird.driver.core.Connection.commit)
 
   Commits any pending transaction to the database. Note that if the database supports
   an auto-commit feature, this must be initially off. An interface method may be provided
   to turn it back on. Database modules that do not support transactions should implement
   this method with void functionality.
 
-`.Connection.rollback()`
+[`Connection.rollback()`](../ref-core.md#firebird.driver.core.Connection.rollback)
 
   (optional) In case a database does provide transactions this method causes the the
   database to roll back to the start of any pending transaction. **Closing a connection
@@ -39,7 +40,7 @@ has to respond to the following methods:
 
 In addition to the implicit transaction initiation required by Python Database API,
 firebird-driver allows the programmer to start transactions explicitly via the
-`.Connection.begin()` method. Also `.Connection.savepoint()` method was added to provide
+[`Connection.begin()`](../ref-core.md#firebird.driver.core.Connection.begin) method. Also [`Connection.savepoint()`](../ref-core.md#firebird.driver.core.Connection.savepoint) method was added to provide
 support for [Firebird SAVEPOINTs](http://www.firebirdsql.org/refdocs/langrefupd15-savepoint.html).
 
 But Python Database API 2.0 was created with assumption that connection can support only
@@ -50,16 +51,16 @@ opened simultaneously to perform various tasks, which would require to open mult
 connections and thus consume more resources than necessary.
 
 Firebird-driver surfaces this Firebird feature by separating transaction management out
-from `.Connection` into separate `.TransactionManager` objects. To comply with Python DB
-API 2.0 requirements, `.Connection` object uses one `.TransactionManager` instance as
-`main transaction`, and delegates `~.Connection.begin()`,
-`~.Connection.savepoint()`, `~.Connection.commit()`, `~.Connection.rollback()` and
-`~.Connection.execute_immediate()` calls to it.
+from [`Connection`](../ref-core.md#firebird.driver.core.Connection) into separate [`TransactionManager`](../ref-core.md#firebird.driver.core.TransactionManager) objects. To comply with Python DB
+API 2.0 requirements, [`Connection`](../ref-core.md#firebird.driver.core.Connection) object uses one [`TransactionManager`](../ref-core.md#firebird.driver.core.TransactionManager) instance as
+`main transaction`, and delegates [`begin()`](../ref-core.md#firebird.driver.core.Connection.begin),
+[`savepoint()`](../ref-core.md#firebird.driver.core.Connection.savepoint), [`commit()`](../ref-core.md#firebird.driver.core.Connection.commit), [`rollback()`](../ref-core.md#firebird.driver.core.Connection.rollback) and
+[`execute_immediate()`](../ref-core.md#firebird.driver.core.Connection.execute_immediate) calls to it.
 
 !!! info
 
     More about using multiple transactions with the same connection in separate
-    [section](transanction-management.md#multiple_transactions).
+    [section](transactions.md#multiple_transactions).
 
 **Example:**
 
@@ -73,12 +74,12 @@ with connect('employee', user='SYSDBA', password='masterkey') as con:
     # ========================================================================================
     #
     # Transaction is started implicitly
-    cur.execute('insert into country values ('Oz','Crowns')
+    cur.execute('insert into country values (?,?)', ['Oz','Crowns'])
     con.commit() # commits active transaction
     # Again, transaction is started implicitly
-    cur.execute('insert into country values ('Barsoom','XXX')
+    cur.execute('insert into country values (?,?)', ['Barsoom','XXX'])
     con.rollback() # rolls back active transaction
-    cur.execute('insert into country values ('Pellucidar','Shells')
+    cur.execute('insert into country values (?,?)', ['Pellucidar','Shells'])
 
 # Commit was not performed before connection context was closed
 # This will roll back the transaction because Python DB API 2.0
@@ -88,14 +89,14 @@ with connect('employee', user='SYSDBA', password='masterkey') as con:
 ```
 
 !!! info
-    `.TransactionManager` for details.
+    [`TransactionManager`](../ref-core.md#firebird.driver.core.TransactionManager) for details.
 
 
 ## Auto-commit
 
 Firebird-driver doesn't support `auto-commit` feature directly, but developers
 may achieve the similar result using `explicit` transaction start, taking advantage
-of `.TransactionManager.default_action` and its default value (`~.DefaultAction.COMMIT`).
+of [`TransactionManager.default_action`](../ref-core.md#firebird.driver.core.TransactionManager) and its default value ([`COMMIT`](../ref-types.md#firebird.driver.types.DefaultAction)).
 
 **Example:**
 
@@ -106,11 +107,11 @@ with connect('employee', user='SYSDBA', password='masterkey') as con:
     cur = con.cursor()
 
     con.begin()
-    cur.execute('insert into country values ('Oz','Crowns')
+    cur.execute('insert into country values (?,?)', ['Oz','Crowns'])
     con.begin() # commits active transaction and starts new one
-    cur.execute('insert into country values ('Barsoom','XXX')
+    cur.execute('insert into country values (?,?)', ['Barsoom','XXX'])
     con.begin() # commits active transaction and starts new one
-    cur.execute('insert into country values ('Pellucidar','Shells')
+    cur.execute('insert into country values (?,?)', ['Pellucidar','Shells'])
 
     # However, commit is required before connection is closed,
     # because Python DB API 2.0 requires that closing connection
@@ -129,23 +130,23 @@ the transaction has read and write access to tables, or read-only access, and
 whether or not other simultaneously active transactions can share table access
 with the transaction.
 
-Transaction manager has `~.TransactionManager.default_tpb` attribute that can be
+Transaction manager has [`default_tpb`](../ref-core.md#firebird.driver.core.TransactionManager) attribute that can be
 changed to set the default TPB to be used for all subsequent transactions started
-by this manager. Also Connection have a `~.Connection.default_tpb` attribute,
+by this manager. Also Connection have a [`default_tpb`](../ref-core.md#firebird.driver.core.Connection) attribute,
 but it's used to set the default TPB for all transactions managers subsequently
-created for the connection (see `.Connection.transaction_manager()`).
+created for the connection (see [`Connection.transaction_manager()`](../ref-core.md#firebird.driver.core.Connection.transaction_manager)).
 
 Alternatively, if the programmer only wants to set the TPB for a single transaction,
-he can start a transaction explicitly via the `.Connection.begin()` or
-`.TransactionManager.begin()` method and pass a TPB for that single transaction.
+he can start a transaction explicitly via the [`Connection.begin()`](../ref-core.md#firebird.driver.core.Connection.begin) or
+[`TransactionManager.begin()`](../ref-core.md#firebird.driver.core.TransactionManager.begin) method and pass a TPB for that single transaction.
 
 The TPB is a `bytes` value constructed from various tags and binary values, as
 defined by API. While you can construct the TPB manually, the firebird-driver
 provides several convenient ways for TPB construction:
 
-1. The `.tpb()` function for simple TPBs.
+1. The [`tpb()`](../ref-core.md#firebird.driver.core.tpb) function for simple TPBs.
 
-2. The `~firebird.driver.core.TPB` class for complex TPBs (including table reservation etc.).
+2. The [`TPB`](../ref-core.md#firebird.driver.core.TPB) class for complex TPBs (including table reservation etc.).
 
 **Examples:**
 
@@ -174,13 +175,13 @@ complex_tpb = my_tpb.get_buffer()
 
     Because the scope and type of transaction information depends on the version of the Firebird
     server, this information is made available through a separate class
-    `.TransactionInfoProvider`. The `.TransactionManager.info` property provides access to
-    instance of `.TransactionInfoProvider` or it's **ancestor** class according to used
+    [`TransactionInfoProvider`](../ref-core.md#firebird.driver.core.TransactionInfoProvider). The [`TransactionManager.info`](../ref-core.md#firebird.driver.core.TransactionManager.info) property provides access to
+    instance of [`TransactionInfoProvider`](../ref-core.md#firebird.driver.core.TransactionInfoProvider) or it's **ancestor** class according to used
     Firebird version.
 
 Although you may query the information directly from server using
-`~.TransactionInfoProvider3.get_info()` method (that wraps the Firebird `ITransaction.getInfo()`
-API call), the `.TransactionInfoProvider` object provides more convenient methods and properties
+[`get_info()`](../ref-core.md#firebird.driver.core.TransactionInfoProvider3.get_info) method (that wraps the Firebird `ITransaction.getInfo()`
+API call), the [`TransactionInfoProvider`](../ref-core.md#firebird.driver.core.TransactionInfoProvider) object provides more convenient methods and properties
 for obtaining specific information directly.
 
 **Example:**
@@ -219,7 +220,7 @@ ID of Oldest Snapshot Transaction: 352
 
 ## Retaining transactions
 
-The `~.TransactionManager.commit()` and `~.TransactionManager.rollback()` methods
+The [`commit()`](../ref-core.md#firebird.driver.core.TransactionManager.commit) and [`rollback()`](../ref-core.md#firebird.driver.core.TransactionManager.rollback) methods
 accept an optional boolean keyword parameter `retaining` (**default False**) to
 indicate whether to recycle the transactional context of the transaction being resolved
 by the method call.
@@ -253,10 +254,10 @@ Although Firebird savepoints are fully supported from SQL alone via the `SAVEPOI
 and `ROLLBACK TO ‘name’` statements, firebird-driver also exposes savepoints at the Python
 API level for the sake of convenience.
 
-Call to method `.TransactionManager.savepoint()` establishes a savepoint with the specified
-`name`. To roll back to a specific savepoint, call the `~.TransactionManager.rollback()`
+Call to method [`TransactionManager.savepoint()`](../ref-core.md#firebird.driver.core.TransactionManager.savepoint) establishes a savepoint with the specified
+`name`. To roll back to a specific savepoint, call the [`rollback()`](../ref-core.md#firebird.driver.core.TransactionManager.rollback)
 method and provide the name of the savepoint for the `savepoint` keyword parameter. If the
-savepoint parameter of `~.TransactionManager.rollback()` is not specified, the active
+savepoint parameter of [`rollback()`](../ref-core.md#firebird.driver.core.TransactionManager.rollback) is not specified, the active
 transaction is cancelled in its entirety, as required by the Python Database API Specification.
 
 The following program demonstrates savepoint manipulation via the firebird-driver API,
@@ -328,17 +329,17 @@ After rolling back entirely, the contents of the table are:
 ## Using multiple transactions with the same connection
 
 To use additional transactions that could run simultaneously with
-`main transaction` managed by `.Connection`,
-create new `.TransactionManager` object calling `.Connection.transaction_manager()`
+`main transaction` managed by [`Connection`](../ref-core.md#firebird.driver.core.Connection),
+create new [`TransactionManager`](../ref-core.md#firebird.driver.core.TransactionManager) object calling [`Connection.transaction_manager()`](../ref-core.md#firebird.driver.core.Connection.transaction_manager)
 method. If you don't specify the optional `default_tpb` parameter, this new
-`.TransactionManager` inherits the `~.Connection.default_tpb` from `.Connection`.
-Physical transaction is not started when `.TransactionManager` instance is
+[`TransactionManager`](../ref-core.md#firebird.driver.core.TransactionManager) inherits the [`default_tpb`](../ref-core.md#firebird.driver.core.Connection) from [`Connection`](../ref-core.md#firebird.driver.core.Connection).
+Physical transaction is not started when [`TransactionManager`](../ref-core.md#firebird.driver.core.TransactionManager) instance is
 created, but implicitly when first SQL statement for cursor created from
-this manager is executed, or explicitly via `.TransactionManager.begin()` call.
+this manager is executed, or explicitly via [`TransactionManager.begin()`](../ref-core.md#firebird.driver.core.TransactionManager.begin) call.
 
 To execute statements in context of this additional transaction you have to
-use `cursors` obtained directly from this `.TransactionManager` instance calling
-its `~.TransactionManager.cursor()` method, or call `.TransactionManager.execute_immediate()`
+use `cursors` obtained directly from this [`TransactionManager`](../ref-core.md#firebird.driver.core.TransactionManager) instance calling
+its [`cursor()`](../ref-core.md#firebird.driver.core.TransactionManager.cursor) method, or call [`TransactionManager.execute_immediate()`](../ref-core.md#firebird.driver.core.TransactionManager.execute_immediate)
 method.
 
 **Example:**
@@ -352,22 +353,22 @@ with connect('employee', user='SYSDBA', password='masterkey') as con:
 
     # Create new READ ONLY READ COMMITTED transaction
     ro_transaction = con.transaction_manager(tpb(Isolation.READ_COMMITTED_RECORD_VERSION,
-                                                 access=TraAccessMode.READ))
+                                                 access_mode=TraAccessMode.READ))
     # and cursor
     ro_cur = ro_transaction.cursor()
 
-    cur.execute('insert into country values ('Oz','Crowns')
+    cur.execute('insert into country values (?,?)', ['Oz','Crowns'])
     con.commit() # commits main transaction
 
     # Read data created by main transaction from second one
-    ro_cur.execute("select * from COUNTRY where COUNTRY = `Oz`")
+    ro_cur.execute("select * from COUNTRY where COUNTRY = 'Oz'")
     print(ro_cur.fetchall())
 
     # Insert more data, but don't commit
-    cur.execute('insert into country values ('Barsoom','XXX')
+    cur.execute('insert into country values (?,?)',  ['Barsoom','XXX'])
 
     # Read data created by main transaction from second one
-    ro_cur.execute("select * from COUNTRY where COUNTRY = `Barsoom`")
+    ro_cur.execute("select * from COUNTRY where COUNTRY = 'Barsoom'")
     print(ro_cur.fetchall())
 
 ```
@@ -378,31 +379,31 @@ with connect('employee', user='SYSDBA', password='masterkey') as con:
 ## Distributed Transactions
 
 Distributed transactions are transactions that span multiple databases.
-Firebird-driver provides this Firebird feature through `.DistributedTransactionManager`
+Firebird-driver provides this Firebird feature through [`DistributedTransactionManager`](../ref-core.md#firebird.driver.core.DistributedTransactionManager)
 class. Instances of this class must be created manually, and managed transactions
 are fully independent from all other transactions, main or secondary, of member connections.
 
-Similarly to `.TransactionManager`, distributed transactions are managed
-through `~.DistributedTransactionManager.begin()`,
-`~.DistributedTransactionManager.savepoint()`, `~.DistributedTransactionManager.commit()`
-and `~.DistributedTransactionManager.rollback()` methods.
-Additionally, `.DistributedTransactionManager` exposes method
-`~.DistributedTransactionManager.prepare()` that explicitly initiates the
+Similarly to [`TransactionManager`](../ref-core.md#firebird.driver.core.TransactionManager), distributed transactions are managed
+through [`begin()`](../ref-core.md#firebird.driver.core.DistributedTransactionManager.begin),
+[`savepoint()`](../ref-core.md#firebird.driver.core.DistributedTransactionManager.savepoint), [`commit()`](../ref-core.md#firebird.driver.core.DistributedTransactionManager.commit)
+and [`rollback()`](../ref-core.md#firebird.driver.core.DistributedTransactionManager.rollback) methods.
+Additionally, [`DistributedTransactionManager`](../ref-core.md#firebird.driver.core.DistributedTransactionManager) exposes method
+[`prepare()`](../ref-core.md#firebird.driver.core.DistributedTransactionManager.prepare) that explicitly initiates the
 first phase of `Two-Phase Commit Protocol`. Transaction parameters are defined
-similarly to `.TransactionManager` using `~.DistributedTransactionManager.default_tpb`
-or as optional parameter to `~.DistributedTransactionManager.begin()` call.
+similarly to [`TransactionManager`](../ref-core.md#firebird.driver.core.TransactionManager) using [`default_tpb`](../ref-core.md#firebird.driver.core.DistributedTransactionManager)
+or as optional parameter to [`begin()`](../ref-core.md#firebird.driver.core.DistributedTransactionManager.begin) call.
 
 SQL statements that should belong to context of distributed transaction are
-executed via `.Cursor` instances aquired through `.DistributedTransactionManager.cursor()`
-method, or calling `.DistributedTransactionManager.execute_immediate()` method.
+executed via [`Cursor`](../ref-core.md#firebird.driver.core.Cursor) instances aquired through [`DistributedTransactionManager.cursor()`](../ref-core.md#firebird.driver.core.DistributedTransactionManager.cursor)
+method, or calling [`DistributedTransactionManager.execute_immediate()`](../ref-core.md#firebird.driver.core.DistributedTransactionManager.execute_immediate) method.
 
 !!! note
 
-    Because `.Cursor` instances can belong to only one `.Connection`, the
-    `~.DistributedTransactionManager.cursor()` method has mandatory parameter
+    Because [`Cursor`](../ref-core.md#firebird.driver.core.Cursor) instances can belong to only one [`Connection`](../ref-core.md#firebird.driver.core.Connection), the
+    [`cursor()`](../ref-core.md#firebird.driver.core.DistributedTransactionManager.cursor) method has mandatory parameter
     `connection`, to specify to which member connection cursor should belong.
 
-    The `~.DistributedTransactionManager.execute_immediate()` method operates
+    The [`execute_immediate()`](../ref-core.md#firebird.driver.core.DistributedTransactionManager.execute_immediate) method operates
     on **all** databases in *group*.
 
 **Example program:**
@@ -536,10 +537,10 @@ db2: [(1, None), (2, None), (3, None)]
 
 ## Transaction Context Manager
 
-Firebird-driver provides context manager `~firebird.driver.core.transaction` that allows automatic
+Firebird-driver provides context manager [`transaction`](../ref-core.md#firebird.driver.core.transaction) that allows automatic
 transaction management using WITH statement. It can work with
 any object that supports `begin()`, `commit()` and `rollback()` methods, i.e.
-`.Connection`, `.TransactionManager` or `.DistributedTransactionManager`.
+[`Connection`](../ref-core.md#firebird.driver.core.Connection), [`TransactionManager`](../ref-core.md#firebird.driver.core.TransactionManager) or [`DistributedTransactionManager`](../ref-core.md#firebird.driver.core.DistributedTransactionManager).
 
 It starts transaction when WITH block is entered and commits it if no exception
 occurs within it, or calls `rollback()` otherwise. Exceptions raised in WITH
@@ -563,11 +564,11 @@ with connect('employee', user='SYSDBA', password='masterkey') as con:
         cur.execute("insert into T (PK,C1) values (2,'AAA')")
 
     # Uses distributed transaction
-    with connect('employee2', user='SYSDBA', password='masterkey') as con2,
-         DistributedTransactionManager(con, con2) as dtm:
+    with (connect('employee2', user='SYSDBA', password='masterkey') as con2,
+          DistributedTransactionManager([con, con2]) as dtm):
         with transaction(dtm):
-            cur1 = cg.cursor(con)
-            cur2 = cg.cursor(con2)
+            cur1 = dtm.cursor(con)
+            cur2 = dtm.cursor(con2)
             cur1.execute("insert into T (PK,C1) values (3,'Local')")
             cur2.execute("insert into T (PK,C1) values (3,'Remote')")
 

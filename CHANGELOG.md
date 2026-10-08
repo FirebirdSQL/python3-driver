@@ -247,7 +247,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - `firebird.driver.core.create_database()` now use server configuration user/password
-  if either is not specified in database configuration (like `.connect()`)
+  if either is not specified in database configuration (like [`connect()`](https://firebird-driver.readthedocs.io/en/latest/ref-core/#firebird.driver.core.connect))
 - Problem in `Server` processing incomplete LINE responses.
 
 ### Changed
@@ -318,7 +318,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - `tpb` parameter `access` renamed to `access_mode`.
 - `FirebirdWarning` now descends from `UserWarning` instead `Warning`, and is reported
-  to application via `.warnings.warn` instead raised as exception.
+  to application via [`warnings.warn`](https://docs.python.org/3/library/warnings.html#warnings.warn) instead raised as exception.
 - `iAttachment_v3` attribute `charset` was renamed to `encoding`.
 - `iXpbBuilder.insert_string` optional parameter `encoding` is now  keyword-only.
   Parameter also added to `iXpbBuilder.get_string` method.
@@ -415,7 +415,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - Bug GH-4: exeption returns non ascii-127 symbols.
-  The error message decode uses `.fbapi.err_encoding` value that is initialized to
+  The error message decode uses [`fbapi.err_encoding`](https://firebird-driver.readthedocs.io/en/latest/ref-fbapi/#firebird.driver.fbapi.err_encoding) value that is initialized to
   `locale.getpreferredencoding`. Also, the decode is now done with `errors="replace"`.
 - Unregistered bug: wrong handling of milliseconds in TIME and TEMEPSTAMP datatype.
 - Sync `_VERSION_` value with package version
@@ -517,7 +517,7 @@ for Firebird 4 is still evolving till final release).
 
   - Interface wrapper moved to separate module
   - Buffer managers moved to `firebird.driver.core` module
-- Module `~firebird.driver.core`:
+- Module [`firebird.driver.core`](https://firebird-driver.readthedocs.io/en/latest/ref-core/):
 
   - `connect()`, `create_database()` and `connect_server()` now use driver configuration.
   - Simplified/unified transaction isolation specification.

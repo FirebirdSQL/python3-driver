@@ -30,9 +30,7 @@ Next exceptions are required by Python DB API 2.0
 This is the exception inheritance layout:
 
 ```text
-StandardError
-|__UserWarning
-    |__FirebirdWarning
+Exception
 |__Error
     |__InterfaceError
     |__DatabaseError
@@ -42,6 +40,9 @@ StandardError
         |__InternalError
         |__ProgrammingError
         |__NotSupportedError
+
+UserWarning
+|__FirebirdWarning
 
 ```
 ## Other constants and types required by Python DB API 2.0 specification
@@ -54,7 +55,7 @@ StandardError
 
 ::: firebird.driver.types.paramstyle
 
-### Helper constants for work with `.Cursor.description` content
+### Helper constants for work with [`Cursor.description`](ref-core.md#firebird.driver.core.Cursor.description) content
 
 - DESCRIPTION_NAME
 - DESCRIPTION_TYPE_CODE

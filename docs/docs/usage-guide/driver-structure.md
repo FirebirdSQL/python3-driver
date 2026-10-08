@@ -21,16 +21,16 @@ hooks, or to implement your own callback interfaces.
     be extended even in maintenance releases, the driver isolates volatile functionality
     into special class hierarchies.
 
-    For example information about database (provided via `~.iAttachment_v3.get_info()` API
-    call) is isolated into separate `.DatabaseInfoProvider` class hierarchy.
-    The `.Connection.info` attribute then provides access to instance of appropriate class
-    - `.DatabaseInfoProvider` or its ancestor - for connected database.
-    The `.DatabaseInfoProvider` class **always** provides functionality of most recent
+    For example information about database (provided via [`get_info()`](../ref-intf.md#firebird.driver.interfaces.iAttachment_v3.get_info) API
+    call) is isolated into separate [`DatabaseInfoProvider`](../ref-core.md#firebird.driver.core.DatabaseInfoProvider) class hierarchy.
+    The [`Connection.info`](../ref-core.md#firebird.driver.core.Connection.info) attribute then provides access to instance of appropriate class
+    - [`DatabaseInfoProvider`](../ref-core.md#firebird.driver.core.DatabaseInfoProvider) or its ancestor - for connected database.
+    The [`DatabaseInfoProvider`](../ref-core.md#firebird.driver.core.DatabaseInfoProvider) class **always** provides functionality of most recent
     Firebird version supported by driver.
 
     This layout has several important consequences:
 
-    1. The `.DatabaseInfoProvider` class may change in major driver release if new Firebird
+    1. The [`DatabaseInfoProvider`](../ref-core.md#firebird.driver.core.DatabaseInfoProvider) class may change in major driver release if new Firebird
         functionality is introduced. This normally represent no problems for client application
         as backward compatibility is guaranteed.
     2. You should check the class hierarchy for "evolving" classes when you start using the
@@ -43,11 +43,11 @@ hooks, or to implement your own callback interfaces.
 
         !!! note
 
-            The same apply for low-level API (`~firebird.driver.interfaces`) with difference
+            The same apply for low-level API ([`interfaces`](../ref-intf.md)) with difference
             that they may change in minor driver releases (because API could be extended in
             Firebird maintenance releases).
 
     !!! info
 
-        `.DatabaseInfoProvider`, `.TransactionInfoProvider`, `.ServerInfoProvider`,
-        `.ServerDbServices`, `.ServerUserServices` and `.ServerTraceServices`.
+        [`DatabaseInfoProvider`](../ref-core.md#firebird.driver.core.DatabaseInfoProvider), [`TransactionInfoProvider`](../ref-core.md#firebird.driver.core.TransactionInfoProvider), [`ServerInfoProvider`](../ref-core.md#firebird.driver.core.ServerInfoProvider),
+        [`ServerDbServices`](../ref-core.md#firebird.driver.core.ServerDbServices), [`ServerUserServices`](../ref-core.md#firebird.driver.core.ServerUserServices) and [`ServerTraceServices`](../ref-core.md#firebird.driver.core.ServerTraceServices).

@@ -1,10 +1,10 @@
 # Databases
 
-Access to the database is made available through `.Connection` objects. Firebird-driver
+Access to the database is made available through [`Connection`](../ref-core.md#firebird.driver.core.Connection) objects. Firebird-driver
 provides two constructors for these:
 
-* `.connect` - Returns `.Connection` to database that already exists.
-* `~firebird.driver.core.create_database` - Returns `.Connection` to newly created database.
+* [`connect`](../ref-core.md#firebird.driver.core.connect) - Returns [`Connection`](../ref-core.md#firebird.driver.core.Connection) to database that already exists.
+* [`create_database`](../ref-core.md#firebird.driver.core.create_database) - Returns [`Connection`](../ref-core.md#firebird.driver.core.Connection) to newly created database.
 
 
 
@@ -26,7 +26,7 @@ options that are not configurable.
 !!! note
 
     If `database` value is not recognized as name of registered database configuration,
-    the driver uses `~.DriverConfig.db_defaults` and `~.DriverConfig.server_defaults`
+    the driver uses [`db_defaults`](../ref-config.md#firebird.driver.config.DriverConfig) and [`server_defaults`](../ref-config.md#firebird.driver.config.DriverConfig)
     configuration objects.
 
 A simple database connection is typically established with code such as this:
@@ -110,13 +110,13 @@ con = connect('employee')
 ```
 
 !!! info
-    `.connect()` for details.
+    [`connect()`](../ref-core.md#firebird.driver.core.connect) for details.
 
 
 ## Using create_database()
 
 This constructor returns connection to newly created database. It works in the same way
-as `.connect()`, but utilizes additional database configuration options.
+as [`connect()`](../ref-core.md#firebird.driver.core.connect), but utilizes additional database configuration options.
 
 It's possible to specify these options in code like this:
 
@@ -188,7 +188,7 @@ con = create_database('mydb')
 ```
 
 !!! info
-    `~firebird.driver.core.create_database()` for details.
+    [`create_database()`](../ref-core.md#firebird.driver.core.create_database) for details.
 
 
 ## Deleting databases
@@ -201,7 +201,7 @@ it may even have dependent shadow databases. Although the database engine
 recognizes a `DROP DATABASE` SQL statement, support for that statement is limited
 to the `isql` command-line administration utility. However, the engine supports
 the deletion of databases via an API call, which `firebird-driver` exposes as
-`~.Connection.drop_database` method in `.Connection` class. So, to drop a database
+[`drop_database`](../ref-core.md#firebird.driver.core.Connection.drop_database) method in [`Connection`](../ref-core.md#firebird.driver.core.Connection) class. So, to drop a database
 you need to connect to it first.
 
 **Example:**
@@ -218,26 +218,26 @@ con.drop_database()
 ```
 
 !!! info
-    `.Connection.drop_database()` for details.
+    [`Connection.drop_database()`](../ref-core.md#firebird.driver.core.Connection.drop_database) for details.
 
 
 ## Connection object
 
-`.Connection` object represents a direct link to database, and works as
+[`Connection`](../ref-core.md#firebird.driver.core.Connection) object represents a direct link to database, and works as
 gateway for next operations with it:
 
-* [Executing SQL Statements](executing-sql-statements.md#executing-sql-statements): methods `~.Connection.execute_immediate()` and `~.Connection.cursor()`.
-* [Dropping database](databases.md#deleting-databases): method `~.Connection.drop_database()`.
-* [Transanction management](transanction-management.md#transanction-management): methods `~.Connection.begin()`, `~.Connection.commit()`,
-    `~.Connection.rollback()`, `~.Connection.savepoint()`, `~.Connection.transaction_manager()`,
-    `~.Connection.is_active()`, and attributes `~.Connection.main_transaction`,
-    `~.Connection.query_transaction`, `~.Connection.transactions` and `~.Connection.default_tpb`.
-* Work with [Database Events](database-events.md#database-events): method `~.Connection.event_collector`.
-* [Getting information about connection](databases.md#getting-information-about-connection): methods `~.Connection.is_closed()` and
-    `~.Connection.ping()` and attributes `~.Connection.dsn`, `~.Connection.charset`
-    and `~.Connection.sql_dialect`.
-* [Getting information about database](databases.md#getting-information-about-database): attribute `~.Connection.info`.
-* [Closing the connection](databases.md#closing-the-connection): method `~.Connection.close()`
+* [Executing SQL Statements](executing-sql-statements.md#executing-sql-statements): methods [`execute_immediate()`](../ref-core.md#firebird.driver.core.Connection.execute_immediate) and [`cursor()`](../ref-core.md#firebird.driver.core.Connection.cursor).
+* [Dropping database](databases.md#deleting-databases): method [`drop_database()`](../ref-core.md#firebird.driver.core.Connection.drop_database).
+* [Transactions](transactions.md#transactions): methods [`begin()`](../ref-core.md#firebird.driver.core.Connection.begin), [`commit()`](../ref-core.md#firebird.driver.core.Connection.commit),
+    [`rollback()`](../ref-core.md#firebird.driver.core.Connection.rollback), [`savepoint()`](../ref-core.md#firebird.driver.core.Connection.savepoint), [`transaction_manager()`](../ref-core.md#firebird.driver.core.Connection.transaction_manager),
+    [`is_active()`](../ref-core.md#firebird.driver.core.Connection.is_active), and attributes [`main_transaction`](../ref-core.md#firebird.driver.core.Connection.main_transaction),
+    [`query_transaction`](../ref-core.md#firebird.driver.core.Connection.query_transaction), [`transactions`](../ref-core.md#firebird.driver.core.Connection.transactions) and [`default_tpb`](../ref-core.md#firebird.driver.core.Connection).
+* Work with [Database Events](database-events.md#database-events): method [`event_collector`](../ref-core.md#firebird.driver.core.Connection.event_collector).
+* [Getting information about connection](databases.md#getting-information-about-connection): methods [`is_closed()`](../ref-core.md#firebird.driver.core.Connection.is_closed) and
+    [`ping()`](../ref-core.md#firebird.driver.core.Connection.ping) and attributes [`dsn`](../ref-core.md#firebird.driver.core.Connection.dsn), [`charset`](../ref-core.md#firebird.driver.core.Connection.charset)
+    and [`sql_dialect`](../ref-core.md#firebird.driver.core.Connection.sql_dialect).
+* [Getting information about database](databases.md#getting-information-about-database): attribute [`info`](../ref-core.md#firebird.driver.core.Connection.info).
+* [Closing the connection](databases.md#closing-the-connection): method [`close()`](../ref-core.md#firebird.driver.core.Connection.close)
 
 
 ## Closing the connection
@@ -245,7 +245,7 @@ gateway for next operations with it:
 There are many local and server resources used by firebird-driver that must be properly
 managed, and disposed when they are no longer necessary. All objects that require proper
 finalization provide `close()` method that must be called when object is no longer needed.
-The `.Connection` (and `.Server`) objects are the most important ones, as other most frequently
+The [`Connection`](../ref-core.md#firebird.driver.core.Connection) (and [`Server`](../ref-core.md#firebird.driver.core.Server)) objects are the most important ones, as other most frequently
 used objects like cursors, prepared statements and transactions are typically associated with
 connections.
 
@@ -269,10 +269,10 @@ with connect('employee') as con:
 
 !!! note
 
-    Objects that require proper finalization are: `.Connection`, `.TransactionManager`
-    and `.DistributedTransactionManager`, `.Statement`, `.BlobReader`, `.Cursor` and `.Server`.
+    Objects that require proper finalization are: [`Connection`](../ref-core.md#firebird.driver.core.Connection), [`TransactionManager`](../ref-core.md#firebird.driver.core.TransactionManager)
+    and [`DistributedTransactionManager`](../ref-core.md#firebird.driver.core.DistributedTransactionManager), [`Statement`](../ref-core.md#firebird.driver.core.Statement), [`BlobReader`](../ref-core.md#firebird.driver.core.BlobReader), [`Cursor`](../ref-core.md#firebird.driver.core.Cursor) and [`Server`](../ref-core.md#firebird.driver.core.Server).
 
-    Although only `.Connection` and `.Server` objects must be closed directly because
+    Although only [`Connection`](../ref-core.md#firebird.driver.core.Connection) and [`Server`](../ref-core.md#firebird.driver.core.Server) objects must be closed directly because
     all other objects are associated with them and thus closed when connection is
     closed, it's **recommended** to directly close any resource object obtained by
     your code when it's no longer needed (either directly by calling `close()` or using
@@ -280,12 +280,12 @@ with connect('employee') as con:
 
 !!! important
 
-    All managed objects have `~object.__del__` method, which ensures that the object in
+    All managed objects have [`__del__`](https://docs.python.org/3/reference/datamodel.html#object.__del__) method, which ensures that the object in
     the active state is properly closed before it is destroyed by the Python memory manager.
     However, **the close operation may fail** as the state of your application could be arbitrary
     and the sequence in which objects are disposed by memory manager is not deterministic.
 
-    The `~object.__del__` methods should be thus considered as safe guard of last resort
+    The [`__del__`](https://docs.python.org/3/reference/datamodel.html#object.__del__) methods should be thus considered as safe guard of last resort
     that your code should not rely upon. To indicate that your code is not managing
     resources properly, the `ResourceWarning` is raises when active object is disposed
     by memory manager.
@@ -297,27 +297,27 @@ with connect('employee') as con:
         delivery of resource warnings.
 
 !!! info
-    `.Connection.close()` for details.
+    [`Connection.close()`](../ref-core.md#firebird.driver.core.Connection.close) for details.
 
 
 ## Getting information about connection
 
-Only (most useful) part of information associated with `.Connection` object is directly
+Only (most useful) part of information associated with [`Connection`](../ref-core.md#firebird.driver.core.Connection) object is directly
 available:
 
 * It's possible to check whether Connection object is closed or not with
-    `~.Connection.is_closed()` method.
+    [`is_closed()`](../ref-core.md#firebird.driver.core.Connection.is_closed) method.
 * It's possible to check whether connection to the Firebird server is not broken with
-    `~.Connection.ping()` method.
-* The DSN (fully qualified Firebird database connection string) is surfaced as `~.Connection.dsn`
+    [`ping()`](../ref-core.md#firebird.driver.core.Connection.ping) method.
+* The DSN (fully qualified Firebird database connection string) is surfaced as [`dsn`](../ref-core.md#firebird.driver.core.Connection.dsn)
     read-only property.
-* The character set used by Connection is surfaced as `~.Connection.charset` read-only property.
-* The SQL dialect used by Connection is surfaced as `~.Connection.sql_dialect` read-only property.
+* The character set used by Connection is surfaced as [`charset`](../ref-core.md#firebird.driver.core.Connection.charset) read-only property.
+* The SQL dialect used by Connection is surfaced as [`sql_dialect`](../ref-core.md#firebird.driver.core.Connection.sql_dialect) read-only property.
 
 !!! tip
 
     Additional connection-specific information is currently held as `bytes` in protected
-    `Connection._dpb` attribute that could be processed using `~firebird.driver.core.DPB` object.
+    `Connection._dpb` attribute that could be processed using [`DPB`](../ref-core.md#firebird.driver.core.DPB) object.
 
 
 ## Getting information about database
@@ -326,19 +326,19 @@ available:
 
     Because the scope and type of database information depends on the version of the Firebird
     server and database ODS, this information is made available through a separate class
-    `.DatabaseInfoProvider`. The `.Connection.info` property provides access to
-    instance of `.DatabaseInfoProvider` or it's **ancestor** class according to ODS of attached
+    [`DatabaseInfoProvider`](../ref-core.md#firebird.driver.core.DatabaseInfoProvider). The [`Connection.info`](../ref-core.md#firebird.driver.core.Connection.info) property provides access to
+    instance of [`DatabaseInfoProvider`](../ref-core.md#firebird.driver.core.DatabaseInfoProvider) or it's **ancestor** class according to ODS of attached
     database and Firebird version.
 
 Although you may query the information directly from server using
-`~firebird.driver.core.DatabaseInfoProvider3.get_info()` method (that wraps the Firebird
-`.iAttachment.getInfo()` API call), the `.DatabaseInfoProvider` object
+[`get_info()`](../ref-core.md#firebird.driver.core.DatabaseInfoProvider3.get_info) method (that wraps the Firebird
+[`iAttachment_v3.get_info()`](../ref-intf.md#firebird.driver.interfaces.iAttachment_v3.get_info) API call), the [`DatabaseInfoProvider`](../ref-core.md#firebird.driver.core.DatabaseInfoProvider) object
 provides more convenient methods and properties for obtaining specific information directly.
 
 !!! note
 
-    Some information provided by `.DatabaseInfoProvider` properties
-    (like `~.DatabaseInfoProvider3.cache_hit_ratio`) could not be obtained via
+    Some information provided by [`DatabaseInfoProvider`](../ref-core.md#firebird.driver.core.DatabaseInfoProvider) properties
+    (like [`cache_hit_ratio`](../ref-core.md#firebird.driver.core.DatabaseInfoProvider3.cache_hit_ratio)) could not be obtained via
     `get_info()` method.
 
 **Example:**
@@ -415,7 +415,7 @@ ID for next transaction: 308
 ```
 
 !!! info
-    `.DatabaseInfoProvider` for details.
+    [`DatabaseInfoProvider`](../ref-core.md#firebird.driver.core.DatabaseInfoProvider) for details.
 
 #### Getting information about Firebird version
 
@@ -426,18 +426,18 @@ was introduced to Firebird thanks to its InterBase legacy (Firebird 1.0 is a for
 6.0), as applications designed to work with InterBase can often work with Firebird without
 problems (and vice versa).
 
-`.DatabaseInfoProvider` provides these version strings as two properties:
+[`DatabaseInfoProvider`](../ref-core.md#firebird.driver.core.DatabaseInfoProvider) provides these version strings as two properties:
 
-* `~.DatabaseInfoProvider.server_version` - Legacy InterBase-friendly version string.
-* `~.DatabaseInfoProvider.firebird_version` - Firebird’s own version string.
+* [`server_version`](../ref-core.md#firebird.driver.core.DatabaseInfoProvider.server_version) - Legacy InterBase-friendly version string.
+* [`firebird_version`](../ref-core.md#firebird.driver.core.DatabaseInfoProvider.firebird_version) - Firebird’s own version string.
 
 However, this version string contains more information than version number. For example for
-Linux Firebird 4.0.0 it’s ‘LI-T4.0.0.1963 Firebird 4.0 Beta 2’. So `.DatabaseInfoProvider`
+Linux Firebird 4.0.0 it’s ‘LI-T4.0.0.1963 Firebird 4.0 Beta 2’. So [`DatabaseInfoProvider`](../ref-core.md#firebird.driver.core.DatabaseInfoProvider)
 provides two more properties for your convenience:
 
-* `~.DatabaseInfoProvider.version` - Only Firebird version number. It’s a string with
+* [`version`](../ref-core.md#firebird.driver.core.DatabaseInfoProvider.version) - Only Firebird version number. It’s a string with
     format: major.minor.subrelease.build
-* `~.DatabaseInfoProvider.engine_version` - Engine (major.minor) version as (float) number.
+* [`engine_version`](../ref-core.md#firebird.driver.core.DatabaseInfoProvider.engine_version) - Engine (major.minor) version as (float) number.
 
 
 **Example:**
@@ -469,7 +469,7 @@ Particular Firebird features may also depend on specific support in database
 present automatically when database is created by particular engine verison that needs
 them, but Firebird engine may work with databases created by older versions and thus with
 older structure, so it could be necessary to consult also On-Disk Structure (ODS for short)
-version. `.DatabaseInfoProvider` provides this number as `~.DatabaseInfoProvider.ods` (float)
+version. [`DatabaseInfoProvider`](../ref-core.md#firebird.driver.core.DatabaseInfoProvider) provides this number as [`ods`](../ref-core.md#firebird.driver.core.DatabaseInfoProvider.ods) (float)
 property.
 
 **Example:**

@@ -12,7 +12,7 @@ Driver hooks are divided into several types exposed as enums in `firebird.driver
 
 ## APIHook
 
-`.APIHook.LOADED` - This hook is invoked once when instance of `.FirebirdAPI` is created.
+[`APIHook.LOADED`](../ref-hooks.md#firebird.driver.hooks.APIHook) - This hook is invoked once when instance of [`FirebirdAPI`](../ref-fbapi.md#firebird.driver.fbapi.FirebirdAPI) is created.
 It could be used for additional initialization tasks that require Firebird API, or to manipulate
 the FirebirdAPI instance itself before its use.
 
@@ -21,25 +21,25 @@ by hook is ignored.
 
 ## ConnectionHook
 
-* `.ConnectionHook.ATTACH_REQUEST`
+* [`ConnectionHook.ATTACH_REQUEST`](../ref-hooks.md#firebird.driver.hooks.ConnectionHook)
 
-    This hook is invoked after all parameters are preprocessed and before `.Connection` is created.
+    This hook is invoked after all parameters are preprocessed and before [`Connection`](../ref-core.md#firebird.driver.core.Connection) is created.
 
     Hook routine must have signature: `hook_func(dsn: str, dpb: bytes) -> Optional[Connection]`
     where `dpb` is Database Parameter Buffer that would be used to create the attachment to the
-    database defined by `dsn`. It may return `.Connection` (or subclass) instance or `None`.
+    database defined by `dsn`. It may return [`Connection`](../ref-core.md#firebird.driver.core.Connection) (or subclass) instance or `None`.
 
     First instance returned by any hook of this type will become the return value of caller function
     and other hooks of the same type are not invoked.
 
-* `.ConnectionHook.ATTACHED`
+* [`ConnectionHook.ATTACHED`](../ref-hooks.md#firebird.driver.hooks.ConnectionHook)
 
-    This hook is invoked just before `.Connection` (or subclass) instance is returned to the client
+    This hook is invoked just before [`Connection`](../ref-core.md#firebird.driver.core.Connection) (or subclass) instance is returned to the client
     application.
 
     Hook routine must have signature: `hook_func(con: Connection) -> None`.
 
-* `.ConnectionHook.DETACH_REQUEST`
+* [`ConnectionHook.DETACH_REQUEST`](../ref-hooks.md#firebird.driver.hooks.ConnectionHook)
 
     This hook is invoked before connection is closed.
 
@@ -47,13 +47,13 @@ by hook is ignored.
 
     If any hook function returns True, connection is not closed.
 
-* `.ConnectionHook.CLOSED`
+* [`ConnectionHook.CLOSED`](../ref-hooks.md#firebird.driver.hooks.ConnectionHook)
 
     This hook is invoked after connection is closed.
 
     Hook routine must have signature: `hook_func(con: Connection) -> None`.
 
-* `.ConnectionHook.DROPPED`
+* [`ConnectionHook.DROPPED`](../ref-hooks.md#firebird.driver.hooks.ConnectionHook)
 
     This hook is invoked after database is dropped (and connection is closed).
 
@@ -61,9 +61,9 @@ by hook is ignored.
 
 ## ServerHook
 
-* `.ServerHook.ATTACHED`
+* [`ServerHook.ATTACHED`](../ref-hooks.md#firebird.driver.hooks.ServerHook)
 
-    This hook is invoked before `.Server` instance is returned.
+    This hook is invoked before [`Server`](../ref-core.md#firebird.driver.core.Server) instance is returned.
 
     Hook routine must have signature: `hook_func(srv: Server) -> None`.
 

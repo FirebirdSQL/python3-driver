@@ -13,7 +13,7 @@ strings (in `.ini-style` `configparser` format).
 
 ## The 'driver_config' object
 
-The global `.driver_config` object holds all configurable driver parameters, and access
+The global [`driver_config`](../ref-config.md#firebird.driver.config.driver_config) object holds all configurable driver parameters, and access
 configuration parameters for registered Firebird servers and databases.
 
 In initial state, all parameters have default values and there are no registered servers
@@ -24,13 +24,13 @@ configuration string, dict or file(s).
 !!! important
 
     If you want to use specific Firebird client library, you must set the value of
-    `.DriverConfig.fb_client_library` configuration option **before** your application
-    calls any from following functions: `.connect()`, `~firebird.driver.core.create_database()`,
-    `.connect_server()`, `.load_api()` or `.get_api()`.
+    [`DriverConfig.fb_client_library`](../ref-config.md#firebird.driver.config.DriverConfig) configuration option **before** your application
+    calls any from following functions: [`connect()`](../ref-core.md#firebird.driver.core.connect), [`create_database()`](../ref-core.md#firebird.driver.core.create_database),
+    [`connect_server()`](../ref-core.md#firebird.driver.core.connect_server), [`load_api()`](../ref-fbapi.md#firebird.driver.fbapi.load_api) or [`get_api()`](../ref-fbapi.md#firebird.driver.fbapi.get_api).
 
 !!! info
 
-    `.DriverConfig` for list of available methods and parameters.
+    [`DriverConfig`](../ref-config.md#firebird.driver.config.DriverConfig) for list of available methods and parameters.
 
 ## Server and database configuration
 
@@ -54,4 +54,4 @@ or configuration, and few keyword parameters to specify / override selected opti
 
 !!! info
 
-    `.ServerConfig` and `.DatabaseConfig` for list of available methods and parameters.
+    [`ServerConfig`](../ref-config.md#firebird.driver.config.ServerConfig) and [`DatabaseConfig`](../ref-config.md#firebird.driver.config.DatabaseConfig) for list of available methods and parameters.

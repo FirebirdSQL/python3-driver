@@ -24,22 +24,22 @@ Full text of Python Database API 2.0 (PEP 249) is available at
 
 ## Nominally Supported Optional Features
 
-`.Cursor`
+### Cursor
 
-    `~.Cursor.arraysize`
+[`Cursor.arraysize`](ref-core.md#firebird.driver.core.Cursor)
 
-        As required by the spec, the value of this attribute is observed with
-        respect to the `fetchmany` method. However, changing the value of this
-        attribute does not make any difference in fetch efficiency because
-        the database engine only supports fetching a single row at a time.
+As required by the spec, the value of this attribute is observed with
+respect to the `fetchmany` method. However, changing the value of this
+attribute does not make any difference in fetch efficiency because
+the database engine only supports fetching a single row at a time.
 
-    `~.Cursor.setinputsizes`
+[`Cursor.setinputsizes`](ref-core.md#firebird.driver.core.Cursor.setinputsizes)
 
-        Although this method is present, it does nothing, as allowed by the spec.
+Although this method is present, it does nothing, as allowed by the spec.
 
-    `~.Cursor.setoutputsize`
+[`Cursor.setoutputsize`](ref-core.md#firebird.driver.core.Cursor.setoutputsize)
 
-        Although this method is present, it does nothing, as allowed by the spec.
+Although this method is present, it does nothing, as allowed by the spec.
 
 
 ## Caveats
@@ -49,76 +49,73 @@ of the Python DB API. This section attempts to document only those
 features that overlap with the DB API.
 
 
-`.Connection`
+### Connection
 
-   `~.Connection.commit(retaining=False)`
-   `~.Connection.rollback(retaining=False, savepoint=None)`
+`Connection.commit(retaining=False)` and
+`Connection.rollback(retaining=False, savepoint=None)` accept an optional boolean
+`retaining` parameter. It determines whether the transaction context is recycled;
+see [Retaining transactions](usage-guide/transactions.md#retaining-transactions).
 
-      The `commit` and `rollback` methods accept an optional boolean parameter `retaining`
-      (default `False`) that indicates whether the transactional context of the transaction
-      being resolved should be recycled. For details, see the Advanced
-      Transaction Control: Retaining Operations section of this document.
-      The `rollback` method accepts an optional string parameter `savepoint`
-      that causes the transaction to roll back only as far as the designated
-      savepoint, rather than rolling back entirely. For details, see the
-      Advanced Transaction Control: Savepoints section of this document.
+`Connection.rollback()` also accepts an optional `savepoint` name. This rolls back
+to the named savepoint rather than ending the entire transaction; see
+[Savepoints](usage-guide/transactions.md#savepoints).
 
 
-`.Cursor`
+### Cursor
 
-   `~.Cursor.description`
+[`Cursor.description`](ref-core.md#firebird.driver.core.Cursor.description)
 
-      Firebird-driver makes absolutely no guarantees about `description` except those
-      required by the Python Database API Specification 2.0 (that is, `description`
-      is either `None` or a sequence of 7-element sequences). Therefore, client
-      programmers should *not* rely on `description` being an instance of a particular
-      class or type. Firebird-driver provides several named positional constants to be
-      used as indices into a given element of `description` . The contents
-      of all `description` elements are defined by the DB API spec; these
-      constants are provided merely for convenience.
+Firebird-driver makes absolutely no guarantees about `description` except those
+required by the Python Database API Specification 2.0 (that is, `description`
+is either `None` or a sequence of 7-element sequences). Therefore, client
+programmers should *not* rely on `description` being an instance of a particular
+class or type. Firebird-driver provides several named positional constants to be
+used as indices into a given element of `description`. The contents
+of all `description` elements are defined by the DB API spec; these
+constants are provided merely for convenience.
 
-      ```python
-      DESCRIPTION_NAME
-      DESCRIPTION_TYPE_CODE
-      DESCRIPTION_DISPLAY_SIZE
-      DESCRIPTION_INTERNAL_SIZE
-      DESCRIPTION_PRECISION
-      DESCRIPTION_SCALE
-      DESCRIPTION_NULL_OK
+```python
+DESCRIPTION_NAME
+DESCRIPTION_TYPE_CODE
+DESCRIPTION_DISPLAY_SIZE
+DESCRIPTION_INTERNAL_SIZE
+DESCRIPTION_PRECISION
+DESCRIPTION_SCALE
+DESCRIPTION_NULL_OK
 
-      ```
+```
 
-      Here is an example of accessing the *name* of the first field in the
-      `description` of cursor `cur`:
+Here is an example of accessing the *name* of the first field in the
+`description` of cursor `cur`:
 
-      ```python
-      nameOfFirstField = cur.description[0][firebird.driver.DESCRIPTION_NAME]
+```python
+nameOfFirstField = cur.description[0][firebird.driver.DESCRIPTION_NAME]
 
-      ```
+```
 
-      For more information, see the documentation of Cursor.description in
-      the [DB API Specification](https://peps.python.org/pep-0249/).
+For more information, see the documentation of Cursor.description in
+the [DB API Specification](https://peps.python.org/pep-0249/).
 
-   `~.Cursor.rowcount`
+[`Cursor.rowcount`](ref-core.md#firebird.driver.core.Cursor)
 
-      Although `Cursor` in Firebird-driver implement this attribute,
-      the database engine's own support for the determination of
-      "rows affected"/"rows selected" is quirky. The database engine only
-      supports the determination of rowcount for `INSERT`, `UPDATE`,
-      `DELETE`, and `SELECT` statements. When stored procedures become
-      involved, row count figures are usually not available to the client.
-      Determining rowcount for `SELECT` statements is problematic: the
-      rowcount is reported as zero until at least one row has been fetched
-      from the result set, and the rowcount is misreported if the result set
-      is larger than 1302 rows. The server apparently marshals result sets
-      internally in batches of 1302, and will misreport the rowcount for
-      result sets larger than 1302 rows until the 1303rd row is fetched,
-      result sets larger than 2604 rows until the 2605th row is fetched, and
-      so on, in increments of 1302. As required by the Python DB API Spec,
-      the rowcount attribute "is -1 in case no executeXX() has been
-      performed on the cursor or the rowcount of the last operation is not
-      determinable by the interface".
+Although `Cursor` in Firebird-driver implements this attribute,
+the database engine's own support for the determination of
+"rows affected"/"rows selected" is quirky. The database engine only
+supports the determination of rowcount for `INSERT`, `UPDATE`,
+`DELETE`, and `SELECT` statements. When stored procedures become
+involved, row count figures are usually not available to the client.
+Determining rowcount for `SELECT` statements is problematic: the
+rowcount is reported as zero until at least one row has been fetched
+from the result set, and the rowcount is misreported if the result set
+is larger than 1302 rows. The server apparently marshals result sets
+internally in batches of 1302, and will misreport the rowcount for
+result sets larger than 1302 rows until the 1303rd row is fetched,
+result sets larger than 2604 rows until the 2605th row is fetched, and
+so on, in increments of 1302. As required by the Python DB API Spec,
+the rowcount attribute "is -1 in case no executeXX() has been
+performed on the cursor or the rowcount of the last operation is not
+determinable by the interface".
 
-      !!! note
+!!! note
 
-          This attribute is just an alias for `.Cursor.affected_rows` property.
+    This attribute is just an alias for the [`Cursor.affected_rows`](ref-core.md#firebird.driver.core.Cursor.affected_rows) property.

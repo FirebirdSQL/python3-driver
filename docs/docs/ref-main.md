@@ -9,6 +9,7 @@
 
 ### config
 
+Classes:  `DatabaseConfig`, `DriverConfig`, and `ServerConfig`.
 
 Globals: `driver_config`
 
@@ -16,33 +17,33 @@ Globals: `driver_config`
 
 
 Functions:
-    `connect()`, `create_database()`, `connect_server()`, `transaction()` and `tpb()`
+    `connect()`, `create_database()`, `connect_server()`, `temp_database()`, `transaction()` and `tpb()`
 
 Translation dictionaries:
     `CHARSET_MAP`
 
+Sentinels:
+    `TIMEOUT`
+
 Classes:
-    `DistributedTransactionManager`, `Connection`, `Cursor`, `Server` and `TPB`
+    `Connection`, `Cursor`, `Server`, `Statement`, `TransactionManager`, `DistributedTransactionManager` and `TPB`
 
 ### types
 
 
 Exceptions:
-    `Warning`, `Error`, `InterfaceError`, `DatabaseError`, `DataError`,
+    `FirebirdWarning`, `Error`, `InterfaceError`, `DatabaseError`, `DataError`,
     `OperationalError`, `IntegrityError`, `InternalError`, `ProgrammingError`
     and `NotSupportedError`
 
 Enums:
     `NetProtocol`, `DirectoryCode`, `PageSize`, `DBKeyScope`, `DbInfoCode`, `Features`,
-    `TraInfoCode`, `ReplicaMode`, `StmtInfoCode`, `TraInfoIsolation`,
+    `TraInfoCode`, `ReplicaMode`, `StmtInfoCode`, `ResultSetInfoCode`, `SrvInfoCode`, `TraInfoIsolation`,
     `TraInfoReadCommitted`, `TraInfoAccess`, `TraIsolation`, `TraReadCommitted`,
     `TraLockResolution`, `TraAccessMode`, `TableShareMode`, `TableAccessMode`, `Isolation`,
     `DefaultAction`, `StatementType`, `BlobType`, `DbAccessMode`, `DbSpaceReservation`,
     `DbWriteMode`, `ShutdownMode`, `OnlineMode`, `ShutdownMethod`, `CancelType`,
     `DecfloatRound` and `DecfloatTraps`
-
-Sentinels:
-     `~firebird.driver.core.TIMEOUT`
 
 Flags:
     `ServerCapability`, `SrvRepairFlag`, `SrvStatFlag`, `SrvBackupFlag`,

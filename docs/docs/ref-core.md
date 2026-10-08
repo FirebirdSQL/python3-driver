@@ -7,14 +7,14 @@ This is the main code module of the Firebird driver.
 
 ### C integer limit constants
 
-    - SHRT_MIN
-    - SHRT_MAX
-    - USHRT_MAX
-    - INT_MIN
-    - INT_MAX
-    - UINT_MAX
-    - LONG_MIN
-    - LONG_MAX
+- SHRT_MIN
+- SHRT_MAX
+- USHRT_MAX
+- INT_MIN
+- INT_MAX
+- UINT_MAX
+- LONG_MIN
+- LONG_MAX
 
 ### Translation dictionaries
 

@@ -97,13 +97,12 @@ in vain for new messages when there are none available.
     !!! note
         If you don't care about the gory details of event notification,
 
-        skip to the section that describes FDB's Python-level event handling
-        API.
+        skip to the [Python event API](#api-for-python-developers).
 
     The Firebird C client library offers two forms of event notification.
     The first form is *synchronous* notification, by way of the function
     `isc_wait_for_event()`. This form is admirably simple for a C programmer
-    to use, but is inappropriate as a basis for FDB's event support,
+    to use, but is inappropriate as a basis for firebird-driver's event support,
     chiefly because it's not sophisticated enough to serve as the basis for
     a comfortable Python-level API. The other form of event notification
     offered by the database client library is *asynchronous*, by way of the
@@ -133,32 +132,32 @@ in vain for new messages when there are none available.
 ## API for Python developers
 
 The Firebird-driver database event API is comprised of the following: the method
-`.Connection.event_collector()` and the class `.EventCollector`.
+[`Connection.event_collector()`](../ref-core.md#firebird.driver.core.Connection.event_collector) and the class [`EventCollector`](../ref-core.md#firebird.driver.core.EventCollector).
 
-Use the `.Connection.event_collector()` method (takes a sequence of string event
-names as parameter) to create `.EventCollector` instance, that collects database event
+Use the [`Connection.event_collector()`](../ref-core.md#firebird.driver.core.Connection.event_collector) method (takes a sequence of string event
+names as parameter) to create [`EventCollector`](../ref-core.md#firebird.driver.core.EventCollector) instance, that collects database event
 notifications sent from the server for given database.
 
 !!! important
 
-    To start listening for events it's necessary to call `.EventCollector.begin()`
+    To start listening for events it's necessary to call [`EventCollector.begin()`](../ref-core.md#firebird.driver.core.EventCollector.begin)
     method or use EventCollector's context manager interface.
 
-Immediately when `~.EventCollector.begin()` method is called, EventCollector starts
+Immediately when [`begin()`](../ref-core.md#firebird.driver.core.EventCollector.begin) method is called, EventCollector starts
 to accumulate notifications of any event that occur within the collector’s internal queue
-until the collector is closed either explicitly (via the `~.EventCollector.close()`
+until the collector is closed either explicitly (via the [`close()`](../ref-core.md#firebird.driver.core.EventCollector.close)
 method) or implicitly (via garbage collection).
 
-Notifications about events are aquired through call to `~.EventCollector.wait()` method,
+Notifications about events are aquired through call to [`wait()`](../ref-core.md#firebird.driver.core.EventCollector.wait) method,
 that blocks the calling thread until at least one of the events occurs, or the specified
 `timeout` (if any) expires, and returns `None` if the wait timed out, or a dictionary that
 maps `event_name -> event_occurrence_count`.
 
 !!! important
 
-    `.EventCollector` can act as context manager that ensures execution of
-    `~.EventCollector.begin()` and `~.EventCollector.close()` methods.
-    It's strongly advised to use the `.EventCollector` with the `with` statement.
+    [`EventCollector`](../ref-core.md#firebird.driver.core.EventCollector) can act as context manager that ensures execution of
+    [`begin()`](../ref-core.md#firebird.driver.core.EventCollector.begin) and [`close()`](../ref-core.md#firebird.driver.core.EventCollector.close) methods.
+    It's strongly advised to use the [`EventCollector`](../ref-core.md#firebird.driver.core.EventCollector) with the `with` statement.
 
 **Example:**
 
@@ -170,7 +169,7 @@ with connection.event_collector(['event_a', 'event_b']) as collector:
 ```
 
 If you want to drop notifications accumulated so far by conduit, call
-`.EventCollector.flush()` method.
+[`EventCollector.flush()`](../ref-core.md#firebird.driver.core.EventCollector.flush) method.
 
 **Example program:**
 

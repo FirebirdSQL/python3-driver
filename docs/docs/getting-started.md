@@ -42,6 +42,11 @@ strings (in `.ini-style` `ConfigParser` format).
 
 ## Connecting to a Database
 
+The examples use `employee`, the local alias for the Firebird sample database included
+with each Firebird installation. The driver builds a connection DSN from this alias
+and the current settings. For your own databases, define server and database settings
+as described in [Server and database configuration](usage-guide/configuration.md#server-and-database-configuration).
+
 **Example 1:**
 
 A simple database connection is typically established with code such as this:
@@ -102,8 +107,8 @@ con = connect('employee')
 
 ## Creating a Database
 
-A database is created using `~firebird.driver.core.create_database()` function.
-Like `~firebird.driver.core.connect()`, this function uses configuration for specification of
+A database is created using [`create_database()`](ref-core.md#firebird.driver.core.create_database) function.
+Like [`connect()`](ref-core.md#firebird.driver.core.connect), this function uses configuration for specification of
 database parameters like page size, sweep interval etc.
 
 ## Executing SQL Statements

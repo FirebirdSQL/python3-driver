@@ -2,39 +2,39 @@
 
 Firebird-driver implements two ways for execution of SQL commands against connected database:
 
-* `~.Connection.execute_immediate` - for execution of SQL commands that don't return any result.
-* `.Cursor` objects that offer rich interface for execution of SQL commands and fetching their results.
+* [`execute_immediate`](../ref-core.md#firebird.driver.core.Connection.execute_immediate) - for execution of SQL commands that don't return any result.
+* [`Cursor`](../ref-core.md#firebird.driver.core.Cursor) objects that offer rich interface for execution of SQL commands and fetching their results.
 
 
 
 ## Cursor object
 
-Because `.Cursor` objects always operate in context of single `.Connection` (and `.TransactionManager`),
-`.Cursor` instances are not created directly, but by constructor method. Python DB API 2.0 assumes
+Because [`Cursor`](../ref-core.md#firebird.driver.core.Cursor) objects always operate in context of single [`Connection`](../ref-core.md#firebird.driver.core.Connection) (and [`TransactionManager`](../ref-core.md#firebird.driver.core.TransactionManager)),
+[`Cursor`](../ref-core.md#firebird.driver.core.Cursor) instances are not created directly, but by constructor method. Python DB API 2.0 assumes
 that if database engine supports transactions, it supports only one transaction per connection,
-hence it defines constructor method `~.Connection.cursor` (and other transaction-related methods)
-as part of `.Connection` interface. However, Firebird supports multiple independent transactions
+hence it defines constructor method [`cursor`](../ref-core.md#firebird.driver.core.Connection.cursor) (and other transaction-related methods)
+as part of [`Connection`](../ref-core.md#firebird.driver.core.Connection) interface. However, Firebird supports multiple independent transactions
 per connection. To conform to Python DB API, firebird-driver uses concept of internal
-`~.Connection.main_transaction` and secondary `~.Connection.transactions`. Cursor constructor is
-primarily defined by `.TransactionManager`, and Cursor constructor on `.Connection` is therefore
+[`main_transaction`](../ref-core.md#firebird.driver.core.Connection.main_transaction) and secondary [`transactions`](../ref-core.md#firebird.driver.core.Connection.transactions). Cursor constructor is
+primarily defined by [`TransactionManager`](../ref-core.md#firebird.driver.core.TransactionManager), and Cursor constructor on [`Connection`](../ref-core.md#firebird.driver.core.Connection) is therefore
 a shortcut for `main_transaction.cursor()`.
 
-`.Cursor` objects are used for next operations:
+[`Cursor`](../ref-core.md#firebird.driver.core.Cursor) objects are used for next operations:
 
-* Execution of SQL Statemets: methods `~.Cursor.execute()`, `~.Cursor.executemany()`, `~.Cursor.open()`
-    and `~.Cursor.callproc()`.
-* Creating `.Statement` objects for efficient repeated execution of SQL statements, and to obtain
-    additional information about SQL statements (like execution `~.Statement.plan`): method `~.Cursor.prepare()`.
-* [Fetching results](executing-sql-statements.md#fetching-data-from-server): methods `~.Cursor.fetchone()`, `~.Cursor.fetchmany()`,
-    `~.Cursor.fetchall()`, `~.Cursor.fetch_next()`, `~.Cursor.fetch_prior()`, `~.Cursor.fetch_first()`,
-    `~.Cursor.fetch_last()`, `~.Cursor.fetch_absolute()` and `~.Cursor.fetch_relative()`.
+* Execution of SQL Statemets: methods [`execute()`](../ref-core.md#firebird.driver.core.Cursor.execute), [`executemany()`](../ref-core.md#firebird.driver.core.Cursor.executemany), [`open()`](../ref-core.md#firebird.driver.core.Cursor.open)
+    and [`callproc()`](../ref-core.md#firebird.driver.core.Cursor.callproc).
+* Creating [`Statement`](../ref-core.md#firebird.driver.core.Statement) objects for efficient repeated execution of SQL statements, and to obtain
+    additional information about SQL statements (like execution [`plan`](../ref-core.md#firebird.driver.core.Statement.plan)): method [`prepare()`](../ref-core.md#firebird.driver.core.Cursor.prepare).
+* [Fetching results](executing-sql-statements.md#fetching-data-from-server): methods [`fetchone()`](../ref-core.md#firebird.driver.core.Cursor.fetchone), [`fetchmany()`](../ref-core.md#firebird.driver.core.Cursor.fetchmany),
+    [`fetchall()`](../ref-core.md#firebird.driver.core.Cursor.fetchall), [`fetch_next()`](../ref-core.md#firebird.driver.core.Cursor.fetch_next), [`fetch_prior()`](../ref-core.md#firebird.driver.core.Cursor.fetch_prior), [`fetch_first()`](../ref-core.md#firebird.driver.core.Cursor.fetch_first),
+    [`fetch_last()`](../ref-core.md#firebird.driver.core.Cursor.fetch_last), [`fetch_absolute()`](../ref-core.md#firebird.driver.core.Cursor.fetch_absolute) and [`fetch_relative()`](../ref-core.md#firebird.driver.core.Cursor.fetch_relative).
 
 
 ## SQL Execution Basics
 
 There are five methods how to execute SQL commands:
 
-1. `.Connection.execute_immediate()` or `.TransactionManager.execute_immediate()` for SQL commands
+1. [`Connection.execute_immediate()`](../ref-core.md#firebird.driver.core.Connection.execute_immediate) or [`TransactionManager.execute_immediate()`](../ref-core.md#firebird.driver.core.TransactionManager.execute_immediate) for SQL commands
     that don't return any result, and are not executed frequently. This method also **doesn't**
     support either [parameterized statements](executing-sql-statements.md#parameterized-statements) or
     [prepared statements](executing-sql-statements.md#prepared-statements).
@@ -44,7 +44,7 @@ There are five methods how to execute SQL commands:
         This method is efficient for `administrative` and [DDL](http://en.wikipedia.org/wiki/Data_Definition_Language) SQL commands, like `DROP`, `CREATE`
         or `ALTER` commands, `SET STATISTICS` etc.
 
-2. `.Cursor.execute()` for SQL commands that return result sets, i.e. sequence of `rows` of the same
+2. [`Cursor.execute()`](../ref-core.md#firebird.driver.core.Cursor.execute) for SQL commands that return result sets, i.e. sequence of `rows` of the same
     structure, and sequence has unknown number of `rows` (including zero). Each row of the sequence
     can be read only once, and is returned in the order it is read from the server.
 
@@ -53,7 +53,7 @@ There are five methods how to execute SQL commands:
         This method is preferred for all `SELECT` and other [DML](http://en.wikipedia.org/wiki/Data_Manipulation_Language) statements, or any statement that
         is executed frequently, either `as is` or in `parameterized` form.
 
-3. `.Cursor.executemany()` for execution of single parameterized SQL command with various set
+3. [`Cursor.executemany()`](../ref-core.md#firebird.driver.core.Cursor.executemany) for execution of single parameterized SQL command with various set
     of parameters.
 
     !!! important
@@ -63,7 +63,7 @@ There are five methods how to execute SQL commands:
         it's possible to access the result set **only** from last executed command, so this method
         should not be used for SQL commands that return results.
 
-4. `.Cursor.open()` for SQL command that return result sets, i.e. sequence of `rows` of the same
+4. [`Cursor.open()`](../ref-core.md#firebird.driver.core.Cursor.open) for SQL command that return result sets, i.e. sequence of `rows` of the same
     structure, and sequence has unknown number of `rows` (including zero). Instead of just fetching
     rows sequentially in a forward direction like `execute()`, this method allows flexible navigation
     through an open cursor set both backwards and forwards. Rows next to, prior to and relative to
@@ -72,7 +72,7 @@ There are five methods how to execute SQL commands:
     !!! info
         [Scrollable cursors](executing-sql-statements.md#scrollable-cursors) for details.
 
-5. `.Cursor.callproc()` for execution of `Stored procedures` that always return exactly one set
+5. [`Cursor.callproc()`](../ref-core.md#firebird.driver.core.Cursor.callproc) for execution of `Stored procedures` that always return exactly one set
     of values.
 
     !!! note
@@ -83,41 +83,41 @@ There are five methods how to execute SQL commands:
 ## Fetching data from server
 
 Result of SQL statement execution consists from sequence of zero to unknown number of `rows`,
-where each `row` is a set of exactly the same number of values. `.Cursor` object offer number
+where each `row` is a set of exactly the same number of values. [`Cursor`](../ref-core.md#firebird.driver.core.Cursor) object offer number
 of different methods for fetching these `rows`, that should satisfy all your specific needs:
 
-* `~.Cursor.fetchone()` - Returns the next row of a query result set, or `None` when no more data
+* [`fetchone()`](../ref-core.md#firebird.driver.core.Cursor.fetchone) - Returns the next row of a query result set, or `None` when no more data
     is available.
 
     !!! tip
 
         Cursor supports the [iterator protocol](https://docs.python.org/3/library/stdtypes.html#iterator-types), yielding tuples of values
-        like `~.Cursor.fetchone()`.
+        like [`fetchone()`](../ref-core.md#firebird.driver.core.Cursor.fetchone).
 
-* `~.Cursor.fetchmany()` - Returns the next set of rows of a query result, returning a sequence
+* [`fetchmany()`](../ref-core.md#firebird.driver.core.Cursor.fetchmany) - Returns the next set of rows of a query result, returning a sequence
     of sequences (e.g. a list of tuples). An empty sequence is returned when no more rows are available.
 
     The number of rows to fetch per call is specified by the parameter. If it is not given, the
-    cursor’s `~.Cursor.arraysize` determines the number of rows to be fetched. The method does try
+    cursor’s [`arraysize`](../ref-core.md#firebird.driver.core.Cursor) determines the number of rows to be fetched. The method does try
     to fetch as many rows as indicated by the size parameter. If this is not possible due to
     the specified number of rows not being available, fewer rows may be returned.
 
     !!! note
 
-        The default value of `~.Cursor.arraysize` is `1`, so without paremeter it's equivalent to
-        `~.Cursor.fetchone()`, but returns list of `rows`, instead actual `row` directly.
+        The default value of [`arraysize`](../ref-core.md#firebird.driver.core.Cursor) is `1`, so without paremeter it's equivalent to
+        [`fetchone()`](../ref-core.md#firebird.driver.core.Cursor.fetchone), but returns list of `rows`, instead actual `row` directly.
 
-* `~.Cursor.fetchall()` -  Returns all (remaining) rows of a query result as list of tuples,
+* [`fetchall()`](../ref-core.md#firebird.driver.core.Cursor.fetchall) -  Returns all (remaining) rows of a query result as list of tuples,
     where each tuple is one row of returned values.
 
     !!! tip
 
         This method can potentially return huge amount of data, that may exhaust available memory.
-        If you need just `iteration` over potentially big result set, use loops with `~.Cursor.fetchone()`
+        If you need just `iteration` over potentially big result set, use loops with [`fetchone()`](../ref-core.md#firebird.driver.core.Cursor.fetchone)
         or Cursor's built-in support for [iterator protocol](https://docs.python.org/3/library/stdtypes.html#iterator-types) instead this method.
 
-* Call to `~.Cursor.execute()` returns `self` (Cursor instance) that itself supports the
-    [iterator protocol](https://docs.python.org/3/library/stdtypes.html#iterator-types), yielding tuples of values like `~.Cursor.fetchone()`.
+* Call to [`execute()`](../ref-core.md#firebird.driver.core.Cursor.execute) returns `self` (Cursor instance) that itself supports the
+    [iterator protocol](https://docs.python.org/3/library/stdtypes.html#iterator-types), yielding tuples of values like [`fetchone()`](../ref-core.md#firebird.driver.core.Cursor.fetchone).
 
 !!! important
 
@@ -154,8 +154,8 @@ with connect('employee', user='SYSDBA', password='masterkey') as con:
 
 !!! important
 
-    Method `.Cursor.executemany()` is not intended for operations that return results,
-    so it does **NOT** returns `self` like `.Cursor.execute()`, and you can't use calls
+    Method [`Cursor.executemany()`](../ref-core.md#firebird.driver.core.Cursor.executemany) is not intended for operations that return results,
+    so it does **NOT** returns `self` like [`Cursor.execute()`](../ref-core.md#firebird.driver.core.Cursor.execute), and you can't use calls
     to this method as iterator.
 
 <a id="scrollable-cursors"></a>
@@ -163,26 +163,26 @@ with connect('employee', user='SYSDBA', password='masterkey') as con:
 
 ## Scrollable cursors
 
-SQL statements executed by `.Cursor.open()` have scrollable result set that could be
+SQL statements executed by [`Cursor.open()`](../ref-core.md#firebird.driver.core.Cursor.open) have scrollable result set that could be
 navigated using next methods:
 
-* `~.Cursor.fetch_next()` - Moves the cursor's current position to the next row and
+* [`fetch_next()`](../ref-core.md#firebird.driver.core.Cursor.fetch_next) - Moves the cursor's current position to the next row and
     returns it. Returns `None` if the cursor is empty or already positioned at the last row.
 
-* `~.Cursor.fetch_prior()` - Moves the cursor's current position to the prior row and
+* [`fetch_prior()`](../ref-core.md#firebird.driver.core.Cursor.fetch_prior) - Moves the cursor's current position to the prior row and
     returns it. Returns `None` if the cursor is empty or already positioned at the first row.
 
-* `~.Cursor.fetch_first()` - Moves the cursor's current position to the first row and
+* [`fetch_first()`](../ref-core.md#firebird.driver.core.Cursor.fetch_first) - Moves the cursor's current position to the first row and
     returns it. Returns `None` if the cursor is empty.
 
-* `~.Cursor.fetch_last()` - Moves the cursor's current position to the last row and
+* [`fetch_last()`](../ref-core.md#firebird.driver.core.Cursor.fetch_last) - Moves the cursor's current position to the last row and
     returns it. Returns `None` if the cursor is empty.
 
-* `~.Cursor.fetch_absolute()` - Moves the cursor's current position to the specified
+* [`fetch_absolute()`](../ref-core.md#firebird.driver.core.Cursor.fetch_absolute) - Moves the cursor's current position to the specified
     <position> and returns the located row. Returns `None` if <position> is beyond the
     cursor's boundaries.
 
-* `~.Cursor.fetch_relative()` - Moves the cursor's current position backward or forward
+* [`fetch_relative()`](../ref-core.md#firebird.driver.core.Cursor.fetch_relative) - Moves the cursor's current position backward or forward
     by the specified <offset> and returns the located row. Returns `None` if the calculated
     position is beyond the cursor's boundaries.
 
@@ -331,33 +331,33 @@ statement for repeated execution. This may save significant amount of server
 processing time, and result in better overall performance.
 
 Firebird-driver builds on this by encapsulating the Firebird SQL statement data
-and related code into separate `.Statement` class, and implementing the `.Cursor`
-class around it. The Cursor uses either an internally managed `.Statement` instance
-to execute SQL commands provided as `string`, or uses `.Statement` instance
+and related code into separate [`Statement`](../ref-core.md#firebird.driver.core.Statement) class, and implementing the [`Cursor`](../ref-core.md#firebird.driver.core.Cursor)
+class around it. The Cursor uses either an internally managed [`Statement`](../ref-core.md#firebird.driver.core.Statement) instance
+to execute SQL commands provided as `string`, or uses [`Statement`](../ref-core.md#firebird.driver.core.Statement) instance
 provided by your code as SQL command.
 
-To get the (prepared) `.Statement` instance for later (repeated) execution, use
-`~.Cursor.prepare()` method. You can then pass this instance to `~.Cursor.execute()`,
-`~.Cursor.executemany()` or `~.Cursor.open()` instead `command string`.
+To get the (prepared) [`Statement`](../ref-core.md#firebird.driver.core.Statement) instance for later (repeated) execution, use
+[`prepare()`](../ref-core.md#firebird.driver.core.Cursor.prepare) method. You can then pass this instance to [`execute()`](../ref-core.md#firebird.driver.core.Cursor.execute),
+[`executemany()`](../ref-core.md#firebird.driver.core.Cursor.executemany) or [`open()`](../ref-core.md#firebird.driver.core.Cursor.open) instead `command string`.
 
-`.Statement` instances are bound to `.Connection` instance, and can't be used
-with any other `.Connection`. Beside repeated execution they are also useful
-to get information about statement (like its execution `~.Statement.plan` or
-`~.Statement.type`) before its execution.
+[`Statement`](../ref-core.md#firebird.driver.core.Statement) instances are bound to [`Connection`](../ref-core.md#firebird.driver.core.Connection) instance, and can't be used
+with any other [`Connection`](../ref-core.md#firebird.driver.core.Connection). Beside repeated execution they are also useful
+to get information about statement (like its execution [`plan`](../ref-core.md#firebird.driver.core.Statement.plan) or
+[`type`](../ref-core.md#firebird.driver.core.Statement.type)) before its execution.
 
 !!! note
 
-    The internally managed `.Statement` instance is released when `.Cursor` is closed,
+    The internally managed [`Statement`](../ref-core.md#firebird.driver.core.Statement) instance is released when [`Cursor`](../ref-core.md#firebird.driver.core.Cursor) is closed,
     or before any new statement is executed. It means that if your code executes
     the same SQL command (passed as string) repeatedly without closing the cursor
-    between calls, the same `.Statement` instance is (re)used.
+    between calls, the same [`Statement`](../ref-core.md#firebird.driver.core.Statement) instance is (re)used.
 
 !!! important
 
     Implementation of Cursor in firebird-driver somewhat violates the Python DB API 2.0,
-    which requires that cursor will be unusable after call to `~.Cursor.close()`; and
+    which requires that cursor will be unusable after call to [`close()`](../ref-core.md#firebird.driver.core.Cursor.close); and
     an Error (or subclass) exception should be raised if any operation is attempted with
-    the cursor. In firebird-driver, the `.Cursor.close()` call only releases resources
+    the cursor. In firebird-driver, the [`Cursor.close()`](../ref-core.md#firebird.driver.core.Cursor.close) call only releases resources
     associated with executed statement like the result set, and you can't fetch data or
     query information about the SQL statement. However, you can use the cursor instance
     to execute new SQL commands.
@@ -389,14 +389,14 @@ cur.executemany(insertStatement, inputRows)
 ```
 
 !!! info
-    `.Statement` for details.
+    [`Statement`](../ref-core.md#firebird.driver.core.Statement) for details.
 
 
 ## Named Cursors
 
 To allow the Python programmer to perform scrolling **UPDATE** or **DELETE** via the
 **“SELECT ... FOR UPDATE”** syntax, the firebird-driver provides the read-only property
-`.Cursor.name` and method `.Cursor.set_cursor_name()`.
+[`Cursor.name`](../ref-core.md#firebird.driver.core.Cursor.name) and method [`Cursor.set_cursor_name()`](../ref-core.md#firebird.driver.core.Cursor.set_cursor_name).
 
 **Example Program:**
 
@@ -453,11 +453,11 @@ con.commit() # If the procedure had any side effects, commit them.
 To **execute** a stored procedure and **access its output parameters**, you can
 choose from two options:
 
-1. Method `.Cursor.callproc()` that **conforms to Python DB API 2.0**. This method
-    does not returns the output parameters directly, and you must call `.Cursor.fetchone()`
+1. Method [`Cursor.callproc()`](../ref-core.md#firebird.driver.core.Cursor.callproc) that **conforms to Python DB API 2.0**. This method
+    does not returns the output parameters directly, and you must call [`Cursor.fetchone()`](../ref-core.md#firebird.driver.core.Cursor.fetchone)
     **exactly once** to retrieve them.
 
-2. Method `.Cursor.call_procedure()` that returns output parameters directly
+2. Method [`Cursor.call_procedure()`](../ref-core.md#firebird.driver.core.Cursor.call_procedure) that returns output parameters directly
     (or `None` if procedure does not have output parameters).
 
 **Examples:**
