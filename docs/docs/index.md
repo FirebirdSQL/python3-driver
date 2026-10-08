@@ -28,7 +28,7 @@ written by Helen Borrie and published by [IBPhoenix](http://www.ibphoenix.com).
 ## Content
 
 - [Getting Started](getting-started.md)
-- [Usage Guide](usage-guide.md)
+- [Usage Guide](usage-guide/driver-structure.md)
 - [Python Db Api Compliance](python-db-api-compliance.md)
 - [Reference](ref-main.md)
 - [Changelog](changelog.md)

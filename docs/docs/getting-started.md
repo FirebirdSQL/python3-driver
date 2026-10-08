@@ -263,7 +263,7 @@ con.commit()
 Note the use of a *parameterized* SQL statement above. When dealing with repetitive
 statements, this is much faster and less error-prone than assembling each SQL statement
 manually. (You can read more about parameterized SQL statements in the section on
-[Prepared Statements](usage-guide.md#prepared-statements).)
+[Prepared Statements](usage-guide/executing-sql-statements.md#prepared-statements).)
 
 After running Example 4, the table printer from Example 3 would print:
 
