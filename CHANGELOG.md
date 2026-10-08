@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- GH-65: Segmentation fault when close connection or cursor
+- GH-65 Segmentation fault when close connection or cursor
 - &#8203;#63: Exception ignored in: function Connection.__del__
 - &#8203;#58: readline_timed() method appending \n to data received
 - &#8203;#56: Variable 'dsn' needs to be initialized in create_database()
