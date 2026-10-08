@@ -57,6 +57,7 @@ show_source = true
 
 [project.plugins.llmstxt]
 enabled = true
+markdown_description = "For driver version 2.0.3"
 sections = {
 "Usage Guide" = [
     "usage-guide/driver-structure.md" ,
