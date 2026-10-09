@@ -23,6 +23,7 @@
 # See LICENSE.TXT for details.
 
 import inspect
+from ctypes import memmove
 from io import BytesIO
 import pytest
 from packaging.specifiers import SpecifierSet
@@ -153,6 +154,85 @@ def test_output_by_line(server_connection):
 def test_output_to_eof(server_connection):
     server_connection.mode = SrvInfoCode.TO_EOF
     test_log(server_connection)
+
+
+class OutputService:
+    """Feed service query response buffers without depending on server timing."""
+    def __init__(self, responses):
+        self.responses = iter(responses)
+        self.requests = []
+
+    def query(self, send, request, output):
+        self.requests.append((send, request))
+        response = next(self.responses)
+        memmove(output, response, len(response))
+
+    def detach(self):
+        pass
+
+
+def output_response(mode, data='', tag=1):
+    encoded = data.encode('utf8')
+    return bytes([mode]) + len(encoded).to_bytes(2, 'little') + encoded + bytes([tag])
+
+
+@pytest.mark.parametrize('mode', [SrvInfoCode.LINE, SrvInfoCode.TO_EOF])
+@pytest.mark.parametrize('timeout', [-1, 1])
+@pytest.mark.parametrize('consumer', ['readline', 'iteration', 'readlines'])
+def test_text_output_modes_and_timeouts(mode, timeout, consumer):
+    responses = []
+    if timeout > 0:
+        responses.append(bytes([SrvInfoCode.TIMEOUT]))
+    if mode is SrvInfoCode.LINE:
+        responses.append(output_response(mode, 'first'))
+        if timeout > 0:
+            responses.append(bytes([SrvInfoCode.TIMEOUT]))
+        responses.extend([output_response(mode, 'second'), output_response(mode)])
+    else:
+        responses.append(output_response(mode, 'first\n', 2))
+        if timeout > 0:
+            responses.append(bytes([SrvInfoCode.TIMEOUT]))
+        responses.extend([output_response(mode, 'second\n', 2), output_response(mode)])
+    service = OutputService(responses)
+    server = driver.Server(service, b'', 'localhost', 'utf8', 'strict')
+    server.mode = mode
+    server.query_timeout = timeout
+    try:
+        expected = ['first\n', 'second\n']
+        if consumer == 'readline':
+            result = [server.readline() for _ in range(len(expected) + 2 * (timeout > 0))]
+            assert server.readline() is None
+        elif consumer == 'iteration':
+            result = list(server)
+        else:
+            result = server.readlines()
+        if timeout > 0 and consumer != 'readlines':
+            expected = [driver.TIMEOUT, expected[0], driver.TIMEOUT, expected[1]]
+        assert result == expected
+        expected_send = None if timeout < 0 else bytes([SrvInfoCode.TIMEOUT, 2, 0, timeout, 0])
+        assert all(send == expected_send and request == bytes([mode])
+                   for send, request in service.requests)
+    finally:
+        server.close()
+
+
+@pytest.mark.parametrize('mode', [SrvInfoCode.LINE, SrvInfoCode.TO_EOF])
+def test_text_output_timeout_preserves_partial_line(mode):
+    if mode is SrvInfoCode.LINE:
+        responses = [output_response(mode, 'part', 2), bytes([SrvInfoCode.TIMEOUT]),
+                     output_response(mode, 'ial'), output_response(mode)]
+    else:
+        responses = [output_response(mode, 'part', SrvInfoCode.TIMEOUT),
+                     output_response(mode, 'ial\n'), output_response(mode)]
+    server = driver.Server(OutputService(responses), b'', 'localhost', 'utf8', 'strict')
+    server.mode = mode
+    server.query_timeout = 1
+    try:
+        assert server.readline() is driver.TIMEOUT
+        assert server.readline() == 'partial\n'
+        assert server.readline() is None
+    finally:
+        server.close()
 
 def test_get_limbo_transaction_ids(server_connection, db_file):
     pytest.skip('Not implemented yet')

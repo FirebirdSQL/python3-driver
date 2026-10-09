@@ -52,7 +52,7 @@ from typing import Protocol
 
 from dateutil import tz
 
-from firebird.base.types import Error
+from firebird.base.types import Error, Sentinel
 
 # Exceptions required by Python Database API 2.0
 
@@ -155,6 +155,11 @@ class FirebirdWarning(UserWarning):
             setattr(self, name, value)
     def __getattr__(self, name):
         return None
+
+# Sentinels
+
+class TIMEOUT(Sentinel):
+    "Sentinel to signal that operation timed out"
 
 # Enums
 

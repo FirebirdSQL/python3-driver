@@ -85,6 +85,7 @@ from .types import (
     CB_OUTPUT_LINE,
     DESCRIPTION,
     FILESPEC,
+    TIMEOUT,
     BlobInfoCode,
     BlobType,
     BPBItem,
@@ -208,9 +209,6 @@ CHARSET_MAP = {None: a.getpreferredencoding(), 'NONE': a.getpreferredencoding(),
                'WIN1258': 'cp1258',
                }
 
-#: Sentinel that denotes timeout expiration
-TIMEOUT: Sentinel = Sentinel('TIMEOUT')
-
 # Internal
 #: Firebird `.iMaster` interface
 _master: iMaster = None
@@ -231,6 +229,7 @@ isc_info_end = 1
 isc_info_truncated = 2
 isc_info_error = 3
 isc_info_data_not_ready = 4
+isc_info_svc_timeout = 64
 
 def __api_loaded(api: a.FirebirdAPI) -> None:
     setattr(sys.modules[__name__], '_master', api.fb_get_master_interface()) # noqa: B010
@@ -5606,6 +5605,8 @@ class Server:
         self.host: str = host
         #: Service output mode (line or eof)
         self.mode: SrvInfoCode = SrvInfoCode.TO_EOF
+        #: Timeout in seconds for server output queries; -1 waits indefinitely
+        self.query_timeout: int = INFINITE_TIMEOUT
         #: Response buffer used to communicate with service
         self.response: CBuffer = CBuffer(USHRT_MAX)
         self._eof: bool = False
@@ -5667,26 +5668,42 @@ class Server:
         if self.response.get_tag() != isc_info_end:  # pragma: no cover
             raise InterfaceError("Malformed result buffer (missing isc_info_end item)")
         return result
-    def _query_output(self, timeout: int) -> str:
+    def _query_output(self, timeout: int) -> str | Sentinel:
         self.response.clear()
         self._svc.query(self._make_request(timeout), bytes([self.mode]), self.response.raw)
-        if (tag := self.response.get_tag()) != self.mode:  # pragma: no cover
+        if (tag := self.response.get_tag()) == isc_info_svc_timeout:
+            return TIMEOUT
+        if tag != self.mode:  # pragma: no cover
             raise InterfaceError(f"Service responded with error code: {tag}")
         return self.response.read_sized_string(encoding=self.encoding, errors=self.encoding_errors)
-    def _read_output(self, *, init: str='', timeout: int=INFINITE_TIMEOUT) -> None:
-        data = self._query_output(timeout)
+    def _read_output(self, *, init: str='') -> bool:
+        """Fetch output into the line buffer; return True if the query timed out."""
+        data = self._query_output(self.query_timeout)
+        if data is TIMEOUT:
+            self.__line_buffer = init.splitlines(keepends=True)
+            return True
+        tag = self.response.get_tag()
+        timed_out = tag == isc_info_svc_timeout
         if self.mode is SrvInfoCode.TO_EOF:
-            self._eof = self.response.get_tag() == isc_info_end
+            self._eof = tag == isc_info_end
         else: # LINE mode
-            self._eof = not data
-            while (tag := self.response.get_tag()) == isc_info_truncated:
-                data += self._query_output(timeout)
-            if tag != isc_info_end:  # pragma: no cover
+            while tag == isc_info_truncated:
+                part = self._query_output(self.query_timeout)
+                if part is TIMEOUT:
+                    timed_out = True
+                    break
+                data += part
+                tag = self.response.get_tag()
+                timed_out = tag == isc_info_svc_timeout
+            if not timed_out and tag != isc_info_end:  # pragma: no cover
                 raise InterfaceError("Malformed result buffer (missing isc_info_end item)")
+            if not timed_out:
+                self._eof = not data
         init += data
-        if data and self.mode is SrvInfoCode.LINE:
+        if data and self.mode is SrvInfoCode.LINE and not timed_out:
             init += '\n'
         self.__line_buffer = init.splitlines(keepends=True)
+        return timed_out
     def _read_all_binary_output(self, *, timeout: int=INFINITE_TIMEOUT) -> bytes:
         send = self._make_request(timeout)
         result = []
@@ -5740,35 +5757,27 @@ class Server:
         if data and data.endswith('\r '):
             data = data[:-1]  # Remove space, keep '\r'
         return data if data else None
-    def readline(self) -> str | None:
+    def readline(self) -> str | Sentinel | None:
         """Get next line of textual output from last service query.
 
         Returns:
-          Line of service output or `None` for EOF.
+          Line of service output, `.TIMEOUT` if the query timed out, or `None` for EOF.
 
         Important:
-          This method blocks until any output is available from server. Bacuse this method
-          is used by iteration over `.Server` and `.readlines` method, they will block as
-          well.
+          With the default `.query_timeout` this method blocks until output is available.
         """
-        if self._eof and not self.__line_buffer:
-            return None
-        if not self.__line_buffer:
-            self._read_output()
-        elif len(self.__line_buffer) == 1:
-            line = self.__line_buffer.pop(0)
+        while True:
+            if self.__line_buffer and (self.__line_buffer[0].endswith('\n') or self._eof):
+                return self.__line_buffer.pop(0)
             if self._eof:
-                return line
-            self._read_output(init=line)
-            while not self.__line_buffer[0].endswith('\n'):
-                self._read_output(init=self.__line_buffer.pop(0))
-        if self.__line_buffer:
-            return self.__line_buffer.pop(0)
-        return None
+                return None
+            pending = self.__line_buffer.pop(0) if self.__line_buffer else ''
+            if self._read_output(init=pending):
+                return TIMEOUT
     def readlines(self) -> list[str]:
-        """Get list of remaining output lines from last service query.
+        """Get remaining output lines, omitting any timeout signals.
         """
-        return list(self)
+        return [line for line in self if line is not TIMEOUT]
     def wait(self) -> None:
         """Wait until running service completes, i.e. stops sending data.
         """
