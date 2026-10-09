@@ -130,6 +130,7 @@ from .types import (
     get_timezone,
     paramstyle,
     threadsafety,
+    TINEOUT,
 )
 
 #: Current driver version, SEMVER string.
