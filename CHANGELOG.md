@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## Development
+
+### Added
+
+- Firebird 6 trace session plugin support: `ServerTraceServices.start()` accepts plugin names,
+  and `TraceSession` reports the plugins returned by the service manager.
+- Configurable `Server.query_timeout` and a `TIMEOUT` sentinel for timed text output queries.
+  `readline()` and iteration report timeouts without ending output; `readlines()` omits them.
+- Generated `llms.txt` for the published documentation and a repository skill for coding with
+  `firebird-driver`.
+- Developer guidance in `development/`, including module notes and test and build instructions.
+
+### Changed
+
+- Migrated the user documentation and Read the Docs build from Sphinx to Zensical, including
+  the API reference and docset workflow.
+- Split the usage guide into topic pages and corrected examples, links, and API descriptions.
+- Updated repository funding information and removed the unused `gdocs` build environment.
+
+### Fixed
+
+- GH-69: Avoid detaching an already released Firebird 5 attachment during garbage collection.
+- Keep the trace session `plugins` argument optional for existing callers.
+- Correct historical changelog issue references and links for Markdown rendering in Zensical.
+
 ## [2.0.3] - 2026-04-20
 
 ### Fixed
@@ -25,7 +50,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- #48: AttributeError object has no attribute 'logging_id' in "__del__" methods
+- GH-48: AttributeError object has no attribute 'logging_id' in "__del__" methods
 
 ## [2.0.0] - 2025-04-30
 
@@ -157,8 +182,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-- #27 - Failed to establish a connection to the server on the specified port.
-- #15 - Documentation issue.
+- GH-27 - Failed to establish a connection to the server on the specified port.
+- GH-15 - Documentation issue.
 - Fixed issue on MacOS (see GH-7827 in Firebird)
 
 ### Changed
