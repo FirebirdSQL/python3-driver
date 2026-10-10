@@ -32,6 +32,16 @@ nav = [
   { "License" = "license.md" },
 ]
 
+[[project.theme.palette]]
+scheme = "slate"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to light mode"
+
+[[project.theme.palette]]
+scheme = "default"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to dark mode"
+
 [project.theme]
 favicon = "assets/fb-favicon.png"
 features = [
@@ -56,6 +66,8 @@ show_attribute_values = false
 show_root_heading = true
 show_signature_annotations = true
 show_source = true
+backlinks = "tree"
+find_stubs_package = true
 
 [project.plugins.llmstxt]
 enabled = true
