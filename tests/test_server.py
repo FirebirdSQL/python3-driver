@@ -234,6 +234,21 @@ def test_text_output_timeout_preserves_partial_line(mode):
     finally:
         server.close()
 
+@pytest.mark.parametrize('timeout', [-1, 1])
+def test_text_output_non_lf_line_boundary_keeps_following_lines(timeout):
+    # str.splitlines() also breaks lines on CR, FF and other non-LF separators, which can
+    # occur in SQL text in trace output. Lines buffered after such a piece must survive.
+    responses = [output_response(SrvInfoCode.TO_EOF, 'select 1 /* a\rb */ from x\nnext\n', 2),
+                 output_response(SrvInfoCode.TO_EOF, 'last\n', 2),
+                 output_response(SrvInfoCode.TO_EOF)]
+    server = driver.Server(OutputService(responses), b'', 'localhost', 'utf8', 'strict')
+    server.mode = SrvInfoCode.TO_EOF
+    server.query_timeout = timeout
+    try:
+        assert ''.join(server.readlines()) == 'select 1 /* a\rb */ from x\nnext\nlast\n'
+    finally:
+        server.close()
+
 def test_get_limbo_transaction_ids(server_connection, db_file):
     pytest.skip('Not implemented yet')
     ids = server_connection.database.get_limbo_transaction_ids(database=str(db_file))
