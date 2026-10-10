@@ -11,39 +11,25 @@ This documentation set is not a tutorial on SQL or Firebird; rather, it is a top
 presentation of driver's feature set, with example code to demonstrate basic usage patterns.
 For detailed information about Firebird features, see the
 [Firebird documentation](http://www.firebirdsql.org/en/documentation/), and especially
-the excellent [The Firebird Book](http://www.ibphoenix.com/products/books/firebird_book)
+the excellent [The Firebird Book](https://www.ibphoenix.com/products/publications/fbook/)
 written by Helen Borrie and published by [IBPhoenix](http://www.ibphoenix.com).
+
+!!! note
+    Driver development is sponsored by [IBPhoenix](http://www.ibphoenix.com).
+
+    [![PyPI - Version](https://img.shields.io/pypi/v/firebird-driver.svg)](https://pypi.org/project/firebird-driver)
+    [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/firebird-driver.svg)](https://pypi.org/project/firebird-driver)
+    [![Hatch project](https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg)](https://github.com/pypa/hatch)
+    [![PyPI - Downloads](https://img.shields.io/pypi/dm/firebird-driver)](https://pypi.org/project/firebird-driver)
+    [![Libraries.io SourceRank](https://img.shields.io/librariesio/sourcerank/pypi/firebird-driver)](https://libraries.io/pypi/firebird-driver)
+    [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/FirebirdSQL/python3-driver)
+
+    [Source repository](https://github.com/FirebirdSQL/python3-driver)
 
 !!! info
     [firebird-lib](https://pypi.org/project/firebird-lib/) package for optional extensions to this driver.
-
-!!! note
-    Requires Python 3.11+
 
 !!! tip
     You can download docset for [Dash](https://kapeli.com/dash) (MacOS) or [Zeal](https://zealdocs.org/) (Windows / Linux) documentation
 
     readers from [releases](https://github.com/FirebirdSQL/python3-driver/releases) at github.
-
-## Content
-
-- [Getting Started](getting-started.md)
-- [Usage Guide](usage-guide/driver-structure.md)
-- [Python Db Api Compliance](python-db-api-compliance.md)
-- [Reference](ref-main.md)
-- [Changelog](changelog.md)
-- [License](license.md)
-
-Driver development is sponsored by [IBPhoenix](http://www.ibphoenix.com).
-
-[IBPhoenix]: http://www.ibphoenix.com
-[Python]: http://python.org
-[Python Database API 2.0]: http://www.python.org/dev/peps/pep-0249/
-[Firebird]: http://www.firebirdsql.org
-[under]: http://www.firebirdsql.org/en/devel-python-driver/
-[Firebird Project]: http://www.firebirdsql.org
-[IBPhoenix]: http://www.ibphoenix.com
-[firebird-lib]: https://pypi.org/project/firebird-lib/
-[releases]: https://github.com/FirebirdSQL/python3-driver/releases
-[Dash]: https://kapeli.com/dash
-[Zeal]: https://zealdocs.org/
