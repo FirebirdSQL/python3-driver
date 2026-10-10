@@ -64,12 +64,12 @@ class InterfaceError(Error):
 class DatabaseError(Error):
     """Exception raised for all errors reported by Firebird.
     """
-    #: Returned SQLSTATE or None
     sqlstate: str = None
-    #: Returned SQLCODE or None
+    "Returned SQLSTATE or None"
     sqlcode: int = None
-    #: Tuple with all returned GDS error codes
+    "Returned SQLCODE or None"
     gds_codes: tuple[int] = ()
+    "Tuple with all returned GDS error codes"
 
 class DataError(DatabaseError):
     """Exception raised for errors that are due to problems with the processed
@@ -1419,14 +1419,14 @@ class ImpDataOld:
 
 # Constants required by Python DB API 2.0 specification
 
-#: String constant stating the supported DB API level.
 apilevel: str = '2.0'
-#: Integer constant stating the level of thread safety the interface supports.
-#: Curretly `1` = Threads may share the module, but not connections.
+"String constant stating the supported DB API level."
 threadsafety: int = 1
-#: String constant stating the type of parameter marker formatting expected by
-#: the interface. `'qmark'` = Question mark style, e.g. '...WHERE name=?'
+"""Integer constant stating the level of thread safety the interface supports.
+Curretly `1` = Threads may share the module, but not connections."""
 paramstyle: str = 'qmark'
+"""String constant stating the type of parameter marker formatting expected by
+the interface. `'qmark'` = Question mark style, e.g. '...WHERE name=?'"""
 
 # Named positional constants to be used as indices into the description
 # attribute of a cursor.
@@ -1441,12 +1441,12 @@ DESCRIPTION_NULL_OK = 6
 
 # Types Required by Python DB-API 2.0
 
-#: This callable constructs an object holding a date value.
 Date = datetime.date
-#: This callable constructs an object holding a time value.
+"This callable constructs an object holding a date value."
 Time = datetime.time
-#: This callable constructs an object holding a time stamp value.
+"This callable constructs an object holding a time value."
 Timestamp = datetime.datetime
+"This callable constructs an object holding a time stamp value."
 
 def DateFromTicks(ticks: float) -> Date: # noqa: N802
     """Constructs an object holding a date value from the given ticks value
@@ -1466,8 +1466,8 @@ def TimestampFromTicks(ticks: float) -> Timestamp: # noqa: N802
     """
     return Timestamp(time.localtime(ticks)[:6])
 
-#: This callable constructs an object capable of holding a binary (long) string value.
 Binary = memoryview
+"This callable constructs an object capable of holding a binary (long) string value."
 
 class DBAPITypeObject:
     """Python DB API 2.0 - type support.
@@ -1481,25 +1481,25 @@ class DBAPITypeObject:
             return 1
         return -1
 
-#: This type object is used to describe columns in a database that are string-based (e.g. CHAR).
 STRING = DBAPITypeObject(str)
-#: This type object is used to describe (long) binary columns in a database (e.g. LONG, RAW, BLOBs).
+"This type object is used to describe columns in a database that are string-based (e.g. CHAR)."
 BINARY = DBAPITypeObject(bytes, bytearray)
-#: This type object is used to describe numeric columns in a database.
+"This type object is used to describe (long) binary columns in a database (e.g. LONG, RAW, BLOBs)."
 NUMBER = DBAPITypeObject(int, float, decimal.Decimal)
-#: This type object is used to describe date/time columns in a database.
+"This type object is used to describe numeric columns in a database."
 DATETIME = DBAPITypeObject(datetime.datetime, datetime.date, datetime.time)
-#: This type object is used to describe the "Row ID" column in a database.
+"This type object is used to describe date/time columns in a database."
 ROWID = DBAPITypeObject()
+'This type object is used to describe the "Row ID" column in a database.'
 
 # Types for type hints
 
-#: DB API 2.0 Cursor DESCRIPTION
 DESCRIPTION = tuple[str, type, int, int, int, int, bool]
-#: Callback that accepts line of text output
+"DB API 2.0 Cursor DESCRIPTION"
 CB_OUTPUT_LINE = Callable[[str], None]
-#: File name (incl. path) specification
+"Callback that accepts line of text output"
 FILESPEC = str | Path
+"File name (incl. path) specification"
 
 class Transactional(Protocol):  # pragma: no cover
     """Protocol type for object that supports transactional processing."""

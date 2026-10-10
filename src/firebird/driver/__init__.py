@@ -133,5 +133,5 @@ from .types import (
     TIMEOUT,
 )
 
-#: Current driver version, SEMVER string.
 __VERSION__ = '2.0.4'
+"Current driver version, SEMVER string."

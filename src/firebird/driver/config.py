@@ -70,134 +70,134 @@ class ServerConfig(Config):
     """
     def __init__(self, name: str, *, optional: bool=False, description: str | None=None):
         super().__init__(name, optional=optional, description=description)
-        #: Server host machine specification
         self.host: StrOption = \
             StrOption('host', "Server host machine specification")
-        #: Port used by Firebird server
+        "Server host machine specification"
         self.port: StrOption = \
             StrOption('port', "Port used by Firebird server")
-        #: Defaul user name, default is envar ISC_USER or None if not specified
+        "Port used by Firebird server"
         self.user: StrOption = \
             StrOption('user', "Defaul user name", default=os.environ.get('ISC_USER', None))
-        #: Default user password, default is envar ISC_PASSWORD or None if not specified
+        "Defaul user name, default is envar ISC_USER or None if not specified"
         self.password: StrOption = \
             StrOption('password', "Default user password",
                       default=os.environ.get('ISC_PASSWORD', None))
-        #: Configuration override
+        "Default user password, default is envar ISC_PASSWORD or None if not specified"
         self.config: StrOption = \
             StrOption('config', "Configuration override")
-        #: List of authentication plugins override
+        "Configuration override"
         self.auth_plugin_list: StrOption = \
             StrOption('auth_plugin_list', "List of authentication plugins override")
-        #: Use trusted authentication, default: False
+        "List of authentication plugins override"
         self.trusted_auth: BoolOption = \
             BoolOption('trusted_auth', "Use trusted authentication", default=False)
-        #: Encoding used for text data exchange with server
+        "Use trusted authentication, default: False"
         self.encoding: StrOption = \
             StrOption('encoding', "Encoding used for text data exchange with server",
                       default='ascii')
-        #: Handler used for encoding errors. See `codecs error handlers <codecs>` for details.
+        "Encoding used for text data exchange with server"
         self.encoding_errors: StrOption = \
             StrOption('encoding_errors', "Handler used for encoding errors", default='strict')
+        "Handler used for encoding errors. See `codecs error handlers <codecs>` for details."
 
 class DatabaseConfig(Config):
     """Represents configuration options specific to a named Firebird database entry, including connection and creation parameters.
     """
     def __init__(self, name: str, *, optional: bool=False, description: str | None=None):
         super().__init__(name, optional=optional, description=description)
-        #: Name of server where database is located
         self.server: StrOption = \
             StrOption('server', "Name of server where database is located")
-        #: Database connection string
+        "Name of server where database is located"
         self.dsn: StrOption = \
             StrOption('dsn', "Database connection string")
-        #: Database file specification or alias
+        "Database connection string"
         self.database: StrOption = \
             StrOption('database', "Database file specification or alias")
-        #: Specifies whether the database parameter (filename) is encoded in UTF-8 when passed to the server.
+        "Database file specification or alias"
         self.utf8filename: BoolOption = \
             BoolOption('utf8filename', "Specifies whether the database parameter (filename) is encoded in UTF-8 when passed to the server.")
-        #: Network protocol to use for the connection. Value must be a member of the .NetProtocol enum.
+        "Specifies whether the database parameter (filename) is encoded in UTF-8 when passed to the server."
         self.protocol: EnumOption = \
             EnumOption('protocol', NetProtocol, "Network protocol to use for the connection. Value must be a member of the .NetProtocol enum.")
-        #: Defaul user name, default is envar ISC_USER or None if not specified
+        "Network protocol to use for the connection. Value must be a member of the .NetProtocol enum."
         self.user: StrOption = \
             StrOption('user', "Defaul user name", default=os.environ.get('ISC_USER', None))
-        #: Default user password, default is envar ISC_PASSWORD or None if not specified
+        "Defaul user name, default is envar ISC_USER or None if not specified"
         self.password: StrOption = \
             StrOption('password', "Default user password",
                       default=os.environ.get('ISC_PASSWORD', None))
-        #: Use trusted authentication, default: False
+        "Default user password, default is envar ISC_PASSWORD or None if not specified"
         self.trusted_auth: BoolOption = \
             BoolOption('trusted_auth', "Use trusted authentication", default=False)
-        #: User role
+        "Use trusted authentication, default: False"
         self.role: StrOption = \
             StrOption('role', "User role")
-        #: Character set for database connection
+        "User role"
         self.charset: StrOption = \
             StrOption('charset', "Character set for database connection")
-        #: SQL Dialect for database connection, default: 3
+        "Character set for database connection"
         self.sql_dialect: IntOption = \
             IntOption('sql_dialect', "SQL Dialect for database connection", default=3)
-        #: Connection timeout
+        "SQL Dialect for database connection, default: 3"
         self.timeout: IntOption = \
             IntOption('timeout', "Connection timeout")
-        #: Do not use linger for database connection
+        "Connection timeout"
         self.no_linger: BoolOption = \
             BoolOption('no_linger', "Do not use linger for database connection")
-        #: Page cache size override for database connection
+        "Do not use linger for database connection"
         self.cache_size: IntOption = \
             IntOption('cache_size', "Page cache size override for database connection")
-        #: Dummy packet interval for this database connection
+        "Page cache size override for database connection"
         self.dummy_packet_interval: IntOption = \
             IntOption('dummy_packet_interval',
                       "Dummy packet interval")
-        #: Configuration override
+        "Dummy packet interval for this database connection"
         self.config: StrOption = \
             StrOption('config', "Configuration override")
-        #: List of authentication plugins override
+        "Configuration override"
         self.auth_plugin_list: StrOption = \
             StrOption('auth_plugin_list', "List of authentication plugins override")
-        #: Session time zone [Firebird 4]
+        "List of authentication plugins override"
         self.session_time_zone: StrOption = \
             StrOption('session_time_zone', "Session time zone")
-        #: Set BIND [Firebird 4]
+        "Session time zone [Firebird 4]"
         self.set_bind: StrOption = \
             StrOption('set_bind', "Set BIND - sets up columns coercion rules in session")
-        #: Set DECFLOAT ROUND [Firebird 4], value is `.DecfloatRound`
+        "Set BIND [Firebird 4]"
         self.decfloat_round: EnumOption = \
             EnumOption('decfloat_round', DecfloatRound, "DECFLOAT round mode")
-        #: Specifies which DECFLOAT exceptional conditions should cause a trap (raise an error) [Firebird 4]. Accepts a list of .DecfloatTraps enum members.
+        "Set DECFLOAT ROUND [Firebird 4], value is `.DecfloatRound`"
         self.decfloat_traps: ListOption = \
             ListOption('decfloat_traps', DecfloatTraps,
                        """Specifies which DECFLOAT exceptional conditions should cause a trap
 (raise an error) [Firebird 4]. Accepts a list of .DecfloatTraps enum members.""")
-        #: Number of parallel workers
+        "Specifies which DECFLOAT exceptional conditions should cause a trap (raise an error) [Firebird 4]. Accepts a list of .DecfloatTraps enum members."
         self.parallel_workers = \
             IntOption('parallel_workers', "Number of parallel workers")
+        "Number of parallel workers"
         # --- Options specific to Database Creation ---
-        #: Database create option. Page size to be used.
         self.page_size: IntOption = \
             IntOption('page_size', "Page size to be used for created database.")
-        #: Database create option. Write mode (True = sync/False = async).
+        "Database create option. Page size to be used."
         self.forced_writes: BoolOption = \
             BoolOption('forced_writes', "Write mode for created database (True = sync, False = async)")
-        #: Database create option. Character set for the database.
+        "Database create option. Write mode (True = sync/False = async)."
         self.db_charset: StrOption = \
             StrOption('db_charset', "Character set for created database")
-        #: Database create option. SQL dialect for the database.
+        "Database create option. Character set for the database."
         self.db_sql_dialect: IntOption = \
             IntOption('db_sql_dialect', "SQL dialect for created database")
-        #: Database create option. Page cache size override for database.
+        "Database create option. SQL dialect for the database."
         self.db_cache_size: IntOption = \
             IntOption('db_cache_size', "Page cache size override for created database")
-        #: Database create option. Sweep interval for the database.
+        "Database create option. Page cache size override for database."
         self.sweep_interval: IntOption = \
             IntOption('sweep_interval', "Sweep interval for created database")
-        #: Database create option. Data page space usage (True = reserve space, False = Use all space).
+        "Database create option. Sweep interval for the database."
         self.reserve_space: BoolOption = \
             BoolOption('reserve_space',
                        "Data page space usage for created database (True = reserve space, False = Use all space)")
+        "Database create option. Data page space usage (True = reserve space, False = Use all space)."
 
 class DriverConfig(Config):
     """Main configuration object for the Firebird driver. Holds global settings, default
@@ -209,28 +209,28 @@ class DriverConfig(Config):
     """
     def __init__(self, name: str):
         super().__init__(name)
-        #: Path to Firebird client library
         self.fb_client_library: StrOption = \
             StrOption('fb_client_library', "Path to Firebird client library")
-        #: BLOB size threshold. Bigger BLOB will be returned as stream BLOBs.
+        "Path to Firebird client library"
         self.stream_blob_threshold: IntOption = \
             IntOption('stream_blob_threshold',
                       "BLOB size threshold. Bigger BLOB will be returned as stream BLOBs.",
                       default=65536)
-        #: Default database configuration ('firebird.db.defaults')
+        "BLOB size threshold. Bigger BLOB will be returned as stream BLOBs."
         self.db_defaults: DatabaseConfig = DatabaseConfig('firebird.db.defaults',
                                                           optional=True,
                                                           description="Default database configuration.")
-        #: Default server configuration ('firebird.server.defaults')
+        "Default database configuration ('firebird.db.defaults')"
         self.server_defaults: ServerConfig = ServerConfig('firebird.server.defaults',
                                                           optional=True,
                                                           description="Default server configuration.")
-        #: Registered servers
+        "Default server configuration ('firebird.server.defaults')"
         self.servers: ConfigListOption = \
             ConfigListOption('servers', ServerConfig, "Registered servers")
-        #: Registered databases
+        "Registered servers"
         self.databases: ConfigListOption = \
             ConfigListOption('databases', DatabaseConfig, "Registered databases")
+        "Registered databases"
     def read(self, filenames: str | Iterable, encoding: str | None=None):
         """Read configuration from a filename or an iterable of filenames.
 
@@ -336,7 +336,5 @@ class DriverConfig(Config):
 
 # Configuration
 
-#: Global driver configuration instance.
-#: Load settings from files/strings/dicts into this object before connecting,
-#: or modify its attributes directly for programmatic configuration.
 driver_config: DriverConfig = DriverConfig('firebird.driver')
+"Global driver configuration instance.\nLoad settings from files/strings/dicts into this object before connecting,\nor modify its attributes directly for programmatic configuration."

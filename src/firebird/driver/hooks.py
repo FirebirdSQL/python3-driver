@@ -55,25 +55,25 @@ from firebird.base.hooks import add_hook, get_callbacks, hook_manager, register_
 class APIHook(Enum):
     """Hooks related to the loading and initialization of the underlying Firebird client API.
     """
-    #: Called after the Firebird client library has been successfully loaded and basic interfaces obtained.
     LOADED = auto()
+    "Called after the Firebird client library has been successfully loaded and basic interfaces obtained."
 
 class ConnectionHook(Enum):
     """Hooks related to the lifecycle of a database connection (attachment, detachment, dropping).
     """
-    #: Called before attempting to attach to a database, allows interception or modification.
     ATTACH_REQUEST = auto()
-    #: Called after a database connection (attachment) has been successfully established.
+    "Called before attempting to attach to a database, allows interception or modification."
     ATTACHED = auto()
-    #: Called before attempting to detach from a database, allows cancellation.
+    "Called after a database connection (attachment) has been successfully established."
     DETACH_REQUEST = auto()
-    #: Called after a database connection has been successfully closed (detached).
+    "Called before attempting to detach from a database, allows cancellation."
     CLOSED = auto()
-    #: Called after a database has been successfully dropped.
+    "Called after a database connection has been successfully closed (detached)."
     DROPPED = auto()
+    "Called after a database has been successfully dropped."
 
 class ServerHook(Enum):
     """Hooks related to the lifecycle of a service manager connection.
     """
-    #: Called after connecting to the Firebird service manager.
     ATTACHED = auto()
+    "Called after connecting to the Firebird service manager."

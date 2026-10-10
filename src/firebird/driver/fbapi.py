@@ -1891,8 +1891,8 @@ IInt128_VTable._fields_: ClassVar = [
     ('fromString', IInt128_fromString)]
 
 
-#: Encoding used to decode error messages from Firebird.
 err_encoding = getpreferredencoding()
+"Encoding used to decode error messages from Firebird."
 
 def db_api_error(status: ISC_STATUS_ARRAY) -> bool:
     "Returns True if `status` contains error"
@@ -2072,59 +2072,59 @@ class FirebirdAPI:
             if not file_name:
                 raise Exception(f"Firebird Client Library '{filename}' not found")
             filename = file_name
-        #: Firebird client library
         self.client_library: ctypes.CDLL = None
+        "Firebird client library"
         if sys.platform in ('win32', 'cygwin', 'os2', 'os2emx'):
             self.client_library: ctypes.CDLL = ctypes.WinDLL(str(filename))
         else:
             self.client_library: ctypes.CDLL = ctypes.CDLL(str(filename), mode=ctypes.RTLD_GLOBAL)
-        #: Firebird client library name
         self.client_library_name: Path = Path(filename)
-        #: Firebird API
+        "Firebird client library name"
         self.fb_get_master_interface = (self.client_library.fb_get_master_interface)
+        "Firebird API"
         self.fb_get_master_interface.restype = IMaster
         self.fb_get_master_interface.argtypes = []
-        #: Firebird API
         self.fb_get_database_handle = self.client_library.fb_get_database_handle
+        "Firebird API"
         self.fb_get_database_handle.restype = ISC_STATUS
         self.fb_get_database_handle.argtypes = [ISC_STATUS_PTR, FB_API_HANDLE_PTR, IAttachment]
-        #: Firebird API
         self.fb_get_transaction_handle = (self.client_library.fb_get_transaction_handle)
+        "Firebird API"
         self.fb_get_transaction_handle.restype = ISC_STATUS
         self.fb_get_transaction_handle.argtypes = [ISC_STATUS_PTR, FB_API_HANDLE_PTR, ITransaction]
-        #: Firebird API
         self.fb_sqlstate = self.client_library.fb_sqlstate
+        "Firebird API"
         self.fb_sqlstate.restype = None
         self.fb_sqlstate.argtypes = [STRING, ISC_STATUS_PTR]
-        #: Firebird API
         self.fb_shutdown_callback = self.client_library.fb_shutdown_callback
+        "Firebird API"
         self.fb_shutdown_callback.restype = ISC_STATUS
         self.fb_shutdown_callback.argtypes = [ISC_STATUS_PTR,
                                               FB_SHUTDOWN_CALLBACK,
                                               c_int,
                                               c_void_p]
-        #: Firebird API
         self.isc_sqlcode = self.client_library.isc_sqlcode
+        "Firebird API"
         self.isc_sqlcode.restype = ISC_LONG
         self.isc_sqlcode.argtypes = [ISC_STATUS_PTR]
-        #: Firebird API
         self.fb_interpret = self.client_library.fb_interpret
+        "Firebird API"
         self.fb_interpret.restype = ISC_LONG
         self.fb_interpret.argtypes = [STRING, c_uint, POINTER(ISC_STATUS_PTR)]
-        #: Firebird API
         self.isc_array_lookup_bounds = (self.client_library.isc_array_lookup_bounds)
+        "Firebird API"
         self.isc_array_lookup_bounds.restype = ISC_STATUS
         self.isc_array_lookup_bounds.argtypes = [ISC_STATUS_PTR, FB_API_HANDLE_PTR,
                                                  FB_API_HANDLE_PTR, STRING, STRING,
                                                  ISC_ARRAY_DESC_PTR]
-        #: Firebird API
         self.isc_array_put_slice = self.client_library.isc_array_put_slice
+        "Firebird API"
         self.isc_array_put_slice.restype = ISC_STATUS
         self.isc_array_put_slice.argtypes = [ISC_STATUS_PTR, FB_API_HANDLE_PTR,
                                              FB_API_HANDLE_PTR, ISC_QUAD_PTR,
                                              ISC_ARRAY_DESC_PTR, c_void_p, ISC_LONG_PTR]
-        #: Firebird API
         self.isc_array_get_slice = self.client_library.isc_array_get_slice
+        "Firebird API"
         self.isc_array_get_slice.restype = ISC_STATUS
         self.isc_array_get_slice.argtypes = [ISC_STATUS_PTR, FB_API_HANDLE_PTR,
                                              FB_API_HANDLE_PTR, ISC_QUAD_PTR,
@@ -2135,81 +2135,81 @@ class FirebirdAPI:
         # C_isc_event_block(ISC_LONG, POINTER(POINTER(ISC_UCHAR)), POINTER(POINTER(ISC_UCHAR)), ISC_USHORT)
         self.C_isc_event_block = self.P_isc_event_block(('isc_event_block', self.client_library))
         self.P_isc_event_block_args = self.C_isc_event_block.argtypes
-        #: Firebird API
         self.isc_que_events = self.client_library.isc_que_events
+        "Firebird API"
         self.isc_que_events.restype = ISC_STATUS
         self.isc_que_events.argtypes = [POINTER(ISC_STATUS), POINTER(FB_API_HANDLE),
                                         POINTER(ISC_LONG), c_short, POINTER(ISC_UCHAR),
                                         ISC_EVENT_CALLBACK, POINTER(ISC_UCHAR)]
-        #: Firebird API
         self.isc_event_counts = self.client_library.isc_event_counts
+        "Firebird API"
         self.isc_event_counts.restype = None
         self.isc_event_counts.argtypes = [POINTER(RESULT_VECTOR), c_short,
                                           POINTER(ISC_UCHAR), POINTER(ISC_UCHAR)]
-        #: Firebird API
         self.isc_cancel_events = self.client_library.isc_cancel_events
+        "Firebird API"
         self.isc_cancel_events.restype = ISC_STATUS
         self.isc_cancel_events.argtypes = [POINTER(ISC_STATUS), POINTER(FB_API_HANDLE),
                                            POINTER(ISC_LONG)]
-        #: Firebird API
         self.isc_compile_request = self.client_library.isc_compile_request
+        "Firebird API"
         self.isc_compile_request.restype = ISC_STATUS
         self.isc_compile_request.argtypes = [POINTER(ISC_STATUS), POINTER(FB_API_HANDLE),
                                              POINTER(FB_API_HANDLE), c_short, STRING]
-        #: Firebird API
         self.isc_start_request = self.client_library.isc_start_request
+        "Firebird API"
         self.isc_start_request.restype = ISC_STATUS
         self.isc_start_request.argtypes = [POINTER(ISC_STATUS), POINTER(FB_API_HANDLE),
                                            POINTER(FB_API_HANDLE), c_short]
-        #: Firebird API
         self.isc_release_request = self.client_library.isc_release_request
+        "Firebird API"
         self.isc_release_request.restype = ISC_STATUS
         self.isc_release_request.argtypes = [POINTER(ISC_STATUS), POINTER(FB_API_HANDLE)]
-        #: Firebird API
         self.isc_receive = self.client_library.isc_receive
+        "Firebird API"
         self.isc_receive.restype = ISC_STATUS
         self.isc_receive.argtypes = [POINTER(ISC_STATUS), POINTER(FB_API_HANDLE),
                                      c_short, c_short, c_void_p, c_short]
-        #: Firebird API
         self.isc_start_and_send = self.client_library.isc_start_and_send
+        "Firebird API"
         self.isc_start_and_send.restype = ISC_STATUS
         self.isc_start_and_send.argtypes = [POINTER(ISC_STATUS), POINTER(FB_API_HANDLE),
                                             POINTER(FB_API_HANDLE), c_short, c_short,
                                             c_void_p, c_short]
-        #: Firebird API
         self.isc_send = self.client_library.isc_send
+        "Firebird API"
         self.isc_send.restype = ISC_STATUS
         self.isc_send.argtypes = [POINTER(ISC_STATUS), POINTER(FB_API_HANDLE),
                                   c_short, c_short, c_void_p, c_short]
-        #: Firebird API
         self.isc_open_blob2 = self.client_library.isc_open_blob2
+        "Firebird API"
         self.isc_open_blob2.restype = ISC_STATUS
         self.isc_open_blob2.argtypes = [POINTER(ISC_STATUS), POINTER(FB_API_HANDLE),
                                         POINTER(FB_API_HANDLE), POINTER(FB_API_HANDLE),
                                         POINTER(ISC_QUAD), ISC_USHORT, STRING] # POINTER(ISC_UCHAR)
-        #: Firebird API
         self.isc_blob_info = self.client_library.isc_blob_info
+        "Firebird API"
         self.isc_blob_info.restype = ISC_STATUS
         self.isc_blob_info.argtypes = [POINTER(ISC_STATUS), POINTER(FB_API_HANDLE),
                                        c_short, STRING, c_short, POINTER(c_char)]
-        #: Firebird API
         self.isc_create_blob2 = self.client_library.isc_create_blob2
+        "Firebird API"
         self.isc_create_blob2.restype = ISC_STATUS
         self.isc_create_blob2.argtypes = [POINTER(ISC_STATUS), POINTER(FB_API_HANDLE),
                                           POINTER(FB_API_HANDLE), POINTER(FB_API_HANDLE),
                                           POINTER(ISC_QUAD), c_short, STRING]
-        #: Firebird API
         self.isc_get_segment = self.client_library.isc_get_segment
+        "Firebird API"
         self.isc_get_segment.restype = ISC_STATUS
         self.isc_get_segment.argtypes = [POINTER(ISC_STATUS), POINTER(FB_API_HANDLE),
                                          POINTER(c_ushort), c_ushort, c_void_p]
-        #: Firebird API
         self.isc_put_segment = self.client_library.isc_put_segment
+        "Firebird API"
         self.isc_put_segment.restype = ISC_STATUS
         self.isc_put_segment.argtypes = [POINTER(ISC_STATUS), POINTER(FB_API_HANDLE),
                                          c_ushort, c_void_p]
-        #: Firebird API
         self.isc_close_blob = self.client_library.isc_close_blob
+        "Firebird API"
         self.isc_close_blob.restype = ISC_STATUS
         self.isc_close_blob.argtypes = [POINTER(ISC_STATUS), POINTER(FB_API_HANDLE)]
         # Next netributes are set in types by API_LOADED hook

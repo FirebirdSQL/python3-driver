@@ -181,13 +181,12 @@ FB50: float = 5.0
 FB40: float = 4.0
 INFINITE_TIMEOUT: int = -1
 
-#: Max BLOB segment size
 MAX_BLOB_SEGMENT_SIZE = 65535
+"Max BLOB segment size"
 
-#: Current filesystem encoding
 FS_ENCODING = sys.getfilesystemencoding()
+"Current filesystem encoding"
 
-#: Python dictionary that maps Firebird character set names (key) to Python character sets (value).
 CHARSET_MAP = {None: a.getpreferredencoding(), 'NONE': a.getpreferredencoding(),
                'OCTETS': None, 'UNICODE_FSS': 'utf_8', 'UTF8': 'utf_8', 'UTF-8': 'utf_8',
                'ASCII': 'ascii', 'SJIS_0208': 'shift_jis', 'EUCJ_0208': 'euc_jp',
@@ -208,12 +207,13 @@ CHARSET_MAP = {None: a.getpreferredencoding(), 'NONE': a.getpreferredencoding(),
                'GBK': 'gbk', 'KOI8R': 'koi8_r', 'KOI8U': 'koi8_u',
                'WIN1258': 'cp1258',
                }
+"Python dictionary that maps Firebird character set names (key) to Python character sets (value)."
 
 # Internal
-#: Firebird `.iMaster` interface
 _master: iMaster = None
-#: Firebird `.iUtil` interface
+"Firebird `.iMaster` interface"
 _util: iUtil = None
+"Firebird `.iUtil` interface"
 _thns = threading.local()
 
 _ten_to = [10 ** x for x in range(30)]
@@ -521,73 +521,73 @@ class DPB:
         # AuthClient, WireCryptPlugin, Providers, ConnectionTimeout, WireCrypt,
         # WireCompression, DummyPacketInterval, RemoteServiceName, RemoteServicePort,
         # RemoteAuxPort, TcpNoNagle, IpcName, RemotePipeName, ClientBatchBuffer [FB4+]
-        #: Configuration override
         self.config: str | None = config
-        #: List of authentication plugins override
+        "Configuration override"
         self.auth_plugin_list: str | None = auth_plugin_list
+        "List of authentication plugins override"
         # Connect
-        #: Use trusted authentication
         self.trusted_auth: bool = trusted_auth
-        #: User name
+        "Use trusted authentication"
         self.user: str | None = user
-        #: User password
+        "User name"
         self.password: str | None = password
-        #: User role
+        "User password"
         self.role: str | None = role
-        #: SQL Dialect for database connection
+        "User role"
         self.sql_dialect: int = sql_dialect
-        #: Character set for database connection
+        "SQL Dialect for database connection"
         self.charset: str = charset
-        #: Connection timeout
+        "Character set for database connection"
         self.timeout: int | None = timeout
-        #: Dummy packet interval for this database connection
+        "Connection timeout"
         self.dummy_packet_interval: int | None = dummy_packet_interval
-        #: Page cache size override for database connection
+        "Dummy packet interval for this database connection"
         self.cache_size: int | None = cache_size
-        #: Disable garbage collection for database connection
+        "Page cache size override for database connection"
         self.no_gc: bool = no_gc
-        #: Disable database triggers for database connection
+        "Disable garbage collection for database connection"
         self.no_db_triggers: bool = no_db_triggers
-        #: Do not use linger for database connection
+        "Disable database triggers for database connection"
         self.no_linger: bool = no_linger
-        #: Database filename passed in UTF8
+        "Do not use linger for database connection"
         self.utf8filename: bool = utf8filename
-        #: Scope for RDB$DB_KEY values
+        "Database filename passed in UTF8"
         self.dbkey_scope: DBKeyScope | None = dbkey_scope
-        #: Session time zone [Firebird 4]
+        "Scope for RDB$DB_KEY values"
         self.session_time_zone: str | None = session_time_zone
-        #: Set replica mode [Firebird 4]
+        "Session time zone [Firebird 4]"
         self.set_db_replica: ReplicaMode | None = set_db_replica
-        #: Set BIND [Firebird 4]
+        "Set replica mode [Firebird 4]"
         self.set_bind: str | None = set_bind
-        #: Set DECFLOAT ROUND [Firebird 4]
+        "Set BIND [Firebird 4]"
         self.decfloat_round: DecfloatRound | None = decfloat_round
-        #: Set DECFLOAT TRAPS [Firebird 4]
+        "Set DECFLOAT ROUND [Firebird 4]"
         self.decfloat_traps: list[DecfloatTraps] | None = \
             None if decfloat_traps is None else list(decfloat_traps)
+        "Set DECFLOAT TRAPS [Firebird 4]"
         # For db create
-        #: Database page size [db create only]
         self.page_size: int | None = page_size
-        #: Overwrite existing database [db create only]
+        "Database page size [db create only]"
         self.overwrite: bool = overwrite
-        #: Number of pages in database cache [db create only]
+        "Overwrite existing database [db create only]"
         self.db_buffers: int | None= None
-        #: Database cache size [db create only]
+        "Number of pages in database cache [db create only]"
         self.db_cache_size: int | None = db_cache_size
-        #: Database write mode (True = sync/False = async) [db create only]
+        "Database cache size [db create only]"
         self.forced_writes: bool | None = forced_writes
-        #: Database data page space usage (True = reserve space, False = Use all space) [db create only]
+        "Database write mode (True = sync/False = async) [db create only]"
         self.reserve_space: bool | None = reserve_space
-        #: Database access mode (True = read-only/False = read-write) [db create only]
+        "Database data page space usage (True = reserve space, False = Use all space) [db create only]"
         self.read_only: bool = read_only
-        #: Sweep interval for the database [db create only]
+        "Database access mode (True = read-only/False = read-write) [db create only]"
         self.sweep_interval: int | None = sweep_interval
-        #: SQL dialect for the database [db create only]
+        "Sweep interval for the database [db create only]"
         self.db_sql_dialect: int | None = db_sql_dialect
-        #: Character set for the database [db create only]
+        "SQL dialect for the database [db create only]"
         self.db_charset: str | None = db_charset
-        #: Number of parallel workers
+        "Character set for the database [db create only]"
         self.parallel_workers: int | None = parallel_workers
+        "Number of parallel workers"
     def clear(self) -> None:
         """Clear all information.
         """
@@ -1772,8 +1772,8 @@ class Connection:
         self._encoding: str = CHARSET_MAP.get(charset, 'ascii')
         self._att.encoding = self._encoding
         self._dpb: bytes | None = dpb
-        #: Default TPB for newly created transaction managers
         self.default_tpb: bytes = tpb(Isolation.SNAPSHOT)
+        "Default TPB for newly created transaction managers"
         self._transactions: list[TransactionManager] = []
         self._statements: list[Statement] = []
         #
@@ -2590,10 +2590,10 @@ class TransactionManager:
     def __init__(self, connection: Connection, default_tpb: bytes,
                  default_action: DefaultAction=DefaultAction.COMMIT):
         self._connection: Callable[[], Connection] = weakref.ref(connection, self.__dead_con)
-        #: Default Transaction Parameter Block used to start transaction
         self.default_tpb: bytes = default_tpb
-        #: Default action (commit/rollback) to be performed when transaction is closed.
+        "Default Transaction Parameter Block used to start transaction"
         self.default_action: DefaultAction = default_action
+        "Default action (commit/rollback) to be performed when transaction is closed."
         self.__handle: a.FB_API_HANDLE = None
         self.__info: TransactionInfoProvider | TransactionInfoProvider3 = None
         self._cursors: list = []  # Weak references to cursors
@@ -3326,11 +3326,8 @@ class Cursor:
     Note:
         Implements context manager protocol to call `.close()` automatically.
     """
-    #: This read/write attribute specifies the number of rows to fetch at a time with
-    #: .fetchmany(). It defaults to 1 meaning to fetch a single row at a time.
-    #:
-    #: Required by Python DB API 2.0
     arraysize: int = 1
+    "This read/write attribute specifies the number of rows to fetch at a time with\n.fetchmany(). It defaults to 1 meaning to fetch a single row at a time.\n\nRequired by Python DB API 2.0"
     def __init__(self, connection: Connection, transaction: TransactionManager):
         self._connection: Connection = connection
         self._dialect: int = connection.sql_dialect
@@ -3345,11 +3342,10 @@ class Cursor:
         self.__output_cache: tuple = None
         self.__internal: bool = False
         self.__blob_readers: set = weakref.WeakSet()
-        #: Names of columns that should be returned as `BlobReader`.
         self.stream_blobs: list[str] = []
-        #: BLOBs greater than threshold are returned as `BlobReader` instead in materialized form.
-        #: Defaults to the value from `driver_config`.
+        "Names of columns that should be returned as `BlobReader`."
         self.stream_blob_threshold = driver_config.stream_blob_threshold.value
+        "BLOBs greater than threshold are returned as `BlobReader` instead in materialized form.\nDefaults to the value from `driver_config`."
     def __enter__(self) -> Self:
         return self
     def __exit__(self, exc_type, exc_value, traceback) -> None:
@@ -5599,22 +5595,22 @@ class Server:
     def __init__(self, svc: iService, spb: bytes, host: str, encoding: str,
                  encoding_errors: str):
         self._svc: iService = svc
-        #: Service Parameter Buffer (SPB) used to connect the service manager
         self.spb: bytes = spb
-        #: Server host
+        "Service Parameter Buffer (SPB) used to connect the service manager"
         self.host: str = host
-        #: Service output mode (line or eof)
+        "Server host"
         self.mode: SrvInfoCode = SrvInfoCode.TO_EOF
-        #: Timeout in seconds for server output queries; -1 waits indefinitely
+        "Service output mode (line or eof)"
         self.query_timeout: int = INFINITE_TIMEOUT
-        #: Response buffer used to communicate with service
+        "Timeout in seconds for server output queries; -1 waits indefinitely"
         self.response: CBuffer = CBuffer(USHRT_MAX)
+        "Response buffer used to communicate with service"
         self._eof: bool = False
         self.__line_buffer: list[str] = []
-        #: Encoding used for text data exchange with server
         self.encoding: str = encoding
-        #: Handler used for encoding errors. See: `codecs#error-handlers`
+        "Encoding used for text data exchange with server"
         self.encoding_errors: str = encoding_errors
+        "Handler used for encoding errors. See: `codecs#error-handlers`"
         #
         self.__ev: float = None
         self.__info: ServerInfoProvider = None
