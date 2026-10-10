@@ -5767,7 +5767,10 @@ class Server:
           With the default `.query_timeout` this method blocks until output is available.
         """
         while True:
-            if self.__line_buffer and (self.__line_buffer[0].endswith('\n') or self._eof):
+            # Only the last buffered piece can be an incomplete line; earlier ones ended on
+            # another `splitlines()` boundary (e.g. a bare '\r' inside SQL text).
+            if self.__line_buffer and (len(self.__line_buffer) > 1
+                                       or self.__line_buffer[0].endswith('\n') or self._eof):
                 return self.__line_buffer.pop(0)
             if self._eof:
                 return None
