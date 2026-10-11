@@ -3826,7 +3826,7 @@ class Cursor:
                     segment_size = blob.get_info2(BlobInfoCode.MAX_SEGMENT)
                     # Check if stream BLOB is requested instead materialized one
                     if ((self.stream_blobs and (desc.alias if desc.alias != desc.field else desc.field) in self.stream_blobs)
-                        or (blob_length > self.stream_blob_threshold)):
+                        or (self.stream_blob_threshold != -1 and blob_length > self.stream_blob_threshold)):
                         # Stream BLOB
                         value = BlobReader(blob, blobid, desc.subtype, blob_length,
                                            segment_size, self._encoding, self)
