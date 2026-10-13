@@ -1573,9 +1573,10 @@ handle does not work with interfaces."""
         buffer = create_string_buffer(1024)
         self.vtable.formatStatus(self, buffer, 1024, status)
         return buffer.value.decode(encoding, errors='replace')
-    def get_client_version(self) -> int:
-        "Returns integer, containing major version in byte 0 and minor version in byte 1"
-        return self.vtable.getClientVersion(self)
+    def get_client_version(self) -> tuple[int, int]:
+        "Returns the client library's major and minor version numbers."
+        version = self.vtable.getClientVersion(self)
+        return version >> 8, version & 0xff
     def get_xpb_builder(self, kind: XpbKind, buffer: bytes |None=None) -> iXpbBuilder:
         "Returns XpbBuilder interface."
         if buffer is None:
