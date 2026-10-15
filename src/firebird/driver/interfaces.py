@@ -2027,5 +2027,6 @@ def __augment_api(api: a.FirebirdAPI) -> None:
     setattr(sys.modules[__name__], '_util', _master.get_util_interface()) # noqa:B010
     api.master: iMaster = _master
     api.util: iUtil = _util
+    api._initialize_provider()
 
 add_hook(APIHook.LOADED, a.FirebirdAPI, __augment_api)

@@ -10,3 +10,4 @@ When changing a public symbol, check whether it must be exported here and docume
 `docs/docs/ref-main.md` or another API page. Keep implementations in their owning modules.
 Check imports after export changes because importing `firebird.driver` loads several
 implementation modules and registers API hooks.
+`FirebirdProvider` is exported as a public protocol; the driver's own implementation stays private.

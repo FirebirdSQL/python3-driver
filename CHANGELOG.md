@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 
+- A runtime provider protocol and provider-based client library selection through `load_api()`.
 - Firebird 6 trace session plugin support: `ServerTraceServices.start()` accepts plugin names,
   and `TraceSession` reports the plugins returned by the service manager.
 - Configurable `Server.query_timeout` and a `TIMEOUT` sentinel for timed text output queries.
@@ -25,6 +26,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- Decode `iUtil.get_client_version()` into major and minor version numbers.
 - GH-69: Avoid detaching an already released Firebird 5 attachment during garbage collection.
 - Keep the trace session `plugins` argument optional for existing callers.
 - Correct historical changelog issue references and links for Markdown rendering in Zensical.

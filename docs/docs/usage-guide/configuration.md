@@ -28,6 +28,24 @@ configuration string, dict or file(s).
     calls any from following functions: [`connect()`](../ref-core.md#firebird.driver.core.connect), [`create_database()`](../ref-core.md#firebird.driver.core.create_database),
     [`connect_server()`](../ref-core.md#firebird.driver.core.connect_server), [`load_api()`](../ref-fbapi.md#firebird.driver.fbapi.load_api) or [`get_api()`](../ref-fbapi.md#firebird.driver.fbapi.get_api).
 
+You can also call `load_api(provider)` with an instance of a runtime provider, such as one
+advertised by the `firebird.runtime.providers` entry-point group. Entry points expose provider
+classes; select and instantiate the desired class in your application. The driver does not
+automatically choose an installed provider. The selected provider is available as the read-only
+`get_api().provider` property. For an explicit filename or a system client, the driver uses its
+own provider and obtains the runtime root and client version after loading the API.
+
+For example, to select the `firebird-embedded` provider by entry-point name:
+
+```python
+from importlib.metadata import entry_points
+from firebird.driver import load_api
+
+provider_entry = next(ep for ep in entry_points(group='firebird.runtime.providers')
+                      if ep.name == 'firebird')
+load_api(provider_entry.load()())
+```
+
 !!! info
 
     [`DriverConfig`](../ref-config.md#firebird.driver.config.DriverConfig) for list of available methods and parameters.

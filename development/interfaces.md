@@ -12,4 +12,6 @@ disposable wrappers dispose their interfaces. Status checking translates Firebir
 vectors into driver errors or warnings. On `APIHook.LOADED`, the module obtains the master
 and utility interfaces and attaches them to the API object. Check wrapper changes against
 the matching `fbapi.py` declarations and run integration tests for the Firebird versions
-they affect.
+they affect. The same hook completes metadata for the private driver provider using the root
+directory and client version reported by the loaded API. `iUtil.get_client_version()` returns
+`(major, minor)`.

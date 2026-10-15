@@ -27,6 +27,7 @@ nav = [
     { "Hooks" = "ref-hooks.md" },
     { "Interfaces" = "ref-intf.md" },
     { "Client API" = "ref-fbapi.md" },
+    { "Runtime provider" = "ref-provider.md" },
   ] },
   { "Changelog" = "changelog.md" },
   { "License" = "license.md" },
@@ -71,7 +72,7 @@ find_stubs_package = true
 
 [project.plugins.llmstxt]
 enabled = true
-markdown_description = "For driver version 2.0.3"
+markdown_description = "For driver version 2.1.0.dev0"
 sections = {
 "Usage Guide" = [
     "usage-guide/driver-structure.md" ,
@@ -94,5 +95,6 @@ sections = {
     "ref-hooks.md",
     "ref-intf.md",
     "ref-fbapi.md",
+    "ref-provider.md",
   ],
 }

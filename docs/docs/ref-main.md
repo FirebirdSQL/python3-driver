@@ -66,3 +66,7 @@ Helper functions:
 
 
 Functions `load_api()` and `get_api()`.
+
+### provider
+
+Protocol: `FirebirdProvider`.

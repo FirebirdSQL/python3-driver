@@ -6,6 +6,7 @@ Source code is currently divided into next submodules:
 * `interfaces` - Interface wrappers for Firebird new API
 * `core` - Main driver source code.
 * `fbapi` - Python `ctypes` interface to Firebird client library.
+* `provider` - Runtime provider contract for selecting a client library.
 * `config` - Driver configuration.
 * `hooks` - Drivers hooks.
 

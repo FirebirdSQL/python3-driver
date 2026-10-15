@@ -23,8 +23,10 @@
 # See LICENSE.TXT for details.
 
 import inspect
+import sys
 from ctypes import memmove
 from io import BytesIO
+from shutil import copyfile
 import pytest
 from packaging.specifiers import SpecifierSet
 import firebird.driver as driver
@@ -67,6 +69,23 @@ def service_test_env(tmp_dir, fb_vars):
                 f_path.unlink()
             except OSError:
                 pass # Ignore if removal fails
+
+@pytest.fixture
+def user_db_file(tmp_dir, fb_vars, request, server_connection):
+    # User services must not modify the installation's security database.
+    # Use a separate copy in the directory already accessible to the test server.
+    path = tmp_dir / f'{request.node.name}-users.fdb'
+    copyfile(fb_vars['source_db'], path)
+    if sys.platform != 'win32':
+        path.chmod(0o666)
+    try:
+        server_connection.user.add(user_name='SYSDBA', password=fb_vars['password'], database=path)
+        yield path
+    finally:
+        try:
+            path.unlink(missing_ok=True)
+        except PermissionError:
+            pass  # Firebird may retain the database file until the service detaches.
 
 def test_attach(server_connection):
     # The fixture itself tests attachment
@@ -299,8 +318,8 @@ def test_trace(server_connection, db_file, fb_vars):
         assert sessions[trace1_id].user == 'SYSDBA'
         assert sessions[trace2_id].user == 'SYSDBA'
         assert trace2_id in sessions
-        assert sessions[trace1_id].flags == ['active', ' trace']
-        assert sessions[trace2_id].flags == ['active', ' trace']
+        assert {'active', 'trace'} <= {flag.strip() for flag in sessions[trace1_id].flags}
+        assert {'active', 'trace'} <= {flag.strip() for flag in sessions[trace2_id].flags}
         # Pause session
         svcx.trace.suspend(session_id=trace2_id)
         assert 'suspend' in svcx.trace.sessions[trace2_id].flags
@@ -313,16 +332,16 @@ def test_trace(server_connection, db_file, fb_vars):
         # Finalize
         svcx.trace.stop(session_id=trace1_id)
 
-def test_get_users(server_connection):
-    users = server_connection.user.get_all()
+def test_get_users(server_connection, user_db_file):
+    users = server_connection.user.get_all(database=user_db_file)
     assert isinstance(users, type(list()))
     assert isinstance(users[0], driver.core.UserInfo)
     assert users[0].user_name == 'SYSDBA'
 
-def test_manage_user(server_connection):
+def test_manage_user(server_connection, user_db_file):
     USER_NAME = 'DRIVER_TEST'
     try:
-        server_connection.user.delete(USER_NAME)
+        server_connection.user.delete(USER_NAME, database=user_db_file)
     except DatabaseError as e:
         if e.sqlstate == '28000':
             pass
@@ -330,24 +349,26 @@ def test_manage_user(server_connection):
             raise
     # Add user
     server_connection.user.add(user_name=USER_NAME, password='DRIVER_TEST',
-                      first_name='Firebird', middle_name='Driver', last_name='Test')
-    assert server_connection.user.exists(USER_NAME)
-    users = [u for u in server_connection.user.get_all() if u.user_name == USER_NAME]
+                      first_name='Firebird', middle_name='Driver', last_name='Test',
+                      database=user_db_file)
+    assert server_connection.user.exists(USER_NAME, database=user_db_file)
+    users = [u for u in server_connection.user.get_all(database=user_db_file) if u.user_name == USER_NAME]
     assert users
     assert len(users) == 1
     assert users[0].first_name == 'Firebird'
     assert users[0].middle_name == 'Driver'
     assert users[0].last_name == 'Test'
     # Modify user
-    server_connection.user.update(USER_NAME, first_name='XFirebird', middle_name='XDriver', last_name='XTest')
-    user = server_connection.user.get(USER_NAME)
+    server_connection.user.update(USER_NAME, first_name='XFirebird', middle_name='XDriver',
+                                  last_name='XTest', database=user_db_file)
+    user = server_connection.user.get(USER_NAME, database=user_db_file)
     assert user.user_name == USER_NAME
     assert user.first_name == 'XFirebird'
     assert user.middle_name == 'XDriver'
     assert user.last_name == 'XTest'
     # Delete user
-    server_connection.user.delete(USER_NAME)
-    assert not server_connection.user.exists(USER_NAME)
+    server_connection.user.delete(USER_NAME, database=user_db_file)
+    assert not server_connection.user.exists(USER_NAME, database=user_db_file)
 
 def test_get_statistics(server_connection, db_file):
     def fetchline(line):

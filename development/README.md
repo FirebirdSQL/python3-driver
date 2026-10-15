@@ -18,6 +18,7 @@ wrappers, types, and hooks. Read the module note before changing its source:
 | `fbapi.py` | [fbapi.md](fbapi.md) | `ctypes` bindings and client library loading |
 | `hooks.py` | [hooks.md](hooks.md) | Driver hook kinds and registration imports |
 | `interfaces.py` | [interfaces.md](interfaces.md) | Firebird object API wrappers |
+| `provider.py` | [provider.md](provider.md) | Runtime provider contract and system-client selection |
 | `types.py` | [types.md](types.md) | DB API exceptions, constants, flags, and data types |
 
 The package requires Python 3.11 or newer and depends on `firebird-base` and `python-dateutil`.
@@ -32,14 +33,15 @@ database entry. A working client library, server, and matching test database are
 needed even for many narrowly selected tests.
 
 From the repository root, `hatch test` runs the default test environment; `hatch test -a`
-runs its Python 3.11–3.14 matrix. The `hatch-test` environment in `pyproject.toml` passes
-`--host=localhost` by default. `tests/conftest.py` also accepts `--host`, `--port`, `--client-lib`,
+runs the Python and backend matrix in `pyproject.toml`. The `local` backend passes
+`--host=localhost`; `localem` uses a local embedded connection. Select a single Python 3.11
+backend during development, for example `hatch test -i backend=localem -py 3.11`.
+`tests/conftest.py` also accepts `--host`, `--port`, `--client-lib`,
 `--driver-config`, and `--server`. Use a focused test file while developing, then run the
 wider suite when the prepared Firebird environment is available. Do not treat a missing server
 or client library as a passing test.
 
-For embedded-mode testing, remove the `--host=localhost` extra argument from `[tool.hatch.envs.hatch-test]`
-in `pyproject.toml` and provide a suitable local client library. Alternatively, use a driver
+For embedded-mode testing, provide a suitable local client library. Alternatively, use a driver
 configuration file with `--driver-config` and select a named server with `--server`. Check
 `tests/conftest.py` for how these options are applied before the API is loaded.
 

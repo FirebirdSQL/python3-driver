@@ -41,7 +41,6 @@ import ctypes
 import decimal
 import platform
 import sys
-from contextlib import suppress
 from ctypes import (
     CFUNCTYPE,
     POINTER,
@@ -64,13 +63,13 @@ from ctypes import (
     cast,
     create_string_buffer,
 )
-from ctypes.util import find_library
 from locale import getpreferredencoding
 from pathlib import Path
 from typing import ClassVar
 
 from .config import driver_config
 from .hooks import APIHook, get_callbacks, register_class
+from .provider import FirebirdProvider, _DriverProvider
 
 # Constants
 
@@ -1929,10 +1928,12 @@ class FirebirdAPI:
     for bindings.
 
     Arguments:
-        filename (`~pathlib.Path`): Firebird client library to be loaded. If it's not provided,
-            the driver uses `ctypes.util.find_library()` to locate the library.
+        filename: Client library filename or runtime provider. When omitted, the driver
+            locates a system client library.
+        provider: Runtime provider supplied by keyword, as an alternative to `filename`.
 
     Attributes:
+        provider (`.FirebirdProvider`): Runtime provider used to load this API
         client_library (`ctypes.CDLL`): Loaded Firebird client library `ctypes` handler
         client_library_name (`~pathlib.Path`): Path to loaded Firebird client library
         master (iMaster): Firebird API IMaster interface
@@ -2052,26 +2053,15 @@ class FirebirdAPI:
             Old API function.
 
     """
-    def __init__(self, filename: Path | None=None):
+    def __init__(self, filename: FirebirdProvider | str | Path | None=None,
+                 *, provider: FirebirdProvider | None=None):
         decimal.getcontext().prec = 34
-        if filename is None:
-            if sys.platform == 'darwin':
-                filename = find_library('Firebird')
-            elif sys.platform == 'win32':
-                filename = find_library('fbclient.dll')
-            else:
-                filename = find_library('fbclient')
-                if not filename:
-                    with suppress(Exception):
-                        ctypes.CDLL('libfbclient.so')
-                        filename = 'libfbclient.so'
-            if not filename:
-                raise Exception("The location of Firebird Client Library could not be determined.")
-        elif not filename.exists():
-            file_name = find_library(filename.name)
-            if not file_name:
-                raise Exception(f"Firebird Client Library '{filename}' not found")
-            filename = file_name
+        if filename is not None and provider is not None:
+            raise TypeError('Specify either filename or provider')
+        selected = provider if provider is not None else filename
+        self._provider = _DriverProvider(selected) if selected is None or isinstance(selected, (str, Path)) \
+            else selected
+        filename = self._provider.client_library
         self.client_library: ctypes.CDLL = None
         "Firebird client library"
         if sys.platform in ('win32', 'cygwin', 'os2', 'os2emx'):
@@ -2216,6 +2206,19 @@ class FirebirdAPI:
         self.master = None
         self.util = None
 
+    @property
+    def provider(self) -> FirebirdProvider:
+        """Runtime provider used by this API, available after initialization."""
+        if isinstance(self._provider, _DriverProvider) and self._provider._root is None:
+            raise RuntimeError('Provider metadata is not initialized')
+        return self._provider
+
+    def _initialize_provider(self) -> None:
+        """Complete metadata for the driver's own runtime provider."""
+        if isinstance(self._provider, _DriverProvider):
+            root = self.master.get_config_manager().get_root_directory()
+            self._provider._initialize(root, self.util.get_client_version())
+
     def isc_event_block(self, event_buffer: bytes, result_buffer: bytes, *args) -> int:
         """Convenience wrapper for isc_event_block() API function. Injects variable
         number of parameters into `C_isc_event_block` call.
@@ -2232,16 +2235,13 @@ def has_api() -> bool:
     """
     return api is not None
 
-def load_api(filename: str | Path | None=None) -> None:
+def load_api(filename: str | Path | FirebirdProvider | None=None) -> None:
     """Initializes bindings to Firebird Client Library unless they are already initialized.
     Called automatically by `get_api()`.
 
     Args:
-        filename: Path to Firebird Client Library.
-        When it's not specified, driver does its best to locate appropriate client library.
-
-    Returns:
-        `FirebirdAPI` instance.
+        filename: Client library filename or runtime provider. When omitted, the configured
+            filename is used, or the driver locates a system client library.
 
     Hooks:
         Event `HookType.HOOK_API_LOADED`: Executed after api is initialized.
@@ -2251,12 +2251,18 @@ def load_api(filename: str | Path | None=None) -> None:
     if not has_api():
         if filename is None:
             filename = driver_config.fb_client_library.value
-        if filename and not isinstance(filename, Path):
-            filename = Path(filename)
-        _api = FirebirdAPI(filename)
+        if isinstance(filename, str) and not filename:
+            filename = None
+        if filename is None or isinstance(filename, (str, Path)):
+            filename = _DriverProvider(filename)
+        _api = FirebirdAPI(provider=filename)
         setattr(sys.modules[__name__], 'api', _api) # noqa: B010
-        for hook in get_callbacks(APIHook.LOADED, _api):
-            hook(_api)
+        try:
+            for hook in get_callbacks(APIHook.LOADED, _api):
+                hook(_api)
+        except Exception:
+            setattr(sys.modules[__name__], 'api', None) # noqa: B010
+            raise
 
 def get_api() -> FirebirdAPI:
     """Returns Firebird API. Loads the API if needed.
