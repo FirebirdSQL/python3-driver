@@ -497,23 +497,33 @@ def test_restore(server_connection, db_file, service_test_env):
             c.execute('select * from country')
             assert len(c.fetchall()) > 0
 
-def test_local_backup(server_connection, db_file, service_test_env):
+def test_local_backup(server_connection, db_file, dsn, service_test_env):
     fbk = service_test_env['fbk']
-    server_connection.database.backup(database=db_file, backup=fbk)
-    server_connection.wait()
-    with open(fbk, mode='rb') as f:
-        f.seek(68)  # Wee must skip after backup creation time (68) that will differ
-        bkp = f.read()
+    rfdb = service_test_env['rfdb']
+    rfdb_dsn = service_test_env['rfdb_dsn']
+    with connect(dsn) as source:
+        with source.cursor() as cursor:
+            cursor.execute('select country, currency from country order by country')
+            expected_countries = cursor.fetchall()
+            cursor.execute('select count(*) from sales')
+            expected_sales_count = cursor.fetchone()[0]
+    assert expected_countries
+    assert expected_sales_count > 0
+
     backup_stream = BytesIO()
     server_connection.database.local_backup(database=db_file, backup_stream=backup_stream)
-    backup_stream.seek(68)
-    lbkp = backup_stream.read()
-    stop = min(len(bkp), len(lbkp))
-    i = 0
-    while i < stop:
-        assert bkp[i] == lbkp[i]
-        i += 1
-    del bkp
+    assert backup_stream.tell() > 0
+    # Restore the streamed backup through the regular file-based service path.
+    # This verifies its contents without relying on version-specific backup bytes.
+    fbk.write_bytes(backup_stream.getvalue())
+    server_connection.database.restore(backup=fbk, database=rfdb, flags=SrvRestoreFlag.REPLACE)
+    server_connection.wait()
+    with connect(rfdb_dsn) as restored:
+        with restored.cursor() as cursor:
+            cursor.execute('select country, currency from country order by country')
+            assert cursor.fetchall() == expected_countries
+            cursor.execute('select count(*) from sales')
+            assert cursor.fetchone()[0] == expected_sales_count
 
 def test_local_restore(server_connection, db_file, service_test_env):
     rfdb = service_test_env['rfdb']
