@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Updated repository funding information and removed the unused `gdocs` build environment.
 - Added Firebird 3, 4, and 5 embedded test backends with provider selection and runtime details
   in the pytest session header.
+- Documented version guards for Firebird features introduced in separate minor releases of
+  supported branches.
 
 ### Fixed
 
@@ -34,6 +36,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Keep the trace session `plugins` argument optional for existing callers.
 - Correct historical changelog issue references and links for Markdown rendering in Zensical.
 - Allow server log tests to pass when the log exists but has no entries.
+- Isolate connection hooks between tests and close the connection supplied by the attach hook test.
+- Make Firebird 3 integration tests respect feature availability, roll back failed fixture cleanup,
+  and avoid timing assumptions for short service actions.
 
 ## [2.0.3] - 2026-04-20
 

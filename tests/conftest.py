@@ -247,15 +247,17 @@ def db_connection(driver_cfg):
         conn.close()
 
 @pytest.fixture(autouse=True)
-def db_cleanup(db_connection):
+def db_cleanup(db_connection, fb_vars):
     # Clean common test tables before each test using this fixture
     try:
         with db_connection.cursor() as cur:
             cur.execute("delete from t")
             cur.execute("delete from t2")
-            cur.execute("delete from FB4")
+            if fb_vars['version'] in SpecifierSet('>=4.0'):
+                cur.execute("delete from FB4")
             db_connection.commit()
     except Exception as e:
+        db_connection.rollback()
         # Ignore errors if tables don't exist, log others
         if "Table unknown" not in str(e):
             print(f"Warning: Error during pre-test cleanup: {e}")

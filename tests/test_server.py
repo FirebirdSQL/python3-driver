@@ -131,18 +131,19 @@ def test_query(server_connection, fb_vars, dsn, db_file):
     with pytest.raises(Error, match="feature is not supported"): # More specific error?
         svc.info.get_info(255) # Use an invalid code
 
-def test_running(server_connection):
-    assert not server_connection.is_running()
-    server_connection.info.get_log() # Start an async service
+def test_running(server_connection, monkeypatch):
+    # A real service can finish before its state is queried, especially with an empty log.
+    states = iter((1, 0))
+    def running(info_code):
+        assert info_code is SrvInfoCode.RUNNING
+        return next(states)
+    monkeypatch.setattr(server_connection.info, 'get_info', running)
     assert server_connection.is_running()
-    # fetch materialized
-    server_connection.readlines() # Read all output
     assert not server_connection.is_running()
 
 def test_wait(server_connection):
     assert not server_connection.is_running()
     server_connection.info.get_log()
-    assert server_connection.is_running()
     server_connection.wait() # Wait for service to finish
     assert not server_connection.is_running()
 

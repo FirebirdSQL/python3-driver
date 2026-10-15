@@ -41,7 +41,7 @@ from firebird.driver.core import TPB, DPB, SPB_ATTACH
 from firebird.driver.types import (TraAccessMode, Isolation, TableShareMode, TableAccessMode,
                                    DBKeyScope, ReplicaMode, DecfloatRound, DecfloatTraps)
 
-def test_tpb_parsing():
+def test_tpb_parsing(fb_vars):
     """Tests TPB buffer creation and parsing."""
     # Test case 1: Default values
     tpb1 = TPB()
@@ -64,7 +64,7 @@ def test_tpb_parsing():
                no_auto_undo=True,
                auto_commit=True,
                ignore_limbo=True,
-               at_snapshot_number=12345,
+               at_snapshot_number=12345 if fb_vars['version'].major >= 4 else None,
                encoding='iso8859_1')
     tpb1.reserve_table('TABLE1', TableShareMode.PROTECTED, TableAccessMode.LOCK_READ)
     tpb1.reserve_table('TABLE2', TableShareMode.SHARED, TableAccessMode.LOCK_WRITE)
@@ -90,11 +90,13 @@ def test_tpb_parsing():
     assert tpb1.isolation == tpb2.isolation
     assert tpb1.lock_timeout == tpb2.lock_timeout
 
-    tpb1 = TPB(isolation=Isolation.READ_COMMITTED_READ_CONSISTENCY)
-    buffer1 = tpb1.get_buffer()
-    tpb2 = TPB()
-    tpb2.parse_buffer(buffer1)
-    assert tpb1.isolation == tpb2.isolation
+    # Snapshot sharing and READ CONSISTENCY were introduced in Firebird 4.0.
+    if fb_vars['version'].major >= 4:
+        tpb1 = TPB(isolation=Isolation.READ_COMMITTED_READ_CONSISTENCY)
+        buffer1 = tpb1.get_buffer()
+        tpb2 = TPB()
+        tpb2.parse_buffer(buffer1)
+        assert tpb1.isolation == tpb2.isolation
 
 def test_dpb_parsing():
     """Tests DPB buffer creation and parsing."""

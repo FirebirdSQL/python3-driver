@@ -50,6 +50,19 @@ source database, which the fixtures copy for the run. The `fb3em` backend instal
 Alternatively, use a driver configuration file with `--driver-config` and select a named server
 with `--server`.
 
+## Firebird feature versions
+
+Guard test cases and driver code that use version-specific Firebird features against the tested
+engine version. Features remain available in later releases, but a feature introduced in minor
+releases of multiple supported branches needs a separate threshold for each branch. For example,
+if a feature first appears in 3.0.6 and 4.0.2, a check for `>=3.0.6` would incorrectly allow
+4.0.0 and 4.0.1. Express that case as `>=3.0.6,<4.0` or `>=4.0.2`, and document the actual
+thresholds beside the guard and here or in the matching module note. Do not infer availability
+from the major version alone when a feature was introduced in a minor release.
+
+Current test examples: snapshot-number and READ CONSISTENCY transaction parameters require
+Firebird 4.0 or newer; `SET DEBUG OPTION DSQL_KEEP_BLR` requires Firebird 4.0.1 or newer.
+
 ## Documentation and packaging
 
 From the repository root, `hatch run doc:build` builds `docs/zensical.toml` and the Markdown

@@ -20,3 +20,6 @@ This file applies to the repository root. All paths below are relative to that r
 - Check pytest's `Firebird:` session header against the intended backend when changing tests or
   fixtures: it reports the configuration, server/version, host, client library, and selected test
   database. The displayed database path is the source file; fixtures test a temporary copy.
+- Guard version-specific features in tests and driver code. Record introduction versions and any
+  separate minor-release thresholds for supported Firebird branches in `development/` when adding
+  or changing a guard; do not assume one lower-bound check covers every branch.

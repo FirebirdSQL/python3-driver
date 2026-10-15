@@ -36,6 +36,12 @@ def _reset_hook_state():
     hook_state.clear()
     hook_manager.remove_all_hooks()
 
+@pytest.fixture(autouse=True)
+def isolated_hooks():
+    _reset_hook_state()
+    yield
+    _reset_hook_state()
+
 def _hook_service_attached(svc):
     hook_state.append("Service attached")
 
@@ -72,29 +78,30 @@ def hook_svc(fb_vars):
         yield svc
 
 def test_hook_db_attached(dsn):
-    _reset_hook_state()
     add_hook(ConnectionHook.ATTACHED, Connection, _hook_db_attached)
     with connect(dsn) as con:
         assert len(hook_state) == 1
         assert hook_state[0] == "Database attached"
 
 def test_hook_db_attach_request(dsn):
-    _reset_hook_state()
     main_con = connect(dsn)
-    add_hook(ConnectionHook.ATTACH_REQUEST, Connection, _hook_db_attach_request_a)
-    with connect(dsn) as con:
-        assert len(hook_state) == 1
-        assert hook_state[0] == "Database attach request NORMAL CONNECT"
+    try:
+        add_hook(ConnectionHook.ATTACH_REQUEST, Connection, _hook_db_attach_request_a)
+        with connect(dsn) as con:
+            assert len(hook_state) == 1
+            assert hook_state[0] == "Database attach request NORMAL CONNECT"
 
-    add_hook(ConnectionHook.ATTACH_REQUEST, Connection, partial(_hook_db_attach_request_b,
-                                                                hook_con_instance=main_con))
-    con = connect(dsn)
-    assert len(hook_state) == 3
-    assert hook_state[2] == "Database attach request PROVIDE CONNECTION"
-    assert con is main_con
+        add_hook(ConnectionHook.ATTACH_REQUEST, Connection, partial(_hook_db_attach_request_b,
+                                                                    hook_con_instance=main_con))
+        con = connect(dsn)
+        assert len(hook_state) == 3
+        assert hook_state[2] == "Database attach request PROVIDE CONNECTION"
+        assert con is main_con
+    finally:
+        hook_manager.remove_all_hooks()
+        main_con.close()
 
 def test_hook_db_closed(dsn):
-    _reset_hook_state()
     with connect(dsn) as con:
         con._test_id_ = 'OUR CONENCTION'
         add_hook(ConnectionHook.CLOSED, con, _hook_db_closed)
@@ -102,7 +109,6 @@ def test_hook_db_closed(dsn):
     assert hook_state[0] == "Database closed: OUR CONENCTION"
 
 def test_hook_db_detach_request(dsn):
-    _reset_hook_state()
     # reject detach
     con = connect(dsn)
     con._test_id_ = 'OUR CONENCTION'
@@ -121,7 +127,6 @@ def test_hook_db_detach_request(dsn):
     assert con.is_closed()
 
 def test_hook_service_attached(fb_vars):
-    _reset_hook_state()
     add_hook(ServerHook.ATTACHED, Server, _hook_service_attached)
     with connect_server(fb_vars['host'], user=fb_vars['user'], password=fb_vars['password']) as svc:
         assert len(hook_state) == 1

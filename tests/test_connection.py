@@ -372,11 +372,13 @@ def test_db_info(db_connection, fb_vars, db_file):
     assert isinstance(con.info.get_info(DbInfoCode.ODS_MINOR_VERSION), int)
 
     assert con.info.get_info(DbInfoCode.CRYPT_KEY) == ''
-    assert con.info.get_info(DbInfoCode.CRYPT_PLUGIN) == ''
-    # DB_GUID can vary, just check format if needed
-    guid = con.info.get_info(DbInfoCode.DB_GUID)
-    assert isinstance(guid, str)
-    assert len(guid) == 38 # Example check for {GUID} format
+    # These database info items were introduced in Firebird 4.0.
+    if fb_vars['version'].major >= 4:
+        assert con.info.get_info(DbInfoCode.CRYPT_PLUGIN) == ''
+        # DB_GUID can vary, just check format if needed
+        guid = con.info.get_info(DbInfoCode.DB_GUID)
+        assert isinstance(guid, str)
+        assert len(guid) == 38 # Example check for {GUID} format
 
 def test_connect_with_driver_config_server_defaults_local(driver_cfg, db_file, fb_vars):
     """
