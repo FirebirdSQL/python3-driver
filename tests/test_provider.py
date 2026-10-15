@@ -5,9 +5,29 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
+import conftest
 
 from firebird.driver import __VERSION__, fbapi
 from firebird.driver.provider import _DriverProvider
+
+
+def test_registered_provider_selection(monkeypatch):
+    provider = object()
+    entry = SimpleNamespace(name='embedded', value='package:Provider', load=lambda: lambda: provider)
+    monkeypatch.setattr(conftest, 'entry_points', lambda *, group: [entry] if group == 'firebird.runtime.providers' else [])
+
+    assert conftest._registered_provider() is provider
+
+    monkeypatch.setattr(conftest, 'entry_points', lambda *, group: [])
+    assert conftest._registered_provider() is None
+
+
+def test_multiple_registered_providers_abort_configuration(monkeypatch):
+    entries = [SimpleNamespace(name=name, value=f'{name}:Provider') for name in ('first', 'second')]
+    monkeypatch.setattr(conftest, 'entry_points', lambda *, group: entries)
+
+    with pytest.raises(pytest.exit.Exception, match='Multiple Firebird runtime providers.*first.*second'):
+        conftest._registered_provider()
 
 
 def test_explicit_library_is_authoritative(tmp_path, monkeypatch):

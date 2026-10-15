@@ -153,17 +153,17 @@ def test_log(server_connection):
     server_connection.info.get_log()
     # fetch materialized
     log = server_connection.readlines()
-    assert log
-    assert isinstance(log, type(list()))
+    # A fresh embedded installation can have an empty log. Check that all
+    # output methods agree without generating a log entry just for this test.
+    assert isinstance(log, list)
     # iterate over result
     server_connection.info.get_log()
-    for line in server_connection:
-        assert line is not None
-        assert isinstance(line, str)
+    iterated = list(server_connection)
+    assert iterated == log
+    assert all(isinstance(line, str) for line in iterated)
     # callback
     output = []
     server_connection.info.get_log(callback=fetchline)
-    assert len(output) > 0
     assert output == log
 
 def test_output_by_line(server_connection):

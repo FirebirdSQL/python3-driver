@@ -17,3 +17,6 @@ This file applies to the repository root. All paths below are relative to that r
 - Check `git status` before editing and preserve unrelated work. Verify changes with the focused
   tests and build commands described in the development README; report any Firebird-dependent
   checks that could not run.
+- Check pytest's `Firebird:` session header against the intended backend when changing tests or
+  fixtures: it reports the configuration, server/version, host, client library, and selected test
+  database. The displayed database path is the source file; fixtures test a temporary copy.

@@ -41,6 +41,11 @@ class FirebirdProvider(Protocol):
         ...
 
     @property
+    def firebird_log(self) -> Path | None:
+        """Path to a directly accessible Firebird log, if available."""
+        ...
+
+    @property
     def capabilities(self) -> frozenset[str]:
         """Features supplied by this runtime."""
         ...
@@ -101,6 +106,11 @@ class _DriverProvider:
     def client_library(self) -> Path:
         """Client library to load."""
         return self._client_library
+
+    @property
+    def firebird_log(self) -> Path | None:
+        """The system client's Firebird log location is not known."""
+        return None
 
     @property
     def capabilities(self) -> frozenset[str]:

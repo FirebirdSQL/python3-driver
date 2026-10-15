@@ -41,9 +41,14 @@ backend during development, for example `hatch test -i backend=localem -py 3.11`
 wider suite when the prepared Firebird environment is available. Do not treat a missing server
 or client library as a passing test.
 
-For embedded-mode testing, provide a suitable local client library. Alternatively, use a driver
-configuration file with `--driver-config` and select a named server with `--server`. Check
-`tests/conftest.py` for how these options are applied before the API is loaded.
+At startup, the tests inspect entry points in `firebird.runtime.providers`. With one provider,
+they set `FIREBIRD` to its runtime root and load its client library before any connection; with
+more than one, setup stops with an error. Without a registered provider, the configured or system
+client library is used. The pytest `Firebird:` header reports the loaded provider and the selected
+source database, which the fixtures copy for the run. The `fb3em` backend installs
+`firebird-embedded~=3.0`; check that its header reports Firebird 3 and `fbtest30.fdb`.
+Alternatively, use a driver configuration file with `--driver-config` and select a named server
+with `--server`.
 
 ## Documentation and packaging
 

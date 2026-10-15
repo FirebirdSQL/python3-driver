@@ -36,6 +36,8 @@
 from __future__ import annotations
 
 from pathlib import Path
+from importlib.metadata import entry_points
+import os
 import platform
 from shutil import copyfile
 from configparser import ConfigParser
@@ -44,7 +46,7 @@ import pytest
 from packaging.specifiers import SpecifierSet
 from packaging.version import parse
 from firebird.base.config import EnvExtendedInterpolation
-from firebird.driver import driver_config, get_api, connect_server, connect, DbInfoCode
+from firebird.driver import driver_config, get_api, load_api, connect_server, connect, DbInfoCode
 from firebird.base.config import ConfigProto
 
 _vars_: dict = {'client-lib': None,
@@ -59,6 +61,14 @@ _vars_: dict = {'client-lib': None,
 _platform: str = platform.system()
 
 # Configuration
+
+def _registered_provider():
+    """Load the sole installed runtime provider, if there is one."""
+    providers = list(entry_points(group='firebird.runtime.providers'))
+    if len(providers) > 1:
+        names = ', '.join(f'{item.name} ({item.value})' for item in providers)
+        pytest.exit(f'Multiple Firebird runtime providers are registered: {names}')
+    return providers[0].load()() if providers else None
 
 def pytest_addoption(parser, pluginmanager):
     """Adds specific pytest command-line options.
@@ -131,8 +141,13 @@ def pytest_configure(config):
             driver_config.server_defaults.port.value = config.getoption('port')
         driver_config.server_defaults.user.value = 'SYSDBA'
         driver_config.server_defaults.password.value = 'masterkey'
-    # THIS should load the driver API, do not connect db or server earlier!
-    _vars_['client-lib'] = get_api().client_library_name
+    # Select a bundled runtime before the first client API load or connection.
+    if provider := _registered_provider():
+        os.environ['FIREBIRD'] = str(provider.root)
+        load_api(provider)
+    api = get_api()
+    _vars_['client-lib'] = api.client_library_name
+    _vars_['provider'] = api.provider
     # Information from server
     with connect_server('') as srv:
         version = parse(srv.info.version.replace('-dev', ''))
@@ -165,6 +180,7 @@ def pytest_report_header(config):
 
     .. seealso:: `pytest documentation <_pytest.hookspec.pytest_report_header>` for details.
     """
+    provider = _vars_['provider']
     return ["Firebird:",
             f"  configuration: {_vars_['firebird-config']}",
             f"  server: {_vars_['server']} [v{_vars_['version']}, {_vars_['arch']}]",
@@ -172,6 +188,11 @@ def pytest_report_header(config):
             f"  home: {_vars_['home-dir']}",
             f"  bin: {_vars_['bin-dir']}",
             f"  client library: {_vars_['client-lib']}",
+            f"  provider: {provider.name} ({type(provider).__module__}.{type(provider).__qualname__})",
+            f"  provider package: {provider.package_version}",
+            f"  provider Firebird: {provider.firebird_version}",
+            f"  provider root: {provider.root}",
+            f"  provider capabilities: {', '.join(sorted(provider.capabilities))}",
             f"  test database: {_vars_['source_db']}",
             ]
 
