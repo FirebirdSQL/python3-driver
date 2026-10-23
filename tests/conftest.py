@@ -37,7 +37,6 @@ from __future__ import annotations
 
 from pathlib import Path
 from importlib.metadata import entry_points
-import os
 import platform
 from shutil import copyfile
 from configparser import ConfigParser
@@ -143,7 +142,6 @@ def pytest_configure(config):
         driver_config.server_defaults.password.value = 'masterkey'
     # Select a bundled runtime before the first client API load or connection.
     if provider := _registered_provider():
-        os.environ['FIREBIRD'] = str(provider.root)
         load_api(provider)
     api = get_api()
     _vars_['client-lib'] = api.client_library_name
