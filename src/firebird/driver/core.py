@@ -2144,7 +2144,7 @@ def tpb(isolation: Isolation, lock_timeout: int=INFINITE_TIMEOUT,
     Arguments:
         isolation: Isolation level.
         lock_timeout: Lock timeout (-1 = Infinity)
-        access: Access mode.
+        access_mode: Access mode.
     """
     return TPB(isolation=isolation, lock_timeout=lock_timeout, access_mode=access_mode).get_buffer()
 
@@ -3345,7 +3345,7 @@ class Cursor:
         self.stream_blobs: list[str] = []
         "Names of columns that should be returned as `BlobReader`."
         self.stream_blob_threshold = driver_config.stream_blob_threshold.value
-        "BLOBs greater than threshold are returned as `BlobReader` instead in materialized form.\nDefaults to the value from `driver_config`."
+        "BLOBs greater than threshold are returned as `BlobReader` instead of materialized values.\nSet to -1 to disable automatic streaming. Defaults to the value from `driver_config`."
     def __enter__(self) -> Self:
         return self
     def __exit__(self, exc_type, exc_value, traceback) -> None:
@@ -4550,7 +4550,7 @@ class ServerDbServices3(ServerServiceProvider):
                flags: SrvBackupFlag=SrvBackupFlag.NONE, role: str | None=None,
                callback: CB_OUTPUT_LINE | None=None, stats: str | None=None,
                verbose: bool=False, verbint: int | None=None, skip_data: str | None=None,
-               include_data: str | None=None, keyhoder: str | None=None, keyname: str | None=None,
+               include_data: str | None=None, keyholder: str | None=None, keyname: str | None=None,
                crypt: str | None=None, parallel_workers: int | None=None) -> None:
         """Request logical (GBAK) database backup. **(ASYNC service)**
 
@@ -4566,7 +4566,7 @@ class ServerDbServices3(ServerServiceProvider):
             verbint: Verbose information with explicit interval (number of records)
             skip_data: String with table names whose data should be excluded from backup.
             include_data: String with table names whose data should be included into backup [Firebird 4].
-            keyholder: Keyholder name [Firebird 4]
+            keyholder: Keyholder name [Firebird 4].
             keyname: Key name [Firebird 4]
             crypt: Encryption specification [Firebird 4]
             parallel_workers: Number of parallel workers [Firebird 5]
@@ -4587,8 +4587,8 @@ class ServerDbServices3(ServerServiceProvider):
                 spb.insert_string(SrvBackupOption.SKIP_DATA, skip_data)
             if include_data is not None:
                 spb.insert_string(SrvBackupOption.INCLUDE_DATA, include_data)
-            if keyhoder is not None:
-                spb.insert_string(SrvBackupOption.KEYHOLDER, keyhoder)
+            if keyholder is not None:
+                spb.insert_string(SrvBackupOption.KEYHOLDER, keyholder)
             if keyname is not None:
                 spb.insert_string(SrvBackupOption.KEYNAME, keyname)
             if crypt is not None:
@@ -4614,7 +4614,7 @@ class ServerDbServices3(ServerServiceProvider):
                 verbose: bool=False, verbint: int | None=None, skip_data: str | None=None,
                 page_size: int | None=None, buffers: int | None=None,
                 access_mode: DbAccessMode=DbAccessMode.READ_WRITE, include_data: str | None=None,
-                keyhoder: str | None=None, keyname: str | None=None, crypt: str | None=None,
+                keyholder: str | None=None, keyname: str | None=None, crypt: str | None=None,
                 replica_mode: ReplicaMode | None=None, parallel_workers: int | None=None) -> None:
         """Request database restore from logical (GBAK) backup. **(ASYNC service)**
 
@@ -4633,7 +4633,7 @@ class ServerDbServices3(ServerServiceProvider):
             buffers: Cache size for restored database.
             access_mode: Restored database access mode (R/W or R/O).
             include_data: String with table names whose data should be included into backup [Firebird 4].
-            keyholder: Keyholder name [Firebird 4]
+            keyholder: Keyholder name [Firebird 4].
             keyname: Key name [Firebird 4]
             crypt: Encryption specification [Firebird 4]
             replica_mode: Replica mode for restored database [Firebird 4]
@@ -4663,8 +4663,8 @@ class ServerDbServices3(ServerServiceProvider):
                 spb.insert_string(SrvRestoreOption.SKIP_DATA, skip_data, encoding=self._srv().encoding)
             if include_data is not None:
                 spb.insert_string(SrvRestoreOption.INCLUDE_DATA, include_data, encoding=self._srv().encoding)
-            if keyhoder is not None:
-                spb.insert_string(SrvRestoreOption.KEYHOLDER, keyhoder)
+            if keyholder is not None:
+                spb.insert_string(SrvRestoreOption.KEYHOLDER, keyholder)
             if keyname is not None:
                 spb.insert_string(SrvRestoreOption.KEYNAME, keyname)
             if crypt is not None:
@@ -4686,7 +4686,7 @@ class ServerDbServices3(ServerServiceProvider):
                 callback(line)
     def local_backup(self, *, database: FILESPEC, backup_stream: BinaryIO,
                      flags: SrvBackupFlag=SrvBackupFlag.NONE, role: str | None=None,
-                     skip_data: str | None=None, include_data: str | None=None, keyhoder: str | None=None,
+                     skip_data: str | None=None, include_data: str | None=None, keyholder: str | None=None,
                      keyname: str | None=None, crypt: str | None=None) -> None:
         """Request logical (GBAK) database backup into local byte stream. **(SYNC service)**
 
@@ -4697,7 +4697,7 @@ class ServerDbServices3(ServerServiceProvider):
             role: SQL ROLE name passed to gbak.
             skip_data: String with table names whose data should be excluded from backup.
             include_data: String with table names whose data should be included into backup [Firebird 4].
-            keyholder: Keyholder name [Firebird 4]
+            keyholder: Keyholder name [Firebird 4].
             keyname: Key name [Firebird 4]
             crypt: Encryption specification [Firebird 4]
         """
@@ -4715,8 +4715,8 @@ class ServerDbServices3(ServerServiceProvider):
             if include_data is not None:
                 spb.insert_string(SrvBackupOption.INCLUDE_DATA, include_data,
                                   encoding=self._srv().encoding)
-            if keyhoder is not None:
-                spb.insert_string(SrvBackupOption.KEYHOLDER, keyhoder)
+            if keyholder is not None:
+                spb.insert_string(SrvBackupOption.KEYHOLDER, keyholder)
             if keyname is not None:
                 spb.insert_string(SrvBackupOption.KEYNAME, keyname)
             if crypt is not None:
@@ -4730,7 +4730,7 @@ class ServerDbServices3(ServerServiceProvider):
                       flags: SrvRestoreFlag=SrvRestoreFlag.CREATE, role: str | None=None,
                       skip_data: str | None=None, page_size: int | None=None, buffers: int | None=None,
                       access_mode: DbAccessMode=DbAccessMode.READ_WRITE,
-                      include_data: str | None=None, keyhoder: str | None=None, keyname: str | None=None,
+                      include_data: str | None=None, keyholder: str | None=None, keyname: str | None=None,
                       crypt: str | None=None, replica_mode: ReplicaMode | None=None) -> None:
         """Request database restore from logical (GBAK) backup stored in local byte stream.
         **(SYNC service)**
@@ -4746,7 +4746,7 @@ class ServerDbServices3(ServerServiceProvider):
             buffers: Cache size for restored database.
             access_mode: Restored database access mode (R/W or R/O).
             include_data: String with table names whose data should be included into backup [Firebird 4].
-            keyholder: Keyholder name [Firebird 4]
+            keyholder: Keyholder name [Firebird 4].
             keyname: Key name [Firebird 4]
             crypt: Encryption specification [Firebird 4]
             replica_mode: Replica mode for restored database [Firebird 4]
@@ -4772,8 +4772,8 @@ class ServerDbServices3(ServerServiceProvider):
             if include_data is not None:
                 spb.insert_string(SrvRestoreOption.INCLUDE_DATA, include_data,
                                   encoding=self._srv().encoding)
-            if keyhoder is not None:
-                spb.insert_string(SrvRestoreOption.KEYHOLDER, keyhoder)
+            if keyholder is not None:
+                spb.insert_string(SrvRestoreOption.KEYHOLDER, keyholder)
             if keyname is not None:
                 spb.insert_string(SrvRestoreOption.KEYNAME, keyname)
             if crypt is not None:
@@ -5093,13 +5093,12 @@ class ServerDbServices3(ServerServiceProvider):
 
         Arguments:
             database: Database specification or alias.
-            flags: Repair flags.
             include_table: Regex pattern for table names to include in validation run.
             exclude_table: Regex pattern for table names to exclude in validation run.
             include_index: Regex pattern for index names to include in validation run.
             exclude_index: Regex pattern for index names to exclude in validation run.
             lock_timeout: Lock timeout (seconds), used to acquire locks for table to validate,
-              default is 10 secs. 0 is no-wait, -1 is infinite wait.
+                default is 10 secs. 0 is no-wait, -1 is infinite wait.
             role: SQL ROLE name passed to gfix.
             callback: Function to call back with each output line.
         """
@@ -5276,8 +5275,6 @@ class ServerDbServices(ServerDbServices4):
 
         Arguments:
             database: Database specification or alias.
-            flags: Repair flags.
-            role: SQL ROLE name passed to gfix.
         """
         self._srv()._reset_output()
         with a.get_api().util.get_xpb_builder(XpbKind.SPB_START) as spb:
@@ -5369,7 +5366,7 @@ class ServerUserServices(ServerServiceProvider):
             password: User password.
             user_id: User ID.
             group_id: Group ID.
-            firest_name: User's first name.
+            first_name: User's first name.
             middle_name: User's middle name.
             last_name: User's last name.
             admin: Admin flag.
@@ -5414,7 +5411,7 @@ class ServerUserServices(ServerServiceProvider):
             password: User password.
             user_id: User ID.
             group_id: Group ID.
-            firest_name: User's first name.
+            first_name: User's first name.
             middle_name: User's middle name.
             last_name: User's last name.
             admin: Admin flag.
@@ -5859,9 +5856,9 @@ def connect_server(server: str, *, user: str | None=None, password: str | None=N
                      security database)
         role: SQL role used for connection.
         encoding: Encoding for string values passed in parameter buffer. Default is
-           `.ServerConfig.encoding`.
+            `.ServerConfig.encoding`.
         encoding_errors: Error handler used for encoding errors. Default is
-           `.ServerConfig.encoding_errors`.
+            `.ServerConfig.encoding_errors`.
 
     Hooks:
         Event `.ServerHook.ATTACHED`: Executed before `Service` instance is
