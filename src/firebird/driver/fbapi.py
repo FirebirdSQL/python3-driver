@@ -39,6 +39,7 @@ from __future__ import annotations
 
 import ctypes
 import decimal
+import os
 import platform
 import sys
 from ctypes import (
@@ -1932,6 +1933,9 @@ class FirebirdAPI:
             locates a system client library.
         provider: Runtime provider supplied by keyword, as an alternative to `filename`.
 
+    When a runtime provider is supplied, `FIREBIRD` is set to its root before loading the
+    client library if the variable is unset or resolves to a different directory.
+
     Attributes:
         provider (`.FirebirdProvider`): Runtime provider used to load this API
         client_library (`ctypes.CDLL`): Loaded Firebird client library `ctypes` handler
@@ -2016,37 +2020,37 @@ class FirebirdAPI:
         isc_cancel_events():
             Old API function.
 
-        isc_compile_request()
+        isc_compile_request():
             Old API function.
 
-        isc_start_request()
+        isc_start_request():
             Old API function.
 
-        isc_release_request()
+        isc_release_request():
             Old API function.
 
-        isc_receive()
+        isc_receive():
             Old API function.
 
-        isc_start_and_send()
+        isc_start_and_send():
             Old API function.
 
-        isc_send()
+        isc_send():
             Old API function.
 
-        isc_open_blob2()
+        isc_open_blob2():
             Old API function.
 
-        isc_blob_info()
+        isc_blob_info():
             Old API function.
 
-        isc_create_blob2()
+        isc_create_blob2():
             Old API function.
 
-        isc_get_segment()
+        isc_get_segment():
             Old API function.
 
-        isc_put_segment()
+        isc_put_segment():
             Old API function.
 
         isc_close_blob():
@@ -2061,6 +2065,11 @@ class FirebirdAPI:
         selected = provider if provider is not None else filename
         self._provider = _DriverProvider(selected) if selected is None or isinstance(selected, (str, Path)) \
             else selected
+        if not isinstance(self._provider, _DriverProvider):
+            runtime_root = Path(self._provider.root)
+            configured_root = os.environ.get('FIREBIRD')
+            if not configured_root or Path(configured_root).resolve() != runtime_root.resolve():
+                os.environ['FIREBIRD'] = str(runtime_root)
         filename = self._provider.client_library
         self.client_library: ctypes.CDLL = None
         "Firebird client library"
@@ -2242,6 +2251,9 @@ def load_api(filename: str | Path | FirebirdProvider | None=None) -> None:
     Args:
         filename: Client library filename or runtime provider. When omitted, the configured
             filename is used, or the driver locates a system client library.
+
+    A supplied provider sets `FIREBIRD` to its root before loading the client library if
+    the variable is unset or resolves to a different directory.
 
     Hooks:
         Event `HookType.HOOK_API_LOADED`: Executed after api is initialized.
