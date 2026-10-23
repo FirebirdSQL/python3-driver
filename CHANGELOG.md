@@ -4,18 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## Development
+## [2.1.0] - 2026-10-23
 
 ### Added
 
 - A runtime provider protocol and provider-based client library selection through `load_api()`.
-- An optional `FirebirdProvider.firebird_log` path for runtimes with a directly accessible log.
+  `get_api().provider` exposes the selected provider or the driver's internal provider.
 - Firebird 6 trace session plugin support: `ServerTraceServices.start()` accepts plugin names,
   and `TraceSession` reports the plugins returned by the service manager.
 - Configurable `Server.query_timeout` and a `TIMEOUT` sentinel for timed text output queries.
   `readline()` and iteration report timeouts without ending output; `readlines()` omits them.
 - Generated `llms.txt` for the published documentation and a repository skill for coding with
   `firebird-driver`.
+- A `hatch run build-skill` workflow that packages the complete skill as a versioned ZIP for
+  GitHub Releases.
 - Developer guidance in `development/`, including module notes and test and build instructions.
 
 ### Changed
@@ -23,20 +25,31 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Migrated the user documentation and Read the Docs build from Sphinx to Zensical, including
   the API reference and docset workflow.
 - Split the usage guide into topic pages and corrected examples, links, and API descriptions.
-- Updated repository funding information and removed the unused `gdocs` build environment.
+- Improved API reference rendering for class attributes and type annotations, and added
+  light and dark documentation themes.
+- Removed the unused `gdocs` build environment.
+- Declared Python 3.14 and 3.15 in package classifiers and added 3.15 to the test matrix.
 - Added Firebird 3, 4, and 5 embedded test backends with provider selection and runtime details
   in the pytest session header.
+- **BREAKING CHANGE**: Corrected `keyhoder` to `keyholder` in `backup()`, `restore()`,
+  `local_backup()`, and `local_restore()`; the misspelled keyword is no longer accepted.
 - Documented version guards for Firebird features introduced in separate minor releases of
   supported branches.
 
 ### Fixed
 
 - Decode `iUtil.get_client_version()` into major and minor version numbers.
+- Avoid caching a partially initialized client API when an API-loaded hook fails.
+- GH-70: Preserve buffered service output lines after a non-LF line boundary in
+  `Server.readline()`.
+- Treat `stream_blob_threshold=-1` as disabling automatic BLOB streaming.
+- Detect Linux `libEngineXX.so` plugins when reporting the internal provider's embedded capability.
 - GH-69: Avoid detaching an already released Firebird 5 attachment during garbage collection.
 - Keep the trace session `plugins` argument optional for existing callers.
 - Correct historical changelog issue references and links for Markdown rendering in Zensical.
 - Allow server log tests to pass when the log exists but has no entries.
 - Isolate connection hooks between tests and close the connection supplied by the attach hook test.
+- Make the local backup integration test work across supported Firebird versions.
 - Make Firebird 3 integration tests respect feature availability, roll back failed fixture cleanup,
   and avoid timing assumptions for short service actions.
 
