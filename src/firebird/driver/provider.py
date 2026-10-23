@@ -125,7 +125,7 @@ class _DriverProvider:
         if not root:
             raise RuntimeError('The Firebird client did not report a root directory')
         extension = 'dll' if sys.platform == 'win32' else 'so'
-        pattern = re.compile(rf'engine[0-9]+\.{extension}', re.IGNORECASE)
+        pattern = re.compile(rf'(?:lib)?engine[0-9]+\.{extension}', re.IGNORECASE)
         capabilities = {'client'}
         plugins = runtime_root / 'plugins'
         if plugins.is_dir() and any(pattern.fullmatch(path.name) for path in plugins.iterdir()):
