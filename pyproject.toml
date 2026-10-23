@@ -57,6 +57,9 @@ allow-direct-references = true
 dependencies = [
 ]
 
+[tool.hatch.envs.default.scripts]
+build-skill = "python scripts/build_skill.py"
+
 [tool.hatch.envs.hatch-test]
 extra-dependencies = [
   "packaging>=25.0",
@@ -64,9 +67,7 @@ extra-dependencies = [
 
 [[tool.hatch.envs.hatch-test.matrix]]
 python = ["3.11", "3.12", "3.13", "3.14", "3.15"]
-#backend = ["local", "localem"]
 backend = ["local", "localem", "fb3em", "fb4em", "fb5em"]
-
 
 [tool.hatch.envs.hatch-test.overrides]
 matrix.backend.extra-args = { value = ["--host=localhost"], if = ["local"] }
