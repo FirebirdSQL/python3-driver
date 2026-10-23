@@ -75,3 +75,5 @@ publish the Zensical output. Keep user-facing API descriptions in source docstri
 
 The project builds with Hatchling. The version comes from `src/firebird/driver/__init__.py`,
 and Ruff settings are in `pyproject.toml`.
+Run `hatch run build-skill` to package the complete `skills/firebird-driver-python/` directory
+as `dist/firebird-driver-<version>-skill.zip` for a GitHub release.

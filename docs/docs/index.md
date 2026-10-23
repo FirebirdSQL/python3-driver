@@ -33,3 +33,9 @@ written by Helen Borrie and published by [IBPhoenix](http://www.ibphoenix.com).
     You can download docset for [Dash](https://kapeli.com/dash) (MacOS) or [Zeal](https://zealdocs.org/) (Windows / Linux) documentation
 
     readers from [releases](https://github.com/FirebirdSQL/python3-driver/releases) at github.
+
+## Agent skill
+
+The firebird-driver agent skill provides guidance for using individual modules. Download
+`firebird-driver-<version>-skill.zip` from [GitHub Releases](https://github.com/FirebirdSQL/python3-driver/releases)
+and extract its `firebird-driver/` directory into your coding agent's skills directory.
