@@ -28,14 +28,26 @@ configuration string, dict or file(s).
     calls any from following functions: [`connect()`](../ref-core.md#firebird.driver.core.connect), [`create_database()`](../ref-core.md#firebird.driver.core.create_database),
     [`connect_server()`](../ref-core.md#firebird.driver.core.connect_server), [`load_api()`](../ref-fbapi.md#firebird.driver.fbapi.load_api) or [`get_api()`](../ref-fbapi.md#firebird.driver.fbapi.get_api).
 
-You can also call `load_api(provider)` with an instance of a runtime provider, such as one
-advertised by the `firebird.runtime.providers` entry-point group. Entry points expose provider
-classes; select and instantiate the desired class in your application. The driver does not
-automatically choose an installed provider. The selected provider is available as the read-only
-`get_api().provider` property. For an explicit filename or a system client, the driver uses its
-own provider and obtains the runtime root and client version after loading the API.
+!!! info
 
-For example, to select the `firebird-embedded` provider by entry-point name:
+    [`DriverConfig`](../ref-config.md#firebird.driver.config.DriverConfig) for list of available methods and parameters.
+
+## Runtime providers
+
+**New in 2.1.0.** The driver can load a Firebird client library from an object implementing the
+[`FirebirdProvider`](../ref-provider.md#firebird.driver.provider.FirebirdProvider) protocol. A
+provider supplies the library path, runtime root, version, and capabilities. Pass a provider
+instance to [`load_api(provider)`](../ref-fbapi.md#firebird.driver.fbapi.load_api) before the first
+connection or other API load. The driver does not automatically select an installed provider.
+
+If no provider object is explicitly supplied, the driver uses its internal provider. It wraps
+a filename passed to `load_api()` or set in `driver_config.fb_client_library`; otherwise it
+locates a system client library. After the API loads successfully,
+[`get_api().provider`](../ref-fbapi.md#firebird.driver.fbapi.FirebirdAPI.provider) always returns
+an object implementing `FirebirdProvider`: the supplied instance or the internal provider.
+
+Providers may advertise themselves through the `firebird.runtime.providers` entry-point group.
+The following example selects the `firebird-embedded` provider by entry-point name:
 
 ```python
 from importlib.metadata import entry_points
@@ -43,12 +55,21 @@ from firebird.driver import load_api
 
 provider_entry = next(ep for ep in entry_points(group='firebird.runtime.providers')
                       if ep.name == 'firebird')
-load_api(provider_entry.load()())
+provider = provider_entry.load()()
+load_api(provider)
 ```
 
-!!! info
+When loading a supplied provider, the driver sets `FIREBIRD` to its root before loading the
+client library if the variable is unset or points to another directory. An existing value
+that resolves to the same directory is preserved. You do not need to set it in application
+code. For an explicit library filename or a system client, the driver does not change
+`FIREBIRD` because its runtime root is known only after the library loads.
 
-    [`DriverConfig`](../ref-config.md#firebird.driver.config.DriverConfig) for list of available methods and parameters.
+!!! tip "Embedded Firebird runtimes"
+
+    [firebird-embedded packages on PyPI](https://pypi.org/project/firebird-embedded/) provide
+    embedded runtimes for Firebird 3, 4, and 5. Install the major version you need, then select
+    its provider before connecting.
 
 ## Server and database configuration
 

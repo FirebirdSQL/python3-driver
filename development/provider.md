@@ -9,8 +9,8 @@ client API by the `interfaces.py` API-loaded hook. They must not be read before 
 
 The runtime root comes from `IConfigManager.get_root_directory()`, not from the client filename.
 The private provider checks that root's `plugins` directory for a numbered `engineXX` shared
-library to determine whether the embedded capability is present. External provider metadata
-is not changed by the driver.
+library to determine whether the embedded capability is present. The filename may have a `lib`
+prefix, as in Linux `libEngine13.so`. External provider metadata is not changed by the driver.
 
 `firebird_log` is an optional local path in the public protocol. The private driver provider
 returns `None` because a client library does not identify the log of the server it connects to.

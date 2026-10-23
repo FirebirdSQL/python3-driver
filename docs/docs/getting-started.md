@@ -40,6 +40,17 @@ necessary to adjust default configuration, or `register` them in configuration m
 You can manipulate the configuration objects directly, or load configuration from files or
 strings (in `.ini-style` `ConfigParser` format).
 
+## Runtime providers
+
+**New in 2.1.0.** You can select a runtime provider before connecting to supply the client
+library and its runtime files. Without an explicit provider, the driver uses its internal
+provider for a configured or system client library. Once the API loads, `get_api().provider`
+always returns an object implementing the
+[`FirebirdProvider`](ref-provider.md#firebird.driver.provider.FirebirdProvider) protocol. See
+[Runtime providers](usage-guide/configuration.md#runtime-providers) for selection
+and setup, including the [firebird-embedded packages on PyPI](https://pypi.org/project/firebird-embedded/)
+for Firebird 3, 4, and 5.
+
 ## Connecting to a Database
 
 The examples use `employee`, the local alias for the Firebird sample database included

@@ -6,6 +6,7 @@ This module defines DB API exception classes, Firebird protocol and information 
 parameter block items, flags, dataclasses, and typing helpers. It also defines the DB API
 constants `apilevel`, `threadsafety`, and `paramstyle`, plus date/time constructors and
 type objects. Public selections are re-exported by `__init__.py`.
+The `TIMEOUT` sentinel is defined here and exported from the main driver namespace.
 
 Keep numeric protocol values and flag combinations consistent with the Firebird client API.
 If a type or exception changes, check its use in `core.py` and `interfaces.py` and the relevant

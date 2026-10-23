@@ -7,6 +7,12 @@ This module implements the high-level DB API: `connect()`, `create_database()`, 
 and service manager operations. It also builds parameter buffers and exposes version-sensitive
 information providers.
 
+`Cursor.stream_blob_threshold = -1` disables automatic streaming by size; columns named in
+`Cursor.stream_blobs` still use `BlobReader`. `Server.query_timeout` controls text output reads:
+`readline()` and iteration return `TIMEOUT` without ending output, while `readlines()` omits
+the sentinel. Trace session plugin selection through `ServerTraceServices.start(plugins=...)`
+requires Firebird 6 or newer; older versions must omit that argument.
+
 Keep resource ownership aligned with this structure. A `Connection` owns its transaction managers,
 statements, and event collectors; each `Cursor` holds its own transaction manager reference.
 The connection creates a main transaction, a read-only query transaction, and an internal cursor.

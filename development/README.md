@@ -42,8 +42,9 @@ wider suite when the prepared Firebird environment is available. Do not treat a 
 or client library as a passing test.
 
 At startup, the tests inspect entry points in `firebird.runtime.providers`. With one provider,
-they set `FIREBIRD` to its runtime root and load its client library before any connection; with
-more than one, setup stops with an error. Without a registered provider, the configured or system
+they load its client library before any connection. The driver sets `FIREBIRD` to the provider
+root before loading the library if it is unset or points elsewhere. With more than one provider,
+setup stops with an error. Without a registered provider, the configured or system
 client library is used. The pytest `Firebird:` header reports the loaded provider and the selected
 source database, which the fixtures copy for the run. The `fb3em` backend installs
 `firebird-embedded~=3.0`; check that its header reports Firebird 3 and `fbtest30.fdb`.
@@ -62,6 +63,7 @@ from the major version alone when a feature was introduced in a minor release.
 
 Current test examples: snapshot-number and READ CONSISTENCY transaction parameters require
 Firebird 4.0 or newer; `SET DEBUG OPTION DSQL_KEEP_BLR` requires Firebird 4.0.1 or newer.
+Trace session plugin selection requires Firebird 6.0 or newer.
 
 ## Documentation and packaging
 

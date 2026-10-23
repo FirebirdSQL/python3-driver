@@ -185,7 +185,8 @@ These drawbacks are addressed by `stream` BLOBs. Using BLOBs in `stream` mode is
     string/bytes value.
 
     Zero threshold value effectively forces all blobs to be returned as stream blobs.
-    Negative value means no size limit for materialized blobs (use at your own risk).
+    A threshold of `-1` disables automatic streaming by size, leaving no size limit for
+    materialized blobs (use at your own risk). Other negative values do not disable it.
     Please note that positive threshold value means that your application has to be
     prepared to handle BLOBs in both incarnations.
 

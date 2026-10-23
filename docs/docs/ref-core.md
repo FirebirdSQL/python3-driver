@@ -30,8 +30,6 @@ This is the main code module of the Firebird driver.
 
 ::: firebird.driver.core._util
 
-::: firebird.driver.core.TIMEOUT
-
 ## Context managers
 
 ::: firebird.driver.core.transaction

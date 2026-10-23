@@ -7,8 +7,11 @@ and the `FirebirdAPI` loader. `get_api()` calls `load_api()` on first use; the l
 is cached in the module. An explicit filename, provider instance, or
 `driver_config.fb_client_library.value` selects the client library before first load. Filenames
 are wrapped in the private driver provider; provider instances are used directly. The
-`APIHook.LOADED` callbacks initialize the private provider after the master and utility
-interfaces are available.
+loader sets `FIREBIRD` to an external provider's root before loading its client library when
+the variable is unset or resolves to another directory. It leaves an equivalent existing
+path unchanged. The private driver provider has no root metadata until after loading, so
+this automatic setup applies only to supplied providers. `APIHook.LOADED` callbacks initialize
+the private provider after the master and utility interfaces are available.
 
 Changes to C layouts, pointer types, or signatures can affect every higher-level wrapper.
 Compare them with the supported Firebird client API and run focused integration tests on

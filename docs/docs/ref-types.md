@@ -45,6 +45,11 @@ UserWarning
 |__FirebirdWarning
 
 ```
+
+## Sentinels
+
+::: firebird.driver.types.TIMEOUT
+
 ## Other constants and types required by Python DB API 2.0 specification
 
 ### Globals

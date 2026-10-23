@@ -22,14 +22,13 @@ Functions:
 Translation dictionaries:
     `CHARSET_MAP`
 
-Sentinels:
-    `TIMEOUT`
-
 Classes:
     `Connection`, `Cursor`, `Server`, `Statement`, `TransactionManager`, `DistributedTransactionManager` and `TPB`
 
 ### types
 
+Sentinels:
+    `TIMEOUT`
 
 Exceptions:
     `FirebirdWarning`, `Error`, `InterfaceError`, `DatabaseError`, `DataError`,

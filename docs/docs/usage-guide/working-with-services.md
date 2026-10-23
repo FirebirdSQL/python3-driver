@@ -121,9 +121,9 @@ Some services like [`ServerDbServices.backup()`](../ref-core.md#firebird.driver.
 Rather than return the whole text as single string value by methods that provide access
 to these services, firebird-driver isolated the transfer process to separate methods:
 
-* [`readline()`](../ref-core.md#firebird.driver.core.Server.readline) - Similar to `file.readline`, returns next line of output from Service.
-* [`readline_timed()`](../ref-core.md#firebird.driver.core.Server.readline_timed) - Like [`readline()`](../ref-core.md#firebird.driver.core.Server.readline) but with timeout.
-* [`readlines()`](../ref-core.md#firebird.driver.core.Server.readlines) - Like `file.readlines`, returns list of output lines.
+* [`readline()`](../ref-core.md#firebird.driver.core.Server.readline) - Returns the next line, `None` at end of output, or [`TIMEOUT`](../ref-types.md#firebird.driver.types.TIMEOUT) when `query_timeout` expires.
+* [`readline_timed()`](../ref-core.md#firebird.driver.core.Server.readline_timed) - Queries one line with an explicit timeout for that call.
+* [`readlines()`](../ref-core.md#firebird.driver.core.Server.readlines) - Returns the remaining lines, omitting timeout signals.
 * Iteration over [`Server`](../ref-core.md#firebird.driver.core.Server) object, because [`Server`](../ref-core.md#firebird.driver.core.Server) has built-in support for [iterator protocol](https://docs.python.org/3/library/stdtypes.html#iterator-types).
 * Using `callback` method provided by developer. Each [`Server`](../ref-core.md#firebird.driver.core.Server) method that returns its result
     asynchronously accepts an optional parameter `callback`, which must be a function that accepts
@@ -160,14 +160,28 @@ to these services, firebird-driver isolated the transfer process to separate met
 
 !!! important
 
-    Normally, requesting output with [`readline()`](../ref-core.md#firebird.driver.core.Server.readline) blocks until any output is
-    available from server. Bacuse this method is used by iteration over [`Server`](../ref-core.md#firebird.driver.core.Server) and
-    [`readlines()`](../ref-core.md#firebird.driver.core.Server.readlines) method, they will block as well. Most services produce output
-    continuously and without (much) delay, so this is usually not a problem. However, some
-    services (eg trace) can produce output at significantly slower intervals (if at all),
-    which complicates the creation of responsive applications. In this case, it is necessary
-    to use the [`readline_timed()`](../ref-core.md#firebird.driver.core.Server.readline_timed) method, which allows you to limit the waiting
-    time for the output.
+    [`Server.query_timeout`](../ref-core.md#firebird.driver.core.Server) defaults to `-1`, so
+    [`readline()`](../ref-core.md#firebird.driver.core.Server.readline) and iteration wait for
+    output indefinitely. Set it to a positive number of seconds for a service that may be quiet,
+    such as trace. On timeout, `readline()` and iteration return the `TIMEOUT` sentinel without
+    ending the stream; the next read can still receive output. `readlines()` skips timeout
+    signals and continues until the service output ends. `readline_timed(timeout)` remains
+    available when a single line query needs its own timeout.
+
+```python
+from firebird.driver import TIMEOUT
+
+srv.query_timeout = 2
+line = srv.readline()
+if line is TIMEOUT:
+    # No output arrived yet; the stream remains open.
+    pass
+elif line is None:
+    # End of output.
+    pass
+else:
+    print(line)
+```
 
 **Examples:**
 
@@ -178,13 +192,13 @@ with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
     print("==================")
     print("Start backup")
     srv.database.backup(database='employee', backup='employee.fbk')
-    print("srv.running is", srv.isrunning())
+    print("srv.running is", srv.is_running())
     report = srv.readlines()
     print(f"{len(report)} lines returned")
     print("First 5 lines from output:")
-    for i in xrange(5):
+    for i in range(min(5, len(report))):
         print(i,report[i])
-    print("srv.running is", srv.isrunning())
+    print("srv.running is", srv.is_running())
     print()
     print("Iterate over result")
     print("===================")
@@ -220,7 +234,7 @@ Output:
 Fetch materialized
 ==================
 Start backup
-svc.running is True
+srv.running is True
 558 lines returned
 First 5 lines from output:
 0 gbak:readied database employee for backup
@@ -228,7 +242,7 @@ First 5 lines from output:
 2 gbak:starting transaction
 3 gbak:database employee has a page size of 4096 bytes.
 4 gbak:writing domains
-svc.running is False
+srv.running is False
 
 Iterate over result
 ===================
@@ -625,7 +639,7 @@ Database options could be set using [`ServerDbServices`](../ref-core.md#firebird
     The [`Server.trace`](../ref-core.md#firebird.driver.core.Server.trace) property provides access to instance of [`ServerTraceServices`](../ref-core.md#firebird.driver.core.ServerTraceServices) or
     its **ancestor** class according to attached Firebird server version.
 
-* [`ServerTraceServices.start()`](../ref-core.md#firebird.driver.core.ServerTraceServices.start) - Start new trace session. Requires trace `configuration` and returns `Session ID`.
+* [`ServerTraceServices.start()`](../ref-core.md#firebird.driver.core.ServerTraceServices.start) - Start a trace session with a `config` string and optional `name`. On Firebird 6 or newer, `plugins` accepts a plugin name or a list of names. Returns the session ID.
 
     This method is so-called `Async service` that only starts the trace session. Output
     from trace session could be read by one from many methods for [text output from Services](working-with-services.md#text-output-from-services)
@@ -647,7 +661,7 @@ Database options could be set using [`ServerDbServices`](../ref-core.md#firebird
     """
 
     with connect_server('localhost', user='SYSDBA', password='masterkey') as srv:
-        trace_id = srv.trace.start(trace_config,'test_trace_1')
+        trace_id = srv.trace.start(config=trace_config, name='test_trace_1')
         trace_log = []
         # Get first 10 lines of trace output
         for i in range(10):
@@ -665,4 +679,4 @@ Database options could be set using [`ServerDbServices`](../ref-core.md#firebird
 
 * [`ServerTraceServices.resume()`](../ref-core.md#firebird.driver.core.ServerTraceServices.resume) - Resume trace session.
 
-* [`ServerTraceServices.sessions`](../ref-core.md#firebird.driver.core.ServerTraceServices.sessions) - Dictionary with active trace sessions. The key is session ID, value is [`TraceSession`](../ref-types.md#firebird.driver.types.TraceSession) instance.
+* [`ServerTraceServices.sessions`](../ref-core.md#firebird.driver.core.ServerTraceServices.sessions) - Dictionary with active trace sessions. The key is session ID, value is a [`TraceSession`](../ref-types.md#firebird.driver.types.TraceSession) instance. Its `plugins` list contains the plugin names reported by the service manager, when available.
