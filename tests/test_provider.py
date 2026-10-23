@@ -1,5 +1,6 @@
 """Runtime provider tests that do not need a Firebird installation."""
 
+import os
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock
@@ -54,7 +55,9 @@ def test_system_library_lookup(monkeypatch):
 
 @pytest.mark.parametrize(('plugin', 'embedded'), [
     ('engine13.so', True),
+    ('libEngine13.so', True),
     ('engine.so', False),
+    ('libEngine13.so.bak', False),
     ('engine13.so.bak', False),
 ])
 def test_metadata_from_loaded_client(tmp_path, plugin, embedded):
@@ -98,6 +101,42 @@ def test_firebird_api_loads_supplied_provider(tmp_path, monkeypatch):
     assert api.client_library_name == library
     with pytest.raises(AttributeError):
         api.provider = provider
+
+
+@pytest.mark.parametrize('existing', [None, 'same', 'equivalent', 'different'])
+def test_external_provider_sets_firebird_root_before_library_load(tmp_path, monkeypatch, existing):
+    root = tmp_path / 'runtime'
+    root.mkdir()
+    provider = SimpleNamespace(root=root, client_library=root / 'libfbclient.so')
+    current = {'same': str(root),
+               'equivalent': str(root / '..' / 'runtime'),
+               'different': str(tmp_path / 'other')}.get(existing)
+    if current is None:
+        monkeypatch.delenv('FIREBIRD', raising=False)
+    else:
+        monkeypatch.setenv('FIREBIRD', current)
+    seen = []
+    monkeypatch.setattr(fbapi.ctypes, 'CDLL', lambda *_args, **_kwargs:
+                        seen.append(os.environ.get('FIREBIRD')) or MagicMock())
+    monkeypatch.setattr(fbapi, 'CFUNCTYPE', lambda *_args: lambda _: SimpleNamespace(argtypes=[]))
+
+    fbapi.FirebirdAPI(provider=provider)
+
+    expected = current if existing in ('same', 'equivalent') else str(root)
+    assert seen == [expected]
+    assert os.environ['FIREBIRD'] == expected
+
+
+def test_driver_provider_does_not_change_firebird_root(tmp_path, monkeypatch):
+    library = tmp_path / 'libfbclient.so'
+    library.touch()
+    monkeypatch.setenv('FIREBIRD', str(tmp_path / 'configured'))
+    monkeypatch.setattr(fbapi.ctypes, 'CDLL', lambda *_args, **_kwargs: MagicMock())
+    monkeypatch.setattr(fbapi, 'CFUNCTYPE', lambda *_args: lambda _: SimpleNamespace(argtypes=[]))
+
+    fbapi.FirebirdAPI(provider=_DriverProvider(library))
+
+    assert os.environ['FIREBIRD'] == str(tmp_path / 'configured')
 
 
 def test_load_api_uses_external_provider(tmp_path, monkeypatch):
