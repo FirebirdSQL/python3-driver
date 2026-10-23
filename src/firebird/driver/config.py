@@ -214,9 +214,9 @@ class DriverConfig(Config):
         "Path to Firebird client library"
         self.stream_blob_threshold: IntOption = \
             IntOption('stream_blob_threshold',
-                      "BLOB size threshold. Bigger BLOB will be returned as stream BLOBs.",
+                      "BLOB size threshold; larger BLOBs are streamed automatically (-1 disables it).",
                       default=65536)
-        "BLOB size threshold. Bigger BLOB will be returned as stream BLOBs."
+        "BLOB size threshold. Larger BLOBs are streamed automatically; -1 disables this."
         self.db_defaults: DatabaseConfig = DatabaseConfig('firebird.db.defaults',
                                                           optional=True,
                                                           description="Default database configuration.")
