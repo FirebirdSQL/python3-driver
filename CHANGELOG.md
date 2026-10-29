@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.1.dev0] - Unreleased development version
+
+### Fixed
+
+- GT-75: Cursor, Statement, and Connection finalizers raise unraisable DatabaseError after
+  connection loss
+
 ## [2.1.0] - 2026-10-23
 
 ### Added

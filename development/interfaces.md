@@ -15,3 +15,8 @@ the matching `fbapi.py` declarations and run integration tests for the Firebird 
 they affect. The same hook completes metadata for the private driver provider using the root
 directory and client version reported by the loaded API. `iUtil.get_client_version()` returns
 `(major, minor)`.
+
+Attachment, transaction, statement, result set, and BLOB wrappers propagate the owning
+connection's lifecycle flag. Status errors for `isc_conn_lost`, `isc_net_read_err`,
+`isc_net_write_err`, `isc_lost_db_connection`, and `isc_att_shutdown` mark that flag dead.
+Reference-counted finalizers skip native release when it is dead.

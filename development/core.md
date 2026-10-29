@@ -20,6 +20,12 @@ Closing a connection must account for its dependent resources. The `transaction(
 manager begins a transaction and commits or rolls back on exit; with `bypass=True`, it joins
 an already active transaction without finishing it.
 
+Connection, transaction manager, statement, cursor, and BLOB reader finalizers share the
+connection's lifecycle flag. When a connection-loss status marks it dead, their finalizers skip
+native cleanup. Result set and BLOB interfaces created from an attachment or statement inherit
+the same flag, so errors during fetch or BLOB reads mark the owning connection.
+Distributed transaction finalizers check the flags of every participating connection.
+
 For changes here, select tests by behavior: `test_connection.py`, `test_transaction.py`,
 `test_cursor.py`, `test_statement.py`, `test_blob.py`, `test_array.py`, `test_events.py`,
 `test_distributed_trans.py`, `test_server.py`, and `test_info_providers.py`. Exercise the real

@@ -381,6 +381,10 @@ def temp_database(*args, **kwargs) -> Connection:
 _OP_DIE = object()
 _OP_RECORD_AND_REREGISTER = object()
 
+class ConnectionLifecycle:
+    def __init__(self):
+        self.is_dead = False
+
 # Managers for Parameter buffers
 class TPB:
     """Helper class to build and parse Transaction Parameter Buffers (TPB) used when starting transactions.
@@ -1760,7 +1764,9 @@ class Connection:
     NotSupportedError = NotSupportedError
     def __init__(self, att: iAttachment, dsn: str, dpb: bytes | None=None, sql_dialect: int=3,
                  charset: str | None=None) -> None:
+        self._lifecycle = ConnectionLifecycle()
         self._att: iAttachment = att
+        self._att._lifecycle = self._lifecycle
         self.__handle: a.FB_API_HANDLE = None
         self.__str: str = f'Connection[{self._get_handle().value}]'
         self.__charset: str = charset
@@ -1780,20 +1786,19 @@ class Connection:
         self.__ev: float = None
         self.__info: DatabaseInfoProvider = None
         self._tra_main: TransactionManager = TransactionManager(self, self.default_tpb)
-        self._tra_main._logging_id_ = 'Transaction.Main'
         self._tra_qry: TransactionManager = TransactionManager(self,
                                                                tpb(Isolation.READ_COMMITTED_RECORD_VERSION,
                                                                    access_mode=TraAccessMode.READ))
-        self._tra_qry._logging_id_ = 'Transaction.Query'
         # Cursor for internal use
         self._ic = self.query_transaction.cursor()
         self._ic._connection = weakref.proxy(self, self._ic._dead_con)
-        self._ic._logging_id_ = 'Cursor.internal'
         # firebird.lib extensions
         self.__schema = None
         self.__monitor = None
         self.__FIREBIRD_LIB__ = None
     def __del__(self):
+        if getattr(getattr(self, '_lifecycle', None), 'is_dead', False):
+            return
         if not self.is_closed():
             warn("Connection disposed without prior close()", ResourceWarning)
             self._close()
@@ -2590,6 +2595,7 @@ class TransactionManager:
     def __init__(self, connection: Connection, default_tpb: bytes,
                  default_action: DefaultAction=DefaultAction.COMMIT):
         self._connection: Callable[[], Connection] = weakref.ref(connection, self.__dead_con)
+        self._lifecycle = connection._lifecycle
         self.default_tpb: bytes = default_tpb
         "Default Transaction Parameter Block used to start transaction"
         self.default_action: DefaultAction = default_action
@@ -2599,13 +2605,16 @@ class TransactionManager:
         self._cursors: list = []  # Weak references to cursors
         self._tra: iTransaction = None
         self.__closed: bool = False
-        self._logging_id_ = 'Transaction'
     def __enter__(self) -> Self:
         self.begin()
         return self
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         self.close()
     def __del__(self):
+        if getattr(getattr(self, '_lifecycle', None), 'is_dead', False):
+            return
+        if any(lifecycle.is_dead for lifecycle in getattr(self, '_lifecycles', ())):
+            return
         if self._tra is not None:
             warn("Transaction disposed while active", ResourceWarning)
             self._finish()
@@ -2766,13 +2775,13 @@ class DistributedTransactionManager(TransactionManager):
     def __init__(self, connections: Sequence[Connection], default_tpb: bytes | None=None,
                  default_action: DefaultAction=DefaultAction.COMMIT):
         self._connections: list[Connection] = list(connections)
+        self._lifecycles = tuple(con._lifecycle for con in self._connections)
         self.default_tpb: bytes = default_tpb if default_tpb is not None else tpb(Isolation.SNAPSHOT)
         self.default_action: DefaultAction = default_action
         self._cursors: list = []  # Weak references to cursors
         self._tra: iTransaction = None
         self._dtc: iDtc = _master.get_dtc()
         self.__closed: bool = False
-        self._logging_id_ = 'DTransaction'
     def close(self) -> None:
         """Close the distributed transaction manager and release all associated
         resources.
@@ -2978,6 +2987,7 @@ class Statement:
     """
     def __init__(self, connection: Connection, stmt: iStatement, sql: str, dialect: int):
         self._connection: Callable[[], Connection] = weakref.ref(connection, self.__dead_con)
+        self._lifecycle = connection._lifecycle
         self._dialect: int = dialect
         self.__sql: str = sql
         self._istmt: iStatement = stmt
@@ -3016,6 +3026,8 @@ class Statement:
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         self.free()
     def __del__(self):
+        if getattr(getattr(self, '_lifecycle', None), 'is_dead', False):
+            return
         if self._in_meta or self._out_meta or self._istmt:
             warn("Statement disposed without prior free()", ResourceWarning)
             self.free()
@@ -3116,6 +3128,7 @@ class BlobReader(io.IOBase):
     def __init__(self, blob: iBlob, blob_id: a.ISC_QUAD, sub_type: int,
                  length: int, segment_size: int, charset: str, owner: Any | None=None):
         self._blob: iBlob = blob
+        self._lifecycle = blob._lifecycle
         self.newline: str = '\n'
         self.sub_type: int = sub_type
         self._owner: Any | None = weakref.ref(owner)
@@ -3150,6 +3163,8 @@ class BlobReader(io.IOBase):
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         self.close()
     def __del__(self):
+        if getattr(getattr(self, '_lifecycle', None), 'is_dead', False):
+            return
         if self._blob is not None:
             warn("BlobReader disposed without prior close()", ResourceWarning)
             self.close()
@@ -3330,6 +3345,7 @@ class Cursor:
     "This read/write attribute specifies the number of rows to fetch at a time with\n.fetchmany(). It defaults to 1 meaning to fetch a single row at a time.\n\nRequired by Python DB API 2.0"
     def __init__(self, connection: Connection, transaction: TransactionManager):
         self._connection: Connection = connection
+        self._lifecycle = connection._lifecycle
         self._dialect: int = connection.sql_dialect
         self._transaction: TransactionManager = transaction
         self._stmt: Statement = None
@@ -3351,6 +3367,8 @@ class Cursor:
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         self.close()
     def __del__(self):
+        if getattr(getattr(self, '_lifecycle', None), 'is_dead', False):
+            return
         if self._result is not None or self._stmt is not None or self.__blob_readers:
             warn("Cursor disposed without prior close()", ResourceWarning)
             self.close()

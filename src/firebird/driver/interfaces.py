@@ -115,6 +115,10 @@ class iVersioned(metaclass=iVersionedMeta):
         self._as_parameter_ = intf
         if intf and self.vtable.version < self.VERSION:  # pragma: no cover
             raise InterfaceError(f"Wrong interface version {self.vtable.version}, expected {self.VERSION}")
+    def _with_lifecycle(self, result):
+        if hasattr(self, '_lifecycle'):
+            result._lifecycle = self._lifecycle
+        return result
     def __report(self, cls: Error | FirebirdWarning, vector_ptr: a.ISC_STATUS_ARRAY_PTR) -> None:
         msg = _util.format_status(self.status)
         sqlstate = create_string_buffer(6)
@@ -133,6 +137,12 @@ class iVersioned(metaclass=iVersionedMeta):
             i += 1
         # We need to clean up the iStatus before returning
         self.status.init()
+        # Check for connection shutdown/loss codes
+        if any(code in {335544856, 335544726, 335544727, 335544648, 335544741}
+               for code in gds_codes):
+            # If a back-channel lifecycle reference was injected, flip it!
+            if hasattr(self, '_lifecycle'):
+                self._lifecycle.is_dead = True
         return cls(msg, sqlstate=sqlstate.value.decode(),
                    gds_codes=tuple(gds_codes), sqlcode=sqlcode,)
     def _check(self) -> None:
@@ -167,7 +177,7 @@ class iReferenceCounted(iVersioned):
         super().__init__(intf)
         self._refcnt: int = 1
     def __del__(self):
-        if self._refcnt > 0:
+        if self._refcnt > 0 and not getattr(getattr(self, '_lifecycle', None), 'is_dead', False):
             self.release()
     def __enter__(self) -> iReferenceCounted:
         return self
@@ -819,7 +829,7 @@ may be used. Parameter flags is needed to open bidirectional cursor setting it's
 value to IStatement::CURSOR_TYPE_SCROLLABLE."""
         result = self.vtable.openCursor(self, self.status, transaction, in_meta, in_buffer, out_meta, flags)
         self._check()
-        return iResultSet(result)
+        return self._with_lifecycle(iResultSet(result))
     def set_cursor_name(self, name: str) -> None:
         "Replaces `isc_dsql_set_cursor_name()`"
         self.vtable.setCursorName(self, self.status, name.encode())
@@ -1110,13 +1120,13 @@ distributed transactions coordinator should be used, also possible to join 2
 transactions into single distributed transaction"""
         result = self.vtable.startTransaction(self, self.status, len(tpb), tpb)
         self._check()
-        return iTransaction(result)
+        return self._with_lifecycle(iTransaction(result))
     def reconnect_transaction(self, id_: bytes) -> iTransaction:
         """Makes it possible to connect to a transaction in limbo. Id parameter
 contains transaction number in network format of given length."""
         result = self.vtable.reconnectTransaction(self, self.status, len(id_), id_)
         self._check()
-        return iTransaction(result)
+        return self._with_lifecycle(iTransaction(result))
     def compile_request(self, blr: bytes) -> iRequest:
         "Support of ISC API"
         result = self.vtable.compileRequest(self, self.status, len(blr), blr)
@@ -1132,13 +1142,13 @@ contains transaction number in network format of given length."""
         result = self.vtable.createBlob(self, self.status, transaction, byref(id_),
                                         len(bpb) if bpb is not None else 0, bpb)
         self._check()
-        return iBlob(result)
+        return self._with_lifecycle(iBlob(result))
     def open_blob(self, transaction: iTransaction, id_: a.ISC_QUAD, bpb: bytes | None=None) -> iBlob:
         "Opens existing blob, replaces `isc_open_blob2()`"
         result = self.vtable.openBlob(self, self.status, transaction, byref(id_),
                                       len(bpb) if bpb is not None else 0, bpb)
         self._check()
-        return iBlob(result)
+        return self._with_lifecycle(iBlob(result))
     def get_slice(self, transaction: iTransaction, id_: a.ISC_QUAD, sdl: bytes,
                   param: bytes, slice_: bytes) -> int:
         "Support of ISC API"
@@ -1165,7 +1175,7 @@ possible to control what information will be preloaded from engine at once
         result = self.vtable.prepare(self, self.status, transaction, len(b_stmt), b_stmt,
                                      dialect, flags)
         self._check()
-        return iStatement(result)
+        return self._with_lifecycle(iStatement(result))
     def execute(self, transaction: iTransaction, stmt: str, dialect: int,
                 in_metadata: iMessageMetadata | None=None, in_buffer: bytes | None=None,
                 out_metadata: iMessageMetadata | None=None, out_buffer: bytes | None=None) -> None:
@@ -1191,7 +1201,7 @@ bidirectional cursor setting it's value to Istatement::CURSOR_TYPE_SCROLLABLE.""
                                         dialect, in_metadata, in_buffer, out_metadata,
                                         cursor_name.encode(self.encoding), cursor_flags)
         self._check()
-        return iResultSet(result)
+        return self._with_lifecycle(iResultSet(result))
     def que_events(self, callback: iEventCallbackImpl, events: bytes) -> iEvents:
         """Replaces `isc_que_events()` call. Instead callback function with
 void* parameter callback interface is used."""
