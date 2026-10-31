@@ -192,7 +192,7 @@ class OutputService:
 
 
 def output_response(mode, data='', tag=1):
-    encoded = data.encode('utf8')
+    encoded = data if isinstance(data, bytes) else data.encode('utf8')
     return bytes([mode]) + len(encoded).to_bytes(2, 'little') + encoded + bytes([tag])
 
 
@@ -266,6 +266,42 @@ def test_text_output_non_lf_line_boundary_keeps_following_lines(timeout):
     server.query_timeout = timeout
     try:
         assert ''.join(server.readlines()) == 'select 1 /* a\rb */ from x\nnext\nlast\n'
+    finally:
+        server.close()
+
+@pytest.mark.parametrize('mode', [SrvInfoCode.LINE, SrvInfoCode.TO_EOF])
+@pytest.mark.parametrize('timeout', [-1, 1])
+@pytest.mark.parametrize('errors', ['strict', 'replace'])
+def test_text_output_multibyte_character_split_across_responses(mode, timeout, errors):
+    # The service fills each response by size, so a response can end inside a multi-byte
+    # character. The character must survive, also when a timeout falls between the halves.
+    line = 'a\xe7\xe3o'
+    encoded = line.encode('utf8')
+    head, tail = encoded[:2], encoded[2:]  # split inside the 2-byte '\xe7'
+    if mode is SrvInfoCode.TO_EOF:
+        tail += b'\n'
+    responses = [output_response(mode, head, 2)]
+    if timeout > 0:
+        responses.append(bytes([SrvInfoCode.TIMEOUT]))
+    responses.extend([output_response(mode, tail), output_response(mode)])
+    server = driver.Server(OutputService(responses), b'', 'localhost', 'utf8', errors)
+    server.mode = mode
+    server.query_timeout = timeout
+    try:
+        assert server.readlines() == [line + '\n']
+    finally:
+        server.close()
+
+@pytest.mark.parametrize('mode', [SrvInfoCode.LINE, SrvInfoCode.TO_EOF])
+def test_text_output_incomplete_character_at_end_uses_error_handler(mode):
+    # A character still incomplete when the output (or a LINE-mode line) ends is not
+    # silently dropped; the error handler decides, as for any other invalid input.
+    responses = [output_response(mode, b'ab\xc3'), output_response(mode)]
+    server = driver.Server(OutputService(responses), b'', 'localhost', 'utf8', 'replace')
+    server.mode = mode
+    try:
+        expected = 'ab' + chr(0xFFFD)
+        assert server.readlines() == [expected + '\n' if mode is SrvInfoCode.LINE else expected]
     finally:
         server.close()
 
