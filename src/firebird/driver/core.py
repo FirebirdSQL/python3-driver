@@ -43,6 +43,7 @@ events, BLOBs, parameter buffers, and accessing database/server information.
 from __future__ import annotations
 
 import atexit
+import codecs
 import contextlib
 import datetime
 import decimal
@@ -5622,6 +5623,7 @@ class Server:
         "Response buffer used to communicate with service"
         self._eof: bool = False
         self.__line_buffer: list[str] = []
+        self.__decoder: codecs.IncrementalDecoder | None = None
         self.encoding: str = encoding
         "Encoding used for text data exchange with server"
         self.encoding_errors: str = encoding_errors
@@ -5655,6 +5657,7 @@ class Server:
     def _reset_output(self) -> None:
         self._eof = False
         self.__line_buffer.clear()
+        self.__decoder = None
     def _make_request(self, timeout: int) -> bytes:
         if timeout == -1:
             return None
@@ -5686,7 +5689,14 @@ class Server:
             return TIMEOUT
         if tag != self.mode:  # pragma: no cover
             raise InterfaceError(f"Service responded with error code: {tag}")
-        return self.response.read_sized_string(encoding=self.encoding, errors=self.encoding_errors)
+        if self.__decoder is None:
+            self.__decoder = codecs.getincrementaldecoder(self.encoding)(self.encoding_errors)
+        # The service fills responses by size, so one can end inside a multi-byte character.
+        # The incremental decoder keeps those bytes until the next response completes it.
+        return self.__decoder.decode(self.response.read_bytes())
+    def _flush_output(self) -> str:
+        """Decode bytes left from an unfinished character at the end of output or of a line."""
+        return self.__decoder.decode(b'', final=True)
     def _read_output(self, *, init: str='') -> bool:
         """Fetch output into the line buffer; return True if the query timed out."""
         data = self._query_output(self.query_timeout)
@@ -5697,6 +5707,8 @@ class Server:
         timed_out = tag == isc_info_svc_timeout
         if self.mode is SrvInfoCode.TO_EOF:
             self._eof = tag == isc_info_end
+            if self._eof:
+                data += self._flush_output()
         else: # LINE mode
             while tag == isc_info_truncated:
                 part = self._query_output(self.query_timeout)
@@ -5709,6 +5721,7 @@ class Server:
             if not timed_out and tag != isc_info_end:  # pragma: no cover
                 raise InterfaceError("Malformed result buffer (missing isc_info_end item)")
             if not timed_out:
+                data += self._flush_output()
                 self._eof = not data
         init += data
         if data and self.mode is SrvInfoCode.LINE and not timed_out:
